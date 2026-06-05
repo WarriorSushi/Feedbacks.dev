@@ -15,6 +15,31 @@ async function loadFixture(name: string) {
   return JSON.parse(raw) as Record<string, unknown>
 }
 
+function createSignedDodoWebhookRequest({
+  payload,
+  webhookId = 'evt_test_valid',
+  timestamp = Math.floor(Date.now() / 1000).toString(),
+  signature = createHmac('sha256', process.env.DODO_PAYMENTS_WEBHOOK_SECRET!)
+    .update(`${webhookId}.${timestamp}.${payload}`)
+    .digest('hex'),
+}: {
+  payload: string
+  webhookId?: string
+  timestamp?: string
+  signature?: string
+}) {
+  return new Request('https://example.com/api/billing/webhook', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'webhook-id': webhookId,
+      'webhook-timestamp': timestamp,
+      'webhook-signature': signature,
+    },
+    body: payload,
+  })
+}
+
 test('maps subscription.active payloads to an active pro account', async () => {
   const { extractBillingEventContext } = await import(new URL('../../src/lib/billing-webhooks.ts', import.meta.url).href)
   const fixture = await loadFixture('subscription-active')
@@ -59,26 +84,25 @@ test('verifies valid Dodo webhook signatures', async () => {
   const { verifyDodoWebhook } = await import(new URL('../../src/lib/dodo.ts', import.meta.url).href)
   const fixture = await loadFixture('subscription-active')
   const payload = JSON.stringify(fixture)
-  const webhookId = 'evt_test_valid'
-  const timestamp = '1710000000'
-  const signature = createHmac('sha256', process.env.DODO_PAYMENTS_WEBHOOK_SECRET!)
-    .update(`${webhookId}.${timestamp}.${payload}`)
-    .digest('hex')
+  const request = createSignedDodoWebhookRequest({ payload })
 
-  const request = new Request('https://example.com/api/billing/webhook', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'webhook-id': webhookId,
-      'webhook-timestamp': timestamp,
-      'webhook-signature': signature,
-    },
-    body: payload,
+  const verified = await verifyDodoWebhook(request)
+  assert.equal(verified.webhookId, 'evt_test_valid')
+  assert.equal(verified.event.type, 'subscription.active')
+})
+
+test('verifies Dodo webhook signatures with millisecond timestamps', async () => {
+  const { verifyDodoWebhook } = await import(new URL('../../src/lib/dodo.ts', import.meta.url).href)
+  const fixture = await loadFixture('subscription-active')
+  const payload = JSON.stringify(fixture)
+  const request = createSignedDodoWebhookRequest({
+    payload,
+    webhookId: 'evt_test_valid_ms',
+    timestamp: Date.now().toString(),
   })
 
   const verified = await verifyDodoWebhook(request)
-  assert.equal(verified.webhookId, webhookId)
-  assert.equal(verified.event.type, 'subscription.active')
+  assert.equal(verified.webhookId, 'evt_test_valid_ms')
 })
 
 test('rejects invalid Dodo webhook signatures', async () => {
@@ -86,16 +110,52 @@ test('rejects invalid Dodo webhook signatures', async () => {
   const fixture = await loadFixture('subscription-active')
   const payload = JSON.stringify(fixture)
 
-  const request = new Request('https://example.com/api/billing/webhook', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'webhook-id': 'evt_test_invalid',
-      'webhook-timestamp': '1710000001',
-      'webhook-signature': 'bad-signature',
-    },
-    body: payload,
+  const request = createSignedDodoWebhookRequest({
+    payload,
+    webhookId: 'evt_test_invalid',
+    signature: 'bad-signature',
   })
 
   await assert.rejects(() => verifyDodoWebhook(request), /Invalid webhook signature/)
+})
+
+test('rejects stale Dodo webhook timestamps', async () => {
+  const { verifyDodoWebhook } = await import(new URL('../../src/lib/dodo.ts', import.meta.url).href)
+  const fixture = await loadFixture('subscription-active')
+  const payload = JSON.stringify(fixture)
+  const staleTimestamp = Math.floor((Date.now() - 6 * 60 * 1000) / 1000).toString()
+  const request = createSignedDodoWebhookRequest({
+    payload,
+    webhookId: 'evt_test_stale',
+    timestamp: staleTimestamp,
+  })
+
+  await assert.rejects(() => verifyDodoWebhook(request), /timestamp is outside the allowed tolerance/)
+})
+
+test('rejects too-far-future Dodo webhook timestamps', async () => {
+  const { verifyDodoWebhook } = await import(new URL('../../src/lib/dodo.ts', import.meta.url).href)
+  const fixture = await loadFixture('subscription-active')
+  const payload = JSON.stringify(fixture)
+  const futureTimestamp = Math.floor((Date.now() + 6 * 60 * 1000) / 1000).toString()
+  const request = createSignedDodoWebhookRequest({
+    payload,
+    webhookId: 'evt_test_future',
+    timestamp: futureTimestamp,
+  })
+
+  await assert.rejects(() => verifyDodoWebhook(request), /timestamp is outside the allowed tolerance/)
+})
+
+test('rejects malformed Dodo webhook timestamps', async () => {
+  const { verifyDodoWebhook } = await import(new URL('../../src/lib/dodo.ts', import.meta.url).href)
+  const fixture = await loadFixture('subscription-active')
+  const payload = JSON.stringify(fixture)
+  const request = createSignedDodoWebhookRequest({
+    payload,
+    webhookId: 'evt_test_bad_timestamp',
+    timestamp: 'not-a-timestamp',
+  })
+
+  await assert.rejects(() => verifyDodoWebhook(request), /Invalid Dodo webhook timestamp/)
 })

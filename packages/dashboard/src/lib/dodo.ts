@@ -5,6 +5,7 @@ const API_BASES = {
   test: 'https://test.dodopayments.com',
   live: 'https://live.dodopayments.com',
 } as const
+const WEBHOOK_TIMESTAMP_TOLERANCE_MS = 5 * 60 * 1000
 
 export interface DodoCheckoutRequest {
   productId: string
@@ -85,6 +86,27 @@ function headerValue(headers: Headers, key: string) {
   return headers.get(key) || headers.get(key.toLowerCase())
 }
 
+function parseWebhookTimestamp(timestamp: string) {
+  const trimmed = timestamp.trim()
+  if (!/^\d+$/.test(trimmed)) {
+    throw new Error('Invalid Dodo webhook timestamp')
+  }
+
+  const numericTimestamp = Number(trimmed)
+  if (!Number.isSafeInteger(numericTimestamp)) {
+    throw new Error('Invalid Dodo webhook timestamp')
+  }
+
+  const timestampMs = numericTimestamp < 1_000_000_000_000
+    ? numericTimestamp * 1000
+    : numericTimestamp
+  const deltaMs = Math.abs(Date.now() - timestampMs)
+
+  if (deltaMs > WEBHOOK_TIMESTAMP_TOLERANCE_MS) {
+    throw new Error('Dodo webhook timestamp is outside the allowed tolerance')
+  }
+}
+
 export async function verifyDodoWebhook(request: Request) {
   if (!env.DODO_PAYMENTS_WEBHOOK_SECRET) {
     throw new Error('Dodo webhook secret is not configured')
@@ -98,6 +120,8 @@ export async function verifyDodoWebhook(request: Request) {
   if (!signature || !webhookId || !timestamp) {
     throw new Error('Missing Dodo webhook headers')
   }
+
+  parseWebhookTimestamp(timestamp)
 
   const signedContent = `${webhookId}.${timestamp}.${payload}`
   const expected = createHmac('sha256', env.DODO_PAYMENTS_WEBHOOK_SECRET)
