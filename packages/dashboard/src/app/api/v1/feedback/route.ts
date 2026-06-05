@@ -5,6 +5,7 @@ import { assertCanReceiveFeedback, assertFeatureAccess, getBillingSummaryForUser
 import { notifyProjectOwnerOfNewFeedback } from '@/lib/notifications'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { deliverWebhooks } from '@/lib/webhook-delivery'
+import { normalizeFeedbackMetadata } from '@/lib/feedback-submissions'
 import type { FeedbackType, FeedbackPriority, FeedbackStatus, StructuredFeedbackData } from '@/lib/types'
 
 const CORS_HEADERS = {
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate metadata size (max 4KB)
-    const metadata = body.metadata ?? {}
+    const metadata = normalizeFeedbackMetadata(body.metadata)
     if (metadata && JSON.stringify(metadata).length > 4_096) {
       return jsonError('metadata too large (max 4KB)', 400)
     }
