@@ -40,9 +40,9 @@ pnpm add @feedbacks/widget
 
 ```html
 <script
-  src="https://feedbacks.dev/widget/latest.js"
+  src="https://app.feedbacks.dev/widget/latest.js"
   data-project="your-project-key"
-  data-api-url="https://feedbacks.dev/api/feedback"
+  data-api-url="https://app.feedbacks.dev/api/feedback"
   defer
 ></script>
 ```
@@ -141,9 +141,9 @@ pnpm add @feedbacks/widget-vue
 
 # CDN (no build step)
 <script
-  src="https://feedbacks.dev/widget/latest.js"
+  src="https://app.feedbacks.dev/widget/latest.js"
   data-project="your-project-key"
-  data-api-url="https://feedbacks.dev/api/feedback"
+  data-api-url="https://app.feedbacks.dev/api/feedback"
   defer
 ></script>
 ```

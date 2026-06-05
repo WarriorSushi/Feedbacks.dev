@@ -560,7 +560,7 @@ class FeedbacksWidget {
       await new Promise<void>((resolve, reject) => {
         const s = document.createElement('script');
         s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-        s.integrity = 'sha384-Lhp4gBQSCMq2fNDEx53VsXFnGBi3FuQVnh6k6c3GFsuqJMuqlHwaJM3BRzb/0nT';
+        s.integrity = 'sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H';
         s.crossOrigin = 'anonymous';
         s.async = true;
         s.onload = () => resolve();

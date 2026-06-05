@@ -21,7 +21,7 @@ cd feedbacks.dev-2026
 pnpm install
 
 # Set up environment variables
-cp packages/dashboard/.env.example packages/dashboard/.env.local
+cp packages/dashboard/.env.local.example packages/dashboard/.env.local
 # Fill in your Supabase credentials
 
 # Run database migrations
