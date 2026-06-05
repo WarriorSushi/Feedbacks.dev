@@ -20,6 +20,7 @@ Go to your **Supabase Dashboard** → **SQL Editor** → run these files in orde
 7. `sql/009_billing_and_entitlements.sql` — billing accounts, events, usage counters, and quota helpers
 8. `sql/010_api_key_hardening.sql` — final API-key storage hardening
 9. `sql/011_notification_digests.sql` — digest scheduling support
+10. `sql/012_project_stats_and_digest_rls.sql` — project stats RPCs and notification digest RLS coverage
 
 **How:** Copy-paste the contents of each file into the SQL Editor and click "Run".
 

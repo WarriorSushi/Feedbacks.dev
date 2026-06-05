@@ -204,7 +204,6 @@ async function deliverSingle(
 
       if (res.ok) {
         status = 'success'
-        try { await admin.rpc('reset_webhook_failures', { p_project_id: projectId, p_type: type, p_endpoint_id: endpoint.id }) } catch { /* rpc may not exist */ }
         break
       }
     } catch (err) {
