@@ -22,7 +22,7 @@ test('supports public replies, status changes, and hiding a board item', async (
   })
 
   await page.goto(board.url)
-  await page.getByRole('button', { name: 'Details' }).click()
+  await page.getByRole('button', { name: 'View request' }).click()
   await expect(page.getByText('Post public reply')).toBeVisible()
 
   const replyText = `We are on it ${Date.now().toString(36)}`
