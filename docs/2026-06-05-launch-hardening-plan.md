@@ -54,7 +54,7 @@ Fixed since then:
 
 Still true:
 
-- The full Playwright suite is not stable enough when run all together.
+- The full Playwright suite passed locally on 6th June 2026, but should stay part of every launch-hardening pass.
 - Real Slack, Discord, GitHub, and Dodo sandbox/live flows still need manual verification.
 - Domain naming still needs one canonical story: `feedbacks.dev` versus `app.feedbacks.dev`.
 - Rate limiting is functional but race-prone under burst traffic.
@@ -216,6 +216,10 @@ Acceptance criteria:
 Purpose:
 
 Prove the paid surfaces work with real external services.
+
+Execution runbook:
+
+- `docs/2026-06-06-real-connector-and-billing-verification.md`
 
 Tasks:
 

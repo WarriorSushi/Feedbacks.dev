@@ -1,0 +1,308 @@
+# Real Connector And Billing Verification — 6th June 2026
+
+## Purpose
+
+This is the execution checklist for Step 3 of `docs/2026-06-05-launch-hardening-plan.md`.
+
+The local automated Playwright suite proves the connector code paths with local test targets. This runbook proves the same surfaces against real external services:
+
+- Slack incoming webhooks
+- Discord webhooks
+- generic HTTPS webhooks
+- GitHub Issues
+- Dodo Payments checkout and webhooks
+- Free/Pro entitlement behavior
+
+## Current Status
+
+Local `.env.local` currently has Supabase, captcha, app origin, and local salts/secrets. It does not currently include real connector or Dodo credentials.
+
+Because of that, true Step 3 verification is blocked until these credentials are provided:
+
+- `DODO_PAYMENTS_API_KEY`
+- `DODO_PAYMENTS_PRO_MONTHLY_PRODUCT_ID`
+- `DODO_PAYMENTS_WEBHOOK_SECRET`
+- real Slack incoming webhook URL
+- real Discord webhook URL
+- real HTTPS generic webhook inspection URL
+- GitHub test repo and GitHub token with issue creation permission
+
+The app itself does not read the `REAL_*` variables. They are optional local placeholders for the human/operator running this checklist.
+
+## Preflight
+
+1. Start from a clean git state or only intentional docs changes.
+2. Fill `packages/dashboard/.env.local` with the required Supabase variables.
+3. Add optional verification secrets locally:
+
+```env
+DODO_PAYMENTS_ENVIRONMENT=test
+DODO_PAYMENTS_API_KEY=...
+DODO_PAYMENTS_PRO_MONTHLY_PRODUCT_ID=...
+DODO_PAYMENTS_PRO_YEARLY_PRODUCT_ID=...
+DODO_PAYMENTS_WEBHOOK_SECRET=...
+
+REAL_SLACK_WEBHOOK_URL=...
+REAL_DISCORD_WEBHOOK_URL=...
+REAL_GENERIC_WEBHOOK_URL=...
+REAL_GITHUB_ISSUES_REPO=owner/repo
+REAL_GITHUB_TOKEN=...
+```
+
+4. Run the baseline before real external calls:
+
+```powershell
+pnpm test:unit
+pnpm type-check
+pnpm lint
+pnpm test:e2e:required
+```
+
+5. Start the local app:
+
+```powershell
+pnpm dev
+```
+
+6. Sign in with the normal local account or the E2E test session if this is an internal verification run.
+
+## Slack Verification
+
+Goal: prove Slack delivery, log writing, and replay.
+
+Steps:
+
+1. Create or open a test project.
+2. Open `Projects -> Integrations`.
+3. Add a Slack endpoint.
+4. Paste `REAL_SLACK_WEBHOOK_URL`.
+5. Save integrations.
+6. Click `Send test`.
+7. Confirm the Slack channel receives a message.
+8. Confirm Recent delivery history shows:
+   - status: `Delivered`
+   - kind: `slack`
+   - event: `feedback.test`
+   - HTTP status: `200`
+9. Click `Resend`.
+10. Confirm Slack receives the replayed message and the log shows another successful delivery.
+
+Pass condition:
+
+- Slack receives both initial test and replay.
+- Dashboard delivery history records both as successful.
+
+Failure evidence to capture:
+
+- endpoint URL domain only, never the secret path
+- delivery status code
+- response body snippet
+- browser console error, if any
+- server log error, if any
+
+## Discord Verification
+
+Goal: prove Discord delivery, log writing, and replay.
+
+Steps:
+
+1. Add a Discord endpoint.
+2. Paste `REAL_DISCORD_WEBHOOK_URL`.
+3. Save integrations.
+4. Click `Send test`.
+5. Confirm the Discord channel receives a message.
+6. Confirm delivery history shows a successful `discord` delivery.
+7. Click `Resend`.
+8. Confirm a second Discord message and successful replay log.
+
+Pass condition:
+
+- Discord receives both initial test and replay.
+- Dashboard delivery history records both as successful.
+
+## Generic HTTPS Webhook Verification
+
+Goal: prove raw generic payload delivery and replay.
+
+Recommended target:
+
+- a private webhook.site URL
+- a small HTTPS test endpoint you control
+- any equivalent HTTPS request inspection endpoint
+
+Steps:
+
+1. Add a Generic Webhook endpoint.
+2. Paste `REAL_GENERIC_WEBHOOK_URL`.
+3. Save integrations.
+4. Click `Send test`.
+5. Confirm the inspection endpoint receives JSON with:
+   - `event`
+   - `feedback`
+   - `project`
+   - `timestamp`
+6. Confirm delivery history shows a successful `generic` delivery.
+7. Click `Resend`.
+8. Confirm a second received request and successful replay log.
+
+Pass condition:
+
+- The received payload matches `WebhookPayload` from `packages/dashboard/src/lib/webhook-delivery.ts`.
+- Delivery log and replay are both successful.
+
+Security check:
+
+- Verify non-HTTPS/private URLs are rejected or logged as blocked. Do not loosen the SSRF protection for real connector tests.
+
+## GitHub Issues Verification
+
+Goal: prove GitHub issue creation and replay.
+
+Preparation:
+
+1. Create a private or throwaway repo.
+2. Create a fine-grained GitHub token that can create issues in that repo.
+3. Store the repo as `REAL_GITHUB_ISSUES_REPO`.
+4. Store the token as `REAL_GITHUB_TOKEN`.
+
+Steps:
+
+1. Add a GitHub Issues endpoint.
+2. Set Repository to `REAL_GITHUB_ISSUES_REPO`.
+3. Set Token to `REAL_GITHUB_TOKEN`.
+4. Save integrations.
+5. Click `Send test`.
+6. Confirm a GitHub issue is created.
+7. Confirm:
+   - title includes feedback type
+   - body includes project name and feedback text
+   - labels include feedback type when available
+8. Confirm delivery history shows a successful `github` delivery.
+9. Click `Resend`.
+10. Confirm a second issue or replay behavior expected by the implementation.
+
+Pass condition:
+
+- GitHub receives a created issue from both initial send and replay.
+- Delivery history records both.
+
+Security check:
+
+- Token must never appear in page text, delivery logs, screenshots, or committed files.
+
+## Dodo Payments Verification
+
+Goal: prove checkout, verified webhook handling, replay rejection, and entitlement truth.
+
+Useful source:
+
+- Dodo webhooks docs: `https://docs.dodopayments.com/developer-resources/webhooks`
+- Dodo CLI docs: `https://docs.dodopayments.com/developer-resources/sdks/cli`
+
+Important implementation note:
+
+- Dodo documents Standard Webhooks headers:
+  - `webhook-id`
+  - `webhook-signature`
+  - `webhook-timestamp`
+- Their manual verification flow builds the signed message from `webhook-id`, `webhook-timestamp`, and the exact raw payload, separated by periods.
+- `webhook-timestamp` is documented as a Unix timestamp in seconds.
+- Our implementation also accepts milliseconds for compatibility, but real Dodo events should be verified against seconds.
+
+Steps:
+
+1. Add Dodo env vars:
+
+```env
+DODO_PAYMENTS_ENVIRONMENT=test
+DODO_PAYMENTS_API_KEY=...
+DODO_PAYMENTS_PRO_MONTHLY_PRODUCT_ID=...
+DODO_PAYMENTS_PRO_YEARLY_PRODUCT_ID=...
+DODO_PAYMENTS_WEBHOOK_SECRET=...
+```
+
+2. Start the local app.
+3. Use Dodo dashboard webhook testing or Dodo CLI forwarding to send a test event to:
+
+```text
+{NEXT_PUBLIC_APP_ORIGIN}/api/billing/webhook
+```
+
+4. Confirm the route returns a `2xx` for a valid current webhook.
+5. Confirm an invalid signature returns a rejection.
+6. Confirm a stale timestamp older than 5 minutes is rejected.
+7. Confirm a too-far-future timestamp is rejected.
+8. Run checkout from `/billing`.
+9. Confirm checkout returns to `/billing`.
+10. Confirm plan changes only after webhook-backed billing state updates.
+
+Pass condition:
+
+- Real or dashboard-forwarded Dodo event passes signature verification.
+- Stale/future replay attempts fail.
+- Entitlements are updated only from verified webhook state.
+
+Risk to watch:
+
+- If real Dodo sends a `webhook-signature` format that differs from the current hex HMAC comparison, update `packages/dashboard/src/lib/dodo.ts` and unit tests before launch.
+
+## Entitlement Verification
+
+Goal: prove paid gates are server-side.
+
+Free plan checks:
+
+1. Force or create a Free account state.
+2. Open integrations.
+3. Confirm Pro-only webhook routing is blocked.
+4. Confirm delivery logs are not fetched for Free.
+5. Call `/api/v1/feedback` with an API key.
+6. Confirm MCP/API access is blocked if the plan does not allow it.
+
+Pro plan checks:
+
+1. Force or create a Pro account state through verified Dodo webhook state.
+2. Confirm integrations are unlocked.
+3. Confirm webhook test sends work.
+4. Confirm MCP/API access works.
+
+Pass condition:
+
+- Browser UI and server routes agree.
+- Browser redirect alone does not grant paid features.
+
+## Evidence Template
+
+Use this template for each connector.
+
+```md
+### Connector
+
+- Date:
+- Environment:
+- Project:
+- Endpoint kind:
+- Secret source:
+- Initial test result:
+- Replay result:
+- Delivery log IDs:
+- External proof:
+- Notes:
+```
+
+Do not paste full secret URLs, GitHub tokens, Dodo API keys, or webhook secrets into notes.
+
+## What To Do After Verification
+
+If all connector and billing checks pass:
+
+1. Update `docs/2026-06-05-launch-hardening-plan.md` Step 3 status.
+2. Move to Step 4: domain/docs/security hardening.
+3. Decide whether outbound webhook signatures are required before launch.
+
+If any connector fails:
+
+1. Capture exact error and response code.
+2. Add or update a focused regression test if the failure is product-side.
+3. Fix the smallest product path.
+4. Re-run only that connector, then the full E2E suite.
