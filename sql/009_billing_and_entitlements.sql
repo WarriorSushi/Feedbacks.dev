@@ -19,18 +19,22 @@ create table if not exists public.billing_accounts (
   updated_at timestamptz not null default now()
 );
 
+drop trigger if exists trg_billing_accounts_updated_at on public.billing_accounts;
 create trigger trg_billing_accounts_updated_at
   before update on public.billing_accounts
   for each row execute function public.touch_updated_at();
 
 alter table public.billing_accounts enable row level security;
 
+drop policy if exists "billing_accounts_select_own" on public.billing_accounts;
 create policy "billing_accounts_select_own" on public.billing_accounts for select
   using ((select auth.uid()) = user_id);
 
+drop policy if exists "billing_accounts_insert_own" on public.billing_accounts;
 create policy "billing_accounts_insert_own" on public.billing_accounts for insert
   with check ((select auth.uid()) = user_id);
 
+drop policy if exists "billing_accounts_update_own" on public.billing_accounts;
 create policy "billing_accounts_update_own" on public.billing_accounts for update
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
@@ -51,6 +55,7 @@ create index if not exists idx_billing_events_subscription on public.billing_eve
 
 alter table public.billing_events enable row level security;
 
+drop policy if exists "billing_events_deny_all" on public.billing_events;
 create policy "billing_events_deny_all" on public.billing_events for all
   using (false);
 
@@ -68,15 +73,18 @@ create table if not exists public.usage_counters (
 create index if not exists idx_usage_counters_lookup
   on public.usage_counters(user_id, metric, period_start desc);
 
+drop trigger if exists trg_usage_counters_updated_at on public.usage_counters;
 create trigger trg_usage_counters_updated_at
   before update on public.usage_counters
   for each row execute function public.touch_updated_at();
 
 alter table public.usage_counters enable row level security;
 
+drop policy if exists "usage_counters_select_own" on public.usage_counters;
 create policy "usage_counters_select_own" on public.usage_counters for select
   using ((select auth.uid()) = user_id);
 
+drop policy if exists "usage_counters_deny_writes" on public.usage_counters;
 create policy "usage_counters_deny_writes" on public.usage_counters for all
   using (false)
   with check (false);

@@ -26,14 +26,14 @@ Step 3 is intentionally deferred until real connector and Dodo credentials are a
 
 Current state:
 
-- `packages/dashboard/src/lib/rate-limit.ts` uses a database-backed `DELETE -> COUNT -> INSERT` flow.
-- This is functional for launch-scale local and early hosted traffic.
-- It is race-prone under high burst traffic because the check and insert are not atomic.
+- `sql/013_launch_security_hardening.sql` adds `public.check_rate_limit(...)`.
+- The function takes an advisory transaction lock per `key:route`, cleans expired rows, counts the current window, and records the request in one server-side call.
+- `packages/dashboard/src/lib/rate-limit.ts` calls that RPC first and falls back to the older database path if migration `013` has not been applied yet.
 
 Decision:
 
-- Keep the current implementation for this pass.
-- Before heavier launch traffic, replace it with an atomic database function or bucketed counter model.
+- Use the atomic RPC after migration `013` is applied.
+- Keep the fallback only to avoid breaking local or self-hosted environments that have not applied the newest migration yet.
 
 ### Stored Integration Secrets
 
@@ -66,12 +66,45 @@ Decision:
 Current state:
 
 - `docs/DEPLOYMENT.md` lists the ordered migration chain.
-- Live Supabase schema verification was not performed in this pass.
+- Live Supabase read-only verification was performed on project `xiiaugllydxxmjbtzfux`.
+- Live project is healthy on Postgres 17.
+- Live migration ledger starts at Phase 6 branch-style migrations rather than the repo's full `001` through `013` ordered SQL chain.
+- Live schema contains `public.widget_config_events`, which is not present in the canonical repo SQL chain.
+- Deployment docs now include `002_public_board_voting.sql` and `003_agent_support.sql`; omitting them made the fresh ordered chain impossible because `004_fix_public_board.sql` depends on `public_board_settings` and `votes`.
+- `004_fix_public_board.sql` now drops/recreates duplicate board/vote policies so it can safely run after `002_public_board_voting.sql`.
+- `005_security_fixes.sql`, `006_public_board_comments.sql`, and `009_billing_and_entitlements.sql` now drop/recreate named policies or triggers where needed so the deployment guide's idempotency guidance is closer to reality.
 
 Decision:
 
 - Keep the ordered migration chain as the source of truth.
-- Re-run empty-database migration verification before launch, then compare live Supabase schema against repo migrations if credentials are available.
+- Do not mutate live Supabase from this pass.
+- Apply and verify `sql/013_launch_security_hardening.sql` in a controlled migration window.
+- Reconcile live migration history and the extra `widget_config_events` table before launch.
+- Re-run empty-database migration verification before launch.
+
+## Live Supabase Advisor Snapshot
+
+Read-only checks on 6th June 2026 found:
+
+- Security advisor warnings for public execution of SECURITY DEFINER functions.
+- Security advisor warning for `widget_config_events` having RLS enabled with no policies.
+- Security advisor warnings for mutable function search paths on older board/vote trigger functions.
+- Performance advisor warnings for unindexed Phase 6 foreign keys.
+- Performance advisor warnings where RLS policies used direct `auth.uid()` instead of `(select auth.uid())`.
+- Auth leaked password protection is disabled in Supabase Auth settings.
+
+Actions in this pass:
+
+- Added `sql/013_launch_security_hardening.sql`.
+- Updated rate limiting to prefer the atomic RPC.
+- Updated deployment docs with migration `013`.
+- Verified `pnpm type-check`, `pnpm lint`, `pnpm test:unit`, and `pnpm test:e2e:required` pass after the repo changes.
+
+Still manual:
+
+- Enable leaked password protection in Supabase Auth settings.
+- Decide whether to apply migration `013` directly to live Supabase or through a Supabase branch/staging window.
+- Re-run Supabase security and performance advisors after `013` is applied.
 
 ## Next Step 4 Work
 

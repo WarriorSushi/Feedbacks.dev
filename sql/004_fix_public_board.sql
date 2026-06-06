@@ -51,22 +51,31 @@ CREATE TRIGGER trigger_update_vote_count
 -- RLS policies for votes table
 ALTER TABLE votes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can read votes" ON votes;
 CREATE POLICY "Anyone can read votes" ON votes
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Anyone can insert votes" ON votes;
 CREATE POLICY "Anyone can insert votes" ON votes
   FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Anyone can delete own votes" ON votes;
 CREATE POLICY "Anyone can delete own votes" ON votes
   FOR DELETE USING (true);
 
 -- RLS for public board settings (public read)
 ALTER TABLE public_board_settings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can read enabled boards" ON public_board_settings;
 CREATE POLICY "Anyone can read enabled boards" ON public_board_settings
   FOR SELECT USING (enabled = true);
 
-CREATE POLICY "Owners can manage board settings" ON public_board_settings
+DROP POLICY IF EXISTS "Owners can manage board settings" ON public_board_settings;
+DROP POLICY IF EXISTS "Project owners can manage board settings" ON public_board_settings;
+CREATE POLICY "Project owners can manage board settings" ON public_board_settings
   FOR ALL USING (
+    project_id IN (SELECT id FROM projects WHERE owner_user_id = auth.uid())
+  )
+  WITH CHECK (
     project_id IN (SELECT id FROM projects WHERE owner_user_id = auth.uid())
   );

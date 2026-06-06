@@ -18,15 +18,18 @@ Hosted convention:
 Go to your **Supabase Dashboard** → **SQL Editor** → run these files in order:
 
 1. `sql/001_initial_schema.sql` — base tables (projects, feedback, webhook_deliveries, etc.)
-2. `sql/004_fix_public_board.sql` — adds public board support (is_public, vote_count, votes table, triggers)
-3. `sql/005_security_fixes.sql` — security fixes, vote-count repair, and API key hardening prerequisites
-4. `sql/006_public_board_comments.sql` — public admin comments on board items
-5. `sql/007_phase6_hardening.sql` — typed board profile fields, announcements, follows, watches, reports, and durable webhook jobs
-6. `sql/008_board_display_name.sql` — public board display name support
-7. `sql/009_billing_and_entitlements.sql` — billing accounts, events, usage counters, and quota helpers
-8. `sql/010_api_key_hardening.sql` — final API-key storage hardening
-9. `sql/011_notification_digests.sql` — digest scheduling support
-10. `sql/012_project_stats_and_digest_rls.sql` — project stats RPCs and notification digest RLS coverage
+2. `sql/002_public_board_voting.sql` — public board settings, votes, board indexes, and initial board RLS
+3. `sql/003_agent_support.sql` — agent fields and indexes for AI/API submissions
+4. `sql/004_fix_public_board.sql` — public board consistency fixes, vote-count trigger repair, and public defaults
+5. `sql/005_security_fixes.sql` — security fixes, vote-count repair, and API key hardening prerequisites
+6. `sql/006_public_board_comments.sql` — public admin comments on board items
+7. `sql/007_phase6_hardening.sql` — typed board profile fields, announcements, follows, watches, reports, and durable webhook jobs
+8. `sql/008_board_display_name.sql` — public board display name support
+9. `sql/009_billing_and_entitlements.sql` — billing accounts, events, usage counters, and quota helpers
+10. `sql/010_api_key_hardening.sql` — final API-key storage hardening
+11. `sql/011_notification_digests.sql` — digest scheduling support
+12. `sql/012_project_stats_and_digest_rls.sql` — project stats RPCs and notification digest RLS coverage
+13. `sql/013_launch_security_hardening.sql` — atomic rate-limit RPC, function exposure hardening, advisor indexes, and RLS cleanup
 
 **How:** Copy-paste the contents of each file into the SQL Editor and click "Run".
 
@@ -212,3 +215,4 @@ The widget JS is served from `/widget/latest.js` on your domain.
 | Widget not loading | Check browser console, verify script URL |
 | Build fails on Vercel | Ensure root directory is `packages/dashboard`, Node 20+ |
 | Public board empty | Verify migrations `004` through `008` ran, then check `is_public` and `public_board_settings` rows |
+| Rate limiting behaves like the old non-atomic path | Verify migration `013` ran so `public.check_rate_limit(...)` exists |

@@ -6,5 +6,6 @@ ALTER TABLE public.feedback_notes
   ADD COLUMN IF NOT EXISTS is_public boolean NOT NULL DEFAULT false;
 
 -- Allow anonymous users to read public notes (admin comments on public board)
+DROP POLICY IF EXISTS "feedback_notes_public_read" ON public.feedback_notes;
 CREATE POLICY "feedback_notes_public_read" ON public.feedback_notes FOR SELECT
   USING (is_public = true);

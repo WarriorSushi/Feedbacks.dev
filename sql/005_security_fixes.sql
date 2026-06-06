@@ -9,6 +9,7 @@
 -- Since votes are anonymous (no auth.uid()), the real protection is app-level.
 -- The admin/service-role client bypasses RLS anyway.
 DROP POLICY IF EXISTS "Anyone can delete own votes" ON public.votes;
+DROP POLICY IF EXISTS "Service role manages vote deletes" ON public.votes;
 CREATE POLICY "Service role manages vote deletes" ON public.votes
   FOR DELETE USING (true);
 
