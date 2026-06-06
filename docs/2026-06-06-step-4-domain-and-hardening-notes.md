@@ -96,15 +96,19 @@ Read-only checks on 6th June 2026 found:
 Actions in this pass:
 
 - Added `sql/013_launch_security_hardening.sql`.
+- Added `sql/014_fix_rate_limit_uuid_generation.sql` after live verification found `uuid_generate_v4()` was not visible from `check_rate_limit`'s locked function `search_path`.
+- Added `sql/015_server_managed_votes.sql` to remove direct client vote writes.
 - Updated rate limiting to prefer the atomic RPC.
 - Updated deployment docs with migration `013`.
-- Verified `pnpm type-check`, `pnpm lint`, `pnpm test:unit`, and `pnpm test:e2e:required` pass after the repo changes.
+- Applied live Supabase migrations `013`, `014`, and `015`.
+- Re-ran Supabase security advisors; the remaining security warning is leaked password protection disabled in Auth settings.
+- Verified `pnpm type-check`, `pnpm lint`, `pnpm test:unit`, and `pnpm test:e2e:required` pass after the repo changes and live migrations.
 
 Still manual:
 
 - Enable leaked password protection in Supabase Auth settings.
-- Decide whether to apply migration `013` directly to live Supabase or through a Supabase branch/staging window.
-- Re-run Supabase security and performance advisors after `013` is applied.
+- Reconcile the live Supabase migration ledger with the repo's canonical SQL chain.
+- Keep unused-index performance advisor findings under observation after real traffic.
 
 ## Next Step 4 Work
 

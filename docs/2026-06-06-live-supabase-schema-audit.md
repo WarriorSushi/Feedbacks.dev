@@ -4,7 +4,11 @@
 
 Read-only Supabase MCP checks against project `xiiaugllydxxmjbtzfux` (`feedbacks.dev`).
 
-No live migrations were applied in this pass.
+Live migrations were applied after the initial read-only audit:
+
+- `013_launch_security_hardening`
+- `014_fix_rate_limit_uuid_generation`
+- `015_server_managed_votes`
 
 ## Project
 
@@ -24,6 +28,9 @@ Live migration history currently contains:
 - `20260405224008 010_api_key_hardening`
 - `20260405224016 011_notification_digests`
 - `20260605152552 project_stats_and_digest_rls`
+- `20260606074137 013_launch_security_hardening`
+- `20260606074308 014_fix_rate_limit_uuid_generation`
+- `20260606074420 015_server_managed_votes`
 
 Repo deployment docs now use the ordered `sql/001` through `sql/013` chain as the canonical source of truth.
 
@@ -42,21 +49,25 @@ Risk:
 
 All public tables reported RLS enabled.
 
-One live-only drift table needs attention:
+One live-only drift table was found:
 
 - `public.widget_config_events`: RLS enabled, zero policies, and not present in the repo's canonical SQL files.
 
-Action added:
+Action applied:
 
-- `sql/013_launch_security_hardening.sql` adds a compatibility deny-all policy if `widget_config_events` exists.
+- `sql/013_launch_security_hardening.sql` added a compatibility deny-all policy because `widget_config_events` exists in live Supabase.
 
 ## Advisor Findings
 
-Security advisor findings:
+Initial security advisor findings:
 
 - Several SECURITY DEFINER functions were executable by `anon` and `authenticated`.
 - `update_board_settings_updated_at` and `update_feedback_vote_count` had mutable search paths.
 - `votes` has intentionally permissive anonymous insert/delete policies for public voting.
+- Supabase Auth leaked password protection is disabled.
+
+After migrations `013`, `014`, and `015`, the remaining security advisor finding is:
+
 - Supabase Auth leaked password protection is disabled.
 
 Performance advisor findings:
@@ -67,7 +78,7 @@ Performance advisor findings:
 
 ## Action Taken In Repo
 
-Added `sql/013_launch_security_hardening.sql` to:
+Added and applied `sql/013_launch_security_hardening.sql` to:
 
 - add atomic `public.check_rate_limit(...)`
 - revoke direct client execution from server-only SECURITY DEFINER functions
@@ -75,6 +86,10 @@ Added `sql/013_launch_security_hardening.sql` to:
 - set search paths on older trigger functions
 - replace direct `auth.uid()` in advisor-flagged policies
 - add a live-drift deny-all policy for `widget_config_events` if the table exists
+
+Added and applied `sql/014_fix_rate_limit_uuid_generation.sql` because the first live RPC verification found `uuid_generate_v4()` was not visible from `check_rate_limit`'s locked function `search_path`.
+
+Added and applied `sql/015_server_managed_votes.sql` so public board vote writes go through Next.js server routes instead of direct Supabase client policies.
 
 Updated `packages/dashboard/src/lib/rate-limit.ts` to prefer the new RPC and fall back to the old path only when migration `013` is missing.
 
@@ -87,10 +102,15 @@ After the repo changes:
 - `pnpm test:unit` passed
 - `pnpm test:e2e:required` passed, 10/10 browser tests
 
+After applying live migrations:
+
+- `check_rate_limit('codex-live-verify-014', 'migration-014', 2, 60)` returned allowed, allowed, then blocked across three calls.
+- Live `votes` policies now allow public reads and deny direct client insert/update/delete.
+- Supabase security advisor now reports only leaked password protection disabled.
+- `pnpm test:e2e:required` passed again after live migrations, 10/10 browser tests.
+
 ## Still To Do
 
-1. Apply `sql/013_launch_security_hardening.sql` to staging or a Supabase branch first.
-2. Re-run Supabase security and performance advisors.
-3. Decide whether the intentionally public `votes` policies should remain as-is or move fully behind server-only policies.
-4. Enable leaked password protection in Supabase Auth settings.
-5. Reconcile the live migration ledger with the repo's canonical SQL chain.
+1. Enable leaked password protection in Supabase Auth settings.
+2. Reconcile the live migration ledger with the repo's canonical SQL chain.
+3. Keep unused-index performance advisor findings under observation after real production traffic.

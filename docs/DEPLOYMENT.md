@@ -30,6 +30,8 @@ Go to your **Supabase Dashboard** → **SQL Editor** → run these files in orde
 11. `sql/011_notification_digests.sql` — digest scheduling support
 12. `sql/012_project_stats_and_digest_rls.sql` — project stats RPCs and notification digest RLS coverage
 13. `sql/013_launch_security_hardening.sql` — atomic rate-limit RPC, function exposure hardening, advisor indexes, and RLS cleanup
+14. `sql/014_fix_rate_limit_uuid_generation.sql` — fixes rate-limit UUID generation on locked function search paths
+15. `sql/015_server_managed_votes.sql` — removes direct client vote writes; board votes go through server API routes
 
 **How:** Copy-paste the contents of each file into the SQL Editor and click "Run".
 
