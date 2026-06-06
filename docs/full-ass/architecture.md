@@ -5,7 +5,7 @@
 ```
 ┌─────────────────────────────────────────────────────┐
 │                    Client Sites                      │
-│  <script src="feedbacks.dev/widget.js"></script>     │
+│  <script src="app.feedbacks.dev/widget/latest.js"></script> │
 └──────────────────────┬──────────────────────────────┘
                        │ REST API
                        ▼
@@ -246,11 +246,11 @@ widget.js (~15KB gzipped)
 
 ```html
 <!-- Minimum -->
-<script src="https://feedbacks.dev/widget.js" data-project="PROJECT_SLUG"></script>
+<script src="https://app.feedbacks.dev/widget/latest.js" data-project="PROJECT_SLUG"></script>
 
 <!-- Customized -->
 <script
-  src="https://feedbacks.dev/widget.js"
+  src="https://app.feedbacks.dev/widget/latest.js"
   data-project="PROJECT_SLUG"
   data-position="bottom-left"
   data-color="#10b981"

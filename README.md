@@ -15,7 +15,7 @@ Embeddable widget + smart dashboard + public voting boards + AI agent API — a 
 [![Powered by Supabase](https://img.shields.io/badge/Supabase-3ecf8e?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 
-[Website](https://feedbacks.dev) &nbsp;&middot;&nbsp; [Public Boards](https://feedbacks.dev/boards) &nbsp;&middot;&nbsp; [Documentation](https://feedbacks.dev) &nbsp;&middot;&nbsp; [Contributing](CONTRIBUTING.md)
+[Website](https://feedbacks.dev) &nbsp;&middot;&nbsp; [Public Boards](https://app.feedbacks.dev/boards) &nbsp;&middot;&nbsp; [Documentation](https://feedbacks.dev) &nbsp;&middot;&nbsp; [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -53,7 +53,7 @@ Not just an inbox. Filter by type, priority, and status. Assign, tag, and track 
 ### Public Voting Boards
 Let your users vote on features and report bugs publicly. Custom branding, announcements, moderation tools, and spam protection built in.
 
-Each board gets its own URL at `feedbacks.dev/p/your-product` with:
+Each board gets its own URL at `app.feedbacks.dev/p/your-product` with:
 - Upvoting and discussion
 - Status tracking (Planned, In Progress, Shipped)
 - Custom accent colors and branding
@@ -70,7 +70,7 @@ Your AI agents can file bugs and query feedback programmatically. Built-in MCP s
 npx @feedbacks/mcp-server --api-key fb_live_...
 
 # REST API
-curl https://feedbacks.dev/api/v1/feedback \
+curl https://app.feedbacks.dev/api/v1/feedback \
   -H "X-API-Key: fb_live_..." \
   -H "Content-Type: application/json" \
   -d '{"message": "Export crashes on large datasets", "type": "bug"}'
@@ -103,6 +103,8 @@ No tracking scripts. No cookies. No third-party analytics. Your users' data stay
 ### Cloud (Fastest)
 
 Go to [feedbacks.dev](https://feedbacks.dev), create an account, and install the widget in your app. Free and Pro plans are available, with billing handled by Dodo Payments.
+
+Hosted convention: `feedbacks.dev` is the marketing and docs home. `app.feedbacks.dev` is the hosted product origin for the dashboard, API, widget assets, and public boards.
 
 ### Self-Hosted
 

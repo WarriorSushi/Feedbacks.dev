@@ -28,9 +28,11 @@ import { WidgetDemo, ScrollHeader } from './widget-demo-client'
 
 // ─── Code snippets ────────────────────────────────────────────────────────────
 
+const appOrigin = publicEnv.NEXT_PUBLIC_APP_ORIGIN
+
 const installSnippet = generateInstallSnippets({
   projectKey: 'your-project-key',
-  appOrigin: publicEnv.NEXT_PUBLIC_APP_ORIGIN,
+  appOrigin,
 }).find((snippet) => snippet.label === 'Website')?.code || ''
 
 const mcpSnippet = `// ~/.claude/claude_desktop_config.json
@@ -47,7 +49,7 @@ const mcpSnippet = `// ~/.claude/claude_desktop_config.json
 }`
 
 const apiSnippet = `# List recent feedback
-curl https://feedbacks.dev/api/v1/feedback \\
+curl ${appOrigin}/api/v1/feedback \\
   -H "X-API-Key: fb_live_..." \\
   | jq '.feedback[] | {type, message}'
 

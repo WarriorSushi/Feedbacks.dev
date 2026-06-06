@@ -221,6 +221,12 @@ Execution runbook:
 
 - `docs/2026-06-06-real-connector-and-billing-verification.md`
 
+Status on 6th June 2026:
+
+- Deferred by operator decision because the local environment does not currently include real connector or Dodo credentials.
+- The skipped work is documented in `docs/2026-06-06-real-connector-and-billing-verification.md`.
+- Step 4 may proceed, but Step 3 must be revisited before launch.
+
 Tasks:
 
 1. Slack:
@@ -265,6 +271,12 @@ Acceptance criteria:
 Purpose:
 
 Remove the last trust gaps that would make a new developer hesitate.
+
+Canonical origin decision on 6th June 2026:
+
+- `https://feedbacks.dev` is the marketing and docs origin.
+- `https://app.feedbacks.dev` is the hosted product origin for the dashboard, API, widget assets, and public boards.
+- Self-hosted deployments replace the app origin with their own dashboard domain through `NEXT_PUBLIC_APP_ORIGIN`.
 
 Tasks:
 

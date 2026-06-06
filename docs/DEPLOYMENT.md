@@ -1,5 +1,11 @@
 # feedbacks.dev — Deployment Guide
 
+Hosted convention:
+
+- `https://feedbacks.dev` is the marketing and docs origin.
+- `https://app.feedbacks.dev` is the hosted dashboard, API, widget, and public-board origin.
+- Self-hosted deployments should replace the app origin with their own dashboard domain, shown below as `https://your-app-domain.com`.
+
 ## Prerequisites
 - Supabase project (you already have one)
 - Vercel account (for hosting)
@@ -44,16 +50,16 @@ Go to **Supabase Dashboard** → **Authentication**:
 2. Go to [GitHub Developer Settings](https://github.com/settings/developers) → **OAuth Apps** → **New OAuth App**
 3. Fill in:
    - **Application name:** feedbacks.dev
-   - **Homepage URL:** `https://your-domain.com`
+   - **Homepage URL:** `https://your-app-domain.com`
    - **Authorization callback URL:** `https://your-supabase-project.supabase.co/auth/v1/callback`
 4. Copy the **Client ID** and **Client Secret** back into Supabase GitHub provider settings
 
 ### URL Configuration
 1. **Authentication → URL Configuration**:
-   - **Site URL:** `https://your-domain.com` (or `http://localhost:3000` for local dev)
+   - **Site URL:** `https://your-app-domain.com` (or `http://localhost:3000` for local dev)
    - **Redirect URLs:** Add both:
      - `http://localhost:3000/auth/callback`
-     - `https://your-domain.com/auth/callback`
+     - `https://your-app-domain.com/auth/callback`
 
 ---
 
@@ -185,9 +191,9 @@ Once deployed, users install the widget with:
 
 ```html
 <script
-  src="https://your-domain.com/widget/latest.js"
+  src="https://your-app-domain.com/widget/latest.js"
   data-project="PROJECT_KEY"
-  data-api-url="https://your-domain.com/api/feedback"
+  data-api-url="https://your-app-domain.com/api/feedback"
   defer
 ></script>
 ```

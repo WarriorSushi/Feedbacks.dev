@@ -29,6 +29,29 @@ Because of that, true Step 3 verification is blocked until these credentials are
 
 The app itself does not read the `REAL_*` variables. They are optional local placeholders for the human/operator running this checklist.
 
+## Deferred On 6th June 2026
+
+Step 3 is intentionally skipped for now so Step 4 launch hardening can continue without pretending real external verification happened.
+
+What is skipped:
+
+- real Slack incoming webhook delivery and replay
+- real Discord webhook delivery and replay
+- real generic HTTPS webhook delivery and replay
+- real GitHub Issues creation and replay
+- Dodo sandbox or staging checkout
+- real Dodo webhook signature verification
+- Free/Pro entitlement verification driven by real Dodo webhook state
+
+Reminder trigger:
+
+- before calling connectors production-ready
+- before calling billing production-ready
+- before public launch
+- before doing final Step 5 MCP and UI polish signoff
+
+Do not mark Step 3 complete until evidence is added to this runbook using the evidence template below.
+
 ## Preflight
 
 1. Start from a clean git state or only intentional docs changes.
