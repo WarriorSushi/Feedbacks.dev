@@ -64,6 +64,7 @@ export interface WebhookEndpoint {
   delivery?: 'immediate' | 'digest'
   rules?: WebhookRules
   format?: 'compact' | 'full'
+  signingSecret?: string
 }
 
 export interface GitHubEndpoint extends WebhookEndpoint {

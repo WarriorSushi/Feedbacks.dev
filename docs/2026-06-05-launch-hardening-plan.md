@@ -19,8 +19,8 @@ The goal is not to add more product surface right now. The goal is to make the p
 Current branch:
 
 ```text
-main == origin/main
-latest pushed commit: 9341c6c Update moderation E2E board action label
+main == origin/main after the 9 June 2026 push
+latest pushed commit before this launch-completion slice: 4b6450d Apply live Supabase hardening migrations
 ```
 
 Known local files not part of the pushed product work:
@@ -57,7 +57,7 @@ Still true:
 - The full Playwright suite passed locally on 6th June 2026, but should stay part of every launch-hardening pass.
 - Real Slack, Discord, GitHub, and Dodo sandbox/live flows still need manual verification.
 - Domain naming still needs one canonical story: `feedbacks.dev` versus `app.feedbacks.dev`.
-- Rate limiting is functional but race-prone under burst traffic.
+- Rate limiting now prefers the atomic database RPC added in `sql/013_launch_security_hardening.sql`.
 - MCP exists, but public setup docs and package verification need launch polish.
 - UI/UX should get a focused Impeccable pass before public launch.
 
@@ -132,7 +132,7 @@ Design direction to follow:
 
 Design note:
 
-- There is no dedicated `DESIGN.md` yet. Create one later from the existing dashboard and public-board system so future UI changes have a stronger design source of truth.
+- `DESIGN.md` now exists and should be used with `PRODUCT.md` for future UI changes.
 
 Recommended UI/UX improvements to include in the launch work:
 
@@ -299,13 +299,15 @@ Tasks:
    - webhook endpoint display
    - logs and response body truncation
 5. Consider outbound webhook signatures:
-   - add signing secret per project or endpoint
-   - send signature headers on Slack/Discord/generic payloads where useful
-   - document recipient verification
+   - done for generic webhooks on 9 June 2026
+   - generic endpoints can set an optional signing secret
+   - signed deliveries include `X-Feedbacks-Timestamp` and `X-Feedbacks-Signature`
+   - Slack, Discord, and GitHub keep native delivery formats
 6. Confirm migrations from empty Supabase:
    - ordered migration list works
    - no manual-only SQL remains required
    - live Supabase schema matches repo migrations
+   - blocked on the current machine because Docker and `psql` are unavailable and Supabase branching requires a paid plan
 7. Create `DESIGN.md` from the current product UI:
    - typography
    - spacing

@@ -3,6 +3,7 @@ import { createAdminSupabase } from '@/lib/supabase-server'
 import { notifyUserOfWebhookFailure } from '@/lib/notifications'
 import { normalizeWebhookConfig, type WebhookKind } from '@/lib/webhook-config'
 import { buildE2ETestWebhookUrl, getE2EBypassSecret, isE2ETestWebhookUrl } from '@/lib/e2e'
+import { buildGenericWebhookSignatureHeaders } from '@/lib/webhook-signing'
 
 export interface WebhookPayload {
   event: 'feedback.new' | 'feedback.test'
@@ -186,16 +187,20 @@ async function deliverSingle(
           : type === 'discord'
             ? buildDiscordBody(payload)
             : payload
+        const rawBody = JSON.stringify(body)
 
         res = await fetch(endpoint.url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            ...(type === 'generic'
+              ? buildGenericWebhookSignatureHeaders(rawBody, (endpoint as WebhookEndpoint).signingSecret)
+              : {}),
             ...(isE2ETestWebhookUrl(endpoint.url) && getE2EBypassSecret()
               ? { 'x-feedbacks-e2e-bypass': getE2EBypassSecret() as string }
               : {}),
           },
-          body: JSON.stringify(body),
+          body: rawBody,
         })
       }
 

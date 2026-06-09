@@ -59,6 +59,7 @@ export function PublicBoard({
   const [busyId, setBusyId] = React.useState<string | null>(null)
   const [ready, setReady] = React.useState(false)
   const [showRecommendations, setShowRecommendations] = React.useState(false)
+  const [voteError, setVoteError] = React.useState<string | null>(null)
   const votesKey = `votes:${board.slug}`
 
   const commentsByFeedback = React.useMemo(() => {
@@ -115,14 +116,18 @@ export function PublicBoard({
   const handleVote = async (feedbackId: string) => {
     if (votingId) return
     setVotingId(feedbackId)
+    setVoteError(null)
     try {
       const response = await fetch(`/api/boards/${board.slug}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ feedback_id: feedbackId }),
       })
-      if (!response.ok) return
-      const data = await response.json()
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setVoteError(data.error || 'Your vote could not be saved. Please try again.')
+        return
+      }
       setFeedback((prev) =>
         prev.map((entry) =>
           entry.id === feedbackId
@@ -315,6 +320,12 @@ export function PublicBoard({
               onSortChange={setSort}
               onSearchChange={setSearch}
             />
+
+            {voteError && (
+              <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                {voteError}
+              </div>
+            )}
 
             {board.allow_submissions && (
               <div className="grid gap-3 border-b border-border/70 py-5 sm:grid-cols-[42px_minmax(0,1fr)_auto] sm:items-center">

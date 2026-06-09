@@ -27,5 +27,7 @@ export async function POST(
     kind,
     receivedAt: new Date().toISOString(),
     payloadType: payload && typeof payload === 'object' ? 'json' : 'unknown',
+    feedbacksTimestamp: request.headers.get('x-feedbacks-timestamp'),
+    feedbacksSignature: request.headers.get('x-feedbacks-signature'),
   })
 }

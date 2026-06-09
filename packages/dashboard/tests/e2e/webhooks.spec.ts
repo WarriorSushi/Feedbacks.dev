@@ -7,6 +7,7 @@ type Delivery = {
   id: string
   kind: 'slack' | 'discord' | 'generic' | 'github'
   status: 'success' | 'failed'
+  response_body: string | null
 }
 
 const env = skipE2EIfNeeded()
@@ -82,6 +83,8 @@ test('configures endpoints, sends tests, and replays deliveries from the integra
       .fill(`${env.appOrigin}/api/test/webhook-target/${kind}`)
   }
 
+  await page.locator('[data-webhook-kind="generic"] input[placeholder="whsec_..."]').fill('whsec_e2e_generic')
+
   const githubSection = page.locator('[data-webhook-kind="github"]')
   await githubSection.getByRole('button', { name: 'Add endpoint' }).click()
   await page.locator('[data-webhook-kind="github"] input[placeholder="owner/repo"]').fill('feedbacks/e2e-webhooks')
@@ -100,6 +103,7 @@ test('configures endpoints, sends tests, and replays deliveries from the integra
   expect(savedConfig.slack?.endpoints).toHaveLength(1)
   expect(savedConfig.discord?.endpoints).toHaveLength(1)
   expect(savedConfig.generic?.endpoints).toHaveLength(1)
+  expect(savedConfig.generic?.endpoints?.[0]?.signingSecret).toBe('whsec_e2e_generic')
   expect(savedConfig.github?.endpoints).toHaveLength(1)
 
   for (const kind of WEBHOOK_KINDS) {
@@ -125,6 +129,9 @@ test('configures endpoints, sends tests, and replays deliveries from the integra
   )
 
   expect(deliveries.filter((d) => d.status === 'success').length).toBeGreaterThanOrEqual(4)
+  const genericDelivery = deliveries.find((delivery) => delivery.kind === 'generic' && delivery.status === 'success')
+  expect(genericDelivery?.response_body).toContain('"feedbacksSignature":"v1=')
+  expect(genericDelivery?.response_body).toContain('"feedbacksTimestamp":')
 
   for (const kind of WEBHOOK_KINDS) {
     const replayResponse = page.waitForResponse((response) =>

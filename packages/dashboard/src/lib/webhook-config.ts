@@ -115,7 +115,7 @@ function sanitizeBaseEndpoint(
   const url = sanitizeUrl(source.url)
   if (!url) return undefined
 
-  return {
+  const sanitized: WebhookEndpoint = {
     id: sanitizeString(source.id, 120) || makeEndpointId(kind),
     url,
     enabled: source.enabled !== false,
@@ -123,6 +123,13 @@ function sanitizeBaseEndpoint(
     format: WEBHOOK_FORMATS.has(String(source.format)) ? (source.format as 'compact' | 'full') : 'full',
     rules: sanitizeRules(source.rules),
   }
+
+  if (kind === 'generic') {
+    const signingSecret = sanitizeString(source.signingSecret, 300)
+    if (signingSecret) sanitized.signingSecret = signingSecret
+  }
+
+  return sanitized
 }
 
 function sanitizeGitHubEndpoint(endpoint: unknown): GitHubEndpoint | undefined {

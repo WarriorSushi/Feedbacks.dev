@@ -23,9 +23,9 @@ Authoritative product direction still lives in:
 
 ### 1. Setup trust
 - [ ] keep self-host instructions aligned with actual files in the repo
-- [ ] keep deployment docs aligned with the full ordered migration chain
+- [x] keep deployment docs aligned with the full ordered migration chain
 - [ ] keep local Playwright setup aligned with `packages/dashboard/.env.local`
-- [ ] remove or neutralize references that assume `archived_project/` exists
+- [x] remove or neutralize references that assume `archived_project/` exists
 
 ### 2. Acceptance confidence
 - [ ] run the existing Playwright install flow

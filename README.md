@@ -67,7 +67,7 @@ Your AI agents can file bugs and query feedback programmatically. Built-in MCP s
 
 ```bash
 # MCP Server (for Claude Code, Cursor, etc.)
-npx @feedbacks/mcp-server --api-key fb_live_...
+npx -y @feedbacks/mcp-server --api-key fb_live_...
 
 # REST API
 curl https://app.feedbacks.dev/api/v1/feedback \
@@ -77,7 +77,7 @@ curl https://app.feedbacks.dev/api/v1/feedback \
 ```
 
 ### Webhooks
-Push feedback to Slack, Discord, GitHub Issues, or any HTTP endpoint. Instant or digest delivery. Filter by type, rating, or tags.
+Push feedback to Slack, Discord, GitHub Issues, or any HTTP endpoint. Instant or digest delivery. Filter by type, rating, or tags. Generic webhooks support optional HMAC signing headers.
 
 ### Privacy-First
 No tracking scripts. No cookies. No third-party analytics. Your users' data stays in your Supabase instance.
@@ -128,6 +128,13 @@ pnpm dev
 # Build
 pnpm build
 ```
+
+### Launch Docs
+
+- [Deployment guide](docs/DEPLOYMENT.md)
+- [MCP setup](docs/MCP.md)
+- [Migration reconciliation](docs/2026-06-09-migration-history-reconciliation.md)
+- [Production deploy checklist](docs/2026-06-09-production-deploy-checklist.md)
 
 ### Widget Installation
 

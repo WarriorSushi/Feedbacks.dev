@@ -680,18 +680,46 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
                           </div>
                         </div>
                       ) : (
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-medium text-muted-foreground">Webhook URL</label>
-                          <Input
-                            placeholder={section.placeholder}
-                            value={endpoint.url}
-                            onChange={(e) =>
-                              updateEndpoint(section.kind, index, {
-                                ...endpoint,
-                                url: e.target.value,
-                              })
-                            }
-                          />
+                        <div className="space-y-3">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-muted-foreground">Webhook URL</label>
+                            <Input
+                              placeholder={section.placeholder}
+                              value={endpoint.url}
+                              onChange={(e) =>
+                                updateEndpoint(section.kind, index, {
+                                  ...endpoint,
+                                  url: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+
+                          {section.kind === 'generic' && (
+                            <div className="rounded-lg border bg-muted/10 p-3">
+                              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_1.2fr] md:items-start">
+                                <div>
+                                  <label className="text-xs font-medium text-muted-foreground">
+                                    Signing secret
+                                  </label>
+                                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                    Optional. Adds timestamp and HMAC headers so your receiver can reject forged or stale deliveries.
+                                  </p>
+                                </div>
+                                <Input
+                                  type="password"
+                                  placeholder="whsec_..."
+                                  value={endpoint.signingSecret || ''}
+                                  onChange={(e) =>
+                                    updateEndpoint(section.kind, index, {
+                                      ...endpoint,
+                                      signingSecret: e.target.value,
+                                    })
+                                  }
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 

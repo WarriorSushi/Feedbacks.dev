@@ -32,7 +32,7 @@ Live migration history currently contains:
 - `20260606074308 014_fix_rate_limit_uuid_generation`
 - `20260606074420 015_server_managed_votes`
 
-Repo deployment docs now use the ordered `sql/001` through `sql/013` chain as the canonical source of truth.
+Repo deployment docs now use the ordered `sql/001` through `sql/015` chain as the canonical source of truth.
 
 Correction made during this pass:
 
@@ -63,7 +63,7 @@ Initial security advisor findings:
 
 - Several SECURITY DEFINER functions were executable by `anon` and `authenticated`.
 - `update_board_settings_updated_at` and `update_feedback_vote_count` had mutable search paths.
-- `votes` has intentionally permissive anonymous insert/delete policies for public voting.
+- `votes` previously had permissive anonymous insert/delete policies for public voting.
 - Supabase Auth leaked password protection is disabled.
 
 After migrations `013`, `014`, and `015`, the remaining security advisor finding is:
@@ -109,8 +109,18 @@ After applying live migrations:
 - Supabase security advisor now reports only leaked password protection disabled.
 - `pnpm test:e2e:required` passed again after live migrations, 10/10 browser tests.
 
+## 9 June 2026 Reconciliation Update
+
+The migration story is now documented in `docs/2026-06-09-migration-history-reconciliation.md`.
+
+Fresh projects should run `sql/001` through `sql/015` in order.
+
+The live hosted project should not replay `001` through `012`; its ledger reflects older branch-style work plus applied hardening migrations `013`, `014`, and `015`.
+
+Fresh empty-database verification is still required before Dodo Payments production work. It could not run from the current machine because Docker and `psql` are unavailable, and Supabase branching is not enabled on the current plan.
+
 ## Still To Do
 
 1. Enable leaked password protection in Supabase Auth settings.
-2. Reconcile the live migration ledger with the repo's canonical SQL chain.
+2. Run a true disposable fresh-database `001` through `015` migration test from an environment with Docker, `psql`, branching, or a throwaway project.
 3. Keep unused-index performance advisor findings under observation after real production traffic.

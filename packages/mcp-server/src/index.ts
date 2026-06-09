@@ -9,11 +9,18 @@ import {
   searchFeedbackParams,
 } from './tools.js'
 
-const API_KEY = process.env.FEEDBACKS_API_KEY
-const API_URL = (process.env.FEEDBACKS_API_URL ?? 'https://app.feedbacks.dev').replace(/\/$/, '')
+function readCliOption(name: string): string | undefined {
+  const index = process.argv.indexOf(`--${name}`)
+  if (index === -1) return undefined
+  const value = process.argv[index + 1]
+  return value && !value.startsWith('--') ? value : undefined
+}
+
+const API_KEY = readCliOption('api-key') ?? process.env.FEEDBACKS_API_KEY
+const API_URL = (readCliOption('api-url') ?? process.env.FEEDBACKS_API_URL ?? 'https://app.feedbacks.dev').replace(/\/$/, '')
 
 if (!API_KEY) {
-  console.error('FEEDBACKS_API_KEY environment variable is required')
+  console.error('FEEDBACKS_API_KEY environment variable or --api-key is required')
   process.exit(1)
 }
 

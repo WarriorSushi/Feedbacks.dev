@@ -157,20 +157,26 @@ Steps:
 
 1. Add a Generic Webhook endpoint.
 2. Paste `REAL_GENERIC_WEBHOOK_URL`.
-3. Save integrations.
-4. Click `Send test`.
-5. Confirm the inspection endpoint receives JSON with:
+3. Optionally set a signing secret for this endpoint.
+4. Save integrations.
+5. Click `Send test`.
+6. Confirm the inspection endpoint receives JSON with:
    - `event`
    - `feedback`
    - `project`
    - `timestamp`
-6. Confirm delivery history shows a successful `generic` delivery.
-7. Click `Resend`.
-8. Confirm a second received request and successful replay log.
+7. If a signing secret was set, confirm the request includes:
+   - `X-Feedbacks-Timestamp`
+   - `X-Feedbacks-Signature`
+8. Confirm the signature verifies against `<timestamp>.<raw request body>` using HMAC-SHA256.
+9. Confirm delivery history shows a successful `generic` delivery.
+10. Click `Resend`.
+11. Confirm a second received request and successful replay log.
 
 Pass condition:
 
 - The received payload matches `WebhookPayload` from `packages/dashboard/src/lib/webhook-delivery.ts`.
+- Optional signing headers verify when a signing secret is configured.
 - Delivery log and replay are both successful.
 
 Security check:
@@ -321,7 +327,7 @@ If all connector and billing checks pass:
 
 1. Update `docs/2026-06-05-launch-hardening-plan.md` Step 3 status.
 2. Move to Step 4: domain/docs/security hardening.
-3. Decide whether outbound webhook signatures are required before launch.
+3. Keep optional generic webhook signing covered in docs and tests.
 
 If any connector fails:
 

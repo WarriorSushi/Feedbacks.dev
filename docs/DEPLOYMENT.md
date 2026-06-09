@@ -35,7 +35,7 @@ Go to your **Supabase Dashboard** → **SQL Editor** → run these files in orde
 
 **How:** Copy-paste the contents of each file into the SQL Editor and click "Run".
 
-If the live schema already contains objects from `009` through `011` but your migration history does not, still run those files in order. They are the canonical source of truth for billing, API-key hardening, and notification digests, and applying them idempotently keeps the schema and migration ledger aligned.
+Fresh projects should run the full `001` through `015` chain. The hosted live project has older branch-style migration history plus the launch hardening migrations; see `docs/2026-06-09-migration-history-reconciliation.md` before touching its migration ledger.
 
 Do not treat `sql/000_full_reset_v2-ran this one for v2. nothing else needed.sql` as the canonical production migration path. It is a reset snapshot for local recovery, not the ordered migration source of truth.
 
@@ -184,7 +184,7 @@ The migration files set up RLS, but verify these are active:
 | feedback | Users see feedback from their projects | Via project ownership |
 | feedback_notes | Users manage notes on their feedback | Via project ownership |
 | public_board_settings | Anyone reads enabled boards | `enabled = true` |
-| votes | Anyone can vote | Public insert/delete |
+| votes | Anyone can read public vote totals | Direct client writes denied; vote writes go through server API routes |
 
 Check in **Supabase → Authentication → Policies** that each table has RLS enabled.
 
@@ -205,6 +205,23 @@ Once deployed, users install the widget with:
 
 The widget JS is served from `/widget/latest.js` on your domain.
 
+## Generic Webhook Signatures
+
+Generic webhook endpoints can optionally set a signing secret. When configured, feedbacks.dev sends:
+
+```text
+X-Feedbacks-Timestamp: <unix seconds>
+X-Feedbacks-Signature: v1=<hex hmac sha256>
+```
+
+The signed message is:
+
+```text
+<timestamp>.<raw request body>
+```
+
+Receivers should recompute the HMAC with the endpoint secret, compare it using a timing-safe comparison, and reject stale timestamps.
+
 ---
 
 ## Troubleshooting
@@ -216,5 +233,5 @@ The widget JS is served from `/widget/latest.js` on your domain.
 | No feedback appearing | Check RLS policies, ensure feedback table has data |
 | Widget not loading | Check browser console, verify script URL |
 | Build fails on Vercel | Ensure root directory is `packages/dashboard`, Node 20+ |
-| Public board empty | Verify migrations `004` through `008` ran, then check `is_public` and `public_board_settings` rows |
-| Rate limiting behaves like the old non-atomic path | Verify migration `013` ran so `public.check_rate_limit(...)` exists |
+| Public board empty | Verify the ordered migration chain through `015` ran, then check `is_public` and `public_board_settings` rows |
+| Rate limiting behaves like the old non-atomic path | Verify migration `013` or later ran so `public.check_rate_limit(...)` exists |

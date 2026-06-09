@@ -56,10 +56,11 @@ Current state:
 - Incoming Dodo webhooks have signature and timestamp verification.
 - Outbound Slack, Discord, generic, and GitHub deliveries do not expose a first-party verification signature for recipients.
 
-Decision:
+Decision updated on 9 June 2026:
 
-- Do not add outbound signatures in this pass.
-- Before launch, decide whether generic webhooks need an optional per-endpoint signing secret and headers such as `X-Feedbacks-Timestamp` and `X-Feedbacks-Signature`.
+- Generic webhooks now support an optional per-endpoint signing secret.
+- Signed generic deliveries include `X-Feedbacks-Timestamp` and `X-Feedbacks-Signature`.
+- Slack, Discord, and GitHub deliveries keep their native delivery formats.
 
 ### Migrations
 
@@ -68,7 +69,7 @@ Current state:
 - `docs/DEPLOYMENT.md` lists the ordered migration chain.
 - Live Supabase read-only verification was performed on project `xiiaugllydxxmjbtzfux`.
 - Live project is healthy on Postgres 17.
-- Live migration ledger starts at Phase 6 branch-style migrations rather than the repo's full `001` through `013` ordered SQL chain.
+- Live migration ledger starts at Phase 6 branch-style migrations rather than the repo's full `001` through `015` ordered SQL chain.
 - Live schema contains `public.widget_config_events`, which is not present in the canonical repo SQL chain.
 - Deployment docs now include `002_public_board_voting.sql` and `003_agent_support.sql`; omitting them made the fresh ordered chain impossible because `004_fix_public_board.sql` depends on `public_board_settings` and `votes`.
 - `004_fix_public_board.sql` now drops/recreates duplicate board/vote policies so it can safely run after `002_public_board_voting.sql`.
@@ -79,8 +80,8 @@ Decision:
 - Keep the ordered migration chain as the source of truth.
 - Do not mutate live Supabase from this pass.
 - Apply and verify `sql/013_launch_security_hardening.sql` in a controlled migration window.
-- Reconcile live migration history and the extra `widget_config_events` table before launch.
-- Re-run empty-database migration verification before launch.
+- Use `docs/2026-06-09-migration-history-reconciliation.md` as the explanation for live migration history and the canonical fresh-install chain.
+- Re-run empty-database migration verification before launch from an environment with Docker, `psql`, branching, or a throwaway Supabase project.
 
 ## Live Supabase Advisor Snapshot
 
@@ -107,7 +108,7 @@ Actions in this pass:
 Still manual:
 
 - Enable leaked password protection in Supabase Auth settings.
-- Reconcile the live Supabase migration ledger with the repo's canonical SQL chain.
+- Run the fresh `001` through `015` chain on a disposable clean database when the environment supports it.
 - Keep unused-index performance advisor findings under observation after real traffic.
 
 ## Next Step 4 Work
