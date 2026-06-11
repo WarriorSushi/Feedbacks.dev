@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase, createServerSupabase } from '@/lib/supabase-server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { isBoardPubliclyAccessible } from '@/lib/public-board'
+import { getPrivacySalt } from '@/lib/privacy-salts'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -14,7 +15,7 @@ async function buildReporterIdentifier(request: NextRequest, userId: string | nu
     request.headers.get('x-real-ip') ||
     'anonymous'
 
-  const encoded = new TextEncoder().encode(`${ip}:${process.env.BOARD_REPORT_SALT || '_feedbacks_board_report'}`)
+  const encoded = new TextEncoder().encode(`${ip}:${getPrivacySalt('BOARD_REPORT_SALT', '_feedbacks_board_report')}`)
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoded)
   return Array.from(new Uint8Array(hashBuffer))
     .map((value) => value.toString(16).padStart(2, '0'))
@@ -81,7 +82,12 @@ export async function POST(
     targetType = 'feedback'
   }
 
-  const reporterIdentifier = await buildReporterIdentifier(request, user?.id || null)
+  let reporterIdentifier: string
+  try {
+    reporterIdentifier = await buildReporterIdentifier(request, user?.id || null)
+  } catch {
+    return NextResponse.json({ error: 'Report hashing is not configured' }, { status: 500 })
+  }
   const { data: existing } = await admin
     .from('board_reports')
     .select('id')

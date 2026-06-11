@@ -53,6 +53,7 @@ Use this as the launch signoff checklist before connecting Dodo Payments to prod
   - [ ] `CRON_SECRET`
   - [ ] `WEBHOOK_JOB_SECRET`
   - [ ] `VOTE_HMAC_SECRET`
+  - [ ] `BOARD_REPORT_SALT`
   - [ ] billing env vars when Dodo is enabled
   - [ ] captcha env vars if captcha is enabled
 

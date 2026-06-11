@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { isBoardPubliclyAccessible } from '@/lib/public-board'
+import { getPrivacySalt } from '@/lib/privacy-salts'
 
 export async function POST(
   req: NextRequest,
@@ -16,14 +17,19 @@ export async function POST(
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  // Hash the IP for privacy — use env var for salt with fallback
+  // Hash the IP for privacy. Production must provide a private salt.
   const ip =
     req.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim() ||
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     req.headers.get('x-real-ip') ||
     'anonymous'
 
-  const salt = process.env.VOTE_HMAC_SECRET || '_feedbacks_vote_salt'
+  let salt: string
+  try {
+    salt = getPrivacySalt('VOTE_HMAC_SECRET', '_feedbacks_vote_salt')
+  } catch {
+    return NextResponse.json({ error: 'Vote hashing is not configured' }, { status: 500 })
+  }
   const encoder = new TextEncoder()
   const data = encoder.encode(ip + salt)
   const hashBuffer = await crypto.subtle.digest('SHA-256', data)

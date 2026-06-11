@@ -102,9 +102,12 @@ Optional but recommended for the new reliability and moderation surfaces:
 WEBHOOK_JOB_SECRET=your-webhook-job-secret
 BOARD_REPORT_SALT=your-board-report-salt
 E2E_AUTH_BYPASS_SECRET=your-e2e-auth-bypass-secret
+VOTE_HMAC_SECRET=your-vote-hmac-secret
 ```
 
 `E2E_AUTH_BYPASS_SECRET` is only needed for the local Playwright acceptance flow.
+
+`BOARD_REPORT_SALT` and `VOTE_HMAC_SECRET` are required in production so public board reports and votes do not use development fallback salts.
 
 ### For Vercel
 Add the required server/runtime variables in **Vercel → Project Settings → Environment Variables**. Keep `SUPABASE_SERVICE_ROLE_KEY`, webhook secrets, billing secrets, and email keys server-only. Only `NEXT_PUBLIC_*` values should reach the browser.
