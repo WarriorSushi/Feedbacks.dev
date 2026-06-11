@@ -25,6 +25,8 @@ Use this as the launch signoff checklist before connecting Dodo Payments to prod
 - [ ] Live project migration history is explained by `docs/2026-06-09-migration-history-reconciliation.md`.
 - [ ] `public.check_rate_limit(...)` exists and blocks repeated requests.
 - [ ] Public board vote writes go through server routes, not direct client RLS writes.
+- [x] All live public tables have RLS enabled.
+- [x] Server-only SECURITY DEFINER functions are executable by `postgres` and `service_role`, not direct clients.
 - [ ] Security advisor has no unresolved app-side issues.
 - [ ] Unused-index performance findings are reviewed after real traffic.
 

@@ -236,7 +236,8 @@ Important implementation note:
   - `webhook-timestamp`
 - Their manual verification flow builds the signed message from `webhook-id`, `webhook-timestamp`, and the exact raw payload, separated by periods.
 - `webhook-timestamp` is documented as a Unix timestamp in seconds.
-- Our implementation also accepts milliseconds for compatibility, but real Dodo events should be verified against seconds.
+- Our implementation accepts the Standard Webhooks `v1,<base64-signature>` format and the earlier internal hex-HMAC test format.
+- Our implementation also accepts milliseconds for timestamp compatibility, but real Dodo events should be verified against seconds.
 
 Steps:
 
@@ -273,7 +274,7 @@ Pass condition:
 
 Risk to watch:
 
-- If real Dodo sends a `webhook-signature` format that differs from the current hex HMAC comparison, update `packages/dashboard/src/lib/dodo.ts` and unit tests before launch.
+- Real Dodo events still need to be verified against the dashboard or CLI sender before production billing is enabled.
 
 ## Entitlement Verification
 

@@ -40,6 +40,13 @@ function createSignedDodoWebhookRequest({
   })
 }
 
+function createStandardWebhookSignature(payload: string, webhookId: string, timestamp: string) {
+  const digest = createHmac('sha256', process.env.DODO_PAYMENTS_WEBHOOK_SECRET!)
+    .update(`${webhookId}.${timestamp}.${payload}`)
+    .digest('base64')
+  return `v1,${digest}`
+}
+
 test('maps subscription.active payloads to an active pro account', async () => {
   const { extractBillingEventContext } = await import(new URL('../../src/lib/billing-webhooks.ts', import.meta.url).href)
   const fixture = await loadFixture('subscription-active')
@@ -88,6 +95,24 @@ test('verifies valid Dodo webhook signatures', async () => {
 
   const verified = await verifyDodoWebhook(request)
   assert.equal(verified.webhookId, 'evt_test_valid')
+  assert.equal(verified.event.type, 'subscription.active')
+})
+
+test('verifies Standard Webhooks v1 base64 Dodo signatures', async () => {
+  const { verifyDodoWebhook } = await import(new URL('../../src/lib/dodo.ts', import.meta.url).href)
+  const fixture = await loadFixture('subscription-active')
+  const payload = JSON.stringify(fixture)
+  const webhookId = 'evt_test_standard'
+  const timestamp = Math.floor(Date.now() / 1000).toString()
+  const request = createSignedDodoWebhookRequest({
+    payload,
+    webhookId,
+    timestamp,
+    signature: createStandardWebhookSignature(payload, webhookId, timestamp),
+  })
+
+  const verified = await verifyDodoWebhook(request)
+  assert.equal(verified.webhookId, webhookId)
   assert.equal(verified.event.type, 'subscription.active')
 })
 

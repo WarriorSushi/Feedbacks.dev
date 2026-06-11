@@ -45,6 +45,7 @@ Fixed since then:
 - `notification_digests` now has RLS and policies in `sql/012_project_stats_and_digest_rls.sql`.
 - Widget `html2canvas` SRI is fixed and unit-tested.
 - Dodo webhook replay protection now has a 5-minute timestamp tolerance.
+- Dodo webhook verification now accepts Standard Webhooks `v1,<base64-signature>` signatures and the earlier internal hex-HMAC test format.
 - `POST /api/v1/feedback` now defaults missing or null `metadata` to `{}`.
 - The temporary password login screen was removed.
 - Favicon metadata and project stats migration work were completed.
@@ -253,7 +254,7 @@ Tasks:
 5. Dodo:
    - test checkout in sandbox or staging
    - receive a real webhook
-   - confirm signature format matches implementation
+   - confirm real Dodo sender works with the Standard Webhooks-compatible verifier
    - confirm timestamp replay protection accepts current events and rejects stale events
 6. Entitlements:
    - verify Free blocks Pro-only webhooks/MCP
