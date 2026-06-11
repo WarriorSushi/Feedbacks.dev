@@ -73,6 +73,11 @@ Go to **Supabase Dashboard** → **Authentication**:
 1. Go to **Storage** → **New Bucket**
 2. Create bucket: `feedback_screenshots` → Public ✅
 3. Create bucket: `feedback_attachments` → Public ✅
+4. Recommended bucket limits:
+   - `feedback_screenshots`: `image/png`, `image/jpeg`, max `3 MB`
+   - `feedback_attachments`: `image/png`, `image/jpeg`, `application/pdf`
+
+The widget API enforces the same screenshot MIME policy and 3 MB screenshot limit. Attachments are capped at 5 MB by the API.
 
 ---
 

@@ -22,7 +22,10 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const VALID_TYPES: FeedbackType[] = ['bug', 'idea', 'praise', 'question']
 const VALID_PRIORITIES: FeedbackPriority[] = ['low', 'medium', 'high', 'critical']
 const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024
+const MAX_SCREENSHOT_SIZE = 3 * 1024 * 1024
+const MAX_SCREENSHOT_DATA_URL_LENGTH = 4_200_000
 const ALLOWED_ATTACHMENT_TYPES = ['image/png', 'image/jpeg', 'application/pdf']
+const ALLOWED_SCREENSHOT_TYPES = ['image/png', 'image/jpeg']
 
 function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status, headers: CORS_HEADERS })
@@ -199,6 +202,9 @@ export async function POST(request: NextRequest) {
     // Upload screenshot
     let screenshotUrl: string | null = null
     if (screenshotFile) {
+      if (screenshotFile.size > MAX_SCREENSHOT_SIZE) return jsonError('Screenshot too large (max 3MB)', 400)
+      if (!ALLOWED_SCREENSHOT_TYPES.includes(screenshotFile.type)) return jsonError('Screenshot type not allowed (png or jpeg only)', 400)
+
       const ext = screenshotFile.type === 'image/png' ? 'png' : 'jpeg'
       const path = `${project.id}/${crypto.randomUUID()}.${ext}`
       const buffer = Buffer.from(await screenshotFile.arrayBuffer())
@@ -208,16 +214,19 @@ export async function POST(request: NextRequest) {
       if (!uploadErr) {
         const { data: urlData } = admin.storage.from('feedback_screenshots').getPublicUrl(path)
         screenshotUrl = urlData.publicUrl
+      } else {
+        return jsonError('Failed to upload screenshot', 500)
       }
     } else if (fields.screenshot && fields.screenshot.startsWith('data:image/')) {
-      // Check base64 size before decoding (~5MB decoded limit)
-      if (fields.screenshot.length > 7_000_000) {
-        return jsonError('Screenshot too large (max ~5MB)', 400)
+      // Check base64 size before decoding (~3MB decoded limit)
+      if (fields.screenshot.length > MAX_SCREENSHOT_DATA_URL_LENGTH) {
+        return jsonError('Screenshot too large (max 3MB)', 400)
       }
       const match = fields.screenshot.match(/^data:image\/(png|jpeg);base64,(.+)$/)
       if (match) {
         const ext = match[1]
         const buffer = Buffer.from(match[2], 'base64')
+        if (buffer.length > MAX_SCREENSHOT_SIZE) return jsonError('Screenshot too large (max 3MB)', 400)
         const path = `${project.id}/${crypto.randomUUID()}.${ext}`
         const { error: uploadErr } = await admin.storage
           .from('feedback_screenshots')
@@ -225,6 +234,8 @@ export async function POST(request: NextRequest) {
         if (!uploadErr) {
           const { data: urlData } = admin.storage.from('feedback_screenshots').getPublicUrl(path)
           screenshotUrl = urlData.publicUrl
+        } else {
+          return jsonError('Failed to upload screenshot', 500)
         }
       }
     }

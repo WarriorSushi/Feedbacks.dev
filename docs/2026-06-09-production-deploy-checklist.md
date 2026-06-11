@@ -30,10 +30,11 @@ Use this as the launch signoff checklist before connecting Dodo Payments to prod
 
 ## Supabase Storage
 
-- [ ] `feedback_screenshots` bucket exists.
-- [ ] `feedback_attachments` bucket exists.
+- [x] `feedback_screenshots` bucket exists.
+- [x] `feedback_attachments` bucket exists.
 - [ ] Bucket access matches the screenshot and attachment model.
-- [ ] Upload size limits are documented or enforced.
+- [x] Screenshot uploads are image-only and capped at 3 MB in live storage.
+- [x] Attachment uploads are MIME-limited in live storage and capped at 5 MB by the API.
 
 ## Vercel
 
