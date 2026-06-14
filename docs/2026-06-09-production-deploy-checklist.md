@@ -94,9 +94,17 @@ Status refresh on 14 June 2026:
 - [ ] Slack real test send and replay are verified.
 - [ ] Discord real test send and replay are verified.
 - [ ] Generic webhook real test send and replay are verified.
-- [ ] Generic webhook signing headers are documented and verified.
+- [x] Generic webhook signing headers are documented and verified.
 - [ ] GitHub Issues real test send and replay are verified.
-- [ ] Secret URLs and tokens are never shown in full in UI, logs, screenshots, or docs.
+- [x] Secret URLs and tokens are never shown in full in UI, logs, screenshots, or docs.
+
+14 June 2026 direct external connector smoke pass:
+
+- Slack dummy feedback event delivered with HTTP `200`; user manually confirmed receipt.
+- Discord dummy feedback event delivered with HTTP `204`; user manually confirmed receipt.
+- Generic webhook dummy event delivered with HTTP `200`; HMAC verified against the exact raw request body.
+- GitHub Issues dummy event created issue `#1` in the configured test repository with HTTP `201`; user manually confirmed it.
+- This pass used local test credentials only. Dashboard delivery-history and replay verification are still pending, so the send-and-replay checklist items remain open.
 
 ## MCP And API
 

@@ -15,7 +15,34 @@ The local automated Playwright suite proves the connector code paths with local 
 
 ## Current Status
 
-Local `.env.local` currently has Supabase, captcha, app origin, and local salts/secrets. It does not currently include real connector or Dodo credentials.
+Connector credentials were provided locally on 14 June 2026 and used for a real external smoke pass.
+
+Verified on 14 June 2026:
+
+- Slack dummy feedback event delivered with HTTP `200`; user manually confirmed the Slack test message.
+- Discord dummy feedback event delivered with HTTP `204`; user manually confirmed the Discord test message.
+- Generic HTTPS dummy feedback event delivered with HTTP `200`.
+- Generic webhook HMAC verified locally using the exact raw JSON request body and `X-Feedbacks-Signature: v1=<hmac-sha256-hex>`.
+- GitHub Issues dummy feedback event created an issue with HTTP `201`; user manually confirmed the GitHub issue.
+- No connector secret values were printed, committed, or hard-coded.
+- Test credentials were read from local `.env.local` only and are not intended for production use.
+
+Still pending:
+
+- Dashboard delivery-history verification and replay for Slack, Discord, generic webhooks, and GitHub.
+- Dodo sandbox or staging checkout.
+- Real Dodo webhook signature verification.
+- Free/Pro entitlement verification driven by real Dodo webhook state.
+
+Production connector model:
+
+- Production connector credentials are stored per project in `projects.webhooks`.
+- Generic webhook signing secrets are endpoint-level configuration.
+- The product is not designed around one shared global Slack, Discord, generic webhook, or GitHub credential for all customers.
+
+Previous blocked status before the 14 June connector smoke pass:
+
+Local `.env.local` had Supabase, captcha, app origin, and local salts/secrets. It did not include real connector or Dodo credentials.
 
 Because of that, true Step 3 verification is blocked until these credentials are provided:
 
