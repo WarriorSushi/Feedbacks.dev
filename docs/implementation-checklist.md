@@ -22,7 +22,7 @@ Authoritative product direction still lives in:
 ## Immediate recovery priorities
 
 ### 1. Setup trust
-- [ ] keep self-host instructions aligned with actual files in the repo
+- [ ] keep hosted customer setup and internal operator docs clearly separated
 - [x] keep deployment docs aligned with the full ordered migration chain
 - [ ] keep local Playwright setup aligned with `packages/dashboard/.env.local`
 - [x] remove or neutralize references that assume `archived_project/` exists

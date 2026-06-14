@@ -1,21 +1,26 @@
-# feedbacks.dev — Deployment Guide
+# feedbacks.dev — Hosted Production Deployment Guide
+
+This is a maintainer/operator runbook for the official hosted feedbacks.dev service. It is not customer setup documentation. Customers should create an account on `https://feedbacks.dev` and install the hosted widget from `https://app.feedbacks.dev`.
 
 Hosted convention:
 
 - `https://feedbacks.dev` is the marketing and docs origin.
 - `https://app.feedbacks.dev` is the hosted dashboard, API, widget, and public-board origin.
-- Self-hosted deployments should replace the app origin with their own dashboard domain, shown below as `https://your-app-domain.com`.
+- Internal staging or private operator deployments should replace the app origin with that deployment's dashboard domain, shown below as `https://your-app-domain.com`.
 
 ## Prerequisites
-- Supabase project (you already have one)
-- Vercel account (for hosting)
-- GitHub account (for OAuth + repo)
+- Access to the feedbacks.dev Supabase project, or a dedicated staging/recovery project
+- Access to the feedbacks.dev Vercel project
+- GitHub OAuth app ownership
+- Production secrets managed outside the repository
 
 ---
 
-## Step 1: Run the SQL Migrations
+## Step 1: Database State And Internal Migrations
 
-Go to your **Supabase Dashboard** → **SQL Editor** → run these files in order:
+For the official hosted production project, do not replay the full SQL chain. The live project was built from older branch-style/manual migrations and is now reconciled through the launch hardening migrations. See `docs/2026-06-09-migration-history-reconciliation.md` before touching the migration ledger.
+
+For a new internal staging, recovery, or disposable verification project, run these files in order:
 
 1. `sql/001_initial_schema.sql` — base tables (projects, feedback, webhook_deliveries, etc.)
 2. `sql/002_public_board_voting.sql` — public board settings, votes, board indexes, and initial board RLS
@@ -33,9 +38,9 @@ Go to your **Supabase Dashboard** → **SQL Editor** → run these files in orde
 14. `sql/014_fix_rate_limit_uuid_generation.sql` — fixes rate-limit UUID generation on locked function search paths
 15. `sql/015_server_managed_votes.sql` — removes direct client vote writes; board votes go through server API routes
 
-**How:** Copy-paste the contents of each file into the SQL Editor and click "Run".
+**How for internal/staging use:** apply the files through the Supabase CLI or copy-paste the contents of each file into the SQL Editor and click "Run".
 
-Fresh projects should run the full `001` through `015` chain. The hosted live project has older branch-style migration history plus the launch hardening migrations; see `docs/2026-06-09-migration-history-reconciliation.md` before touching its migration ledger.
+The hosted live project has older branch-style migration history plus the launch hardening migrations; see `docs/2026-06-09-migration-history-reconciliation.md` before touching its migration ledger.
 
 Do not treat `sql/000_full_reset_v2-ran this one for v2. nothing else needed.sql` as the canonical production migration path. It is a reset snapshot for local recovery, not the ordered migration source of truth.
 
@@ -49,22 +54,25 @@ Go to **Supabase Dashboard** → **Authentication**:
 1. **Providers → Email** → Enabled ✅
 2. Enable "Confirm email" (recommended for production)
 3. Set the Site URL (see below)
+4. In password security settings, enable leaked password protection when the Supabase plan supports it.
 
 ### GitHub OAuth
 1. **Providers → GitHub** → Enabled ✅
 2. Go to [GitHub Developer Settings](https://github.com/settings/developers) → **OAuth Apps** → **New OAuth App**
 3. Fill in:
    - **Application name:** feedbacks.dev
-   - **Homepage URL:** `https://your-app-domain.com`
+   - **Homepage URL:** `https://app.feedbacks.dev`
    - **Authorization callback URL:** `https://your-supabase-project.supabase.co/auth/v1/callback`
 4. Copy the **Client ID** and **Client Secret** back into Supabase GitHub provider settings
 
 ### URL Configuration
 1. **Authentication → URL Configuration**:
-   - **Site URL:** `https://your-app-domain.com` (or `http://localhost:3000` for local dev)
+   - **Site URL:** `https://app.feedbacks.dev` for production
    - **Redirect URLs:** Add both:
      - `http://localhost:3000/auth/callback`
-     - `https://your-app-domain.com/auth/callback`
+     - `https://app.feedbacks.dev/auth/callback`
+
+Use staging app origins for staging projects. Do not point production Auth redirects at preview deployments unless they are intentionally allowed for a launch rehearsal.
 
 ---
 
@@ -110,7 +118,22 @@ VOTE_HMAC_SECRET=your-vote-hmac-secret
 `BOARD_REPORT_SALT` and `VOTE_HMAC_SECRET` are required in production so public board reports and votes do not use development fallback salts.
 
 ### For Vercel
-Add the required server/runtime variables in **Vercel → Project Settings → Environment Variables**. Keep `SUPABASE_SERVICE_ROLE_KEY`, webhook secrets, billing secrets, and email keys server-only. Only `NEXT_PUBLIC_*` values should reach the browser.
+Add the required server/runtime variables in **Vercel → Project Settings → Environment Variables** for Production and any staging environments that run the app. Keep `SUPABASE_SERVICE_ROLE_KEY`, webhook secrets, billing secrets, and email keys server-only. Only `NEXT_PUBLIC_*` values should reach the browser.
+
+Production requires:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+NEXT_PUBLIC_APP_ORIGIN=https://app.feedbacks.dev
+CRON_SECRET
+WEBHOOK_JOB_SECRET
+BOARD_REPORT_SALT
+VOTE_HMAC_SECRET
+```
+
+Add billing, captcha, and email variables only when those surfaces are enabled in production.
 
 ---
 
@@ -123,7 +146,7 @@ Add the required server/runtime variables in **Vercel → Project Settings → E
    - **Framework Preset:** Next.js
    - **Root Directory:** `packages/dashboard`
    - **Build Command:** `cd ../.. && pnpm build`
-   - **Install Command:** `pnpm install`
+   - **Install Command:** `cd ../.. && pnpm install`
 4. Add environment variables (Step 4)
 5. Deploy
 
@@ -145,12 +168,13 @@ vercel
 
 ---
 
-## Step 6: Custom Domain (Optional)
+## Step 6: Production Domains
 
-1. **Vercel → Domains** → Add your domain
+1. **Vercel → Domains** → Add `feedbacks.dev` and `app.feedbacks.dev`
 2. Update DNS records as Vercel instructs
-3. Update Supabase **Site URL** and **Redirect URLs** to use the new domain
-4. Update GitHub OAuth callback URL
+3. Update Supabase **Site URL** and **Redirect URLs** to use `https://app.feedbacks.dev`
+4. Update GitHub OAuth callback URL in the OAuth app
+5. Confirm the widget snippet and public-board URLs use `https://app.feedbacks.dev`
 
 ---
 
@@ -198,20 +222,20 @@ Check in **Supabase → Authentication → Policies** that each table has RLS en
 
 ---
 
-## Widget Installation (for your users)
+## Widget Installation
 
-Once deployed, users install the widget with:
+Hosted users install the widget with:
 
 ```html
 <script
-  src="https://your-app-domain.com/widget/latest.js"
+  src="https://app.feedbacks.dev/widget/latest.js"
   data-project="PROJECT_KEY"
-  data-api-url="https://your-app-domain.com/api/feedback"
+  data-api-url="https://app.feedbacks.dev/api/feedback"
   defer
 ></script>
 ```
 
-The widget JS is served from `/widget/latest.js` on your domain.
+Internal staging deployments can replace the origin with their staging app origin.
 
 ## Generic Webhook Signatures
 

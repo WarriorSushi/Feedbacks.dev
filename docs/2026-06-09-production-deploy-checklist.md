@@ -2,12 +2,24 @@
 
 Use this as the launch signoff checklist before connecting Dodo Payments to production traffic.
 
+Status refresh on 14 June 2026:
+
+- The product is hosted-first. Customers should use `feedbacks.dev` / `app.feedbacks.dev`; they do not need to run Supabase migrations.
+- The SQL chain is an internal staging, recovery, and verification path.
+- Items that require Vercel, DNS, GitHub OAuth, or Supabase dashboard settings stay unchecked until verified in those consoles.
+
 ## Domains
 
-- [ ] `https://feedbacks.dev` serves marketing and docs.
+- [x] `https://feedbacks.dev` redirects to the live marketing/docs site at `https://www.feedbacks.dev`.
 - [ ] `https://app.feedbacks.dev` serves dashboard, API, widget assets, and public boards.
 - [ ] `NEXT_PUBLIC_APP_ORIGIN=https://app.feedbacks.dev` in production.
-- [ ] Self-hosted docs consistently use `https://your-app-domain.com`.
+- [x] Public docs are hosted-first and do not tell customers to run infrastructure.
+
+14 June 2026 probe:
+
+- `https://feedbacks.dev` returns a Vercel 307 redirect to `https://www.feedbacks.dev/`.
+- `https://www.feedbacks.dev` returns HTTP 200.
+- `app.feedbacks.dev` resolves to Vercel DNS, but HTTPS currently fails with an expired certificate. Fix the domain/certificate state in Vercel before launch signoff.
 
 ## Supabase Auth
 
@@ -17,18 +29,20 @@ Use this as the launch signoff checklist before connecting Dodo Payments to prod
   - [ ] local dev callback URL
 - [ ] GitHub OAuth callback points at the Supabase Auth callback URL.
 - [ ] Email provider is production-ready.
-- [ ] Leaked password protection is enabled.
+- [ ] Leaked password protection is enabled in Supabase Auth password security settings.
+
+14 June 2026 note: MCP confirms the live Supabase project `xiiaugllydxxmjbtzfux` is `ACTIVE_HEALTHY` in `eu-west-2` on Postgres 17. The available MCP tools can read advisors and project health, but not the Auth URL configuration.
 
 ## Supabase Database
 
-- [ ] Fresh projects use the canonical `sql/001` through `sql/015` chain.
+- [ ] Internal staging/recovery projects use the canonical `sql/001` through `sql/015` chain.
 - [ ] Live project migration history is explained by `docs/2026-06-09-migration-history-reconciliation.md`.
 - [ ] `public.check_rate_limit(...)` exists and blocks repeated requests.
 - [ ] Public board vote writes go through server routes, not direct client RLS writes.
 - [x] All live public tables have RLS enabled.
 - [x] Server-only SECURITY DEFINER functions are executable by `postgres` and `service_role`, not direct clients.
-- [ ] Security advisor has no unresolved app-side issues.
-- [ ] Unused-index performance findings are reviewed after real traffic.
+- [ ] Security advisor has no unresolved app-side issues. 14 June 2026 refresh still shows leaked password protection disabled.
+- [ ] Performance advisor findings are reviewed after real traffic. 14 June 2026 refresh shows unused indexes and multiple permissive policy warnings.
 
 ## Supabase Storage
 
@@ -42,7 +56,7 @@ Use this as the launch signoff checklist before connecting Dodo Payments to prod
 
 - [ ] Production project root directory is `packages/dashboard`.
 - [ ] Build command is `cd ../.. && pnpm build`.
-- [ ] Install command is `pnpm install`.
+- [ ] Install command is `cd ../.. && pnpm install`.
 - [ ] Node.js version is 20 or newer.
 - [ ] Include source files outside root directory is enabled for the monorepo.
 - [ ] Required env vars exist:
@@ -57,11 +71,13 @@ Use this as the launch signoff checklist before connecting Dodo Payments to prod
   - [ ] billing env vars when Dodo is enabled
   - [ ] captcha env vars if captcha is enabled
 
+14 June 2026 note: local Vercel CLI is installed, but the workspace is not linked to the Vercel project. `vercel env ls production` could not verify env vars without linking the project, and `vercel domains inspect app.feedbacks.dev` failed for the current account.
+
 ## Cron Jobs
 
 - [ ] Webhook jobs cron runs every 5 minutes.
 - [ ] Notification digest cron runs daily.
-- [ ] Cron requests use `CRON_SECRET`.
+- [ ] `CRON_SECRET` exists in Vercel production env so Vercel sends `Authorization: Bearer <CRON_SECRET>` to cron routes.
 - [ ] Manual internal webhook job processing route is not publicly usable without its secret.
 
 ## Widget Assets
@@ -69,7 +85,8 @@ Use this as the launch signoff checklist before connecting Dodo Payments to prod
 - [ ] `packages/dashboard/public/widget/latest.js` exists after build or copy.
 - [ ] `packages/dashboard/public/widget/v2.js` exists after build or copy.
 - [ ] Hosted snippet points to `https://app.feedbacks.dev/widget/latest.js`.
-- [ ] Self-hosted snippet points to the self-hosted app origin.
+- [x] Public customer snippet points to the hosted app origin.
+- [ ] `https://app.feedbacks.dev/widget/latest.js` is reachable over valid HTTPS.
 - [ ] Widget size check passes when widget files change.
 
 ## Integrations

@@ -10,13 +10,13 @@ Step 3 is intentionally deferred until real connector and Dodo credentials are a
 
 - `https://feedbacks.dev`: marketing and documentation.
 - `https://app.feedbacks.dev`: hosted dashboard, API, widget assets, public boards, and board directory.
-- Self-hosted deployments: replace the hosted app origin with the operator's own dashboard domain through `NEXT_PUBLIC_APP_ORIGIN`.
+- Private/internal deployments: replace the hosted app origin with the operator's own dashboard domain through `NEXT_PUBLIC_APP_ORIGIN`.
 
 ## Files Aligned In This Pass
 
 - `README.md`: hosted public boards and REST API examples now use `https://app.feedbacks.dev`.
 - `packages/dashboard/src/app/page.tsx`: landing REST API snippet now uses `publicEnv.NEXT_PUBLIC_APP_ORIGIN`.
-- `docs/DEPLOYMENT.md`: self-hosted examples should use the deployment's app origin, not the hosted marketing domain.
+- `docs/DEPLOYMENT.md`: private/internal examples should use the deployment's app origin, not the hosted marketing domain.
 - `DESIGN.md`: product UI guidance now exists outside the launch plan and Impeccable memory.
 - `PRODUCT.md`: Impeccable-compatible product context now mirrors the existing `.impeccable.md` design context.
 
@@ -33,7 +33,7 @@ Current state:
 Decision:
 
 - Use the atomic RPC after migration `013` is applied.
-- Keep the fallback only to avoid breaking local or self-hosted environments that have not applied the newest migration yet.
+- Keep the fallback only to avoid breaking local or private/internal environments that have not applied the newest migration yet.
 
 ### Stored Integration Secrets
 
@@ -80,8 +80,8 @@ Decision:
 - Keep the ordered migration chain as the source of truth.
 - Do not mutate live Supabase from this pass.
 - Apply and verify `sql/013_launch_security_hardening.sql` in a controlled migration window.
-- Use `docs/2026-06-09-migration-history-reconciliation.md` as the explanation for live migration history and the canonical fresh-install chain.
-- Re-run empty-database migration verification before launch from an environment with Docker, `psql`, branching, or a throwaway Supabase project.
+- Use `docs/2026-06-09-migration-history-reconciliation.md` as the explanation for live migration history and the canonical internal fresh-database chain.
+- Re-run empty-database migration verification before relying on a new staging/recovery database or doing high-risk schema work from an environment with Docker, `psql`, branching, or a throwaway Supabase project.
 
 ## Live Supabase Advisor Snapshot
 
@@ -108,7 +108,7 @@ Actions in this pass:
 Still manual:
 
 - Enable leaked password protection in Supabase Auth settings.
-- Run the fresh `001` through `015` chain on a disposable clean database when the environment supports it.
+- Run the fresh `001` through `015` chain on a disposable internal clean database when the environment supports it.
 - Keep unused-index performance advisor findings under observation after real traffic.
 
 ## Next Step 4 Work

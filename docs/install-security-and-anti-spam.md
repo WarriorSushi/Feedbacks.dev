@@ -14,7 +14,7 @@ style-src 'self' 'unsafe-inline';
 img-src 'self' data: blob:;
 ```
 
-Adjust the origins if you self-host or pin the widget somewhere else.
+Adjust the origins only for private/internal deployments or if you intentionally pin a specific widget asset host.
 
 ## SRI
 

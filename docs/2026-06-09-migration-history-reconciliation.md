@@ -2,7 +2,7 @@
 
 ## Summary
 
-The repo now has one canonical fresh-install chain:
+The repo now has one canonical internal fresh-database chain:
 
 ```text
 sql/001_initial_schema.sql
@@ -10,9 +10,11 @@ sql/001_initial_schema.sql
 sql/015_server_managed_votes.sql
 ```
 
-Fresh projects should run that ordered chain from `001` through `015`.
+Internal staging, recovery, and disposable verification projects should run that ordered chain from `001` through `015`.
 
 The live Supabase project is different because earlier work landed through branch-style or manual migrations. That live history is real and should be documented, not rewritten casually.
+
+This is not customer setup documentation. feedbacks.dev customers should use the hosted service and should not need Supabase access, Docker, `psql`, or migration tooling.
 
 ## Live Project
 
@@ -45,9 +47,9 @@ Interpretation:
 - Do not replay `001` through `012` on the live project.
 - Do not use `supabase migration repair` on production unless a separate backup/staging rehearsal proves the exact ledger operation.
 
-## Fresh Project Story
+## Internal Fresh-Database Story
 
-For a new self-hosted or clean Supabase project:
+For a new internal staging, recovery, or clean Supabase project:
 
 1. Ignore `sql/000_full_reset_v2-ran this one for v2. nothing else needed.sql`.
 2. Run `sql/001` through `sql/015` in order.
@@ -75,7 +77,8 @@ Remote branch blocker:
 Result:
 
 - A true disposable clean-database execution test could not be completed from this machine.
-- The repo should still treat a clean `001` through `015` run as required before Dodo Payments production work.
+- The repo should still treat a clean `001` through `015` run as required before relying on a new staging/recovery database or before doing high-risk production schema work.
+- This is not a blocker for customers using the hosted service.
 
 ## Remaining Action
 

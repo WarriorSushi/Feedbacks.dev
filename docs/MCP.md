@@ -16,7 +16,7 @@ Hosted API URL:
 https://app.feedbacks.dev
 ```
 
-Self-hosted deployments should replace that URL with their own dashboard, API, widget, and public-board origin.
+Private/internal deployments can replace that URL with their own dashboard, API, widget, and public-board origin.
 
 ## Available Tools
 
@@ -34,7 +34,7 @@ From a terminal:
 npx -y @feedbacks/mcp-server --api-key fb_live_your_key
 ```
 
-For self-hosted:
+For private/internal deployments:
 
 ```bash
 npx -y @feedbacks/mcp-server --api-key fb_live_your_key --api-url https://your-app-domain.com

@@ -43,7 +43,7 @@ Correction made during this pass:
 Risk:
 
 - The live migration ledger does not show the base `001` through `008` files as applied migrations, likely because the live project was built from earlier manual or branch-style SQL.
-- Before launch, reconcile live migration history with the repo's ordered SQL chain so a fresh project and live project are explainable from the same source.
+- Before high-risk schema work, keep live migration history reconciled with the repo's ordered SQL chain so internal staging/recovery databases and the live project are explainable from the same source.
 
 ## RLS Inventory
 
@@ -75,6 +75,15 @@ Performance advisor findings:
 - Several Phase 6 foreign keys lacked covering indexes.
 - Several RLS policies used direct `auth.uid()` instead of `(select auth.uid())`.
 - Some indexes are unused, likely because the project has low production traffic or the surfaces are new.
+
+## 14 June 2026 Advisor Refresh
+
+Read-only Supabase MCP advisor refresh:
+
+- Security advisor still reports one warning: Auth leaked password protection is disabled.
+- Performance advisor reports unused indexes and multiple permissive policy warnings on newer board, feedback, usage, and widget configuration surfaces.
+
+Decision: leaked password protection is a production launch setting to enable in Supabase Auth. Performance warnings should be reviewed after real traffic or in a separate RLS/index cleanup pass; do not drop indexes just because the pre-launch project has not used them yet.
 
 ## Action Taken In Repo
 
@@ -113,14 +122,14 @@ After applying live migrations:
 
 The migration story is now documented in `docs/2026-06-09-migration-history-reconciliation.md`.
 
-Fresh projects should run `sql/001` through `sql/015` in order.
+Internal staging/recovery projects should run `sql/001` through `sql/015` in order.
 
 The live hosted project should not replay `001` through `012`; its ledger reflects older branch-style work plus applied hardening migrations `013`, `014`, and `015`.
 
-Fresh empty-database verification is still required before Dodo Payments production work. It could not run from the current machine because Docker and `psql` are unavailable, and Supabase branching is not enabled on the current plan.
+Fresh empty-database verification is still required before relying on a new staging/recovery database or doing high-risk production schema work. It could not run from the current machine because Docker and `psql` are unavailable, and Supabase branching is not enabled on the current plan. This is not customer setup work for hosted feedbacks.dev users.
 
 ## Still To Do
 
 1. Enable leaked password protection in Supabase Auth settings.
-2. Run a true disposable fresh-database `001` through `015` migration test from an environment with Docker, `psql`, branching, or a throwaway project.
+2. Run a true disposable internal fresh-database `001` through `015` migration test from an environment with Docker, `psql`, branching, or a throwaway project.
 3. Keep unused-index performance advisor findings under observation after real production traffic.

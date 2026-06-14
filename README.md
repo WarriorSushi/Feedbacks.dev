@@ -80,7 +80,7 @@ curl https://app.feedbacks.dev/api/v1/feedback \
 Push feedback to Slack, Discord, GitHub Issues, or any HTTP endpoint. Instant or digest delivery. Filter by type, rating, or tags. Generic webhooks support optional HMAC signing headers.
 
 ### Privacy-First
-No tracking scripts. No cookies. No third-party analytics. Your users' data stays in your Supabase instance.
+No tracking scripts. No cookies. No third-party analytics in the widget. The hosted service keeps feedback data in feedbacks.dev's managed Supabase project, protected by RLS and server-side write paths.
 
 ---
 
@@ -100,13 +100,17 @@ No tracking scripts. No cookies. No third-party analytics. Your users' data stay
 
 ## Quick Start
 
-### Cloud (Fastest)
+### Hosted Service (Recommended)
 
 Go to [feedbacks.dev](https://feedbacks.dev), create an account, and install the widget in your app. Free and Pro plans are available, with billing handled by Dodo Payments.
 
 Hosted convention: `feedbacks.dev` is the marketing and docs home. `app.feedbacks.dev` is the hosted product origin for the dashboard, API, widget assets, and public boards.
 
-### Self-Hosted
+### Local Development And Source Review
+
+This repository is source-available so contributors can inspect, audit, and improve the product. Customer setup should not require Supabase migrations or infrastructure work; customers should use the hosted service above.
+
+For local development:
 
 ```bash
 # Clone
@@ -120,7 +124,7 @@ pnpm install
 cp packages/dashboard/.env.local.example packages/dashboard/.env.local
 # Add your Supabase URL and keys
 
-# Run migrations (see docs/DEPLOYMENT.md for the canonical ordered list)
+# Internal/staging databases use the ordered SQL chain documented in docs/DEPLOYMENT.md
 
 # Dev
 pnpm dev
@@ -131,9 +135,9 @@ pnpm build
 
 ### Launch Docs
 
-- [Deployment guide](docs/DEPLOYMENT.md)
+- [Hosted production deployment guide](docs/DEPLOYMENT.md)
 - [MCP setup](docs/MCP.md)
-- [Migration reconciliation](docs/2026-06-09-migration-history-reconciliation.md)
+- [Migration reconciliation for maintainers](docs/2026-06-09-migration-history-reconciliation.md)
 - [Production deploy checklist](docs/2026-06-09-production-deploy-checklist.md)
 
 ### Widget Installation
@@ -169,7 +173,7 @@ packages/
   widget-vue/     # Vue wrapper component
   shared/         # Shared TypeScript types
   mcp-server/     # MCP server for AI agent integration
-sql/              # Supabase migration files
+sql/              # Internal Supabase migration files for hosted/staging operations
 ```
 
 ---
@@ -222,12 +226,12 @@ feedbacks.dev is licensed under the [Functional Source License, Version 1.1, MIT
 
 **What this means:**
 
-- ✅ **Free to self-host** — personal, company, education, any size
-- ✅ **Free to modify** — change anything, build plugins, customize
-- ✅ **Free to redistribute** — share copies with the license included
-- ✅ **Source available** — read, audit, and learn from all code
-- ✅ **Converts to MIT** — each version becomes fully MIT after 2 years
-- ❌ **No competing service** — you can't offer feedbacks.dev as a hosted product that competes with us
+- **Source available today** — you can read, audit, and contribute to the code.
+- **FSL first, MIT later** — each covered version becomes MIT after the two-year FSL period.
+- **Hosted product focus** — the service customers should use is feedbacks.dev / app.feedbacks.dev.
+- **No competing hosted service during the FSL period** — do not offer feedbacks.dev, or a substantially similar hosted feedback product based on it, as a competing service.
+
+This section is a plain-language summary, not a replacement for the license text.
 
 ---
 
