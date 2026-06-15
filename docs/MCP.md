@@ -21,6 +21,7 @@ Private/internal deployments can replace that URL with their own dashboard, API,
 ## Available Tools
 
 - `submit_feedback` - submit a bug, idea, praise, or question
+- `get_project_setup_packet` - fetch exact install snippets, endpoints, and verification steps
 - `list_feedback` - list recent feedback with optional filters
 - `search_feedback` - search feedback by keyword
 - `update_feedback_status` - update status, priority, or tags
@@ -97,7 +98,7 @@ Use this server entry:
 }
 ```
 
-After saving, refresh MCP tools in Cursor and confirm the five feedbacks.dev tools are listed.
+After saving, refresh MCP tools in Cursor and confirm the feedbacks.dev tools are listed.
 
 ## Generic MCP Clients
 
@@ -128,6 +129,10 @@ For local package testing before publish:
 ```
 
 ## Good Agent Prompts
+
+```text
+Use get_project_setup_packet, install the recommended Website snippet, then tell me how to verify the widget.
+```
 
 ```text
 Submit a bug to feedbacks.dev: export fails on CSV files larger than 20 MB.

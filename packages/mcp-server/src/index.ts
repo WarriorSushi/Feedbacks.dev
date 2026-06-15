@@ -7,6 +7,7 @@ import {
   listFeedbackParams,
   updateFeedbackStatusParams,
   searchFeedbackParams,
+  setupPacketParams,
 } from './tools.js'
 
 function readCliOption(name: string): string | undefined {
@@ -61,6 +62,19 @@ async function getProjectId(): Promise<string> {
   cachedProjectId = projectId
   return projectId
 }
+
+server.tool(
+  'get_project_setup_packet',
+  'Get exact widget install snippets, endpoints, and verification steps for the project',
+  setupPacketParams.shape,
+  async (params) => {
+    const projectId = params.project_id || await getProjectId()
+    const result = await apiRequest(`/projects/${projectId}/setup-packet`)
+    return {
+      content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
+    }
+  }
+)
 
 server.tool(
   'submit_feedback',

@@ -5,19 +5,19 @@
 @layer base {
   :root {
     /* Acid green palette — neutrals tinted toward brand hue for cohesion */
-    --background: 90 16% 99%;
+    --background: 90 18% 98%;
     --foreground: 85 28% 9%;
-    --card: 0 0% 100%;
+    --card: 85 18% 99.5%;
     --card-foreground: 85 28% 9%;
-    --popover: 0 0% 100%;
+    --popover: 85 18% 99.5%;
     --popover-foreground: 85 28% 9%;
     --primary: 85 80% 35%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 85 20% 95%;
+    --primary-foreground: 85 30% 98%;
+    --secondary: 85 22% 94%;
     --secondary-foreground: 85 30% 18%;
-    --muted: 85 14% 95%;
-    --muted-foreground: 85 10% 44%;
-    --accent: 85 20% 93%;
+    --muted: 85 16% 93.5%;
+    --muted-foreground: 85 10% 38%;
+    --accent: 85 20% 91.5%;
     --accent-foreground: 85 30% 18%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
@@ -33,24 +33,24 @@
 
   .dark {
     /* Deep green-tinted dark surfaces — proper elevation system */
-    --background: 85 18% 7%;
+    --background: 85 22% 5.5%;
     --foreground: 85 10% 94%;
-    --card: 85 14% 9%;
+    --card: 85 14% 10.5%;
     --card-foreground: 85 10% 94%;
-    --popover: 85 12% 11%;
+    --popover: 85 12% 12.5%;
     --popover-foreground: 85 10% 94%;
     --primary: 85 72% 50%;
     --primary-foreground: 85 40% 6%;
-    --secondary: 85 12% 14%;
+    --secondary: 85 12% 15.5%;
     --secondary-foreground: 85 8% 88%;
-    --muted: 85 12% 14%;
-    --muted-foreground: 85 8% 56%;
-    --accent: 85 12% 16%;
+    --muted: 85 12% 14.5%;
+    --muted-foreground: 85 8% 66%;
+    --accent: 85 12% 18%;
     --accent-foreground: 85 8% 90%;
     --destructive: 0 62% 38%;
     --destructive-foreground: 0 0% 98%;
-    --border: 85 10% 16%;
-    --input: 85 10% 16%;
+    --border: 85 10% 21%;
+    --input: 85 10% 21%;
     --ring: 85 72% 50%;
 
     /* Brand tokens dark */

@@ -45,7 +45,7 @@ export const PLAN_MATRIX: Record<PlanTier, EntitlementSet> = {
     projectLimit: 1,
     feedbackMonthlyLimit: 500,
     historyDays: 30,
-    apiAccess: true,
+    apiAccess: false,
     publicBoards: true,
     webhooks: false,
     mcp: false,

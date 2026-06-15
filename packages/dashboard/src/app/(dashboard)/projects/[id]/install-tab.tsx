@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CodeSnippet } from '@/components/code-snippet'
 import { Badge } from '@/components/ui/badge'
-import { Check, Copy, ExternalLink, Loader2, Sparkles } from 'lucide-react'
+import { Bot, Check, Copy, ExternalLink, Loader2, Sparkles } from 'lucide-react'
 
 interface InstallTabProps {
   project: Project
@@ -37,6 +37,9 @@ export function InstallTab({
   created,
 }: InstallTabProps) {
   const [copied, setCopied] = React.useState(false)
+  const [setupPacket, setSetupPacket] = React.useState<{ packetUrl: string; expiresAt: string } | null>(null)
+  const [setupPacketLoading, setSetupPacketLoading] = React.useState(false)
+  const [setupPacketError, setSetupPacketError] = React.useState<string | null>(null)
   const appOrigin = publicEnv.NEXT_PUBLIC_APP_ORIGIN
   const savedConfig = React.useMemo(
     () => project.settings?.widget_config || {},
@@ -64,12 +67,88 @@ export function InstallTab({
   )
   const modeLabel = getWidgetModeLabel(runtimeConfig)
   const expectedResult = getWidgetExpectation(runtimeConfig)
+  const agentSetupPrompt = React.useMemo(() => {
+    const setupPacket = {
+      project: {
+        id: project.id,
+        name: project.name,
+        publicKey: projectKey || 'generate-a-fresh-project-key-first',
+        domain: project.domain || null,
+      },
+      widget: {
+        recommendedPath: 'Website snippet first. Use React or Vue only when the app shell clearly needs it.',
+        endpoint: feedbackApiUrl,
+        scriptUrl: widgetScriptUrl,
+        mode: modeLabel,
+        expectedResult,
+        snippets: snippets.reduce<Record<string, string>>((acc, snippet) => {
+          acc[snippet.label] = snippet.code
+          return acc
+        }, {}),
+      },
+      verification: {
+        url: `${appOrigin}/projects/${project.id}/verify`,
+        instructions: [
+          'Install the recommended Website snippet in the app shell or global HTML.',
+          'Run the app locally and confirm the feedback UI appears.',
+          'Submit one test report from a real page.',
+          'Open the project inbox and confirm the report includes URL and browser context.',
+        ],
+      },
+      safety: [
+        'Do not expose private API keys in browser code.',
+        'Keep the first install minimal before changing advanced settings.',
+        'If the hosted verification works but the app does not, inspect snippet placement first.',
+      ],
+    }
+
+    return `Use this feedbacks.dev setup packet to add feedback collection to my app.
+
+Goals:
+1. Install the recommended Website snippet unless the app has a clearer React or Vue integration point.
+2. Keep the first pass minimal.
+3. Do not expose private API keys.
+4. Run the app locally and confirm the feedback UI appears.
+5. Submit one test report and tell me whether it appears in the feedbacks.dev inbox.
+
+Setup packet:
+${JSON.stringify(setupPacket, null, 2)}`
+  }, [appOrigin, expectedResult, feedbackApiUrl, modeLabel, project.domain, project.id, project.name, projectKey, snippets, widgetScriptUrl])
 
   const copyWebsiteSnippet = async () => {
     if (!websiteSnippet) return
     await navigator.clipboard.writeText(websiteSnippet)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const createSetupPacketLink = async () => {
+    if (!projectKey) {
+      setSetupPacketError('Generate a fresh project key before creating a setup packet link.')
+      return
+    }
+
+    setSetupPacketLoading(true)
+    setSetupPacketError(null)
+    try {
+      const response = await fetch(`/api/projects/${project.id}/setup-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectKey }),
+      })
+      const payload = await response.json()
+      if (!response.ok) {
+        throw new Error(payload.error || 'Failed to create setup packet link')
+      }
+      setSetupPacket({
+        packetUrl: payload.packetUrl,
+        expiresAt: payload.expiresAt,
+      })
+    } catch (error) {
+      setSetupPacketError(error instanceof Error ? error.message : 'Failed to create setup packet link')
+    } finally {
+      setSetupPacketLoading(false)
+    }
   }
 
   return (
@@ -197,6 +276,90 @@ export function InstallTab({
 
           <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
             Need to change the button, use your own trigger, or embed the form directly on a page? Go back to <span className="font-medium text-foreground">Customize</span>, save the design, then return here for the updated snippet.
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Bot className="h-4 w-4" />
+            </div>
+            <Badge variant="secondary">Agent setup</Badge>
+            <Badge variant="outline">Copyable prompt</Badge>
+          </div>
+          <CardTitle className="text-lg">Give this to your AI builder</CardTitle>
+          <CardDescription>
+            This is the first agent-assisted setup slice: a safe prompt with the project key, canonical snippets, endpoint, and verification task. It uses only data already shown on this install screen.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!projectKey && (
+            <div className="rounded-lg border border-primary/30 bg-primary/[0.04] p-4 text-sm text-muted-foreground">
+              Generate a fresh project key before using the prompt in a real codebase. The current prompt includes a placeholder so your agent does not guess credentials.
+            </div>
+          )}
+          <div className="rounded-lg border bg-muted/20 p-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground">Short-lived setup packet link</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Create a 30-minute URL your AI builder can fetch for exact snippets and verification steps.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => void createSetupPacketLink()}
+                disabled={!projectKey || setupPacketLoading}
+              >
+                {setupPacketLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create packet link
+              </Button>
+            </div>
+            {setupPacketError && (
+              <p role="alert" className="mt-3 text-sm text-destructive">{setupPacketError}</p>
+            )}
+            {setupPacket && (
+              <div className="mt-4 space-y-2">
+                <CodeSnippet
+                  tabs={[
+                    {
+                      label: 'Packet URL',
+                      code: setupPacket.packetUrl,
+                      language: 'text',
+                    },
+                  ]}
+                  wrap
+                  maxHeightClassName="max-h-36"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Expires {new Date(setupPacket.expiresAt).toLocaleString()}.
+                </p>
+              </div>
+            )}
+          </div>
+          <CodeSnippet
+            tabs={[
+              {
+                label: 'Agent Prompt',
+                code: agentSetupPrompt,
+                language: 'text',
+              },
+            ]}
+            wrap
+            maxHeightClassName="max-h-72"
+          />
+          <div className="grid gap-3 md:grid-cols-3">
+            {[
+              'Best for Cursor, Claude Code, Codex, Windsurf, or any repo-aware builder.',
+              'The agent gets exact snippets instead of vague setup instructions.',
+              'Verification stays explicit: one real test report must land in the inbox.',
+            ].map((item) => (
+              <div key={item} className="rounded-lg border bg-muted/20 p-3 text-sm text-muted-foreground">
+                {item}
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

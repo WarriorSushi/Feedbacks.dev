@@ -251,7 +251,7 @@ export function CustomizeTab({
               </Button>
               <Button onClick={handleSave} disabled={saving || !hasUnsavedChanges}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
+                Save changes
               </Button>
             </div>
           </div>
@@ -337,6 +337,7 @@ export function CustomizeTab({
                   <button
                     key={mode}
                     type="button"
+                    aria-pressed={embedMode === mode}
                     onClick={() => updateConfig('embedMode', mode)}
                     className={`rounded-xl border p-4 text-left transition-colors ${
                       embedMode === mode
@@ -370,7 +371,7 @@ export function CustomizeTab({
                       id="primary-color"
                       value={config.primaryColor || '#6366f1'}
                       onChange={(e) => updateConfig('primaryColor', e.target.value)}
-                      className="h-10 w-10 cursor-pointer rounded border"
+                      className="h-11 w-11 cursor-pointer rounded border"
                     />
                     <Input
                       value={config.primaryColor || ''}
@@ -395,7 +396,7 @@ export function CustomizeTab({
                       <select
                         id="position-select"
                         aria-label="Widget position"
-                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                        className="h-11 w-full rounded-md border bg-background px-3 text-sm"
                         value={config.position || 'bottom-right'}
                         onChange={(e) => updateConfig('position', e.target.value)}
                       >
@@ -467,7 +468,7 @@ export function CustomizeTab({
               ).map(([key, label]) => (
                 <label
                   key={key}
-                  className="flex min-h-10 items-center gap-2 rounded-lg border bg-background px-3 text-sm transition-colors hover:bg-muted/30"
+                  className="flex min-h-11 items-center gap-2 rounded-lg border bg-background px-3 text-sm transition-colors hover:bg-muted/30"
                 >
                   <input
                     type="checkbox"

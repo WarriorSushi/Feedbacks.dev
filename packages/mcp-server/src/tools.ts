@@ -38,3 +38,7 @@ export const searchFeedbackParams = z.object({
   status: z.enum(['new', 'reviewed', 'planned', 'in_progress', 'closed']).optional().describe('Filter by status'),
   limit: z.number().min(1).max(50).default(10).describe('Number of results'),
 })
+
+export const setupPacketParams = z.object({
+  project_id: z.string().optional().describe('Project ID. Defaults to the project attached to this API key.'),
+})

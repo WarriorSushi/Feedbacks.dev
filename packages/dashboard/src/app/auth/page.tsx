@@ -167,7 +167,7 @@ function AuthPageInner() {
       </div>
 
       {/* ── Right panel: auth form ────────────────────────────────────────── */}
-      <div className="relative flex flex-1 flex-col items-center justify-center px-6 py-16">
+      <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center px-4 py-16 sm:px-6">
 
         {/* Mobile logo */}
         <div className="mb-10 text-center lg:hidden">
@@ -223,6 +223,7 @@ function AuthPageInner() {
                 variant="outline"
                 className={cn(
                   'group w-full justify-between border-border/80 text-[13px]',
+                  'h-11',
                   'transition-all duration-200 hover:border-foreground/20 hover:bg-accent'
                 )}
                 onClick={handleGitHub}
@@ -258,7 +259,7 @@ function AuthPageInner() {
                     placeholder="you@company.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-10 border-border/80 text-[14px] transition-colors focus:border-primary/60"
+                    className="h-11 border-border/80 text-[14px] transition-colors focus:border-primary/60"
                     required
                     autoFocus
                   />
@@ -269,7 +270,7 @@ function AuthPageInner() {
                 )}
 
                 <Button
-                  className="w-full text-[13px]"
+                  className="h-11 w-full text-[13px]"
                   type="submit"
                   disabled={loading}
                 >

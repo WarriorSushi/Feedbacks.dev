@@ -131,21 +131,21 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg border p-4">
+            <div className="rounded-lg border bg-muted/20 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Projects</p>
               <p className="mt-2 text-2xl font-semibold">{projectLimitText}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {summary.entitlements.projectLimit ? 'Free plan limit' : 'Unlimited on Pro'}
               </p>
             </div>
-            <div className="rounded-lg border p-4">
+            <div className="rounded-lg border bg-muted/20 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Feedback this month</p>
               <p className="mt-2 text-2xl font-semibold">{feedbackLimitText}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {summary.entitlements.feedbackMonthlyLimit ? 'Monthly quota' : 'Unlimited on Pro'}
               </p>
             </div>
-            <div className="rounded-lg border p-4">
+            <div className="rounded-lg border bg-muted/20 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Current period end</p>
               <p className="mt-2 text-xl font-semibold">{formatPeriodEnd(summary.account.current_period_end)}</p>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -182,7 +182,7 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-lg border p-4 text-sm">
+          <div className="rounded-lg border bg-muted/20 p-4 text-sm">
             <p className="font-medium">Included now</p>
             <ul className="mt-2 space-y-1 text-muted-foreground">
               <li>REST API: {summary.entitlements.apiAccess ? 'Yes' : 'No'}</li>
@@ -192,12 +192,12 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
               <li>Custom branding: {summary.entitlements.customBranding ? 'Yes' : 'No'}</li>
             </ul>
           </div>
-          <div className="rounded-lg border p-4 text-sm">
+          <div className="rounded-lg border bg-muted/20 p-4 text-sm">
             <p className="font-medium">Operational notes</p>
             <ul className="mt-2 space-y-1 text-muted-foreground">
               <li>Checkout returns here, but plan changes only after verified webhook processing.</li>
               <li>Downgrades preserve data; Free just gates older history and higher quotas.</li>
-              <li>If billing looks stale after checkout, use “Refresh status” after a minute.</li>
+              <li>If billing looks stale after checkout, use Refresh status after a minute.</li>
             </ul>
           </div>
         </CardContent>

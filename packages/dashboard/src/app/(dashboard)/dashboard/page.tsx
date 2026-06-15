@@ -1,6 +1,6 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { getCurrentUserBillingSummary, getHistoryCutoff } from '@/lib/billing'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn, formatRelativeTime, truncate, getTypeIcon, getStatusColor } from '@/lib/utils'
@@ -14,6 +14,8 @@ import {
   Inbox,
   TrendingUp,
   Bot,
+  Code2,
+  ShieldCheck,
 } from 'lucide-react'
 
 function getGreeting() {
@@ -156,6 +158,107 @@ export default async function DashboardPage() {
     other: 'bg-zinc-400',
   }
 
+  if (projects === 0) {
+    return (
+      <div className="animate-fade-in mx-auto max-w-5xl space-y-6">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <Card className="overflow-hidden border-primary/25 bg-card">
+            <CardContent className="p-6 sm:p-8">
+              <Badge className="bg-primary/90 text-primary-foreground">First run</Badge>
+              <h1 className="mt-5 max-w-2xl text-2xl font-semibold tracking-tight sm:text-3xl">
+                Good {getGreeting()}, {displayName}. Create one project, copy one snippet, verify one test message.
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+                feedbacks.dev starts with the install path. Customization, public boards, API access, and integrations can wait until the widget is collecting feedback.
+              </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Link href="/projects/new">
+                  <Button size="lg" className="w-full gap-2 sm:w-auto">
+                    <Plus className="h-4 w-4" />
+                    Create your first project
+                  </Button>
+                </Link>
+                <Link href="/projects">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                    View setup steps
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">What happens next</CardTitle>
+              <CardDescription>
+                The dashboard will take you straight to install after the project is created.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {[
+                ['1', 'Create project', 'Only the project name is required.'],
+                ['2', 'Copy snippet', 'Website install is the recommended default.'],
+                ['3', 'Verify feedback', 'Send one test item and open the inbox.'],
+              ].map(([step, title, body]) => (
+                <div key={step} className="flex gap-3 rounded-lg border bg-muted/20 p-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                    {step}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{title}</p>
+                    <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{body}</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Code2 className="h-4 w-4" />
+              </div>
+              <CardTitle className="text-base">Copy-paste install</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm leading-6 text-muted-foreground">
+                The install page generates a project-specific snippet from the same config model used by docs and verification.
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+              <CardTitle className="text-base">Safe by default</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm leading-6 text-muted-foreground">
+                The basic prompt and snippet show only the project key needed for browser submissions, not private server secrets.
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Inbox className="h-4 w-4" />
+              </div>
+              <CardTitle className="text-base">First proof fast</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Once the hosted verification works, the inbox becomes the main workspace for triage, tags, and routing.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="animate-fade-in space-y-7">
       {/* ─── Header ───────────────────────────────────────── */}
@@ -290,7 +393,7 @@ export default async function DashboardPage() {
               <Card
                 className={cn(
                   'min-w-[140px] flex-shrink-0 overflow-hidden transition-all hover:shadow-md hover:border-primary/30 cursor-pointer md:min-w-0',
-                  stat.urgent && 'border-l-[3px] border-l-amber-400 dark:border-l-amber-500'
+                  stat.urgent && 'border-amber-300 bg-amber-50/50 dark:border-amber-700/70 dark:bg-amber-950/20'
                 )}
               >
             <CardContent className="p-4 pb-3">
@@ -414,7 +517,7 @@ export default async function DashboardPage() {
                     className={cn(
                       'group flex gap-3 border-b px-4 py-3 transition-colors last:border-b-0 hover:bg-accent/40',
                       fb.status === 'new' &&
-                        'border-l-2 border-l-primary bg-primary/[0.025] hover:bg-primary/[0.05] dark:bg-primary/[0.04]'
+                        'bg-primary/[0.04] ring-1 ring-inset ring-primary/15 hover:bg-primary/[0.06] dark:bg-primary/[0.07]'
                     )}
                   >
                     <span className="mt-0.5 shrink-0 text-base leading-none">

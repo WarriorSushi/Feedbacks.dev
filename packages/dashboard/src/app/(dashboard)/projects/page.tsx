@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatDate } from '@/lib/utils'
 import type { Project } from '@/lib/types'
 import Link from 'next/link'
-import { Plus, Key, FolderOpen } from 'lucide-react'
+import { ArrowRight, Code2, FolderOpen, Inbox, Key, Plus } from 'lucide-react'
 
 export default async function ProjectsPage() {
   const supabase = await createServerSupabase()
@@ -76,8 +76,16 @@ export default async function ProjectsPage() {
             <FolderOpen className="h-10 w-10 text-muted-foreground/40 mb-4" />
             <p className="text-sm font-medium">No projects yet</p>
             <p className="mt-1 text-xs text-muted-foreground max-w-[240px]">
-              Create your first project to start collecting feedback from your users.
+              Create one project, copy the Website snippet, then verify one test feedback item.
             </p>
+            <div className="mt-5 grid w-full max-w-md gap-2 text-left sm:grid-cols-3">
+              {['Create project', 'Copy snippet', 'Verify inbox'].map((step, index) => (
+                <div key={step} className="rounded-lg border bg-muted/20 px-3 py-2 text-xs">
+                  <span className="mr-1 font-semibold text-primary">{index + 1}.</span>
+                  {step}
+                </div>
+              ))}
+            </div>
             <Link href="/projects/new" className="mt-4">
               <Button>
                 <Plus className="mr-2 h-4 w-4" /> Create your first project
@@ -88,10 +96,13 @@ export default async function ProjectsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(projects as Project[]).map((project) => (
-            <Link key={project.id} href={`/projects/${project.id}`}>
-              <Card className="transition-shadow hover:shadow-md">
+            <Link key={project.id} href={`/projects/${project.id}?tab=install`} className="group">
+              <Card className="h-full transition-all hover:border-primary/35 hover:shadow-md">
                 <CardHeader>
-                  <CardTitle className="text-lg">{project.name}</CardTitle>
+                  <div className="flex items-start justify-between gap-3">
+                    <CardTitle className="text-lg">{project.name}</CardTitle>
+                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                  </div>
                   <CardDescription>
                     {project.domain || 'No domain set'}
                   </CardDescription>
@@ -104,14 +115,19 @@ export default async function ProjectsPage() {
                         {project.api_key_last_four ? `••••${project.api_key_last_four}` : 'Hidden'}
                       </code>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="grid gap-2 text-sm sm:grid-cols-2">
                       <Badge variant="secondary">
+                        <Inbox className="mr-1 h-3 w-3" />
                         {countMap.get(project.id) || 0} feedback
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(project.created_at)}
-                      </span>
+                      <Badge variant="outline">
+                        <Code2 className="mr-1 h-3 w-3" />
+                        Install
+                      </Badge>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      Created {formatDate(project.created_at)}
+                    </p>
                   </div>
                 </CardContent>
               </Card>

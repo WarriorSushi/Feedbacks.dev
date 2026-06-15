@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PLAN_MATRIX, generateInstallSnippets } from '@feedbacks/shared'
 import { CodeSnippet } from '@/components/code-snippet'
-import { LandingTerminalDemo } from '@/components/terminal-demo'
+import { LandingShowcase } from '@/components/landing-showcase'
 import { publicEnv } from '@/lib/public-env'
 import { createServerSupabase } from '@/lib/supabase-server'
 import {
@@ -17,14 +17,13 @@ import {
   Sparkles,
   Code2,
   LayoutDashboard,
-  Vote,
-  Compass,
   Webhook,
   Terminal,
   Globe,
-  Boxes,
+  SlidersHorizontal,
+  PanelTop,
 } from 'lucide-react'
-import { WidgetDemo, ScrollHeader } from './widget-demo-client'
+import { ScrollHeader, WidgetDemo } from './widget-demo-client'
 
 // ─── Code snippets ────────────────────────────────────────────────────────────
 
@@ -35,42 +34,13 @@ const installSnippet = generateInstallSnippets({
   appOrigin,
 }).find((snippet) => snippet.label === 'Website')?.code || ''
 
-const mcpSnippet = `// ~/.claude/claude_desktop_config.json
-{
-  "mcpServers": {
-    "feedbacks": {
-      "command": "npx",
-      "args": ["-y", "@feedbacks/mcp-server"],
-      "env": {
-        "FEEDBACKS_API_KEY": "fb_live_..."
-      }
-    }
-  }
-}`
+const vibeCoderPrompt = `Add feedback collection to my app with feedbacks.dev.
 
-const apiSnippet = `# List recent feedback
-curl ${appOrigin}/api/v1/feedback \\
-  -H "X-API-Key: fb_live_..." \\
-  | jq '.feedback[] | {type, message}'
-
-# Result
-# { "type": "bug",  "message": "CSV export crashes on large sets" }
-# { "type": "idea", "message": "Add keyboard shortcuts please"   }`
-
-const webhookSnippet = `// Incoming webhook payload
-{
-  "event": "feedback.created",
-  "feedback": {
-    "type": "bug",
-    "message": "CSV export crashes on large sets",
-    "url": "https://app.example.com/export",
-    "rating": 2,
-    "email": "user@example.com"
-  },
-  "project": {
-    "name": "My SaaS App"
-  }
-}`
+Use the setup packet from the dashboard.
+Install the Website snippet first unless the app has a cleaner React or Vue entry point.
+Run the app locally.
+Submit one test report from a real page.
+Confirm the report appears in the feedbacks.dev inbox with URL and browser context.`
 
 const freePlan = PLAN_MATRIX.free
 const proPlan = PLAN_MATRIX.pro
@@ -91,7 +61,7 @@ export default async function LandingPage() {
             <span className="text-primary">.dev</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Link href="/boards">
+            <Link href="/boards" className="hidden sm:block">
               <Button variant="ghost" size="sm">
                 Boards
               </Button>
@@ -125,7 +95,7 @@ export default async function LandingPage() {
               </Link>
             ) : (
               <>
-                <Link href="/auth">
+                <Link href="/auth" className="hidden sm:block">
                   <Button variant="ghost" size="sm">
                     Sign in
                   </Button>
@@ -144,92 +114,67 @@ export default async function LandingPage() {
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b">
-        {/* Structured backdrop */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-primary/[0.035]" />
-          <div className="absolute inset-x-0 top-0 h-px bg-primary/20" />
-        </div>
-        {/* Subtle dot grid */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,hsl(var(--primary)/0.14),transparent_32%),linear-gradient(180deg,hsl(var(--primary)/0.055),transparent_42%)]" />
         <div
-          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+          className="absolute inset-0 opacity-[0.045] dark:opacity-[0.07]"
           style={{
-            backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
+            backgroundImage:
+              'linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)',
+            backgroundSize: '42px 42px',
           }}
         />
 
-        <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-24 md:pb-28 md:pt-32">
-          <div className="flex flex-col gap-14 md:flex-row md:items-center md:gap-12 lg:gap-20">
-            <div className="min-w-0 flex-1">
+        <div className="relative mx-auto max-w-6xl px-6 pb-10 pt-8 md:pb-14 md:pt-10">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(460px,1.1fr)] lg:items-center">
+            <div className="min-w-0">
               <div className="mb-6 flex flex-wrap items-center gap-2">
-                <Badge variant="secondary" className="gap-1.5 border-primary/20 bg-primary/[0.08] px-3 py-1 text-xs font-semibold text-primary">
+                <Badge variant="secondary" className="gap-1.5 border-primary/20 bg-primary/[0.09] px-3 py-1 text-xs font-semibold text-primary">
                   <Sparkles className="h-3 w-3" />
                   Install-first feedback stack
                 </Badge>
-                <Badge variant="outline" className="gap-1.5 px-3 py-1 text-xs font-medium text-muted-foreground">
-                  <Code2 className="h-3 w-3" />
-                  Widget under 20KB
+                <Badge variant="outline" className="gap-1.5 bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground">
+                  <Bot className="h-3 w-3" />
+                  Agent-ready setup path
                 </Badge>
               </div>
 
-              <h1 className="mb-6 text-5xl font-black leading-[0.95] tracking-tighter md:text-6xl lg:text-7xl">
-                Install feedback
-                <br />
-                in minutes.
-                <br />
-                <span className="text-primary">
-                  Triage the right issues fast.
-                </span>
+              <h1 className="max-w-3xl text-4xl font-black leading-[1] tracking-tighter sm:text-5xl">
+                Collect feedback in minutes.{' '}
+                <span className="block text-primary">Route it anywhere.</span>
               </h1>
 
-              <p className="mb-8 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-                Create a project, paste one Website snippet, and verify a real submission without
-                wading through setup screens. feedbacks.dev keeps the first run small, captures
-                useful context automatically, and gives you public boards only when you are ready
-                to open the workflow up.
+              <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">
+                Install a lightweight widget, capture context, and move signal into your inbox,
+                public boards, webhooks, or AI agent workflows.
               </p>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
                   <Button size="lg" className="group h-12 px-7 font-semibold shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/25">
-                    {isLoggedIn ? 'Go to Dashboard' : 'Create project'}
+                    {isLoggedIn ? 'Go to Dashboard' : 'Start collecting feedback'}
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                   </Button>
                 </Link>
-                <Link href="/boards">
-                  <Button variant="outline" size="lg" className="h-12 gap-2 font-semibold">
-                    Browse public boards
+                <Link href="#install">
+                  <Button variant="outline" size="lg" className="h-12 gap-2 bg-card/70 font-semibold">
+                    See the snippet
                   </Button>
                 </Link>
               </div>
 
-              <div className="mt-8 flex flex-wrap gap-2.5">
-                {[
-                  { Icon: Zap, label: 'Create project' },
-                  { Icon: Code2, label: 'Paste Website snippet' },
-                  { Icon: LayoutDashboard, label: 'Verify and triage first item' },
-                  { Icon: Vote, label: 'Publish a board later' },
-                ].map(({ Icon, label }) => (
-                  <span
-                    key={label}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/50 px-3.5 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur-sm"
-                  >
-                    <Icon className="h-3.5 w-3.5 text-primary" />
-                    {label}
+              <div className="mt-6 flex flex-wrap gap-2 text-sm text-muted-foreground">
+                {['No credit card', 'Website snippet first', 'Agent handoff ready'].map((item) => (
+                  <span key={item} className="rounded-full border bg-card/70 px-3 py-1">
+                    {item}
                   </span>
                 ))}
               </div>
             </div>
 
-            <div className="flex flex-shrink-0 justify-center md:justify-end">
+            <div className="relative">
+              <div className="absolute -inset-6 rounded-[2rem] bg-primary/10 blur-3xl" />
               <div className="relative">
-                <div className="absolute -inset-10 rounded-3xl bg-primary/8 blur-3xl" />
-                <div className="relative">
-                  <p className="mb-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                    Live preview
-                  </p>
-                  <WidgetDemo />
-                </div>
+                <LandingShowcase websiteSnippet={installSnippet} agentPrompt={vibeCoderPrompt} />
               </div>
             </div>
           </div>
@@ -248,318 +193,148 @@ export default async function LandingPage() {
                 Quick start
               </p>
               <h2 className="text-lg font-bold tracking-tight text-zinc-50">
-                Create a project. Copy the Website snippet. Verify one submission.
+                Copy the Website snippet into your app.
               </h2>
             </div>
           </div>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-            <div className="space-y-3">
-              <LandingTerminalDemo websiteSnippet={installSnippet} />
-              <p className="text-sm text-zinc-500">
-                The terminal mirrors the first-run loop: inspect the Website snippet, verify the
-                widget locally, then confirm the first report lands with useful context.
-              </p>
-            </div>
-            <div className="space-y-3">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="min-w-0 space-y-3">
               <CodeSnippet
                 className="border-zinc-800 bg-zinc-900/90 text-zinc-50"
                 tabs={[{ label: 'HTML', code: installSnippet, language: 'html' }]}
+                wrap
+                maxHeightClassName="max-h-56"
               />
               <p className="text-sm text-zinc-500">
-                Website is the recommended default. React and Vue snippets are ready when you need
-                them, but the first-run path stays intentionally small. Under 20KB gzipped.
+                Website is the recommended default. React and Vue examples stay available after the
+                first install works.
               </p>
+            </div>
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+              <p className="text-sm font-semibold text-zinc-50">First-run loop</p>
+              <div className="mt-4 space-y-3 text-sm text-zinc-400">
+                {[
+                  'Create a project',
+                  'Paste this snippet where global scripts load',
+                  'Send one test report and confirm it lands in the inbox',
+                ].map((step, index) => (
+                  <div key={step} className="flex gap-3">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
+                      {index + 1}
+                    </span>
+                    <span>{step}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Feature Grid ─────────────────────────────────────────────────────── */}
-      <section id="features" className="relative border-b py-20 md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 max-w-2xl">
+      {/* ── Widget Preview ───────────────────────────────────────────────────── */}
+      <section id="features" className="border-b py-16 md:py-20">
+        <div className="mx-auto grid max-w-6xl gap-10 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
             <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-              Install first
+              The widget
             </p>
-            <h2 className="mb-4 text-4xl font-black tracking-tighter md:text-5xl">
-              Start with the install loop.
-              <br />
-              Expand when the workflow earns it.
+            <h2 className="text-3xl font-black tracking-tighter md:text-5xl">
+              A feedback form that fits your product.
             </h2>
-            <p className="text-muted-foreground">
-              The product is full-surface, but the path to first value is not. Get the widget
-              live, confirm feedback lands in the inbox, then add routing, public boards, and
-              automation once the core loop is working.
+            <p className="mt-4 max-w-xl text-muted-foreground">
+              Start with a floating button. Switch to modal, inline, or custom trigger when your
+              app needs it.
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {[
+                { Icon: SlidersHorizontal, title: 'Custom fields', body: 'Ask for rating, email, type, or screenshot.' },
+                { Icon: PanelTop, title: 'Multiple placements', body: 'Floating button, inline form, or your own trigger.' },
+                { Icon: Shield, title: 'Privacy first', body: 'No analytics pixels. User email stays optional.' },
+                { Icon: Zap, title: 'Lightweight', body: 'Small script, fast load, no iframe maze.' },
+              ].map(({ Icon, title, body }) => (
+                <div key={title} className="rounded-xl border bg-card/55 p-4">
+                  <Icon className="mb-3 h-4 w-4 text-primary" />
+                  <p className="text-sm font-semibold">{title}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="relative min-h-[430px] overflow-hidden rounded-3xl border bg-[radial-gradient(circle_at_25%_20%,hsl(var(--primary)/0.18),transparent_34%),hsl(var(--card))] p-8">
+            <div
+              className="absolute inset-0 opacity-[0.05]"
+              style={{
+                backgroundImage:
+                  'linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)',
+                backgroundSize: '36px 36px',
+              }}
+            />
+            <div className="relative mx-auto flex min-h-[360px] max-w-sm items-center justify-center">
+              <WidgetDemo />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Workflow ─────────────────────────────────────────────────────────── */}
+      <section className="border-b bg-muted/15 py-16 md:py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-10 max-w-2xl">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+              The workflow
+            </p>
+            <h2 className="text-3xl font-black tracking-tighter md:text-5xl">
+              Capture once. Decide faster.
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              feedbacks.dev stays small at install, then gives you the surfaces you need when
+              feedback starts turning into work.
             </p>
           </div>
-
-          {/* Top row: 3 primary features */}
           <div className="grid gap-px overflow-hidden rounded-2xl border bg-border md:grid-cols-3">
             {[
               {
-                Icon: Code2,
-                headline: 'Embeddable Widget',
-                sub: 'Install in minutes',
-                body: 'Create a project, copy the Website snippet, and get a live widget without a multi-step setup flow. Modal, inline, and trigger modes stay available when you need them.',
-              },
-              {
                 Icon: LayoutDashboard,
-                headline: 'Smart Dashboard',
-                sub: 'Triage with context',
-                body: 'Every submission arrives with URL, browser, rating, and optional screenshot so the inbox helps you decide what matters quickly instead of becoming another pile of messages.',
-              },
-              {
-                Icon: Webhook,
-                headline: 'Workflow Routing',
-                sub: 'Move signal fast',
-                body: 'Send the important items into Slack, Discord, GitHub, or your own endpoints once the first install is already working. Integrations stay secondary to setup, not in the way of it.',
-              },
-            ].map(({ Icon, headline, sub, body }) => (
-              <div key={headline} className="bg-card p-8 md:p-10">
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                  <Icon className="h-5 w-5 text-primary" />
-                </div>
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                  {sub}
-                </p>
-                <h3 className="mb-3 text-2xl font-black tracking-tight">{headline}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">{body}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Bottom row: 4 secondary features */}
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                Icon: Vote,
-                title: 'Public Boards',
-                desc: 'Turn repeated requests into a public roadmap and voting surface after the inbox is already collecting good signal.',
-              },
-              {
-                Icon: Compass,
-                title: 'Board Directory',
-                desc: 'Browse public boards that show how teams turn private feedback loops into credible public product communication.',
-              },
-              {
-                Icon: Bot,
-                title: 'AI Agent API',
-                desc: 'MCP server for Claude, Cursor, and other AI agents. REST API with key auth. Programmatic feedback at scale.',
-              },
-              {
-                Icon: Webhook,
-                title: 'Webhooks',
-                desc: 'Push to Slack, Discord, GitHub Issues, or any custom endpoint. Real-time delivery with retry and logging.',
-              },
-              {
-                Icon: Globe,
-                title: 'Source Available',
-                desc: 'FSL-1.1-MIT today, MIT later. Self-hostable. Full codebase on GitHub. No vendor lock-in, no data hostage situations.',
-              },
-            ].map(({ Icon, title, desc }) => (
-              <div key={title} className="group rounded-2xl border bg-card/50 p-6 transition-all duration-200 hover:bg-card hover:shadow-lg hover:shadow-primary/5">
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/15">
-                  <Icon className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mb-2 text-lg font-bold tracking-tight">{title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── AI Agent API deep dive ────────────────────────────────────────────── */}
-      <section className="border-b py-20 md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-col gap-12 md:flex-row md:items-start md:gap-16">
-            <div className="flex-1">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-                Built for automation
-              </p>
-              <h2 className="mb-5 text-4xl font-black leading-tight tracking-tighter md:text-5xl">
-                Your AI agents
-                <br />
-                can file bugs too.
-              </h2>
-              <p className="mb-8 max-w-sm leading-relaxed text-muted-foreground">
-                Connect Claude, GPT, Cursor, or any AI agent to your feedback pipeline.
-                The MCP server and REST API let machines submit, query, and triage feedback
-                alongside your team.
-              </p>
-              <ul className="space-y-3">
-                {[
-                  'Native MCP server for Claude Code, Cursor, and Windsurf',
-                  'Full REST API with simple API key authentication',
-                  'Submit, list, search, and update feedback programmatically',
-                  'No OAuth complexity — works in seconds',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex-1">
-              <CodeSnippet
-                tabs={[
-                  { label: 'MCP Config', code: mcpSnippet, language: 'json' },
-                  { label: 'REST API', code: apiSnippet, language: 'bash' },
-                ]}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Webhooks section ──────────────────────────────────────────────────── */}
-      <section className="border-b bg-muted/20 py-20 md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-col-reverse gap-12 md:flex-row md:items-start md:gap-16">
-            <div className="flex-1">
-              <CodeSnippet
-                tabs={[
-                  { label: 'Webhook Payload', code: webhookSnippet, language: 'json' },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-                Integrations
-              </p>
-              <h2 className="mb-5 text-4xl font-black leading-tight tracking-tighter md:text-5xl">
-                Pipe feedback
-                <br />
-                where you already work.
-              </h2>
-              <p className="mb-8 max-w-sm leading-relaxed text-muted-foreground">
-                Webhooks fire on every new submission. Route feedback to Slack channels,
-                Discord servers, GitHub Issues, or your own internal tools automatically.
-              </p>
-              <ul className="space-y-3">
-                {[
-                  'Slack, Discord, and generic webhook endpoints',
-                  'Full payload with feedback context and metadata',
-                  'Delivery logs with retry on failure',
-                  'Configure per-project in the dashboard',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── How it works ─────────────────────────────────────────────────────── */}
-      <section className="border-b py-20 md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-            Getting started
-          </p>
-          <h2 className="mb-14 text-4xl font-black tracking-tighter md:text-5xl">
-            From install to first signal in three steps.
-          </h2>
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              {
-                num: '01',
-                title: 'Create the project',
-                body: 'Start with one project and get the Website snippet immediately. No wizard, no setup maze, no advanced configuration wall.',
-                Icon: LayoutDashboard,
-              },
-              {
-                num: '02',
-                title: 'Paste the snippet',
-                body: 'Install the widget where your global scripts load, then open the hosted verify page and send one real test submission.',
-                Icon: Code2,
-              },
-              {
-                num: '03',
-                title: 'Triage your inbox',
-                body: 'Once the first item lands, route what matters, publish a board if you want public signal, and build from a feedback loop that already proved itself.',
-                Icon: MessageSquare,
-              },
-            ].map(({ num, title, body, Icon }) => (
-              <div key={num} className="relative rounded-2xl border bg-card/50 p-8">
-                <span className="mb-6 block text-5xl font-black tracking-tighter text-primary/15">
-                  {num}
-                </span>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                  <Icon className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mb-2 text-xl font-bold tracking-tight">{title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">{body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Why feedbacks.dev ─────────────────────────────────────────────────── */}
-      <section className="border-b bg-muted/10 py-20 md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 max-w-2xl">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-              Why feedbacks.dev
-            </p>
-            <h2 className="mb-4 text-4xl font-black tracking-tighter md:text-5xl">
-              Built different. On purpose.
-            </h2>
-            <p className="text-muted-foreground">
-              feedbacks.dev is opinionated about one thing: first-run success. The product earns
-              the right to be broader by making the install, verify, and triage loop feel obvious
-              before it asks you to think about anything else.
-            </p>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                Icon: Zap,
-                title: 'Lightweight widget',
-                desc: 'Under 20KB gzipped. No iframe bloat, no third-party trackers. Loads fast, runs fast, stays out of the way.',
-              },
-              {
-                Icon: Shield,
-                title: 'Privacy-first',
-                desc: 'No analytics on your users. No tracking pixels. Email collection is optional and controlled by you.',
-              },
-              {
-                Icon: Boxes,
-                title: 'Framework agnostic',
-                desc: 'One script tag works everywhere. React wrapper, Vue wrapper, or plain HTML. Your stack, your choice.',
-              },
-              {
-                Icon: Sparkles,
-                title: 'Rich context',
-                desc: 'Every submission captures URL, browser, OS, rating, and optional screenshot. Debug-ready from submission.',
+                title: 'Triage in one inbox',
+                body: 'Every item includes message, URL, browser, rating, and status.',
               },
               {
                 Icon: MessageSquare,
-                title: 'Team notes',
-                desc: 'Add internal notes to any feedback item. Keep context private between your team while tracking resolution.',
+                title: 'Publish what matters',
+                body: 'Turn repeated requests into public boards when the signal is worth sharing.',
               },
               {
-                Icon: Globe,
-                title: 'Self-hostable',
-                desc: 'Fork it, run it on your own infra, customize everything. FSL license now, MIT conversion after the change date.',
+                Icon: Webhook,
+                title: 'Route into your stack',
+                body: 'Send high-priority feedback to webhooks, GitHub, or agent workflows.',
               },
-            ].map(({ Icon, title, desc }) => (
-              <div key={title} className="flex gap-4 rounded-xl border bg-card/30 p-5 transition-colors hover:bg-card/60">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                  <Icon className="h-5 w-5 text-primary" />
+            ].map(({ Icon, title, body }) => (
+              <div key={title} className="bg-card p-6 md:p-8">
+                <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
                 </div>
-                <div>
-                  <h3 className="mb-1 text-sm font-bold tracking-tight">{title}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{desc}</p>
-                </div>
+                <h3 className="text-xl font-bold tracking-tight">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Trust Strip ──────────────────────────────────────────────────────── */}
+      <section className="border-b py-10">
+        <div className="mx-auto grid max-w-6xl gap-3 px-6 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { Icon: Code2, label: 'Plain HTML first' },
+            { Icon: Bot, label: 'Agent prompt included' },
+            { Icon: Globe, label: 'Source available' },
+            { Icon: Shield, label: 'No user tracking' },
+          ].map(({ Icon, label }) => (
+            <div key={label} className="flex items-center gap-3 rounded-xl border bg-card/55 px-4 py-3 text-sm font-semibold">
+              <Icon className="h-4 w-4 text-primary" />
+              {label}
+            </div>
+          ))}
         </div>
       </section>
 
@@ -647,22 +422,22 @@ export default async function LandingPage() {
       {/* ── Final CTA ────────────────────────────────────────────────────────── */}
       <section className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-6xl">
-          <div className="relative overflow-hidden rounded-3xl bg-foreground px-8 py-20 text-center md:px-16">
+          <div className="relative overflow-hidden rounded-3xl border bg-card px-8 py-20 text-center shadow-2xl shadow-black/[0.05] md:px-16">
             {/* Dot grid texture */}
             <div
-              className="pointer-events-none absolute inset-0 opacity-[0.04]"
+              className="pointer-events-none absolute inset-0 opacity-[0.05]"
               style={{
-                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
                 backgroundSize: '24px 24px',
               }}
             />
             <div className="relative">
-              <h2 className="mb-4 text-4xl font-black tracking-tighter text-background md:text-5xl">
+              <h2 className="mb-4 text-4xl font-black tracking-tighter text-foreground md:text-5xl">
                 Install the widget.
                 <br />
                 Verify the first submission.
               </h2>
-              <p className="mx-auto mb-8 max-w-md text-background/60">
+              <p className="mx-auto mb-8 max-w-md text-muted-foreground">
                 Start free, keep the setup path small, and add the public and automation layers
                 only after the core loop is working.
               </p>
@@ -670,7 +445,7 @@ export default async function LandingPage() {
                 <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
                   <Button
                     size="lg"
-                    className="h-12 bg-background px-8 font-semibold text-foreground shadow-2xl hover:bg-background/90"
+                    className="h-12 px-8 font-semibold shadow-lg shadow-primary/20"
                   >
                     {isLoggedIn ? 'Go to Dashboard' : 'Start Free'}
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -684,7 +459,7 @@ export default async function LandingPage() {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="h-12 gap-2 border-background/20 font-semibold text-background hover:bg-background/10 hover:text-background"
+                    className="h-12 gap-2 bg-background/70 font-semibold text-foreground hover:bg-muted"
                   >
                     <Github className="h-4 w-4" />
                     Star on GitHub

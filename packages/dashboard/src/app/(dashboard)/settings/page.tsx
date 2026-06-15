@@ -195,11 +195,11 @@ export default function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="space-y-3 rounded-lg border bg-muted/10 p-4">
-            <label className="flex items-start gap-3 text-sm">
+          <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
+            <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-background px-3 py-3 text-sm">
               <input
                 type="checkbox"
-                className="mt-0.5 h-4 w-4 rounded border"
+                className="mt-0.5 h-4 w-4 rounded border accent-primary"
                 checked={emailNotifications}
                 onChange={(event) => setEmailNotifications(event.target.checked)}
               />
@@ -210,10 +210,10 @@ export default function SettingsPage() {
                 </span>
               </span>
             </label>
-            <label className="flex items-start gap-3 text-sm">
+            <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-background px-3 py-3 text-sm">
               <input
                 type="checkbox"
-                className="mt-0.5 h-4 w-4 rounded border"
+                className="mt-0.5 h-4 w-4 rounded border accent-primary"
                 checked={dailyDigest}
                 onChange={(event) => setDailyDigest(event.target.checked)}
               />
@@ -224,10 +224,10 @@ export default function SettingsPage() {
                 </span>
               </span>
             </label>
-            <label className="flex items-start gap-3 text-sm">
+            <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-background px-3 py-3 text-sm">
               <input
                 type="checkbox"
-                className="mt-0.5 h-4 w-4 rounded border"
+                className="mt-0.5 h-4 w-4 rounded border accent-primary"
                 checked={webhookFailureEmails}
                 onChange={(event) => setWebhookFailureEmails(event.target.checked)}
                 disabled={!emailNotifications}
@@ -239,10 +239,10 @@ export default function SettingsPage() {
                 </span>
               </span>
             </label>
-            <label className="flex items-start gap-3 text-sm">
+            <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-background px-3 py-3 text-sm">
               <input
                 type="checkbox"
-                className="mt-0.5 h-4 w-4 rounded border"
+                className="mt-0.5 h-4 w-4 rounded border accent-primary"
                 checked={billingFailureEmails}
                 onChange={(event) => setBillingFailureEmails(event.target.checked)}
               />

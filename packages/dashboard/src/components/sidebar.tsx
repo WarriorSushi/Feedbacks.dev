@@ -21,6 +21,7 @@ import {
   Check,
   Globe,
   ExternalLink,
+  Plus,
 } from 'lucide-react'
 import type { Project } from '@/lib/types'
 import { createClient } from '@/lib/supabase-browser'
@@ -187,6 +188,18 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {projects.length === 0 && !collapsed && (
+        <div className="shrink-0 border-b p-2.5">
+          <Link
+            href="/projects/new"
+            className="flex min-h-11 items-center gap-2 rounded-lg border border-primary/25 bg-primary/[0.06] px-3 py-2 text-[13px] font-medium text-primary transition-colors hover:bg-primary/[0.1]"
+          >
+            <Plus className="h-4 w-4 shrink-0" />
+            Create first project
+          </Link>
         </div>
       )}
 

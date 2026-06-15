@@ -32,6 +32,7 @@ export interface BoardRecommendation {
   slug: string
   title: string
   description: string
+  displayName: string | null
   branding: BoardBranding
   feedbackCount: number
   trustScore: number

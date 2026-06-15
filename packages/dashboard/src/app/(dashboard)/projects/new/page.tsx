@@ -7,8 +7,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Loader2, ArrowLeft } from 'lucide-react'
+import { CheckCircle2, Code2, Inbox, Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+
+const setupSteps = [
+  { Icon: CheckCircle2, title: 'Create project', body: 'Generate a project key automatically.' },
+  { Icon: Code2, title: 'Copy snippet', body: 'Paste the Website snippet first.' },
+  { Icon: Inbox, title: 'Verify inbox', body: 'Send one test item before changing settings.' },
+]
 
 export default function NewProjectPage() {
   const [name, setName] = React.useState('')
@@ -49,7 +55,7 @@ export default function NewProjectPage() {
       if (payload.api_key) {
         rememberProjectApiKey(payload.id, payload.api_key)
       }
-      router.push(`/projects/${payload.id}?created=1&tab=customize`)
+      router.push(`/projects/${payload.id}?created=1&tab=install`)
     } catch {
       setError('Failed to create project')
     } finally {
@@ -58,7 +64,7 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       <Link
         href="/projects"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -66,36 +72,52 @@ export default function NewProjectPage() {
         <ArrowLeft className="h-4 w-4" /> Back to projects
       </Link>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>New Project</CardTitle>
-          <CardDescription>
-            Create a project, choose how the feedback form should appear, then copy the generated install snippet.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Create your first project</CardTitle>
+            <CardDescription>
+              One name is enough. The next screen opens on the Website snippet so you can install before customizing.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Project Name *</Label>
+              <Label htmlFor="name">Project name</Label>
               <Input
                 id="name"
-                placeholder="My App"
+                placeholder="Acme Web App"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                autoFocus
+                maxLength={80}
               />
+              <p className="text-xs text-muted-foreground">
+                Use the name your team recognizes. You can rename it later.
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="domain">Domain (optional)</Label>
-              <Input
-                id="domain"
-                placeholder="myapp.com"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-              />
-            </div>
+            <details className="rounded-lg border bg-muted/10">
+              <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
+                Add domain later, or set it now
+              </summary>
+              <div className="border-t px-4 py-3">
+                <div className="space-y-2">
+                  <Label htmlFor="domain">Domain (optional)</Label>
+                  <Input
+                    id="domain"
+                    placeholder="myapp.com"
+                    value={domain}
+                    onChange={(e) => setDomain(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This helps identify the project, but it is not required to install the widget.
+                  </p>
+                </div>
+              </div>
+            </details>
             {error && (
-              <p className="text-sm text-destructive">{error}</p>
+              <p role="alert" className="text-sm text-destructive">{error}</p>
             )}
             {limitMessage && (
               <div className="rounded-lg border border-primary/30 bg-primary/[0.04] p-4">
@@ -111,13 +133,34 @@ export default function NewProjectPage() {
                 </div>
               </div>
             )}
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" size="lg" className="w-full" disabled={loading || !name.trim()}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Project
+              Create project and show install
             </Button>
           </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Setup stays linear</CardTitle>
+            <CardDescription>
+              This avoids the old all-in-one setup maze.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {setupSteps.map(({ Icon, title, body }) => (
+              <div key={title} className="flex gap-3 rounded-lg border bg-muted/20 p-3">
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{title}</p>
+                  <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{body}</p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

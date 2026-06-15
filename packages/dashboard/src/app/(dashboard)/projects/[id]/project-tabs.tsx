@@ -28,8 +28,8 @@ interface ProjectTabsProps {
 type TabId = 'install' | 'customize' | 'integrations' | 'board' | 'api' | 'settings'
 
 const tabs: { id: TabId; label: string }[] = [
-  { id: 'customize', label: 'Customize' },
   { id: 'install', label: 'Install' },
+  { id: 'customize', label: 'Customize' },
   { id: 'integrations', label: 'Integrations' },
   { id: 'board', label: 'Public Board' },
   { id: 'api', label: 'API' },
@@ -53,7 +53,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
   const [publicBoardUrl, setPublicBoardUrl] = React.useState<string | null>(null)
   const tabParam = searchParams.get('tab') as TabId | null
   const created = searchParams.get('created') === '1'
-  const activeTab = tabs.some((t) => t.id === tabParam) ? tabParam! : 'customize'
+  const activeTab = tabs.some((t) => t.id === tabParam) ? tabParam! : 'install'
   const apiKeyLastFour = React.useMemo(
     () => apiKey?.slice(-4) || project.api_key_last_four || null,
     [apiKey, project.api_key_last_four],
@@ -149,7 +149,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
         <h1 className="mt-2 text-2xl font-bold">{project.name}</h1>
         {created && (
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Start by choosing how the widget should appear. Save the look, then copy the generated install snippet.
+            Start here: copy the Website snippet, verify one test message, then customize the widget when the basic loop works.
           </p>
         )}
         <div className="mt-3 flex flex-wrap items-center gap-2">

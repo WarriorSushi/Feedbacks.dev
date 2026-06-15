@@ -4,7 +4,7 @@ import { authenticateApiKey } from '@/lib/api-auth'
 import { assertCanReceiveFeedback, assertFeatureAccess, getBillingSummaryForUser, getHistoryCutoff, incrementFeedbackUsage } from '@/lib/billing'
 import { notifyProjectOwnerOfNewFeedback } from '@/lib/notifications'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { deliverWebhooks } from '@/lib/webhook-delivery'
+import { enqueueWebhookJobs, processWebhookJobs } from '@/lib/webhook-delivery'
 import { normalizeFeedbackMetadata } from '@/lib/feedback-submissions'
 import type { FeedbackType, FeedbackPriority, FeedbackStatus, StructuredFeedbackData } from '@/lib/types'
 
@@ -17,6 +17,7 @@ const CORS_HEADERS = {
 const VALID_TYPES: FeedbackType[] = ['bug', 'idea', 'praise', 'question']
 const VALID_PRIORITIES: FeedbackPriority[] = ['low', 'medium', 'high', 'critical']
 const VALID_STATUSES: FeedbackStatus[] = ['new', 'reviewed', 'planned', 'in_progress', 'closed']
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status, headers: CORS_HEADERS })
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const { project } = auth
-    const feature = await assertFeatureAccess(project.owner_user_id, 'mcp')
+    const feature = await assertFeatureAccess(project.owner_user_id, 'apiAccess')
     if (!feature.allowed) return jsonError(feature.message, 403)
 
     const entitlement = await assertCanReceiveFeedback(project.owner_user_id)
@@ -61,8 +62,34 @@ export async function POST(request: NextRequest) {
     if (priority && !VALID_PRIORITIES.includes(priority)) return jsonError('Invalid priority', 400)
 
     const email = body.email?.trim() || null
+    if (email && !EMAIL_RE.test(email)) return jsonError('Invalid email format', 400)
+
     const url = body.url?.trim() || null
-    const tags = Array.isArray(body.tags) ? body.tags.map(String).slice(0, 10) : []
+    if (url) {
+      try {
+        const parsed = new URL(url)
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+          return jsonError('URL must use http or https protocol', 400)
+        }
+      } catch {
+        return jsonError('Invalid URL', 400)
+      }
+    }
+
+    const rating = body.rating ?? null
+    if (rating !== null && (!Number.isInteger(rating) || rating < 1 || rating > 5)) {
+      return jsonError('Rating must be an integer from 1 to 5', 400)
+    }
+
+    const tags: string[] = Array.isArray(body.tags)
+      ? Array.from(
+        new Set<string>(
+          body.tags
+            .map((tag: unknown) => String(tag).trim())
+            .filter((tag: string) => tag.length > 0),
+        ),
+      ).slice(0, 10)
+      : []
     const agentName = body.agent_name?.trim() || null
     const agentSessionId = body.agent_session_id?.trim() || null
     const userAgent = body.user_agent || request.headers.get('user-agent') || ''
@@ -91,7 +118,7 @@ export async function POST(request: NextRequest) {
       url,
       user_agent: userAgent,
       type,
-      rating: body.rating ?? null,
+      rating,
       priority,
       status: 'new' as const,
       tags,
@@ -114,14 +141,19 @@ export async function POST(request: NextRequest) {
 
     await incrementFeedbackUsage(project.owner_user_id)
 
-    // Webhook delivery (best-effort)
-    // NOTE: In Vercel production, use waitUntil() for reliable background execution
+    // Queue webhook delivery so retries survive the request lifecycle.
     if (project.webhooks) {
-      deliverWebhooks(
+      enqueueWebhookJobs(
         project.webhooks,
         feedbackRow,
         { id: project.id, name: project.name }
-      ).catch(() => {})
+      )
+        .then((jobIds) => {
+          if (jobIds.length > 0) {
+            void processWebhookJobs({ jobIds, limit: jobIds.length })
+          }
+        })
+        .catch(() => {})
     }
 
     void notifyProjectOwnerOfNewFeedback(
@@ -149,7 +181,7 @@ export async function GET(request: NextRequest) {
     if (!auth) return jsonError('Invalid or missing API key', 401)
 
     const { project } = auth
-    const feature = await assertFeatureAccess(project.owner_user_id, 'mcp')
+    const feature = await assertFeatureAccess(project.owner_user_id, 'apiAccess')
     if (!feature.allowed) return jsonError(feature.message, 403)
     const { searchParams } = new URL(request.url)
 

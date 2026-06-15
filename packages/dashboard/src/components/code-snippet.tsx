@@ -14,9 +14,11 @@ interface CodeTab {
 interface CodeSnippetProps {
   tabs: CodeTab[]
   className?: string
+  wrap?: boolean
+  maxHeightClassName?: string
 }
 
-export function CodeSnippet({ tabs, className }: CodeSnippetProps) {
+export function CodeSnippet({ tabs, className, wrap = false, maxHeightClassName }: CodeSnippetProps) {
   const [activeTab, setActiveTab] = React.useState(0)
   const [copied, setCopied] = React.useState(false)
 
@@ -56,8 +58,14 @@ export function CodeSnippet({ tabs, className }: CodeSnippetProps) {
         >
           {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </Button>
-        <pre className="overflow-x-auto p-4 text-sm">
-          <code className="font-mono text-foreground">
+        <pre
+          className={cn(
+            'p-4 text-sm',
+            wrap ? 'overflow-x-hidden overflow-y-auto whitespace-pre-wrap break-words' : 'overflow-x-auto',
+            maxHeightClassName
+          )}
+        >
+          <code className="font-mono text-current">
             {tabs[activeTab].code}
           </code>
         </pre>

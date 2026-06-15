@@ -60,6 +60,14 @@ export default async function FeedbackDetailPage({
   if (!feedback) notFound()
 
   const fb = feedback as Feedback
+  const hasDetails = Boolean(
+    fb.projects ||
+      fb.email ||
+      fb.rating ||
+      fb.url ||
+      fb.user_agent ||
+      (fb.tags && fb.tags.length > 0),
+  )
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -213,7 +221,7 @@ export default async function FeedbackDetailPage({
                   {(notes as FeedbackNote[]).map((note) => (
                     <div
                       key={note.id}
-                      className="rounded-lg border-l-2 border-primary/30 bg-muted/50 p-3"
+                      className="rounded-lg border border-primary/20 bg-primary/[0.04] p-3"
                     >
                       <p className="text-sm leading-relaxed">{note.content}</p>
                       <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
@@ -244,6 +252,7 @@ export default async function FeedbackDetailPage({
             </CardHeader>
             <CardContent className="space-y-0">
               {/* Structured metadata rows */}
+              {hasDetails ? (
               <div className="divide-y">
                 {fb.projects && (
                   <div className="flex items-center justify-between py-3">
@@ -322,6 +331,11 @@ export default async function FeedbackDetailPage({
                   </div>
                 )}
               </div>
+              ) : (
+                <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
+                  No contact, page, browser, or tag context was captured for this submission.
+                </div>
+              )}
             </CardContent>
           </Card>
 

@@ -37,6 +37,7 @@ For a new internal staging, recovery, or disposable verification project, run th
 13. `sql/013_launch_security_hardening.sql` — atomic rate-limit RPC, function exposure hardening, advisor indexes, and RLS cleanup
 14. `sql/014_fix_rate_limit_uuid_generation.sql` — fixes rate-limit UUID generation on locked function search paths
 15. `sql/015_server_managed_votes.sql` — removes direct client vote writes; board votes go through server API routes
+16. `sql/016_agent_setup_audit.sql` — audit log for short-lived AI setup packet creation and reads
 
 **How for internal/staging use:** apply the files through the Supabase CLI or copy-paste the contents of each file into the SQL Editor and click "Run".
 
@@ -111,6 +112,7 @@ WEBHOOK_JOB_SECRET=your-webhook-job-secret
 BOARD_REPORT_SALT=your-board-report-salt
 E2E_AUTH_BYPASS_SECRET=your-e2e-auth-bypass-secret
 VOTE_HMAC_SECRET=your-vote-hmac-secret
+AGENT_SETUP_TOKEN_SECRET=your-agent-setup-token-secret
 ```
 
 `E2E_AUTH_BYPASS_SECRET` is only needed for the local Playwright acceptance flow.
@@ -131,6 +133,7 @@ CRON_SECRET
 WEBHOOK_JOB_SECRET
 BOARD_REPORT_SALT
 VOTE_HMAC_SECRET
+AGENT_SETUP_TOKEN_SECRET
 ```
 
 Add billing, captcha, and email variables only when those surfaces are enabled in production.

@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const apiAuth = await authenticateApiKey(request)
     if (!apiAuth) return jsonError('Invalid or missing API key', 401)
 
-    const feature = await assertFeatureAccess(apiAuth.project.owner_user_id, 'mcp')
+    const feature = await assertFeatureAccess(apiAuth.project.owner_user_id, 'apiAccess')
     if (!feature.allowed) return jsonError(feature.message, 403)
 
     // API key only gives access to its own project

@@ -36,7 +36,7 @@ export async function GET(
     if (!auth) return jsonError('Invalid or missing API key', 401)
     if (auth.project.id !== id) return jsonError('Forbidden', 403)
 
-    const feature = await assertFeatureAccess(auth.project.owner_user_id, 'mcp')
+    const feature = await assertFeatureAccess(auth.project.owner_user_id, 'apiAccess')
     if (!feature.allowed) return jsonError(feature.message, 403)
 
     const { searchParams } = new URL(request.url)
@@ -91,7 +91,7 @@ export async function PATCH(
     if (!auth) return jsonError('Invalid or missing API key', 401)
     if (auth.project.id !== id) return jsonError('Forbidden', 403)
 
-    const feature = await assertFeatureAccess(auth.project.owner_user_id, 'mcp')
+    const feature = await assertFeatureAccess(auth.project.owner_user_id, 'apiAccess')
     if (!feature.allowed) return jsonError(feature.message, 403)
 
     const { searchParams } = new URL(request.url)

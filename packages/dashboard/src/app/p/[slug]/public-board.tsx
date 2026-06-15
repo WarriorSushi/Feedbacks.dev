@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { ChevronDown } from 'lucide-react'
 import type { BoardAnnouncement } from '@/lib/public-board'
 import {
   type BoardInfo,
@@ -14,7 +13,6 @@ import {
   type FilterType,
   readSetStorage,
   writeSetStorage,
-  typeConfig,
 } from '@/components/boards/board-types'
 import { BoardHero } from '@/components/boards/BoardHero'
 import { BoardFilters } from '@/components/boards/BoardFilters'
@@ -22,6 +20,8 @@ import { BoardFeedbackList } from '@/components/boards/BoardFeedbackList'
 import { BoardFeedbackCard } from '@/components/boards/BoardFeedbackCard'
 import { BoardSubmitForm } from '@/components/boards/BoardSubmitForm'
 import { BoardReportModal } from '@/components/boards/BoardReportModal'
+import { BoardAnnouncements } from '@/components/boards/BoardAnnouncements'
+import { BoardFooter } from '@/components/boards/BoardFooter'
 
 export function PublicBoard({
   board,
@@ -244,37 +244,6 @@ export function PublicBoard({
     return next
   }, [feedback, filter, search, sort])
 
-  const boardHealth = React.useMemo(() => {
-    const repliedIds = new Set(comments.map((comment) => comment.feedback_id))
-    const topRequests = [...feedback]
-      .sort((a, b) => b.vote_count - a.vote_count)
-      .slice(0, Math.min(10, feedback.length))
-    const repliedTopRequests = topRequests.filter((item) => repliedIds.has(item.id)).length
-    const topReplyRate =
-      topRequests.length > 0 ? Math.round((repliedTopRequests / topRequests.length) * 100) : 0
-    const typeCounts = feedback.reduce<Record<string, number>>((counts, item) => {
-      if (!item.type) return counts
-      counts[item.type] = (counts[item.type] || 0) + 1
-      return counts
-    }, {})
-    const mostActiveType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]?.[0]
-
-    return {
-      repliedRequestCount: repliedIds.size,
-      teamReplyCount: comments.length,
-      topReplyRate,
-      mostActiveType: mostActiveType ? typeConfig[mostActiveType]?.label || mostActiveType : 'No activity yet',
-    }
-  }, [comments, feedback])
-
-  const latestAnnouncement = React.useMemo(
-    () =>
-      [...initialAnnouncements].sort(
-        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-      )[0],
-    [initialAnnouncements],
-  )
-
   const uniqueRecommendations = React.useMemo(() => {
     const seen = new Set<string>([board.slug])
     return recommendations.filter((entry) => {
@@ -301,7 +270,7 @@ export function PublicBoard({
         onSubmitClick={() => setShowSubmit(true)}
       />
 
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
         {justSubmitted && (
           <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             Your feedback was submitted. It now enters the same public flow as the rest of the
@@ -309,8 +278,10 @@ export function PublicBoard({
           </div>
         )}
 
-        <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
-          <main aria-label="Public feedback requests">
+        <div className="space-y-6">
+          <BoardAnnouncements announcements={initialAnnouncements} />
+
+          <main aria-label="Public feedback requests" className="rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
             <BoardFilters
               showTypes={board.show_types}
               filter={filter}
@@ -390,107 +361,52 @@ export function PublicBoard({
             </BoardFeedbackList>
           </main>
 
-          <aside className="space-y-6 lg:sticky lg:top-36">
-            <section className="border-t border-border/70 pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Board health
-              </p>
-              <div className="mt-4 space-y-4 text-sm leading-6 text-foreground/78">
-                <div>
-                  <p className="font-semibold text-foreground">
-                    {boardHealth.topReplyRate}% of top requests have a team reply.
-                  </p>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-border/80">
-                    <span
-                      className="block h-full rounded-full bg-primary"
-                      style={{ width: `${boardHealth.topReplyRate}%` }}
-                    />
-                  </div>
-                </div>
-                <p>
-                  Team replies visible here:{' '}
-                  <strong className="font-semibold text-foreground">
-                    {boardHealth.teamReplyCount}
-                  </strong>
-                </p>
-                <p>
-                  Most active category:{' '}
-                  <strong className="font-semibold text-foreground">
-                    {boardHealth.mostActiveType}
-                  </strong>
-                </p>
-              </div>
-            </section>
-
-            <section className="border-t border-border/70 pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Pinned update
-              </p>
-              {latestAnnouncement ? (
-                <div className="mt-4 space-y-3 text-sm leading-6 text-foreground/78">
-                  <p className="font-semibold text-foreground">{latestAnnouncement.title}</p>
-                  <p>{latestAnnouncement.body}</p>
-                  {latestAnnouncement.href && (
-                    <a
-                      href={latestAnnouncement.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex font-semibold text-foreground transition-colors hover:text-primary"
-                    >
-                      Read update
-                    </a>
-                  )}
-                </div>
-              ) : (
-                <p className="mt-4 text-sm leading-6 text-foreground/70">
-                  Team updates will appear here when this board has a public announcement.
-                </p>
-              )}
-            </section>
-
-            <section className="border-t border-border/70 pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-              <div className="flex items-center justify-between gap-3">
+          <section className="rounded-2xl border bg-card p-5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Other boards
                 </p>
-                {uniqueRecommendations.length > 3 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowRecommendations((value) => !value)}
-                    aria-expanded={showRecommendations}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {showRecommendations ? 'Show less' : 'View all'}
-                    <ChevronDown
-                      className={`h-3.5 w-3.5 transition-transform ${showRecommendations ? 'rotate-180' : ''}`}
-                    />
-                  </button>
-                )}
+                <h2 className="mt-2 text-lg font-semibold text-foreground">Explore related feedback loops</h2>
               </div>
+              {uniqueRecommendations.length > 3 && (
+                <button
+                  type="button"
+                  onClick={() => setShowRecommendations((value) => !value)}
+                  aria-expanded={showRecommendations}
+                  className="text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {showRecommendations ? 'Show fewer' : 'View all'}
+                </button>
+              )}
+            </div>
 
-              <div className="mt-4 space-y-3">
-                {(showRecommendations ? uniqueRecommendations : uniqueRecommendations.slice(0, 3)).map(
-                  (entry) => (
-                    <Link
-                      key={entry.slug}
-                      href={`/p/${entry.slug}`}
-                      className="block text-sm leading-6 transition-colors hover:text-primary"
-                    >
-                      <span className="block font-semibold text-foreground">{entry.title}</span>
-                      <span className="block line-clamp-2 text-foreground/68">
-                        {entry.description}
-                      </span>
-                    </Link>
-                  ),
-                )}
-                {uniqueRecommendations.length === 0 && (
-                  <p className="text-sm leading-6 text-foreground/70">
-                    Related public boards will appear here as more teams publish boards.
-                  </p>
-                )}
-              </div>
-            </section>
-          </aside>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {(showRecommendations ? uniqueRecommendations : uniqueRecommendations.slice(0, 4)).map(
+                (entry) => (
+                  <Link
+                    key={entry.slug}
+                    href={`/p/${entry.slug}`}
+                    className="rounded-xl border bg-background p-4 transition-colors hover:border-primary/30"
+                  >
+                    <span className="block font-semibold text-foreground">
+                      {entry.displayName || entry.title}
+                    </span>
+                    <span className="mt-2 block line-clamp-2 text-sm leading-6 text-foreground/68">
+                      {entry.description}
+                    </span>
+                  </Link>
+                ),
+              )}
+              {uniqueRecommendations.length === 0 && (
+                <p className="text-sm leading-6 text-foreground/70">
+                  Related public boards will appear here as more teams publish boards.
+                </p>
+              )}
+            </div>
+          </section>
+
+          <BoardFooter canModerate={canModerate} projectId={board.projectId} />
         </div>
       </div>
 

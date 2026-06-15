@@ -40,10 +40,26 @@ export function BoardHero({
   const categories = board.branding.categories?.slice(0, 4) || []
   const websiteHost = getWebsiteHost(board.branding.websiteUrl)
   const submissionLabel = board.allow_submissions ? 'Open submissions' : 'Read only'
+  const accent = board.branding.accentColor || '#4d7c0f'
 
   return (
-    <section className="z-20 border-b border-border/80 bg-card/95 shadow-[0_1px_0_rgba(15,23,42,0.02)] backdrop-blur-xl lg:sticky lg:top-0">
-      <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6">
+    <section
+      className="relative overflow-hidden border-b border-border/80"
+      style={{
+        background:
+          `radial-gradient(circle at 16% 12%, ${accent}26, transparent 32%), ` +
+          `linear-gradient(135deg, ${accent}18, hsl(var(--background)) 52%, hsl(var(--card)) 100%)`,
+      }}
+    >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.08] dark:opacity-[0.12]"
+        style={{
+          backgroundImage:
+            'linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)',
+          backgroundSize: '34px 34px',
+        }}
+      />
+      <div className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <Link
             href="/boards"
@@ -67,30 +83,36 @@ export function BoardHero({
           )}
         </div>
 
-        <div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-[1.9rem]">
+            <div
+              className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border bg-card/80 text-3xl shadow-sm backdrop-blur"
+              style={{ borderColor: `${accent}40` }}
+              aria-hidden="true"
+            >
+              {board.branding.logoEmoji || displayTitle.slice(0, 1).toUpperCase()}
+            </div>
+            <h1 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-tighter text-foreground sm:text-5xl lg:text-6xl">
               {displayTitle}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-foreground/72 sm:text-base">
+            <p className="mt-5 max-w-3xl text-base leading-7 text-foreground/72 sm:text-lg">
               {heroDescription}
             </p>
 
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-              <span>
+            <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <span className="rounded-full border bg-card/75 px-3 py-1.5 shadow-sm backdrop-blur">
                 <strong className="font-semibold text-foreground">{feedbackCount}</strong> requests
               </span>
-              <span className="hidden h-1 w-1 rounded-full bg-muted-foreground/45 sm:inline-flex" />
-              <span>
+              <span className="rounded-full border bg-card/75 px-3 py-1.5 shadow-sm backdrop-blur">
                 <strong className="font-semibold text-foreground">{totalVotes}</strong> votes
               </span>
-              <span className="hidden h-1 w-1 rounded-full bg-muted-foreground/45 sm:inline-flex" />
-              <span className="font-medium text-foreground/75">{submissionLabel}</span>
+              <span className="rounded-full border bg-card/75 px-3 py-1.5 font-medium text-foreground/75 shadow-sm backdrop-blur">
+                {submissionLabel}
+              </span>
               {board.branding.tagline && (
-                <>
-                  <span className="hidden h-1 w-1 rounded-full bg-muted-foreground/45 sm:inline-flex" />
-                  <span>{board.branding.tagline}</span>
-                </>
+                <span className="rounded-full border bg-card/75 px-3 py-1.5 shadow-sm backdrop-blur">
+                  {board.branding.tagline}
+                </span>
               )}
             </div>
 
@@ -99,7 +121,7 @@ export function BoardHero({
                 {categories.map((category) => (
                   <span
                     key={category}
-                    className="inline-flex rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                    className="inline-flex rounded-md border border-border bg-card/75 px-2.5 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur"
                   >
                     {category}
                   </span>
@@ -119,9 +141,13 @@ export function BoardHero({
             )}
           </div>
 
-          <div className="flex shrink-0 flex-col gap-2 sm:flex-row lg:justify-end">
+          <div className="rounded-2xl border bg-card/78 p-4 shadow-sm backdrop-blur">
+            <p className="text-sm font-semibold text-foreground">Have something to add?</p>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Vote first, then add a fresh request when the board does not already cover it.
+            </p>
             {board.allow_submissions && (
-              <Button onClick={onSubmitClick} className="gap-2 px-4 font-semibold">
+              <Button onClick={onSubmitClick} className="mt-4 w-full gap-2 font-semibold">
                 Share feedback
                 <MessageSquarePlus className="h-4 w-4" />
               </Button>

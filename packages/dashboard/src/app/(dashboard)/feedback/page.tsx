@@ -273,18 +273,19 @@ function FeedbackInboxInner() {
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search feedback…"
-                className="h-9 w-full pl-8.5 text-sm md:w-72"
+                className="h-9 w-full pl-9 text-sm md:w-72"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />
               {searchInput && (
                 <button
                   type="button"
+                  aria-label="Clear search"
                   onClick={() => {
                     setSearchInput('')
                     updateParams({ q: '' })
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -297,18 +298,19 @@ function FeedbackInboxInner() {
               <Tag className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Filter by tag…"
-                className="h-9 w-full pl-8.5 text-sm md:w-56"
+                className="h-9 w-full pl-9 text-sm md:w-56"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
               />
               {tagInput && (
                 <button
                   type="button"
+                  aria-label="Clear tag filter"
                   onClick={() => {
                     setTagInput('')
                     updateParams({ tag: '' })
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -370,7 +372,7 @@ function FeedbackInboxInner() {
                 setTagInput('')
                 updateParams({ status: '', type: '', q: '', agent: '', projectId: '', tag: '' })
               }}
-              className="ml-1 flex flex-shrink-0 items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+              className="ml-1 flex min-h-10 flex-shrink-0 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:min-h-8"
             >
               <X className="h-3 w-3" />
               Clear
@@ -406,7 +408,7 @@ function FeedbackInboxInner() {
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : feedbacks.length === 0 ? (
-          <EmptyState hasFilters={!!hasFilters} onClear={() => {
+          <EmptyState hasFilters={!!hasFilters} hasProjects={projects.length > 0} onClear={() => {
             setSearchInput('')
             setTagInput('')
             updateParams({ status: '', type: '', q: '', agent: '', projectId: '', tag: '' })
@@ -414,12 +416,12 @@ function FeedbackInboxInner() {
         ) : (
           <div>
             {/* Select-all header */}
-            <div className="flex items-center gap-3 border-b bg-muted/20 px-4 py-2">
+            <div className="flex items-center gap-3 border-b bg-muted/20 px-4 py-3">
               <input
                 type="checkbox"
                 checked={selected.size === feedbacks.length && feedbacks.length > 0}
                 onChange={toggleSelectAll}
-                className="h-3.5 w-3.5 rounded border accent-primary"
+                className="h-4 w-4 rounded border accent-primary"
                 aria-label="Select all"
               />
               <span className="text-xs text-muted-foreground">
@@ -489,21 +491,21 @@ function FeedbackInboxInner() {
       {/* ─── Floating Bulk Action Bar ────────────────────── */}
       <div
         className={cn(
-          'fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] left-1/2 z-50 -translate-x-1/2 transition-all duration-300 md:bottom-6',
+          'fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] left-1/2 z-50 w-[calc(100vw-1.5rem)] max-w-3xl -translate-x-1/2 transition-all duration-300 md:bottom-6 md:w-auto',
           selected.size > 0
             ? 'translate-y-0 opacity-100'
             : 'translate-y-4 opacity-0 pointer-events-none'
         )}
       >
-        <div className="flex items-center gap-1.5 rounded-full border bg-background px-3 py-2 shadow-xl ring-1 ring-black/5 dark:ring-white/5">
-          <span className="pl-1 pr-2 text-xs font-semibold">
+        <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border bg-background px-3 py-2 shadow-xl ring-1 ring-black/5 scrollbar-thin dark:ring-white/5 md:rounded-full">
+          <span className="shrink-0 pl-1 pr-2 text-xs font-semibold">
             {selected.size} selected
           </span>
           <div className="h-4 w-px bg-border" />
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 gap-1.5 rounded-full px-3 text-[11px] font-medium"
+            className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-[11px] font-medium"
             disabled={bulkLoading}
             onClick={() => bulkUpdateStatus('reviewed')}
           >
@@ -513,7 +515,7 @@ function FeedbackInboxInner() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 gap-1.5 rounded-full px-3 text-[11px] font-medium"
+            className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-[11px] font-medium"
             disabled={bulkLoading}
             onClick={() => bulkUpdateStatus('planned')}
           >
@@ -523,7 +525,7 @@ function FeedbackInboxInner() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 gap-1.5 rounded-full px-3 text-[11px] font-medium text-destructive hover:text-destructive"
+            className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-[11px] font-medium text-destructive hover:text-destructive"
             disabled={bulkLoading}
             onClick={() => bulkUpdateStatus('closed')}
           >
@@ -535,12 +537,12 @@ function FeedbackInboxInner() {
             value={bulkTagInput}
             onChange={(e) => setBulkTagInput(e.target.value)}
             placeholder="tag"
-            className="h-7 w-24 rounded-full px-2.5 text-[11px]"
+            className="h-8 w-28 shrink-0 rounded-full px-2.5 text-[12px]"
           />
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 gap-1.5 rounded-full px-3 text-[11px] font-medium"
+            className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-[11px] font-medium"
             disabled={bulkLoading || !bulkTagInput.trim()}
             onClick={() => bulkUpdateTags('add')}
           >
@@ -549,7 +551,7 @@ function FeedbackInboxInner() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 gap-1.5 rounded-full px-3 text-[11px] font-medium"
+            className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-[11px] font-medium"
             disabled={bulkLoading || !bulkTagInput.trim()}
             onClick={() => bulkUpdateTags('remove')}
           >
@@ -558,7 +560,7 @@ function FeedbackInboxInner() {
           <div className="h-4 w-px bg-border" />
           <button
             onClick={clearBulkSelection}
-            className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             aria-label="Deselect all"
           >
             <X className="h-3.5 w-3.5" />
@@ -588,7 +590,8 @@ function FilterPill({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all',
+        'flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-all',
+        'min-h-11 flex-shrink-0 md:min-h-8',
         active
           ? 'bg-foreground text-background shadow-sm'
           : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -615,7 +618,7 @@ function FeedbackRow({
       className={cn(
         'group relative flex items-start gap-3 border-b px-4 py-3.5 transition-colors last:border-b-0',
         isNew
-          ? 'border-l-2 border-l-primary bg-primary/[0.025] hover:bg-primary/[0.04] dark:bg-primary/[0.04]'
+          ? 'bg-primary/[0.04] ring-1 ring-inset ring-primary/15 hover:bg-primary/[0.06] dark:bg-primary/[0.07]'
           : 'hover:bg-accent/30',
         selected && 'bg-accent/50'
       )}
@@ -624,7 +627,7 @@ function FeedbackRow({
         type="checkbox"
         checked={selected}
         onChange={onToggle}
-        className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border accent-primary"
+        className="mt-0.5 h-4 w-4 shrink-0 rounded border accent-primary"
         aria-label="Select item"
         onClick={(e) => e.stopPropagation()}
       />
@@ -743,9 +746,11 @@ function FeedbackRow({
 
 function EmptyState({
   hasFilters,
+  hasProjects,
   onClear,
 }: {
   hasFilters: boolean
+  hasProjects: boolean
   onClear: () => void
 }) {
   if (hasFilters) {
@@ -758,7 +763,7 @@ function EmptyState({
         <p className="mt-1 text-xs text-muted-foreground">
           Try adjusting or clearing your filters.
         </p>
-        <Button variant="outline" size="sm" className="mt-4 h-8 gap-1.5 text-xs" onClick={onClear}>
+        <Button variant="outline" size="sm" className="mt-4 h-10 gap-1.5 text-xs" onClick={onClear}>
           <X className="h-3 w-3" />
           Clear all filters
         </Button>
@@ -771,14 +776,16 @@ function EmptyState({
       <span className="text-5xl leading-none" role="img" aria-label="Empty inbox">
         📭
       </span>
-      <p className="mt-4 text-sm font-medium">Your inbox is empty</p>
+      <p className="mt-4 text-sm font-medium">{hasProjects ? 'Your inbox is empty' : 'No feedback path is installed yet'}</p>
       <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground">
-        Once users submit feedback through your widget, it will appear here.
+        {hasProjects
+          ? 'Install or verify a project and new submissions will appear here with URL and browser context.'
+          : 'Create one project first. The next screen gives you the Website snippet and hosted verification page.'}
       </p>
-      <Link href="/projects" className="mt-4">
-        <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+      <Link href={hasProjects ? '/projects' : '/projects/new'} className="mt-4">
+        <Button variant="outline" size="sm" className="h-10 gap-1.5 text-xs">
           <Inbox className="h-3.5 w-3.5" />
-          Set up a project
+          {hasProjects ? 'Open projects' : 'Create project'}
         </Button>
       </Link>
     </div>
