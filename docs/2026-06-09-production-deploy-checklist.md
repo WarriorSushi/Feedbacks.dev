@@ -11,7 +11,7 @@ Status refresh on 14 June 2026:
 ## Domains
 
 - [x] `https://feedbacks.dev` redirects to the live marketing/docs site at `https://www.feedbacks.dev`.
-- [ ] `https://app.feedbacks.dev` serves dashboard, API, widget assets, and public boards.
+- [x] `https://app.feedbacks.dev` serves dashboard, API, widget assets, and public boards.
 - [ ] `NEXT_PUBLIC_APP_ORIGIN=https://app.feedbacks.dev` in production.
 - [x] Public docs are hosted-first and do not tell customers to run infrastructure.
 
@@ -20,6 +20,12 @@ Status refresh on 14 June 2026:
 - `https://feedbacks.dev` returns a Vercel 307 redirect to `https://www.feedbacks.dev/`.
 - `https://www.feedbacks.dev` returns HTTP 200.
 - `app.feedbacks.dev` resolves to Vercel DNS, but HTTPS currently fails with an expired certificate. Fix the domain/certificate state in Vercel before launch signoff.
+
+15 June 2026 probe:
+
+- `https://app.feedbacks.dev` returns HTTP 200 over valid HTTPS.
+- `https://app.feedbacks.dev/widget/latest.js` returns HTTP 200 over valid HTTPS.
+- `https://feedbacks.dev` still redirects to `https://www.feedbacks.dev/`.
 
 ## Supabase Auth
 
@@ -86,7 +92,7 @@ Status refresh on 14 June 2026:
 - [ ] `packages/dashboard/public/widget/v2.js` exists after build or copy.
 - [ ] Hosted snippet points to `https://app.feedbacks.dev/widget/latest.js`.
 - [x] Public customer snippet points to the hosted app origin.
-- [ ] `https://app.feedbacks.dev/widget/latest.js` is reachable over valid HTTPS.
+- [x] `https://app.feedbacks.dev/widget/latest.js` is reachable over valid HTTPS.
 - [ ] Widget size check passes when widget files change.
 
 ## Integrations
