@@ -73,12 +73,12 @@ export function BoardAdvancedSection({
               <div key={report.id} className="rounded-lg border p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-medium text-slate-900">{formatReportTarget(report)}</p>
+                    <p className="text-sm font-medium text-foreground">{formatReportTarget(report)}</p>
                     <p className="text-xs text-muted-foreground">{formatReportDate(report.created_at)}</p>
                   </div>
                   <Badge variant={report.status === 'open' ? 'secondary' : 'outline'}>{report.status}</Badge>
                 </div>
-                <p className="mt-3 text-sm font-medium text-slate-900">{report.reason}</p>
+                <p className="mt-3 text-sm font-medium text-foreground">{report.reason}</p>
                 {report.details && <p className="mt-1 text-sm text-muted-foreground">{report.details}</p>}
                 {report.reporter_email && (
                   <p className="mt-2 text-xs text-muted-foreground">Reporter: {report.reporter_email}</p>

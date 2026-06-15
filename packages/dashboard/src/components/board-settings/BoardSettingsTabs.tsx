@@ -404,16 +404,16 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
           </div>
 
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="divide-y rounded-xl border bg-background">
               {[
                 { label: 'Followers', value: stats.followerCount, description: 'People following the board.' },
                 { label: 'Watched posts', value: stats.watchCount, description: 'Requests watched for updates.' },
                 { label: 'Open reports', value: stats.openReportCount, description: 'Reports awaiting review.' },
               ].map(({ label, value, description }) => (
-                <div key={label} className="rounded-xl border bg-background px-4 py-3">
-                  <p className="text-xs font-medium text-muted-foreground">{label}</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">{value}</p>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
+                <div key={label} className="grid gap-1 px-4 py-3 sm:grid-cols-[140px_80px_minmax(0,1fr)] sm:items-center">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+                  <p className="text-lg font-semibold tabular-nums text-foreground">{value}</p>
+                  <p className="text-xs leading-5 text-muted-foreground">{description}</p>
                 </div>
               ))}
             </div>
@@ -450,13 +450,13 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
       </Card>
 
       {/* Tab bar */}
-      <div className="flex flex-wrap gap-1 rounded-full border bg-muted/50 p-1">
+      <div className="flex gap-1 overflow-x-auto rounded-lg border bg-muted/50 p-1 scrollbar-thin">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              'rounded-full px-4 py-2 text-sm font-medium transition-colors',
+              'min-h-10 shrink-0 rounded-md px-4 py-2 text-sm font-medium transition-colors',
               activeTab === tab.id
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
@@ -508,7 +508,7 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
 
       <Button onClick={() => void handleSave()} disabled={saving}>
         {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Save Board Settings
+        Save board settings
       </Button>
     </div>
   )

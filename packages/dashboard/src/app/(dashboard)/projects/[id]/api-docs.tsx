@@ -20,7 +20,7 @@ function CopyButton({ text }: { text: string }) {
         setTimeout(() => setCopied(false), 2000)
       }}
     >
-      {copied ? 'Copied!' : 'Copy'}
+      {copied ? 'Copied' : 'Copy'}
     </Button>
   )
 }
@@ -31,10 +31,56 @@ function CodeBlock({ code, language = 'bash' }: { code: string; language?: strin
       <div className="absolute right-2 top-2 z-10">
         <CopyButton text={code} />
       </div>
-      <pre className="bg-muted rounded-lg p-4 pr-20 overflow-x-auto text-sm">
+      <pre className="max-h-96 overflow-auto rounded-lg bg-muted p-4 pr-20 text-sm">
         <code>{code}</code>
       </pre>
     </div>
+  )
+}
+
+function MethodBadge({ method }: { method: 'GET' | 'POST' | 'PATCH' }) {
+  const className =
+    method === 'POST'
+      ? 'bg-emerald-600 text-white hover:bg-emerald-600'
+      : method === 'PATCH'
+        ? 'bg-amber-600 text-white hover:bg-amber-600'
+        : 'bg-blue-600 text-white hover:bg-blue-600'
+
+  return <Badge className={className}>{method}</Badge>
+}
+
+function EndpointExample({
+  method,
+  path,
+  description,
+  code,
+  defaultOpen = false,
+}: {
+  method: 'GET' | 'POST' | 'PATCH'
+  path: string
+  description: string
+  code: string
+  defaultOpen?: boolean
+}) {
+  return (
+    <details open={defaultOpen} className="group border-b last:border-b-0">
+      <summary className="flex cursor-pointer list-none flex-col gap-3 px-4 py-4 transition-colors hover:bg-accent/40 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <MethodBadge method={method} />
+            <code className="break-all font-mono text-sm">{path}</code>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+        </div>
+        <span className="shrink-0 text-sm font-medium text-primary">
+          <span className="group-open:hidden">Show curl</span>
+          <span className="hidden group-open:inline">Hide curl</span>
+        </span>
+      </summary>
+      <div className="border-t bg-muted/10 px-4 py-4">
+        <CodeBlock code={code} />
+      </div>
+    </details>
   )
 }
 
@@ -52,6 +98,52 @@ export function ApiDocs({
   onRotateApiKey: () => Promise<void>
 }) {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://app.feedbacks.dev'
+  const endpoints = projectKey
+    ? [
+        {
+          method: 'POST' as const,
+          path: '/api/v1/feedback',
+          description: 'Submit feedback with optional structured data from an app, script, or agent.',
+          code: `curl -X POST ${baseUrl}/api/v1/feedback \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${projectKey}" \\
+  -d '{
+    "message": "Button click throws TypeError",
+    "type": "bug",
+    "priority": "high",
+    "agent_name": "claude-code",
+    "structured_data": {
+      "stack_trace": "TypeError: Cannot read property...",
+      "error_code": "ERR_NULL_REF",
+      "component": "LoginForm"
+    }
+  }'`,
+        },
+        {
+          method: 'GET' as const,
+          path: '/api/v1/feedback',
+          description: 'List feedback with pagination and filters for status, type, agent, search, page, and limit.',
+          code: `curl ${baseUrl}/api/v1/feedback?status=new&limit=10 \\
+  -H "X-API-Key: ${projectKey}"`,
+        },
+        {
+          method: 'GET' as const,
+          path: '/api/v1/projects/{id}',
+          description: 'Get project details and stats for the project attached to this API key.',
+          code: `curl ${baseUrl}/api/v1/projects/${project.id} \\
+  -H "X-API-Key: ${projectKey}"`,
+        },
+        {
+          method: 'PATCH' as const,
+          path: '/api/v1/projects/{id}/feedback',
+          description: 'Update feedback status, priority, or tags after triage.',
+          code: `curl -X PATCH "${baseUrl}/api/v1/projects/${project.id}/feedback?feedback_id=FEEDBACK_ID" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${projectKey}" \\
+  -d '{"status": "in_progress", "priority": "high"}'`,
+        },
+      ]
+    : []
 
   return (
     <div className="space-y-6">
@@ -73,118 +165,62 @@ export function ApiDocs({
         </CardContent>
       </Card>
 
-      {/* API Key */}
       <Card>
-        <CardHeader>
-          <CardTitle>API Key</CardTitle>
-          <CardDescription>Use this key in the X-API-Key header for all API requests</CardDescription>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Connection details</CardTitle>
+          <CardDescription>
+            Use the project key as the `X-API-Key` header. Keep server-side secrets out of browser code.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          {projectKey ? (
-            <div className="flex items-center gap-3">
-              <code className="bg-muted px-3 py-2 rounded text-sm font-mono flex-1 break-all">
+        <CardContent className="divide-y rounded-b-lg border-t p-0">
+          <div className="grid gap-2 px-4 py-3 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-center">
+            <p className="text-sm font-medium">API key</p>
+            {projectKey ? (
+              <code className="break-all rounded bg-muted px-2 py-1.5 font-mono text-sm">
                 {projectKey}
               </code>
-              <CopyButton text={projectKey} />
-            </div>
-          ) : (
-            <div className="space-y-3 rounded-lg border border-dashed bg-muted/10 p-4">
+            ) : (
               <p className="text-sm text-muted-foreground">
-                The current key is hidden by design{apiKeyLastFour ? ` and ends in ${apiKeyLastFour}` : ''}. Generate a fresh key to copy new REST or MCP credentials.
+                Hidden{apiKeyLastFour ? `, ending in ${apiKeyLastFour}` : ''}. Generate a fresh key to copy REST or MCP credentials.
               </p>
+            )}
+            {projectKey ? (
+              <CopyButton text={projectKey} />
+            ) : (
               <Button variant="outline" size="sm" onClick={() => void onRotateApiKey()} disabled={rotatingApiKey}>
-                {rotatingApiKey ? 'Generating…' : 'Generate fresh API key'}
+                {rotatingApiKey ? 'Generating' : 'Generate key'}
               </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Base URL */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Base URL</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <code className="bg-muted px-3 py-2 rounded text-sm font-mono">{baseUrl}/api/v1</code>
+            )}
+          </div>
+          <div className="grid gap-2 px-4 py-3 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-center">
+            <p className="text-sm font-medium">Base URL</p>
+            <code className="break-all rounded bg-muted px-2 py-1.5 font-mono text-sm">{baseUrl}/api/v1</code>
+            <CopyButton text={`${baseUrl}/api/v1`} />
+          </div>
         </CardContent>
       </Card>
 
       {projectKey ? (
         <>
-          {/* Endpoints */}
           <Card>
             <CardHeader>
-              <CardTitle>REST API Endpoints</CardTitle>
-              <CardDescription>All endpoints require the X-API-Key header</CardDescription>
+              <CardTitle className="text-base">REST endpoints</CardTitle>
+              <CardDescription>Start with submit feedback. Open the other examples only when you need them.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-          {/* POST /feedback */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge className="bg-green-600">POST</Badge>
-              <code className="text-sm font-mono">/api/v1/feedback</code>
-            </div>
-            <p className="text-sm text-muted-foreground">Submit feedback with optional structured data (stack traces, error codes, etc.)</p>
-            <CodeBlock code={`curl -X POST ${baseUrl}/api/v1/feedback \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-Key: ${projectKey}" \\
-  -d '{
-    "message": "Button click throws TypeError",
-    "type": "bug",
-    "priority": "high",
-    "agent_name": "claude-code",
-    "structured_data": {
-      "stack_trace": "TypeError: Cannot read property...",
-      "error_code": "ERR_NULL_REF",
-      "component": "LoginForm"
-    }
-  }'`} />
-          </div>
-
-          {/* GET /feedback */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge className="bg-blue-600">GET</Badge>
-              <code className="text-sm font-mono">/api/v1/feedback</code>
-            </div>
-            <p className="text-sm text-muted-foreground">List feedback (paginated). Query params: status, type, agent_name, search, page, limit</p>
-            <CodeBlock code={`curl ${baseUrl}/api/v1/feedback?status=new&limit=10 \\
-  -H "X-API-Key: ${projectKey}"`} />
-          </div>
-
-          {/* GET /projects/:id */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge className="bg-blue-600">GET</Badge>
-              <code className="text-sm font-mono">/api/v1/projects/{'{id}'}</code>
-            </div>
-            <p className="text-sm text-muted-foreground">Get project details with stats</p>
-            <CodeBlock code={`curl ${baseUrl}/api/v1/projects/${project.id} \\
-  -H "X-API-Key: ${projectKey}"`} />
-          </div>
-
-          {/* PATCH /projects/:id/feedback */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge className="bg-yellow-600">PATCH</Badge>
-              <code className="text-sm font-mono">/api/v1/projects/{'{id}'}/feedback?feedback_id=...</code>
-            </div>
-            <p className="text-sm text-muted-foreground">Update feedback status, priority, or tags</p>
-            <CodeBlock code={`curl -X PATCH "${baseUrl}/api/v1/projects/${project.id}/feedback?feedback_id=FEEDBACK_ID" \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-Key: ${projectKey}" \\
-  -d '{"status": "in_progress", "priority": "high"}'`} />
-          </div>
+            <CardContent className="p-0">
+              <div className="overflow-hidden rounded-b-lg border-t">
+                {endpoints.map((endpoint, index) => (
+                  <EndpointExample key={endpoint.path + endpoint.method} {...endpoint} defaultOpen={index === 0} />
+                ))}
+              </div>
             </CardContent>
           </Card>
 
-          {/* MCP Server */}
           <Card>
             <CardHeader>
-              <CardTitle>MCP Server (AI Agent Integration)</CardTitle>
+              <CardTitle className="text-base">MCP server</CardTitle>
               <CardDescription>
-                Connect AI agents like Claude Code to your feedback board
+                Connect repo-aware agents to submit feedback, verify installs, and read project setup packets.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -202,23 +238,28 @@ export function ApiDocs({
   }
 }`} />
 
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">Available MCP Tools</h4>
-            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-              <li><code className="bg-muted px-1 rounded">submit_feedback</code> — Submit a bug report or feature request</li>
-              <li><code className="bg-muted px-1 rounded">submit_test_feedback</code> — Send a verification item to the inbox</li>
-              <li><code className="bg-muted px-1 rounded">list_projects</code> — List the project attached to this API key</li>
-              <li><code className="bg-muted px-1 rounded">get_project_setup_packet</code> — Fetch exact install snippets and verification steps</li>
-              <li><code className="bg-muted px-1 rounded">verify_widget_install</code> — Inspect a reachable page and report inbox status</li>
-              <li><code className="bg-muted px-1 rounded">list_feedback</code> — List recent feedback (paginated, filterable)</li>
-              <li><code className="bg-muted px-1 rounded">update_feedback_status</code> — Change feedback status/priority</li>
-              <li><code className="bg-muted px-1 rounded">get_project_stats</code> — Get project overview stats</li>
-              <li><code className="bg-muted px-1 rounded">search_feedback</code> — Search feedback by keyword</li>
-            </ul>
+          <div className="divide-y rounded-lg border bg-muted/10">
+            {[
+              ['submit_feedback', 'Submit a bug report or feature request.'],
+              ['submit_test_feedback', 'Send a verification item to the inbox.'],
+              ['list_projects', 'List the project attached to this API key.'],
+              ['get_project_setup_packet', 'Fetch exact install snippets and verification steps.'],
+              ['verify_widget_install', 'Inspect a reachable page and report inbox status.'],
+              ['list_feedback', 'List recent feedback with filters.'],
+              ['update_feedback_status', 'Change feedback status or priority.'],
+              ['get_project_stats', 'Get project overview stats.'],
+              ['search_feedback', 'Search feedback by keyword.'],
+            ].map(([tool, description]) => (
+              <div key={tool} className="grid gap-1 px-4 py-2.5 md:grid-cols-[220px_minmax(0,1fr)]">
+                <code className="rounded bg-background px-1.5 py-0.5 font-mono text-xs">{tool}</code>
+                <p className="text-sm text-muted-foreground">{description}</p>
+              </div>
+            ))}
           </div>
 
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">Example Agent Usage</h4>
+          <details className="rounded-lg border bg-muted/10">
+            <summary className="cursor-pointer px-4 py-3 text-sm font-medium">Show example agent prompts</summary>
+            <div className="border-t p-4">
             <CodeBlock code={`// In an AI agent conversation:
 // "Submit a bug report about the login form crashing"
 // → Agent calls submit_feedback with structured_data
@@ -228,7 +269,8 @@ export function ApiDocs({
 
 // "Mark feedback abc-123 as in progress"
 // → Agent calls update_feedback_status`} />
-          </div>
+            </div>
+          </details>
             </CardContent>
           </Card>
         </>

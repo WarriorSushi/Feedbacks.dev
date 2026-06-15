@@ -57,16 +57,18 @@ export function BoardContentSection({
         <CardContent className="space-y-5">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Hero eyebrow</Label>
+              <Label htmlFor="board-hero-eyebrow">Hero eyebrow</Label>
               <Input
+                id="board-hero-eyebrow"
                 value={settings.branding.heroEyebrow || ''}
                 onChange={(e) => onBrandingChange({ heroEyebrow: e.target.value })}
                 placeholder="Public board"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label>Hero title</Label>
+              <Label htmlFor="board-hero-title">Hero title</Label>
               <Input
+                id="board-hero-title"
                 value={settings.branding.heroTitle || ''}
                 onChange={(e) => onBrandingChange({ heroTitle: e.target.value })}
                 placeholder="Roadmap and feedback"
@@ -75,8 +77,9 @@ export function BoardContentSection({
           </div>
 
           <div className="space-y-2">
-            <Label>Hero description</Label>
+            <Label htmlFor="board-hero-description">Hero description</Label>
             <textarea
+              id="board-hero-description"
               value={settings.branding.heroDescription || ''}
               onChange={(e) => onBrandingChange({ heroDescription: e.target.value })}
               rows={3}
@@ -86,8 +89,9 @@ export function BoardContentSection({
           </div>
 
           <div className="space-y-2">
-            <Label>Tagline</Label>
+            <Label htmlFor="board-tagline">Tagline</Label>
             <Input
+              id="board-tagline"
               value={settings.branding.tagline || ''}
               onChange={(e) => onBrandingChange({ tagline: e.target.value })}
               placeholder="Dependable product updates for your users"
@@ -96,16 +100,18 @@ export function BoardContentSection({
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Empty state title</Label>
+              <Label htmlFor="board-empty-title">Empty state title</Label>
               <Input
+                id="board-empty-title"
                 value={settings.branding.emptyStateTitle || ''}
                 onChange={(e) => onBrandingChange({ emptyStateTitle: e.target.value })}
                 placeholder="No requests yet"
               />
             </div>
             <div className="space-y-2">
-              <Label>Empty state description</Label>
+              <Label htmlFor="board-empty-description">Empty state description</Label>
               <Input
+                id="board-empty-description"
                 value={settings.branding.emptyStateDescription || ''}
                 onChange={(e) => onBrandingChange({ emptyStateDescription: e.target.value })}
                 placeholder="Start the conversation by submitting the first request."
@@ -123,9 +129,9 @@ export function BoardContentSection({
         <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label>Feedback types to show</Label>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid gap-2 sm:grid-cols-2">
               {FEEDBACK_TYPES.map((type) => (
-                <label key={type.value} className="flex items-center gap-2 text-sm">
+                <label key={type.value} className="flex min-h-11 items-center gap-2 rounded-lg border bg-background px-3 text-sm transition-colors hover:bg-muted/30">
                   <input
                     type="checkbox"
                     checked={settings.show_types.includes(type.value)}
@@ -138,14 +144,17 @@ export function BoardContentSection({
             </div>
           </div>
 
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex min-h-12 items-center gap-3 rounded-lg border bg-muted/10 px-3 text-sm">
             <input
               type="checkbox"
               checked={settings.allow_submissions}
               onChange={(e) => onSettingsChange({ allow_submissions: e.target.checked })}
               className="h-4 w-4 rounded border"
             />
-            Allow public submissions on the board
+            <span>
+              <span className="block font-medium text-foreground">Allow public submissions</span>
+              <span className="text-muted-foreground">Visitors can post new requests directly on the board.</span>
+            </span>
           </label>
         </CardContent>
       </Card>
@@ -168,7 +177,7 @@ export function BoardContentSection({
         <CardContent className="space-y-3">
           {settings.announcements.length === 0 ? (
             <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
-              No announcements yet. Add one when you ship something meaningful or want to set expectations publicly.
+              No announcements yet. Add one when you ship something meaningful or need to set expectations publicly.
             </div>
           ) : (
             settings.announcements.map((announcement, index) => (

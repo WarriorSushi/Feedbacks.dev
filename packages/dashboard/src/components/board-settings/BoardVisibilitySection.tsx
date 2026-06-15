@@ -30,20 +30,26 @@ export function BoardVisibilitySection({
         <CardDescription>Control whether the board is public, unlisted, or kept private while you set it up.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
-        <label className="flex items-center gap-3 text-sm">
+        <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-muted/10 px-3 py-3 text-sm">
           <input
             type="checkbox"
             checked={settings.enabled}
             onChange={(e) => onSettingsChange({ enabled: e.target.checked })}
-            className="h-4 w-4 rounded border"
+            className="mt-0.5 h-4 w-4 rounded border"
           />
-          Make this board publicly available
+          <span>
+            <span className="block font-medium text-foreground">Enable the board route</span>
+            <span className="text-muted-foreground">
+              The board can open when visibility allows it. Keep this off while drafting copy and moderation rules.
+            </span>
+          </span>
         </label>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>Visibility</Label>
+            <Label htmlFor="board-visibility">Visibility</Label>
             <select
+              id="board-visibility"
               value={visibility}
               onChange={(e) => onBrandingChange({ visibility: e.target.value as BoardVisibility })}
               className="h-10 w-full rounded-md border bg-background px-3 text-sm"
@@ -58,8 +64,9 @@ export function BoardVisibilitySection({
           </div>
 
           <div className="space-y-2">
-            <Label>Categories</Label>
+            <Label htmlFor="board-categories">Categories</Label>
             <Input
+              id="board-categories"
               value={settings.branding.categories?.join(', ') || ''}
               onChange={(e) =>
                 onBrandingChange({
@@ -75,14 +82,17 @@ export function BoardVisibilitySection({
         </div>
 
         {visibility === 'public' && (
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-muted/10 px-3 py-3 text-sm">
             <input
               type="checkbox"
               checked={settings.branding.directoryOptIn !== false}
               onChange={(e) => onBrandingChange({ directoryOptIn: e.target.checked })}
-              className="h-4 w-4 rounded border"
+              className="mt-0.5 h-4 w-4 rounded border"
             />
-            Include this board in the public directory
+            <span>
+              <span className="block font-medium text-foreground">List in the public directory</span>
+              <span className="text-muted-foreground">Make the board discoverable outside the direct URL.</span>
+            </span>
           </label>
         )}
       </CardContent>

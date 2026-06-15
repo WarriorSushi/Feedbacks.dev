@@ -48,5 +48,5 @@ This pass focuses on authenticated product UI only. The product scene is a devel
 
 ## Remaining UX Follow-Up
 
-- Board settings and API docs still deserve a dedicated density pass. They are functional, but the API screen is documentation-heavy and should eventually use a clearer left-nav or endpoint table.
+- Board settings and API docs received a dedicated density pass in commit follow-up. API examples now use progressive disclosure, and board settings now use compact rows, clearer settings labels, and token-based dark-mode text.
 - Headless Playwright did not complete the Supabase password redirect in local dev, although the in-app browser login succeeded. This should be revisited if we add auth E2E coverage for password login.

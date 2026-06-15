@@ -53,8 +53,9 @@ export function BoardIdentitySection({
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="space-y-2">
-          <Label>Display name</Label>
+          <Label htmlFor="board-display-name">Display name</Label>
           <Input
+            id="board-display-name"
             value={settings.display_name}
             onChange={(e) => handleDisplayNameChange(e.target.value)}
             placeholder="My Product"
@@ -66,12 +67,13 @@ export function BoardIdentitySection({
         </div>
 
         <div className="space-y-2">
-          <Label>Slug</Label>
+          <Label htmlFor="board-slug">Slug</Label>
           <div className="flex gap-2">
             <div className="flex items-center rounded-md border bg-muted px-3 text-sm text-muted-foreground">
               /p/
             </div>
             <Input
+              id="board-slug"
               value={settings.slug}
               onChange={(e) => handleSlugChange(e.target.value)}
               placeholder="my-product"
@@ -81,8 +83,9 @@ export function BoardIdentitySection({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>Logo emoji</Label>
+            <Label htmlFor="board-logo-mark">Logo mark</Label>
             <Input
+              id="board-logo-mark"
               value={settings.branding.logoEmoji || ''}
               onChange={(e) => onBrandingChange({ logoEmoji: e.target.value })}
               placeholder="◦"
@@ -90,10 +93,11 @@ export function BoardIdentitySection({
           </div>
 
           <div className="space-y-2">
-            <Label>Accent color</Label>
+            <Label htmlFor="board-accent-color">Accent color</Label>
             <div className="flex gap-2">
               <input
                 type="color"
+                id="board-accent-color"
                 value={settings.branding.accentColor || '#0f766e'}
                 onChange={(e) => onBrandingChange({ accentColor: e.target.value })}
                 className="h-10 w-10 cursor-pointer rounded border"
@@ -108,8 +112,9 @@ export function BoardIdentitySection({
         </div>
 
         <div className="space-y-2">
-          <Label>Website URL</Label>
+          <Label htmlFor="board-website-url">Website URL</Label>
           <Input
+            id="board-website-url"
             value={settings.branding.websiteUrl || ''}
             onChange={(e) => onBrandingChange({ websiteUrl: e.target.value })}
             placeholder="https://example.com"
