@@ -160,12 +160,17 @@ export function WidgetPreviewSurface({
 
     host.innerHTML = ''
 
+    const instruction = runtimeConfig.embedMode === 'inline'
+      ? 'The form should appear below.'
+      : runtimeConfig.embedMode === 'trigger'
+        ? 'Click the test button below to open the form.'
+        : `Click the "${runtimeConfig.buttonText || 'Feedback'}" button on this page to open the form.`
     const content = document.createElement('div')
     content.className = 'max-w-lg space-y-2'
     content.innerHTML = `
-      <p class="text-sm font-medium text-foreground">Preview surface</p>
+      <p class="text-sm font-medium text-foreground">Look here</p>
       <p class="text-sm text-muted-foreground">
-        Inline and trigger modes render inside this box. Modal mode still uses its floating launcher.
+        ${instruction}
       </p>
     `
     host.appendChild(content)

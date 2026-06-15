@@ -12,8 +12,9 @@ import { readStoredProjectApiKey, rememberProjectApiKey } from '@/lib/project-ap
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, ExternalLink, RefreshCw } from 'lucide-react'
+import { ExternalLink, RefreshCw } from 'lucide-react'
 import { WidgetPreviewSurface } from './widget-preview-surface'
+import { ProjectMenu, SetupProgress } from './project-flow-nav'
 
 interface ProjectVerifyClientProps {
   appOrigin: string
@@ -55,21 +56,22 @@ export function ProjectVerifyClient({
   )
   const modeLabel = getWidgetModeLabel(runtimeConfig)
   const runtimeExpectation = getWidgetExpectation(runtimeConfig)
+  const verifyInstruction = runtimeConfig.embedMode === 'inline'
+    ? 'The form should show inside the box below. Fill it out and send one test.'
+    : runtimeConfig.embedMode === 'trigger'
+      ? 'Click the test button in the box below. Fill out the form and send one test.'
+      : `Click the "${runtimeConfig.buttonText || 'Feedback'}" button in the bottom-right corner. Fill out the form and send one test.`
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
+      <ProjectMenu projectId={projectId} activeSection="setup" />
+      <SetupProgress projectId={projectId} activeStep="verify" />
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link
-            href={`/projects/${projectId}?tab=install`}
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to install
-          </Link>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight">Verify {projectName}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            This hosted page uses the live widget runtime and your saved config. If a test item lands in the inbox here, your install inputs are correct before you troubleshoot your own app.
+          <h1 className="text-2xl font-bold tracking-tight">Test your saved form</h1>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
+            This page is a safe test page. It proves your saved form can send feedback. It does not check the code on your own website.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -89,25 +91,25 @@ export function ProjectVerifyClient({
               <Badge variant="secondary">Saved config</Badge>
               <Badge variant="outline">{modeLabel} mode</Badge>
             </div>
-            <CardTitle className="text-lg">Verification checklist</CardTitle>
+            <CardTitle className="text-lg">Do this</CardTitle>
             <CardDescription>
-              Treat this as the proof step before integrations, board setup, or deeper customization.
+              Send one test. Then check the inbox.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-muted-foreground">
             <div className="rounded-lg border bg-muted/20 p-4">
-              1. Confirm the widget is visible on this page. {runtimeExpectation}
+              1. Find the form on this page. {verifyInstruction}
             </div>
             <div className="rounded-lg border bg-muted/20 p-4">
-              2. Submit a short message like <span className="font-medium text-foreground">Install verification for {projectName}</span>.
+              2. Type <span className="font-medium text-foreground">Install test for {projectName}</span>.
             </div>
             <div className="rounded-lg border bg-muted/20 p-4">
-              3. Open the project inbox and confirm the test item appears.
+              3. Open the inbox. Check that the test is there.
             </div>
             <div className="rounded-lg border border-dashed bg-muted/10 p-4">
               {!resolvedProjectKey && 'A fresh project key is required before this hosted page can submit live test feedback.'}
               {resolvedProjectKey && status === 'loading' && 'Loading the live widget runtime…'}
-              {resolvedProjectKey && status === 'ready' && `The widget runtime is ready. ${runtimeExpectation}`}
+              {resolvedProjectKey && status === 'ready' && `Ready. ${runtimeExpectation}`}
               {resolvedProjectKey && status === 'error' && `The widget could not be loaded: ${error}`}
             </div>
           </CardContent>
@@ -115,18 +117,18 @@ export function ProjectVerifyClient({
 
         <Card className="overflow-hidden">
           <CardHeader className="border-b bg-muted/20">
-            <CardTitle className="text-lg">Live verification surface</CardTitle>
+            <CardTitle className="text-lg">Test area</CardTitle>
             <CardDescription>
-              This safe hosted page removes placement and app-shell variables. It is meant to prove the install path, not replace your real product surface.
+              Use this area only to test the saved form. To test your real website, paste the install code there and send a test from that site.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 p-6">
             <div className="rounded-2xl border bg-background p-6 shadow-sm">
               <div className="max-w-xl space-y-3">
-                <p className="text-sm font-medium text-foreground">Verification sandbox</p>
-                <h2 className="text-3xl font-semibold tracking-tight">Make sure your feedback path works end to end.</h2>
+                <p className="text-sm font-medium text-foreground">Saved form test</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Send one test message.</h2>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  The widget on this page is initialized with the same saved configuration used by your install snippets. When you submit a test item here, it should land in the same project inbox without any extra setup.
+                  {verifyInstruction}
                 </p>
               </div>
 
@@ -162,7 +164,7 @@ export function ProjectVerifyClient({
               )}
 
               <div className="mt-4 rounded-xl border bg-muted/20 p-4 text-sm text-muted-foreground">
-                If this page works but your product page does not, leave the config alone and check where the snippet is pasted in your app. That is usually the missing piece on first install.
+                If this page works but your website does not, the saved form is fine. Check where the install code was pasted on your site.
               </div>
             </div>
 

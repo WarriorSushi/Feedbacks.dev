@@ -19,6 +19,7 @@ import { Suspense } from 'react'
 import { InstallTab } from './install-tab'
 import { CustomizeTab } from './customize-tab'
 import { IntegrationsTab } from './integrations-tab'
+import { ProjectMenu, SetupProgress, type ProjectSection, type SetupStep } from './project-flow-nav'
 
 interface ProjectTabsProps {
   project: Project
@@ -27,14 +28,7 @@ interface ProjectTabsProps {
 
 type TabId = 'install' | 'customize' | 'integrations' | 'board' | 'api' | 'settings'
 
-const tabs: { id: TabId; label: string }[] = [
-  { id: 'install', label: 'Install' },
-  { id: 'customize', label: 'Customize' },
-  { id: 'integrations', label: 'Integrations' },
-  { id: 'board', label: 'Public Board' },
-  { id: 'api', label: 'API' },
-  { id: 'settings', label: 'Settings' },
-]
+const tabs: TabId[] = ['install', 'customize', 'integrations', 'board', 'api', 'settings']
 
 export function ProjectTabs({ project, billingSummary }: ProjectTabsProps) {
   return (
@@ -53,7 +47,18 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
   const [publicBoardUrl, setPublicBoardUrl] = React.useState<string | null>(null)
   const tabParam = searchParams.get('tab') as TabId | null
   const created = searchParams.get('created') === '1'
-  const activeTab = tabs.some((t) => t.id === tabParam) ? tabParam! : 'customize'
+  const activeTab = tabs.includes(tabParam as TabId) ? tabParam! : 'customize'
+  const activeSection: ProjectSection =
+    activeTab === 'customize' || activeTab === 'install'
+      ? 'setup'
+      : activeTab === 'integrations'
+        ? 'integrations'
+        : activeTab === 'board'
+          ? 'board'
+          : activeTab === 'api'
+            ? 'api'
+            : 'settings'
+  const activeSetupStep: SetupStep = activeTab === 'install' ? 'install' : 'customize'
   const apiKeyLastFour = React.useMemo(
     () => apiKey?.slice(-4) || project.api_key_last_four || null,
     [apiKey, project.api_key_last_four],
@@ -101,12 +106,6 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
       cancelled = true
     }
   }, [project.id, activeTab])
-
-  const setActiveTab = (tab: TabId) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('tab', tab)
-    router.push(`?${params.toString()}`)
-  }
 
   const handleRotateApiKey = async () => {
     setRotatingApiKey(true)
@@ -176,42 +175,8 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
         </div>
       </div>
 
-      <div className="space-y-2 md:hidden">
-        <SetupProgress projectId={project.id} activeTab={activeTab} />
-        <Label htmlFor="project-section">Project section</Label>
-        <select
-          id="project-section"
-          aria-label="Project section"
-          className="h-11 w-full rounded-md border bg-background px-3 text-sm font-medium"
-          value={activeTab}
-          onChange={(event) => setActiveTab(event.target.value as TabId)}
-        >
-          {tabs.map((tab) => (
-            <option key={tab.id} value={tab.id}>
-              {tab.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="hidden md:block">
-        <SetupProgress projectId={project.id} activeTab={activeTab} />
-        <div className="flex gap-1 border-b">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-shrink-0 whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? 'border-primary text-foreground'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <ProjectMenu projectId={project.id} activeSection={activeSection} />
+      {activeSection === 'setup' && <SetupProgress projectId={project.id} activeStep={activeSetupStep} />}
 
       {activeTab === 'install' && (
         <InstallTab
@@ -220,7 +185,6 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
           apiKeyLastFour={apiKeyLastFour}
           rotatingApiKey={rotatingApiKey}
           onRotateApiKey={handleRotateApiKey}
-          created={created}
         />
       )}
       {activeTab === 'customize' && (
@@ -245,69 +209,6 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
       )}
       {activeTab === 'settings' && <SettingsTab project={project} />}
     </div>
-  )
-}
-
-function SetupProgress({ projectId, activeTab }: { projectId: string; activeTab: TabId }) {
-  const steps = [
-    {
-      id: 'customize',
-      label: 'Customize',
-      body: 'Save the widget look and placement.',
-      href: `/projects/${projectId}?tab=customize`,
-      current: activeTab === 'customize',
-    },
-    {
-      id: 'install',
-      label: 'Install',
-      body: 'Copy the code for your platform.',
-      href: `/projects/${projectId}?tab=install`,
-      current: activeTab === 'install',
-    },
-    {
-      id: 'verify',
-      label: 'Verify',
-      body: 'Send one test message.',
-      href: `/projects/${projectId}/verify`,
-      current: false,
-    },
-    {
-      id: 'inbox',
-      label: 'Inbox',
-      body: 'Confirm feedback arrived.',
-      href: `/feedback?projectId=${projectId}`,
-      current: false,
-    },
-  ]
-
-  return (
-    <nav aria-label="Setup progress" className="mb-4 rounded-lg border bg-card p-2">
-      <ol className="grid gap-2 md:grid-cols-4">
-        {steps.map((step, index) => (
-          <li key={step.id}>
-            <Link
-              href={step.href}
-              className={`flex min-h-16 gap-3 rounded-md px-3 py-2 text-left transition-colors ${
-                step.current ? 'bg-primary/10 text-foreground' : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
-              }`}
-              aria-current={step.current ? 'step' : undefined}
-            >
-              <span
-                className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                  step.current ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {index + 1}
-              </span>
-              <span className="min-w-0">
-                <span className="block text-sm font-semibold">{step.label}</span>
-                <span className="mt-0.5 block text-xs leading-4">{step.body}</span>
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ol>
-    </nav>
   )
 }
 

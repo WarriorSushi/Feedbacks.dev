@@ -31,6 +31,7 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/feedback',  label: 'Feedback',  icon: MessageSquare },
   { href: '/projects',  label: 'Projects',  icon: FolderOpen },
+  { href: '/boards', label: 'Public Boards', icon: Globe },
   { href: '/billing',   label: 'Billing',   icon: CreditCard },
   { href: '/settings',  label: 'Settings',  icon: Settings },
 ]
@@ -208,35 +209,63 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              title={collapsed ? item.label : undefined}
-              aria-label={collapsed ? item.label : undefined}
-              className={cn(
-                'group relative flex items-center gap-3 rounded-lg py-2 text-[13px] font-medium',
-                'transition-all duration-150',
-                collapsed ? 'justify-center px-2' : 'px-3',
-                isActive
-                  ? [
-                      'bg-primary/8 text-primary',
-                      'before:absolute before:inset-y-1 before:left-0 before:w-[3px] before:rounded-r-full',
-                      'before:bg-primary before:shadow-[0_0_8px_hsl(var(--primary)/0.5)]',
-                    ]
-                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-              )}
-            >
-              <item.icon
+            <React.Fragment key={item.href}>
+              <Link
+                href={item.href}
+                title={collapsed ? item.label : undefined}
+                aria-label={collapsed ? item.label : undefined}
                 className={cn(
-                  'h-[17px] w-[17px] shrink-0 transition-transform duration-150',
-                  !isActive && 'group-hover:scale-[1.08]',
-                  isActive && 'text-primary'
+                  'group relative flex items-center gap-3 rounded-lg py-2 text-[13px] font-medium',
+                  'transition-all duration-150',
+                  collapsed ? 'justify-center px-2' : 'px-3',
+                  isActive
+                    ? [
+                        'bg-primary/8 text-primary',
+                        'before:absolute before:inset-y-1 before:left-0 before:w-[3px] before:rounded-r-full',
+                        'before:bg-primary before:shadow-[0_0_8px_hsl(var(--primary)/0.5)]',
+                      ]
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                 )}
-              />
-              {!collapsed && (
-                <span className="truncate">{item.label}</span>
+              >
+                <item.icon
+                  className={cn(
+                    'h-[17px] w-[17px] shrink-0 transition-transform duration-150',
+                    !isActive && 'group-hover:scale-[1.08]',
+                    isActive && 'text-primary'
+                  )}
+                />
+                {!collapsed && (
+                  <span className="truncate">{item.label}</span>
+                )}
+              </Link>
+              {item.href === '/projects' && isActive && !collapsed && projects.length > 0 && (
+                <details open className="ml-6 rounded-md border-l pl-2">
+                  <summary className="cursor-pointer py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Project list
+                  </summary>
+                  <div className="space-y-0.5 pb-1">
+                    {projects.map((project, index) => {
+                      const selected = project.id === currentProjectId
+                      return (
+                        <Link
+                          key={project.id}
+                          href={`/projects/${project.id}`}
+                          className={cn(
+                            'flex items-center gap-2 rounded-md px-2 py-1.5 text-[12px] transition-colors',
+                            selected
+                              ? 'bg-primary/10 font-medium text-primary'
+                              : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                          )}
+                        >
+                          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', projectColors[index % projectColors.length])} />
+                          <span className="truncate">{project.name}</span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </details>
               )}
-            </Link>
+            </React.Fragment>
           )
         })}
 

@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CodeSnippet } from '@/components/code-snippet'
 import { Badge } from '@/components/ui/badge'
-import { Bot, Check, Copy, ExternalLink, Loader2, RefreshCw, Sparkles, XCircle } from 'lucide-react'
+import { Bot, Copy, ExternalLink, Loader2, RefreshCw, Sparkles, XCircle } from 'lucide-react'
 
 interface InstallTabProps {
   project: Project
@@ -25,7 +25,6 @@ interface InstallTabProps {
   apiKeyLastFour: string | null
   rotatingApiKey: boolean
   onRotateApiKey: () => Promise<void>
-  created: boolean
 }
 
 interface SetupTokenStatus {
@@ -48,9 +47,7 @@ export function InstallTab({
   apiKeyLastFour,
   rotatingApiKey,
   onRotateApiKey,
-  created,
 }: InstallTabProps) {
-  const [copied, setCopied] = React.useState(false)
   const [setupPacket, setSetupPacket] = React.useState<{ tokenId: string; packetUrl: string; expiresAt: string } | null>(null)
   const [setupPacketLoading, setSetupPacketLoading] = React.useState(false)
   const [setupTokensLoading, setSetupTokensLoading] = React.useState(false)
@@ -88,6 +85,11 @@ export function InstallTab({
   )
   const modeLabel = getWidgetModeLabel(runtimeConfig)
   const expectedResult = getWidgetExpectation(runtimeConfig)
+  const verifyInstruction = runtimeConfig.embedMode === 'inline'
+    ? 'After you paste the code, open the page where you placed the form. Fill it out and send one test.'
+    : runtimeConfig.embedMode === 'trigger'
+      ? `After you paste the code, open your site and click your own feedback button. Fill out the form and send one test.`
+      : `After you paste the code, open your site and click the "${runtimeConfig.buttonText || 'Feedback'}" button. Fill out the form and send one test.`
   const agentSetupPrompt = React.useMemo(() => {
     const setupPacket = {
       project: {
@@ -135,13 +137,6 @@ Goals:
 Setup packet:
 ${JSON.stringify(setupPacket, null, 2)}`
   }, [appOrigin, expectedResult, feedbackApiUrl, modeLabel, project.domain, project.id, project.name, projectKey, snippets, widgetScriptUrl])
-
-  const copyWebsiteSnippet = async () => {
-    if (!websiteSnippet) return
-    await navigator.clipboard.writeText(websiteSnippet)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   const loadSetupTokens = React.useCallback(async () => {
     setSetupTokensLoading(true)
@@ -346,44 +341,15 @@ export function FeedbacksWidgetScript() {
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className="bg-primary/90 text-primary-foreground">
-                  {created ? 'Project created' : 'Install first'}
-                </Badge>
+                <Badge className="bg-primary/90 text-primary-foreground">Step 2</Badge>
                 <Badge variant="outline">{modeLabel} mode</Badge>
               </div>
               <h2 className="mt-3 text-xl font-semibold tracking-tight">
-                Install the saved widget, then verify once.
+                Put the feedback form on your site.
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                This page uses your last saved customization. Choose the platform, copy only the code, then send one test message.
+                Pick where your site runs. Copy the code below. Paste it into your site. Then send one test from your own site.
               </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2 xl:justify-end">
-              {projectKey ? (
-                <Button onClick={copyWebsiteSnippet} disabled={!websiteSnippet} className="min-h-10">
-                  {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                  {copied ? 'Copied' : 'Copy Website snippet'}
-                </Button>
-              ) : (
-                <Button onClick={() => void onRotateApiKey()} disabled={rotatingApiKey} className="min-h-10">
-                  {rotatingApiKey ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-                  Generate fresh key
-                </Button>
-              )}
-              {projectKey ? (
-                <Link href={`/projects/${project.id}/verify`}>
-                  <Button variant="outline" className="min-h-10">
-                    Verify install
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              ) : (
-                <Button variant="outline" disabled className="min-h-10">
-                  Verify install
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </Button>
-              )}
             </div>
           </div>
 
@@ -431,7 +397,7 @@ export function FeedbacksWidgetScript() {
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">Saved mode</p>
                   <p className="mt-1 text-sm font-medium text-foreground">{modeLabel}</p>
-                  <p className="mt-1 text-sm leading-5 text-muted-foreground">{expectedResult}</p>
+                  <p className="mt-1 text-sm leading-5 text-muted-foreground">{verifyInstruction}</p>
                 </div>
               </div>
             </div>
@@ -473,6 +439,12 @@ export function FeedbacksWidgetScript() {
                 <p className="text-sm font-semibold text-foreground">{selectedTarget.title}</p>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">{selectedTarget.body}</p>
               </div>
+              {selectedTarget.code && (
+                <Button onClick={() => void navigator.clipboard.writeText(selectedTarget.code || '')} size="sm">
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy code
+                </Button>
+              )}
               {selectedTarget.id === 'mobile' && (
                 <Link href={`/projects/${project.id}?tab=api`}>
                   <Button variant="outline" size="sm">Open API docs</Button>
@@ -510,12 +482,12 @@ export function FeedbacksWidgetScript() {
             </div>
             <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
               <p className="text-sm font-medium text-foreground">What appears</p>
-              <p className="text-sm leading-6 text-muted-foreground">{selectedTarget.expected}</p>
+              <p className="text-sm leading-6 text-muted-foreground">{verifyInstruction}</p>
             </div>
             <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
-              <p className="text-sm font-medium text-foreground">Next step</p>
+              <p className="text-sm font-medium text-foreground">Check it worked</p>
               <p className="text-sm leading-6 text-muted-foreground">
-                Open verification, send one test message, then confirm it appears in the inbox.
+                Use your real site first. Send one test, then open the inbox and look for it.
               </p>
             </div>
           </div>
