@@ -209,6 +209,7 @@ export function ApiDocs({
               <li><code className="bg-muted px-1 rounded">submit_test_feedback</code> — Send a verification item to the inbox</li>
               <li><code className="bg-muted px-1 rounded">list_projects</code> — List the project attached to this API key</li>
               <li><code className="bg-muted px-1 rounded">get_project_setup_packet</code> — Fetch exact install snippets and verification steps</li>
+              <li><code className="bg-muted px-1 rounded">verify_widget_install</code> — Inspect a reachable page and report inbox status</li>
               <li><code className="bg-muted px-1 rounded">list_feedback</code> — List recent feedback (paginated, filterable)</li>
               <li><code className="bg-muted px-1 rounded">update_feedback_status</code> — Change feedback status/priority</li>
               <li><code className="bg-muted px-1 rounded">get_project_stats</code> — Get project overview stats</li>

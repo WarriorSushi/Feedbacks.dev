@@ -24,6 +24,7 @@ Private/internal deployments can replace that URL with their own dashboard, API,
 - `submit_test_feedback` - submit a small verification item to the project inbox
 - `list_projects` - list the project attached to this API key
 - `get_project_setup_packet` - fetch exact install snippets, endpoints, and verification steps
+- `verify_widget_install` - inspect a reachable page for the widget and report inbox status
 - `list_feedback` - list recent feedback with optional filters
 - `search_feedback` - search feedback by keyword
 - `update_feedback_status` - update status, priority, or tags

@@ -47,3 +47,8 @@ export const submitTestFeedbackParams = z.object({
   message: z.string().min(2).default('feedbacks.dev install verification from MCP').describe('Test feedback message'),
   url: z.string().url().optional().describe('Page URL where the widget was tested'),
 })
+
+export const verifyWidgetInstallParams = z.object({
+  project_id: z.string().optional().describe('Project ID. Defaults to the project attached to this API key.'),
+  page_url: z.string().url().optional().describe('Optional page URL to inspect for the widget script and project key'),
+})

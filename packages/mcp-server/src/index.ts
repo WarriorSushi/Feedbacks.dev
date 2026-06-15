@@ -9,6 +9,7 @@ import {
   searchFeedbackParams,
   setupPacketParams,
   submitTestFeedbackParams,
+  verifyWidgetInstallParams,
 } from './tools.js'
 
 function readCliOption(name: string): string | undefined {
@@ -83,6 +84,69 @@ server.tool(
   async (params) => {
     const projectId = params.project_id || await getProjectId()
     const result = await apiRequest(`/projects/${projectId}/setup-packet`)
+    return {
+      content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
+    }
+  }
+)
+
+server.tool(
+  'verify_widget_install',
+  'Check whether a page appears to include the feedbacks.dev widget and whether the project has received feedback',
+  verifyWidgetInstallParams.shape,
+  async (params) => {
+    const projectId = params.project_id || await getProjectId()
+    const [packet, stats] = await Promise.all([
+      apiRequest(`/projects/${projectId}/setup-packet`) as Promise<{
+        project: { publicKey: string }
+        widget: { scriptUrl: string; endpoint: string; expectedResult: string }
+        verification: { url: string }
+      }>,
+      apiRequest(`/projects/${projectId}`) as Promise<{
+        stats?: { totalFeedback?: number; newFeedback?: number }
+      }>,
+    ])
+
+    let pageCheck: Record<string, unknown> | null = null
+    if (params.page_url) {
+      try {
+        const response = await fetch(params.page_url)
+        const html = await response.text()
+        pageCheck = {
+          url: params.page_url,
+          reachable: response.ok,
+          status: response.status,
+          containsWidgetScript:
+            html.includes(packet.widget.scriptUrl) ||
+            html.includes('/widget/latest.js') ||
+            html.includes('/widget/v2.js'),
+          containsProjectKey: html.includes(packet.project.publicKey),
+          containsFeedbackEndpoint: html.includes(packet.widget.endpoint),
+        }
+      } catch (error) {
+        pageCheck = {
+          url: params.page_url,
+          reachable: false,
+          error: error instanceof Error ? error.message : 'Failed to fetch page',
+        }
+      }
+    }
+
+    const result = {
+      projectId,
+      expectedWidgetResult: packet.widget.expectedResult,
+      hostedVerificationUrl: packet.verification.url,
+      inbox: {
+        totalFeedback: stats.stats?.totalFeedback ?? 0,
+        newFeedback: stats.stats?.newFeedback ?? 0,
+        hasReceivedFeedback: (stats.stats?.totalFeedback ?? 0) > 0,
+      },
+      pageCheck,
+      nextStep: pageCheck
+        ? 'If the page check passes, submit_test_feedback or submit from the widget, then confirm the item appears in the inbox.'
+        : 'Provide page_url to inspect the installed page, or open the hosted verification URL and submit one test item.',
+    }
+
     return {
       content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
     }
