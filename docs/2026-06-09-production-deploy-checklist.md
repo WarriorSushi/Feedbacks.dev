@@ -12,7 +12,7 @@ Status refresh on 14 June 2026:
 
 - [x] `https://feedbacks.dev` redirects to the live marketing/docs site at `https://www.feedbacks.dev`.
 - [x] `https://app.feedbacks.dev` serves dashboard, API, widget assets, and public boards.
-- [ ] `NEXT_PUBLIC_APP_ORIGIN=https://app.feedbacks.dev` in production.
+- [x] `NEXT_PUBLIC_APP_ORIGIN=https://app.feedbacks.dev` in production.
 - [x] Public docs are hosted-first and do not tell customers to run infrastructure.
 
 14 June 2026 probe:
@@ -29,15 +29,17 @@ Status refresh on 14 June 2026:
 
 ## Supabase Auth
 
-- [ ] Site URL is set to the production app origin.
-- [ ] Redirect URLs include:
-  - [ ] `https://app.feedbacks.dev/auth/callback`
-  - [ ] local dev callback URL
-- [ ] GitHub OAuth callback points at the Supabase Auth callback URL.
-- [ ] Email provider is production-ready.
-- [ ] Leaked password protection is enabled in Supabase Auth password security settings.
+- [x] Site URL is set to the production app origin.
+- [x] Redirect URLs include:
+  - [x] `https://app.feedbacks.dev/auth/callback`
+  - [x] local dev callback URL
+- [x] GitHub OAuth callback points at the Supabase Auth callback URL.
+- [x] Email provider is production-ready.
+- [ ] Leaked password protection is enabled in Supabase Auth password security settings. Accepted for now because it requires Supabase Pro and password login is not part of the product flow.
 
 14 June 2026 note: MCP confirms the live Supabase project `xiiaugllydxxmjbtzfux` is `ACTIVE_HEALTHY` in `eu-west-2` on Postgres 17. The available MCP tools can read advisors and project health, but not the Auth URL configuration.
+
+15 June 2026 note: operator confirmed Supabase Auth Site URL, redirect allow-list, GitHub OAuth, and hosted auth flow work with `https://app.feedbacks.dev`.
 
 ## Supabase Database
 
@@ -69,7 +71,7 @@ Status refresh on 14 June 2026:
   - [ ] `NEXT_PUBLIC_SUPABASE_URL`
   - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - [ ] `SUPABASE_SERVICE_ROLE_KEY`
-  - [ ] `NEXT_PUBLIC_APP_ORIGIN`
+  - [x] `NEXT_PUBLIC_APP_ORIGIN`
   - [ ] `CRON_SECRET`
   - [ ] `WEBHOOK_JOB_SECRET`
   - [ ] `VOTE_HMAC_SECRET`
