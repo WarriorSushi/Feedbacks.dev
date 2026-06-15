@@ -148,6 +148,22 @@ For fast webhook retry processing, use one of these before launch traffic depend
 
 ## Step 5: Deploy to Vercel
 
+Current production status, refreshed 15 June 2026:
+
+- Vercel project: `feedbacks-dev-dashboard`
+- Team/scope: `warriorsushis-projects`
+- Root directory: `packages/dashboard`
+- Production origin: `https://app.feedbacks.dev`
+- Latest verified production commit: `eccd20482645f5a2b0ef4150e434c1b8c2aa150b`
+- Latest verified production deployment: `dpl_FYMCZopaR98JDASYzZECsBbFichw`
+
+The deployment was performed through the Vercel CLI after reconnecting the GitHub integration and granting the requested repository permissions. If Git auto-deploy appears stuck again, first check whether the project is receiving GitHub deployment records, then run:
+
+```bash
+vercel link --yes --project feedbacks-dev-dashboard --scope warriorsushis-projects
+vercel deploy --prod --scope warriorsushis-projects --yes
+```
+
 ### Option A: Via Vercel Dashboard
 1. Go to [vercel.com/new](https://vercel.com/new)
 2. Import your GitHub repo

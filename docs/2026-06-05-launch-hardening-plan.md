@@ -19,8 +19,8 @@ The goal is not to add more product surface right now. The goal is to make the p
 Current branch:
 
 ```text
-main == origin/main after the 9 June 2026 push
-latest pushed commit before this launch-completion slice: 4b6450d Apply live Supabase hardening migrations
+main == origin/main after the 15 June 2026 push
+latest pushed commit before this doc refresh: eccd204 Make Vercel cron config Hobby compatible
 ```
 
 Known local files not part of the pushed product work:
@@ -41,6 +41,7 @@ Claude's 25 May audit was useful, but several items it listed are now fixed.
 Fixed since then:
 
 - Cron config split-brain is fixed. Only `packages/dashboard/vercel.json` remains. On Vercel Hobby it uses daily cron schedules; fast webhook retries need Vercel Pro or an external scheduler.
+- Vercel production is deployed again as of 15 June 2026 after the Hobby cron limit blocked the earlier five-minute webhook schedule.
 - Project stats RPCs are covered by `sql/012_project_stats_and_digest_rls.sql`.
 - `notification_digests` now has RLS and policies in `sql/012_project_stats_and_digest_rls.sql`.
 - Widget `html2canvas` SRI is fixed and unit-tested.
