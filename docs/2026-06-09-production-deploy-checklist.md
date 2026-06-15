@@ -89,7 +89,7 @@ Status refresh on 15 June 2026:
 
 ## Cron Jobs
 
-- [ ] Webhook jobs run every 5 minutes through the GitHub Actions external scheduler. Vercel Hobby deployment keeps a daily fallback because Vercel Hobby rejects sub-daily cron schedules.
+- [x] Webhook jobs run every 5 minutes through the GitHub Actions external scheduler. Vercel Hobby deployment keeps a daily fallback because Vercel Hobby rejects sub-daily cron schedules.
 - [x] Notification digest cron runs daily.
 - [x] `CRON_SECRET` exists in Vercel production env so Vercel sends `Authorization: Bearer <CRON_SECRET>` to cron routes.
 - [x] `CRON_SECRET` exists in GitHub Actions repository secrets for `WarriorSushi/Feedbacks.dev`.
@@ -102,7 +102,7 @@ Status refresh on 15 June 2026:
 
 The fast retry path is handled by GitHub Actions while the project remains on Vercel Hobby. Upgrade to Vercel Pro or move to a dedicated queue/worker only if GitHub's best-effort schedule becomes too loose for production traffic.
 
-15 June 2026 GitHub Actions scheduler note: `.github/workflows/process-webhook-jobs.yml` now calls `https://app.feedbacks.dev/api/cron/webhook-jobs` every 5 minutes using the repository `CRON_SECRET`. A direct production probe with the same secret returned HTTP `200` and `{"processed":[]}`.
+15 June 2026 GitHub Actions scheduler note: `.github/workflows/process-webhook-jobs.yml` now calls `https://app.feedbacks.dev/api/cron/webhook-jobs` every 5 minutes using the repository `CRON_SECRET`. A direct production probe with the same secret returned HTTP `200` and `{"processed":[]}`. Manual workflow run `27526711513` completed successfully.
 
 ## Widget Assets
 
