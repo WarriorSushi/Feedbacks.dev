@@ -1,6 +1,6 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { getCurrentUserBillingSummary } from '@/lib/billing'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatDate } from '@/lib/utils'
@@ -94,43 +94,41 @@ export default async function ProjectsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="overflow-hidden rounded-xl border bg-card">
           {(projects as Project[]).map((project) => (
-            <Link key={project.id} href={`/projects/${project.id}?tab=install`} className="group">
-              <Card className="h-full transition-all hover:border-primary/35 hover:shadow-md">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-3">
-                    <CardTitle className="text-lg">{project.name}</CardTitle>
-                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-                  </div>
-                  <CardDescription>
-                    {project.domain || 'No domain set'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Key className="h-3.5 w-3.5 text-muted-foreground" />
-                      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                        {project.api_key_last_four ? `••••${project.api_key_last_four}` : 'Hidden'}
-                      </code>
-                    </div>
-                    <div className="grid gap-2 text-sm sm:grid-cols-2">
-                      <Badge variant="secondary">
-                        <Inbox className="mr-1 h-3 w-3" />
-                        {countMap.get(project.id) || 0} feedback
-                      </Badge>
-                      <Badge variant="outline">
-                        <Code2 className="mr-1 h-3 w-3" />
-                        Install
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Created {formatDate(project.created_at)}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+            <Link
+              key={project.id}
+              href={`/projects/${project.id}?tab=install`}
+              className="group grid gap-3 border-b px-4 py-4 transition-colors last:border-b-0 hover:bg-accent/40 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+            >
+              <div className="min-w-0">
+                <div className="flex min-w-0 items-center gap-2">
+                  <FolderOpen className="h-4 w-4 shrink-0 text-primary" />
+                  <h2 className="truncate text-base font-semibold">{project.name}</h2>
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                  <span>{project.domain || 'No domain set'}</span>
+                  <span className="hidden h-1 w-1 rounded-full bg-border sm:inline-block" />
+                  <span>Created {formatDate(project.created_at)}</span>
+                  <span className="hidden h-1 w-1 rounded-full bg-border sm:inline-block" />
+                  <span className="inline-flex items-center gap-1">
+                    <Key className="h-3 w-3" />
+                    {project.api_key_last_four ? `••••${project.api_key_last_four}` : 'Key hidden'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                <Badge variant="secondary">
+                  <Inbox className="mr-1 h-3 w-3" />
+                  {countMap.get(project.id) || 0} feedback
+                </Badge>
+                <Badge variant="outline">
+                  <Code2 className="mr-1 h-3 w-3" />
+                  Install
+                </Badge>
+                <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+              </div>
             </Link>
           ))}
         </div>

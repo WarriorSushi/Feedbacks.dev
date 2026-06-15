@@ -195,8 +195,8 @@ export default function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
-            <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-background px-3 py-3 text-sm">
+          <div className="divide-y rounded-lg border bg-muted/10">
+            <label className="flex min-h-14 items-start gap-3 px-4 py-3 text-sm">
               <input
                 type="checkbox"
                 className="mt-0.5 h-4 w-4 rounded border accent-primary"
@@ -210,7 +210,7 @@ export default function SettingsPage() {
                 </span>
               </span>
             </label>
-            <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-background px-3 py-3 text-sm">
+            <label className="flex min-h-14 items-start gap-3 px-4 py-3 text-sm">
               <input
                 type="checkbox"
                 className="mt-0.5 h-4 w-4 rounded border accent-primary"
@@ -224,7 +224,7 @@ export default function SettingsPage() {
                 </span>
               </span>
             </label>
-            <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-background px-3 py-3 text-sm">
+            <label className="flex min-h-14 items-start gap-3 px-4 py-3 text-sm">
               <input
                 type="checkbox"
                 className="mt-0.5 h-4 w-4 rounded border accent-primary"
@@ -239,7 +239,7 @@ export default function SettingsPage() {
                 </span>
               </span>
             </label>
-            <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-background px-3 py-3 text-sm">
+            <label className="flex min-h-14 items-start gap-3 px-4 py-3 text-sm">
               <input
                 type="checkbox"
                 className="mt-0.5 h-4 w-4 rounded border accent-primary"

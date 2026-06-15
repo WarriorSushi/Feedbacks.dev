@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { Github, Mail, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react'
-// Password login removed — magic link only
+import { Github, Mail, Loader2, ArrowRight, CheckCircle2, KeyRound } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -29,7 +28,9 @@ const codeSnippet = generateInstallSnippets({
 
 function AuthPageInner() {
   const [email, setEmail] = React.useState('')
+  const [password, setPassword] = React.useState('')
   const [loading, setLoading] = React.useState(false)
+  const [magicLoading, setMagicLoading] = React.useState(false)
   const [githubLoading, setGithubLoading] = React.useState(false)
   const [sent, setSent] = React.useState(false)
   const [error, setError] = React.useState('')
@@ -38,9 +39,28 @@ function AuthPageInner() {
 
   const supabase = React.useMemo(() => createClient(), [])
 
-  const handleMagicLink = async (e: React.FormEvent) => {
+  const handlePasswordSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    setLoading(false)
+    if (error) {
+      setError(error.message)
+      return
+    }
+
+    window.location.href = redirect
+  }
+
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMagicLoading(true)
     setError('')
 
     const { error } = await supabase.auth.signInWithOtp({
@@ -50,7 +70,7 @@ function AuthPageInner() {
       },
     })
 
-    setLoading(false)
+    setMagicLoading(false)
     if (error) {
       setError(error.message)
     } else {
@@ -248,7 +268,7 @@ function AuthPageInner() {
               </div>
 
               {/* Email form */}
-              <form onSubmit={handleMagicLink} className="space-y-3">
+              <form onSubmit={handlePasswordSignIn} className="space-y-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="email" className="text-[13px]">
                     Email address
@@ -264,6 +284,20 @@ function AuthPageInner() {
                     autoFocus
                   />
                 </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="text-[13px]">
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-11 border-border/80 text-[14px] transition-colors focus:border-primary/60"
+                    required
+                  />
+                </div>
 
                 {error && (
                   <p className="text-[12px] text-destructive">{error}</p>
@@ -277,9 +311,25 @@ function AuthPageInner() {
                   {loading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
+                    <KeyRound className="mr-2 h-4 w-4" />
+                  )}
+                  Sign in and continue setup
+                </Button>
+              </form>
+
+              <form onSubmit={handleMagicLink}>
+                <Button
+                  variant="ghost"
+                  className="h-10 w-full text-[13px] text-muted-foreground"
+                  type="submit"
+                  disabled={magicLoading || !email}
+                >
+                  {magicLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
                     <Mail className="mr-2 h-4 w-4" />
                   )}
-                  Send magic link and continue setup
+                  Email me a magic link instead
                 </Button>
               </form>
             </div>

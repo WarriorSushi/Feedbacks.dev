@@ -13,7 +13,6 @@ import {
   cn,
   truncate,
   formatRelativeTime,
-  getTypeIcon,
   getStatusColor,
   getTypeColor,
   statusConfig as globalStatusConfig,
@@ -31,6 +30,12 @@ import {
   Inbox,
   X,
   Tag,
+  Bug,
+  Lightbulb,
+  Smile,
+  CircleHelp,
+  MessageSquare,
+  Bot,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -40,6 +45,18 @@ const statuses: FeedbackStatus[] = ['new', 'reviewed', 'planned', 'in_progress',
 const types: FeedbackType[] = ['bug', 'idea', 'praise', 'question']
 
 const statusMeta = globalStatusConfig
+const typeIcons = {
+  bug: Bug,
+  idea: Lightbulb,
+  praise: Smile,
+  question: CircleHelp,
+  other: MessageSquare,
+}
+
+function TypeIcon({ type, className }: { type?: FeedbackType | string | null; className?: string }) {
+  const Icon = typeIcons[(type || 'other') as keyof typeof typeIcons] || MessageSquare
+  return <Icon className={cn('h-4 w-4', className)} />
+}
 
 interface ProjectFilterOption {
   id: string
@@ -351,7 +368,7 @@ function FeedbackInboxInner() {
               active={type === t}
               onClick={() => updateParams({ type: type === t ? '' : t })}
             >
-              {getTypeIcon(t)}{' '}
+              <TypeIcon type={t} className="h-3.5 w-3.5" />
               <span className="capitalize">{t}</span>
             </FilterPill>
           ))}
@@ -362,7 +379,8 @@ function FeedbackInboxInner() {
             active={agent === '1'}
             onClick={() => updateParams({ agent: agent === '1' ? '' : '1' })}
           >
-            🤖 Agent
+            <Bot className="h-3.5 w-3.5" />
+            Agent
           </FilterPill>
 
           {hasFilters && (
@@ -636,9 +654,7 @@ function FeedbackRow({
         href={`/feedback/${fb.id}`}
         className="flex min-w-0 flex-1 items-start gap-2.5"
       >
-        <span className="mt-0.5 shrink-0 text-base leading-none">
-          {getTypeIcon(fb.type)}
-        </span>
+        <TypeIcon type={fb.type} className="mt-0.5 shrink-0 text-muted-foreground" />
 
         <div className="min-w-0 flex-1">
           <p
@@ -687,7 +703,8 @@ function FeedbackRow({
               <>
                 <span className="text-[10px] text-muted-foreground/30">·</span>
                 <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
-                  🤖 <span className="font-medium">{fb.agent_name}</span>
+                  <Bot className="h-3 w-3" />
+                  <span className="font-medium">{fb.agent_name}</span>
                 </span>
               </>
             )}
@@ -756,9 +773,7 @@ function EmptyState({
   if (hasFilters) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <span className="text-5xl leading-none" role="img" aria-label="No results">
-          🔍
-        </span>
+        <Search className="h-10 w-10 text-muted-foreground/40" />
         <p className="mt-4 text-sm font-medium">No results found</p>
         <p className="mt-1 text-xs text-muted-foreground">
           Try adjusting or clearing your filters.
@@ -773,9 +788,7 @@ function EmptyState({
 
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <span className="text-5xl leading-none" role="img" aria-label="Empty inbox">
-        📭
-      </span>
+      <Inbox className="h-10 w-10 text-muted-foreground/40" />
       <p className="mt-4 text-sm font-medium">{hasProjects ? 'Your inbox is empty' : 'No feedback path is installed yet'}</p>
       <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground">
         {hasProjects

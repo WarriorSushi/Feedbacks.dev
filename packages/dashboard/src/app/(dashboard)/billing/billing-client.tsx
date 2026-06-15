@@ -130,28 +130,30 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Projects</p>
-              <p className="mt-2 text-2xl font-semibold">{projectLimitText}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {summary.entitlements.projectLimit ? 'Free plan limit' : 'Unlimited on Pro'}
-              </p>
-            </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Feedback this month</p>
-              <p className="mt-2 text-2xl font-semibold">{feedbackLimitText}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {summary.entitlements.feedbackMonthlyLimit ? 'Monthly quota' : 'Unlimited on Pro'}
-              </p>
-            </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Current period end</p>
-              <p className="mt-2 text-xl font-semibold">{formatPeriodEnd(summary.account.current_period_end)}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {summary.entitlements.historyDays ? `${summary.entitlements.historyDays}-day history on Free` : 'Unlimited history on Pro'}
-              </p>
-            </div>
+          <div className="divide-y rounded-lg border bg-muted/10">
+            {[
+              {
+                label: 'Projects',
+                value: projectLimitText,
+                hint: summary.entitlements.projectLimit ? 'Free plan limit' : 'Unlimited on Pro',
+              },
+              {
+                label: 'Feedback this month',
+                value: feedbackLimitText,
+                hint: summary.entitlements.feedbackMonthlyLimit ? 'Monthly quota' : 'Unlimited on Pro',
+              },
+              {
+                label: 'Current period end',
+                value: formatPeriodEnd(summary.account.current_period_end),
+                hint: summary.entitlements.historyDays ? `${summary.entitlements.historyDays}-day history on Free` : 'Unlimited history on Pro',
+              },
+            ].map((item) => (
+              <div key={item.label} className="grid gap-1 px-4 py-3 sm:grid-cols-[180px_minmax(0,1fr)_220px] sm:items-center">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{item.label}</p>
+                <p className="text-lg font-semibold tabular-nums">{item.value}</p>
+                <p className="text-xs text-muted-foreground sm:text-right">{item.hint}</p>
+              </div>
+            ))}
           </div>
 
           <div className="flex flex-wrap gap-2">

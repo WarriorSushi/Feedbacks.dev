@@ -2,7 +2,7 @@ import { createServerSupabase } from '@/lib/supabase-server'
 import { getCurrentUserBillingSummary, getHistoryCutoff } from '@/lib/billing'
 import { notFound } from 'next/navigation'
 import type { Feedback, FeedbackNote } from '@/lib/types'
-import { formatDate, getTypeIcon, getTypeColor, statusConfig } from '@/lib/utils'
+import { cn, formatDate, getTypeColor, statusConfig } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -20,12 +20,30 @@ import {
   Paperclip,
   StickyNote,
   Circle,
+  Bug,
+  Lightbulb,
+  Smile,
+  CircleHelp,
+  MessageSquare,
 } from 'lucide-react'
 import { FeedbackActions } from './feedback-actions'
 
 const statusDotColor = Object.fromEntries(
   Object.entries(statusConfig).map(([k, v]) => [k, v.dot])
 )
+
+const typeIcons = {
+  bug: Bug,
+  idea: Lightbulb,
+  praise: Smile,
+  question: CircleHelp,
+  other: MessageSquare,
+}
+
+function TypeIcon({ type, className }: { type?: string | null; className?: string }) {
+  const Icon = typeIcons[(type || 'other') as keyof typeof typeIcons] || MessageSquare
+  return <Icon className={cn('h-4 w-4', className)} />
+}
 
 export default async function FeedbackDetailPage({
   params,
@@ -78,7 +96,7 @@ export default async function FeedbackDetailPage({
         </Link>
         <span>/</span>
         <span className="text-foreground font-medium">
-          {fb.type ? `${getTypeIcon(fb.type)} ${fb.type}` : 'Detail'}
+          {fb.type || 'Detail'}
         </span>
       </nav>
 
@@ -89,7 +107,7 @@ export default async function FeedbackDetailPage({
           <Card>
             <CardHeader className="pb-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-2xl">{getTypeIcon(fb.type)}</span>
+                <TypeIcon type={fb.type} className="h-5 w-5 text-muted-foreground" />
                 {fb.type && (
                   <Badge variant="secondary" className={getTypeColor(fb.type)}>
                     {fb.type}

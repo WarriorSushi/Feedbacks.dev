@@ -3,7 +3,7 @@ import { getCurrentUserBillingSummary, getHistoryCutoff } from '@/lib/billing'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { cn, formatRelativeTime, truncate, getTypeIcon, getStatusColor } from '@/lib/utils'
+import { cn, formatRelativeTime, truncate, getStatusColor } from '@/lib/utils'
 import type { Feedback } from '@/lib/types'
 import Link from 'next/link'
 import {
@@ -16,6 +16,12 @@ import {
   Bot,
   Code2,
   ShieldCheck,
+  BarChart3,
+  Bug,
+  Lightbulb,
+  Smile,
+  CircleHelp,
+  MessageSquare,
 } from 'lucide-react'
 
 function getGreeting() {
@@ -23,6 +29,19 @@ function getGreeting() {
   if (h < 12) return 'morning'
   if (h < 17) return 'afternoon'
   return 'evening'
+}
+
+const typeIcons = {
+  bug: Bug,
+  idea: Lightbulb,
+  praise: Smile,
+  question: CircleHelp,
+  other: MessageSquare,
+}
+
+function TypeIcon({ type, className }: { type?: string | null; className?: string }) {
+  const Icon = typeIcons[(type || 'other') as keyof typeof typeIcons] || MessageSquare
+  return <Icon className={cn('h-4 w-4', className)} />
 }
 
 export default async function DashboardPage() {
@@ -214,47 +233,23 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Code2 className="h-4 w-4" />
+        <Card>
+          <CardContent className="divide-y p-0">
+            {[
+              { Icon: Code2, title: 'Copy-paste install', body: 'Generated from the same config model used by docs and verification.' },
+              { Icon: ShieldCheck, title: 'Safe by default', body: 'The first snippet uses the browser-safe project key, not private server credentials.' },
+              { Icon: Inbox, title: 'First proof fast', body: 'After hosted verification works, the inbox becomes the workspace for triage and routing.' },
+            ].map(({ Icon, title, body }) => (
+              <div key={title} className="flex gap-3 px-5 py-4">
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{title}</p>
+                  <p className="mt-0.5 text-sm leading-6 text-muted-foreground">{body}</p>
+                </div>
               </div>
-              <CardTitle className="text-base">Copy-paste install</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm leading-6 text-muted-foreground">
-                The install page generates a project-specific snippet from the same config model used by docs and verification.
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-              <CardTitle className="text-base">Safe by default</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm leading-6 text-muted-foreground">
-                The basic prompt and snippet show only the project key needed for browser submissions, not private server secrets.
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Inbox className="h-4 w-4" />
-              </div>
-              <CardTitle className="text-base">First proof fast</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Once the hosted verification works, the inbox becomes the main workspace for triage, tags, and routing.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -451,7 +446,7 @@ export default async function DashboardPage() {
             href="/feedback?type=bug"
             className="flex min-w-[100px] flex-shrink-0 items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-xs font-medium transition-colors hover:bg-accent"
           >
-            <span className="text-sm leading-none">🐛</span>
+            <Bug className="h-3.5 w-3.5 text-muted-foreground" />
             Bugs
             {typeCounts.bug > 0 && (
               <Badge variant="secondary" className="ml-auto h-5 text-[10px]">{typeCounts.bug}</Badge>
@@ -461,7 +456,7 @@ export default async function DashboardPage() {
             href="/feedback?type=idea"
             className="flex min-w-[100px] flex-shrink-0 items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-xs font-medium transition-colors hover:bg-accent"
           >
-            <span className="text-sm leading-none">💡</span>
+            <Lightbulb className="h-3.5 w-3.5 text-muted-foreground" />
             Ideas
             {typeCounts.idea > 0 && (
               <Badge variant="secondary" className="ml-auto h-5 text-[10px]">{typeCounts.idea}</Badge>
@@ -494,9 +489,7 @@ export default async function DashboardPage() {
           <CardContent className="p-0">
             {!recentFeedback || recentFeedback.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <span className="text-5xl leading-none" role="img" aria-label="Empty inbox">
-                  📭
-                </span>
+                <Inbox className="h-10 w-10 text-muted-foreground/40" />
                 <p className="mt-4 text-sm font-medium">No feedback yet</p>
                 <p className="mt-1.5 max-w-[240px] text-xs leading-relaxed text-muted-foreground">
                   Install the widget on a project and feedback will appear here as it arrives.
@@ -520,9 +513,7 @@ export default async function DashboardPage() {
                         'bg-primary/[0.04] ring-1 ring-inset ring-primary/15 hover:bg-primary/[0.06] dark:bg-primary/[0.07]'
                     )}
                   >
-                    <span className="mt-0.5 shrink-0 text-base leading-none">
-                      {getTypeIcon(fb.type)}
-                    </span>
+                    <TypeIcon type={fb.type} className="mt-0.5 shrink-0 text-muted-foreground" />
                     <div className="min-w-0 flex-1">
                       <p
                         className={cn(
@@ -595,9 +586,7 @@ export default async function DashboardPage() {
             <CardContent className="space-y-3 pb-4 pt-0">
               {total === 0 ? (
                 <div className="py-6 text-center">
-                  <span className="text-3xl leading-none" role="img" aria-label="Chart">
-                    📊
-                  </span>
+                  <BarChart3 className="mx-auto h-8 w-8 text-muted-foreground/40" />
                   <p className="mt-2 text-xs text-muted-foreground">No data yet</p>
                 </div>
               ) : (
@@ -616,7 +605,7 @@ export default async function DashboardPage() {
                                 typeColorMap[type] || 'bg-zinc-400'
                               )}
                             />
-                            {getTypeIcon(type as Parameters<typeof getTypeIcon>[0])} {type}
+                            <TypeIcon type={type} className="h-3.5 w-3.5" /> {type}
                           </span>
                           <span className="text-[11px] tabular-nums text-muted-foreground">
                             {count}{' '}
@@ -664,7 +653,7 @@ export default async function DashboardPage() {
                 className="flex items-center justify-between rounded-md px-2 py-2 transition-colors hover:bg-accent"
               >
                 <span className="flex items-center gap-2 text-[12px]">
-                  <span className="text-sm leading-none">🐛</span>
+                  <Bug className="h-3.5 w-3.5 text-muted-foreground" />
                   Bug reports
                 </span>
                 {typeCounts.bug > 0 && (
@@ -678,7 +667,7 @@ export default async function DashboardPage() {
                 className="flex items-center justify-between rounded-md px-2 py-2 transition-colors hover:bg-accent"
               >
                 <span className="flex items-center gap-2 text-[12px]">
-                  <span className="text-sm leading-none">💡</span>
+                  <Lightbulb className="h-3.5 w-3.5 text-muted-foreground" />
                   Feature requests
                 </span>
                 {typeCounts.idea > 0 && (
@@ -725,9 +714,7 @@ export default async function DashboardPage() {
         <CardContent>
           {total === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
-              <span className="text-4xl leading-none" role="img" aria-label="Seedling">
-                🌱
-              </span>
+              <TrendingUp className="h-9 w-9 text-muted-foreground/40" />
               <p className="mt-3 text-sm font-medium">No data yet</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Trend will appear once you receive your first feedback.

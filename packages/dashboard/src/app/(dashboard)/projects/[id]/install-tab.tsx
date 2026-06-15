@@ -223,87 +223,116 @@ ${JSON.stringify(setupPacket, null, 2)}`
   const activeSetupTokens = setupTokens.filter((token) => {
     return !token.revoked_at && new Date(token.expires_at).getTime() > Date.now()
   })
+  const installSteps = [
+    {
+      title: 'Copy Website snippet',
+      body: 'Paste it where global scripts load, usually before the closing body tag.',
+    },
+    {
+      title: 'Run hosted verification',
+      body: 'Submit one test item from the project verification page.',
+    },
+    {
+      title: 'Confirm inbox',
+      body: 'Open the project inbox and check for URL and browser context.',
+    },
+  ]
 
   return (
     <div className="space-y-6">
-      <Card className="border-primary/30 bg-primary/[0.05]">
-        <CardHeader className="pb-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className="bg-primary/90 text-primary-foreground">
-              {created ? 'Project created' : 'Install overview'}
-            </Badge>
-            <Badge variant="outline">{modeLabel} mode</Badge>
-            <span className="text-xs font-medium text-primary">First feedback in three steps</span>
-          </div>
-          <CardTitle className="text-xl">Install the saved widget you just designed</CardTitle>
-          <CardDescription>
-            The snippet below is generated from your saved customization. Copy it, run the hosted verification page, then check the inbox.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
-          <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              '1. Copy the Website snippet.',
-              '2. Verify one test message.',
-              '3. Confirm it lands in the inbox.',
-            ].map((step) => (
-              <div key={step} className="rounded-lg border border-primary/20 bg-background/80 px-4 py-3 text-sm leading-relaxed">
-                {step}
+      <Card className="border-primary/25 bg-primary/[0.035]">
+        <CardContent className="space-y-5 p-5 sm:p-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="bg-primary/90 text-primary-foreground">
+                  {created ? 'Project created' : 'Install first'}
+                </Badge>
+                <Badge variant="outline">{modeLabel} mode</Badge>
               </div>
-            ))}
-          </div>
-
-          <div className="rounded-xl border border-primary/20 bg-background/90 p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              This install is wired to
-            </p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-lg border bg-muted/20 p-3">
-                <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Project key</p>
-                {projectKey ? (
-                  <p className="mt-2 break-all rounded bg-background px-2 py-1 font-mono text-xs text-foreground">
-                    {projectKey}
-                  </p>
-                ) : (
-                  <div className="mt-2 space-y-2 rounded border border-dashed bg-background px-3 py-3 text-sm text-muted-foreground">
-                    <p>
-                      The current key is hidden by design{apiKeyLastFour ? ` and ends in ${apiKeyLastFour}` : ''}.
-                    </p>
-                    <p>
-                      feedbacks.dev only reveals project keys once. Rotate it to generate a fresh key you can copy into your app.
-                    </p>
-                    <Button size="sm" variant="outline" onClick={() => void onRotateApiKey()} disabled={rotatingApiKey}>
-                      {rotatingApiKey && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Generate fresh key
-                    </Button>
-                  </div>
-                )}
-              </div>
-              <div className="rounded-lg border bg-muted/20 p-3">
-                <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Saved mode</p>
-                <p className="mt-2 text-sm font-medium text-foreground">{modeLabel}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{expectedResult}</p>
-              </div>
+              <h2 className="mt-3 text-xl font-semibold tracking-tight">
+                Copy the Website snippet, verify once, then customize.
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                This page uses your saved widget settings. Keep the first install minimal so you can prove feedback reaches the inbox before changing advanced options.
+              </p>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Button onClick={copyWebsiteSnippet} disabled={!websiteSnippet}>
-                {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                {copied ? 'Copied' : projectKey ? 'Copy Website snippet' : 'Rotate key to copy snippet'}
-              </Button>
+            <div className="flex flex-wrap gap-2 xl:justify-end">
+              {projectKey ? (
+                <Button onClick={copyWebsiteSnippet} disabled={!websiteSnippet} className="min-h-10">
+                  {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                  {copied ? 'Copied' : 'Copy Website snippet'}
+                </Button>
+              ) : (
+                <Button onClick={() => void onRotateApiKey()} disabled={rotatingApiKey} className="min-h-10">
+                  {rotatingApiKey ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                  Generate fresh key
+                </Button>
+              )}
               {projectKey ? (
                 <Link href={`/projects/${project.id}/verify`}>
-                  <Button variant="outline">
-                    Run hosted verification
+                  <Button variant="outline" className="min-h-10">
+                    Verify install
                     <ExternalLink className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
               ) : (
-                <Button variant="outline" disabled>
-                  Run hosted verification
+                <Button variant="outline" disabled className="min-h-10">
+                  Verify install
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </Button>
               )}
+            </div>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
+            <div className="divide-y rounded-xl border bg-background/80">
+              {installSteps.map((step, index) => (
+                <div key={step.title} className="flex gap-3 px-4 py-3">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{step.title}</p>
+                    <p className="mt-0.5 text-sm leading-5 text-muted-foreground">{step.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-3 rounded-xl border bg-background/80 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Current install
+                </p>
+                <Badge variant="outline">{modeLabel}</Badge>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground">Project key</p>
+                  {projectKey ? (
+                    <p className="mt-1 break-all rounded-md border bg-muted/20 px-2 py-1.5 font-mono text-xs text-foreground">
+                      {projectKey}
+                    </p>
+                  ) : (
+                    <div className="mt-1 rounded-md border border-dashed bg-muted/10 p-3">
+                      <p className="text-sm leading-5 text-muted-foreground">
+                        Key hidden{apiKeyLastFour ? `, ending in ${apiKeyLastFour}` : ''}. Generate a fresh key to copy a new snippet.
+                      </p>
+                      <Button size="sm" variant="outline" className="mt-3" onClick={() => void onRotateApiKey()} disabled={rotatingApiKey}>
+                        {rotatingApiKey && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Generate fresh key
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Saved mode</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{modeLabel}</p>
+                  <p className="mt-1 text-sm leading-5 text-muted-foreground">{expectedResult}</p>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -327,22 +356,22 @@ ${JSON.stringify(setupPacket, null, 2)}`
             </div>
           )}
 
-          <div className="grid gap-3 lg:grid-cols-3">
-            <div className="rounded-lg border bg-muted/20 p-4">
+          <div className="divide-y rounded-lg border bg-muted/10">
+            <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
               <p className="text-sm font-medium text-foreground">Where this goes</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Paste the snippet into your site where global scripts load, usually just before the closing{' '}
+              <p className="text-sm leading-6 text-muted-foreground">
+                Paste it where global scripts load, usually just before{' '}
                 <code className="rounded bg-muted px-1 py-0.5 text-xs">&lt;/body&gt;</code>.
               </p>
             </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-sm font-medium text-foreground">What you should see next</p>
-              <p className="mt-1 text-sm text-muted-foreground">{expectedResult}</p>
+            <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
+              <p className="text-sm font-medium text-foreground">What appears</p>
+              <p className="text-sm leading-6 text-muted-foreground">{expectedResult}</p>
             </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-sm font-medium text-foreground">Why this is safe to trust</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                The snippet is generated from one shared config model. The same saved settings power this code, the hosted verification page, and the framework examples below.
+            <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
+              <p className="text-sm font-medium text-foreground">Why trust it</p>
+              <p className="text-sm leading-6 text-muted-foreground">
+                One shared config model generates dashboard snippets, framework examples, and hosted verification.
               </p>
             </div>
           </div>
@@ -478,13 +507,13 @@ ${JSON.stringify(setupPacket, null, 2)}`
             wrap
             maxHeightClassName="max-h-72"
           />
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="divide-y rounded-lg border bg-muted/10">
             {[
               'Best for Cursor, Claude Code, Codex, Windsurf, or any repo-aware builder.',
               'The agent gets exact snippets instead of vague setup instructions.',
               'Verification stays explicit: one real test report must land in the inbox.',
             ].map((item) => (
-              <div key={item} className="rounded-lg border bg-muted/20 p-3 text-sm text-muted-foreground">
+              <div key={item} className="px-4 py-3 text-sm leading-6 text-muted-foreground">
                 {item}
               </div>
             ))}
@@ -511,13 +540,16 @@ ${JSON.stringify(setupPacket, null, 2)}`
                 : 'No feedback has reached this project yet. Run hosted verification after installing the snippet.'}
             </p>
           </div>
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="divide-y rounded-lg border bg-muted/10">
             {[
               'Open the verification page in a new tab.',
               `Submit a short test item like "Install verification for ${project.name}".`,
               'Open the inbox and confirm the item appears for this project.',
-            ].map((step) => (
-              <div key={step} className="rounded-lg border bg-muted/20 px-4 py-3 text-sm">
+            ].map((step, index) => (
+              <div key={step} className="flex gap-3 px-4 py-3 text-sm">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
+                  {index + 1}
+                </span>
                 {step}
               </div>
             ))}
