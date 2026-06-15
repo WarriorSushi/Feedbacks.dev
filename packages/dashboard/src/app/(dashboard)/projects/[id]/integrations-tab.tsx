@@ -12,6 +12,7 @@ import type {
 } from '@/lib/types'
 import {
   buildGitHubEndpointUrl,
+  countActiveWebhookEndpoints,
   createGitHubEndpoint,
   createWebhookEndpoint,
   listWebhookEndpointStates,
@@ -320,6 +321,9 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
   const [resendingId, setResendingId] = React.useState<string | null>(null)
   const [featureLocked, setFeatureLocked] = React.useState(initialBillingSummary?.entitlements.webhooks === false)
   const [lockReason, setLockReason] = React.useState(() => webhooksLockReason(initialBillingSummary))
+  const endpointLimit = billingSummary?.entitlements.webhookEndpointLimit ?? null
+  const activeEndpointCount = React.useMemo(() => countActiveWebhookEndpoints(config), [config])
+  const endpointLimitReached = endpointLimit !== null && activeEndpointCount >= endpointLimit
 
   React.useEffect(() => {
     if (billingSummary) return
@@ -540,15 +544,37 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
             <Badge variant="outline">Operational logs</Badge>
             <Badge variant="outline">Rules and health</Badge>
             {billingSummary?.entitlements.label === 'Free' && (
-              <Badge variant="outline">Pro feature</Badge>
+              <Badge variant="outline">Limited on Free</Badge>
             )}
           </div>
           <CardTitle className="mt-3 text-lg">Route important feedback where your team already works</CardTitle>
           <CardDescription>
-            Slack, Discord, GitHub, and generic webhooks share one canonical backend path now. This screen stays honest about what is real today: immediate delivery, test sends, recent logs, replay, and per-endpoint routing rules.
+            Slack, Discord, GitHub, and generic webhooks are available here. Free includes one active endpoint; Pro removes that cap.
           </CardDescription>
         </CardHeader>
       </Card>
+
+      {!featureLocked && billingSummary && (
+        <Card>
+          <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {endpointLimit === null
+                  ? 'Unlimited active endpoints on Pro'
+                  : `${activeEndpointCount} of ${endpointLimit} active endpoint${endpointLimit === 1 ? '' : 's'} used on Free`}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Disable an endpoint to free the slot, or upgrade when you need multiple destinations.
+              </p>
+            </div>
+            {billingSummary.entitlements.label === 'Free' && (
+              <Link href="/billing">
+                <Button variant="outline" size="sm">View Pro limits</Button>
+              </Link>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {featureLocked && (
         <Card className="border-primary/30 bg-primary/[0.04]">
@@ -588,7 +614,13 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
                 <CardDescription className="mt-1">{section.description}</CardDescription>
               </div>
 
-              <Button variant="outline" size="sm" onClick={() => addEndpoint(section.kind)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => addEndpoint(section.kind)}
+                disabled={endpointLimitReached}
+                title={endpointLimitReached ? 'Free includes one active endpoint. Disable another endpoint or upgrade.' : undefined}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Add endpoint
               </Button>

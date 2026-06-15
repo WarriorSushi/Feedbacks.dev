@@ -27,8 +27,9 @@ async function getAuthedProject(projectId: string, request: NextRequest) {
         error: NextResponse.json({ error: feature.message, code: feature.code }, { status: 403 }),
       }
     }
+    return { project, admin, summary: feature.summary }
   }
-  return { project, admin }
+  return { project, admin, summary: null }
 }
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
@@ -37,14 +38,15 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const result = await getAuthedProject(id, _request)
     if ('error' in result && !('admin' in result)) return result.error
 
-    const { project, admin } = result as Exclude<typeof result, { error: NextResponse }>
+    const { project, admin, summary } = result as Exclude<typeof result, { error: NextResponse }>
     const normalized = normalizeWebhookConfig(project.webhooks)
+    const logLimit = summary?.entitlements.webhookDeliveryLogLimit ?? 30
     const { data: deliveries, error } = await admin
       .from('webhook_deliveries')
       .select('id, event, kind, url, status, status_code, response_body, attempt, payload, created_at')
       .eq('project_id', id)
       .order('created_at', { ascending: false })
-      .limit(30)
+      .limit(logLimit)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

@@ -135,64 +135,44 @@ export function WidgetFormPreview({ config, className }: WidgetFormPreviewProps)
   )
 
   return (
-    <div className={cn('overflow-hidden rounded-xl border bg-white', className)}>
-      <div className="flex items-center gap-1.5 border-b px-3 py-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-zinc-300" />
-        <span className="h-2.5 w-2.5 rounded-full bg-zinc-300" />
-        <span className="h-2.5 w-2.5 rounded-full bg-zinc-300" />
-        <span className="ml-3 text-[11px] font-medium text-zinc-500">app.example.com</span>
-      </div>
+    <div className={cn('rounded-xl border bg-zinc-50 p-4', className)}>
+      {mode === 'inline' ? (
+        <PreviewForm config={config} />
+      ) : (
+        <div className="space-y-4">
+          {mode === 'trigger' && (
+            <button
+              type="button"
+              aria-pressed={isFormOpen}
+              onClick={() => setIsFormOpen((open) => !open)}
+              className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-sm transition-transform active:scale-[0.98]"
+            >
+              <MousePointerClick className="h-4 w-4" />
+              {isFormOpen ? 'Close feedback' : 'Open feedback'}
+            </button>
+          )}
 
-      <div className="min-h-[620px] bg-zinc-200 p-4">
-        <div className="max-w-md space-y-3">
-          <div className="h-8 w-40 rounded bg-zinc-400/70" />
-          <div className="h-4 w-64 max-w-full rounded bg-zinc-300" />
-          <div className="grid grid-cols-2 gap-3 pt-3">
-            <div className="h-20 rounded-lg border bg-white shadow-sm" />
-            <div className="h-20 rounded-lg border bg-white shadow-sm" />
-          </div>
-        </div>
-
-        {mode === 'inline' ? (
-          <div className="mt-6 max-w-lg">
-            <PreviewForm config={config} />
-          </div>
-        ) : (
-          <>
-            {mode === 'trigger' && (
-              <button
-                type="button"
-                aria-pressed={isFormOpen}
-                onClick={() => setIsFormOpen((open) => !open)}
-                className="mt-6 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-sm transition-transform active:scale-[0.98]"
-              >
-                <MousePointerClick className="h-4 w-4" />
-                {isFormOpen ? 'Close feedback' : 'Open feedback'}
-              </button>
-            )}
-
-            {mode === 'modal' && launcherIsTop && (
-              <div className={cn('mt-6 flex', alignLauncher)}>
-                {launcher}
-              </div>
-            )}
-
-            <div className="mt-6 flex min-h-[430px] justify-center">
-              {isFormOpen && (
-                <div className="w-full max-w-[340px]">
-                  <PreviewForm config={config} compact />
-                </div>
-              )}
+          {mode === 'modal' && launcherIsTop && (
+            <div className={cn('flex', alignLauncher)}>
+              {launcher}
             </div>
+          )}
 
-            {mode === 'modal' && !launcherIsTop && (
-              <div className={cn('mt-4 flex', alignLauncher)}>
-                {launcher}
-              </div>
-            )}
-          </>
-        )}
-      </div>
+          {isFormOpen ? (
+            <PreviewForm config={config} compact />
+          ) : (
+            <div className="rounded-xl border border-dashed bg-white p-6 text-sm text-zinc-500">
+              The form is closed. Use the preview button to open it.
+            </div>
+          )}
+
+          {mode === 'modal' && !launcherIsTop && (
+            <div className={cn('flex', alignLauncher)}>
+              {launcher}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

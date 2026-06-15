@@ -233,8 +233,8 @@ export function CustomizeTab({
                 <CardTitle className="text-lg">Make the feedback form fit your product</CardTitle>
                 <CardDescription className="mt-1">
                   {hasUnsavedChanges
-                    ? 'Preview your draft, save it, then install that exact version.'
-                    : 'Saved version used by install snippets and hosted verification.'}
+                    ? 'Save changes before copying install code.'
+                    : 'Install snippets use this saved version.'}
                 </CardDescription>
               </div>
               {draftRestored && hasUnsavedChanges && (
@@ -258,7 +258,7 @@ export function CustomizeTab({
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border bg-background/70 px-3 py-2 text-sm text-muted-foreground">
             <span>
-              Install uses <span className="font-medium text-foreground">{savedModeLabel}</span>
+              Saved placement: <span className="font-medium text-foreground">{savedModeLabel}</span>
             </span>
             <span className="hidden h-1 w-1 rounded-full bg-border sm:block" />
             <span>
@@ -267,7 +267,7 @@ export function CustomizeTab({
                   Draft changes: <span className="font-medium text-foreground">{changedFieldsSummary}</span>
                 </>
               ) : (
-                'Preview matches saved install'
+                'Ready to install'
               )}
             </span>
           </div>
@@ -297,7 +297,7 @@ export function CustomizeTab({
         </div>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Widget settings</CardTitle>
@@ -318,19 +318,19 @@ export function CustomizeTab({
                   {
                     mode: 'modal',
                     title: 'Floating button',
-                    body: 'Add a launcher in the corner of your app.',
+                    body: 'Adds a feedback button to your site.',
                     Icon: Send,
                   },
                   {
                     mode: 'trigger',
-                    title: 'Your own button',
-                    body: 'Open the form from an existing button or link.',
+                    title: 'Custom trigger',
+                    body: 'Connects feedback to your own button.',
                     Icon: MousePointerClick,
                   },
                   {
                     mode: 'inline',
-                    title: 'Form on a page',
-                    body: 'Embed the full form inside page content.',
+                    title: 'Inline form',
+                    body: 'Embeds the full form on a page.',
                     Icon: PanelTop,
                   },
                 ].map(({ mode, title, body, Icon }) => (
@@ -481,14 +481,25 @@ export function CustomizeTab({
               ))}
               </div>
             </div>
+
+            <div className="flex flex-wrap gap-2 border-t pt-5">
+              <Button onClick={handleSave} disabled={saving || !hasUnsavedChanges}>
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save changes
+              </Button>
+              <Button variant="outline" onClick={handleReset} disabled={saving || !hasUnsavedChanges}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Discard draft
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto">
           <CardHeader className="border-b bg-muted/20">
             <CardTitle className="text-lg">Live form preview</CardTitle>
             <CardDescription>
-              See the opened form, not just the button. Placement, color, copy, and optional fields update as you edit.
+              Placement, color, copy, and optional fields update as you edit.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 p-6">
@@ -503,6 +514,28 @@ export function CustomizeTab({
           </CardContent>
         </Card>
       </div>
+
+      {hasUnsavedChanges && (
+        <div className="sticky bottom-4 z-20 rounded-lg border border-amber-300/80 bg-amber-50 p-3 shadow-lg dark:bg-amber-950">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Save before installing</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Install code still uses the last saved version. Unsaved changes: {changedFieldsSummary}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={handleSave} disabled={saving}>
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save changes
+              </Button>
+              <Button variant="outline" onClick={handleReset} disabled={saving}>
+                Discard
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

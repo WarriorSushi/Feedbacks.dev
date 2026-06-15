@@ -53,7 +53,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
   const [publicBoardUrl, setPublicBoardUrl] = React.useState<string | null>(null)
   const tabParam = searchParams.get('tab') as TabId | null
   const created = searchParams.get('created') === '1'
-  const activeTab = tabs.some((t) => t.id === tabParam) ? tabParam! : 'install'
+  const activeTab = tabs.some((t) => t.id === tabParam) ? tabParam! : 'customize'
   const apiKeyLastFour = React.useMemo(
     () => apiKey?.slice(-4) || project.api_key_last_four || null,
     [apiKey, project.api_key_last_four],
@@ -149,7 +149,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
         <h1 className="mt-2 text-2xl font-bold">{project.name}</h1>
         {created && (
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Start here: copy the Website snippet, verify one test message, then customize the widget when the basic loop works.
+            Start here: choose the widget placement, save it, then copy the matching install code.
           </p>
         )}
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -177,6 +177,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
       </div>
 
       <div className="space-y-2 md:hidden">
+        <SetupProgress projectId={project.id} activeTab={activeTab} />
         <Label htmlFor="project-section">Project section</Label>
         <select
           id="project-section"
@@ -194,6 +195,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
       </div>
 
       <div className="hidden md:block">
+        <SetupProgress projectId={project.id} activeTab={activeTab} />
         <div className="flex gap-1 border-b">
           {tabs.map((tab) => (
             <button
@@ -243,6 +245,69 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
       )}
       {activeTab === 'settings' && <SettingsTab project={project} />}
     </div>
+  )
+}
+
+function SetupProgress({ projectId, activeTab }: { projectId: string; activeTab: TabId }) {
+  const steps = [
+    {
+      id: 'customize',
+      label: 'Customize',
+      body: 'Save the widget look and placement.',
+      href: `/projects/${projectId}?tab=customize`,
+      current: activeTab === 'customize',
+    },
+    {
+      id: 'install',
+      label: 'Install',
+      body: 'Copy the code for your platform.',
+      href: `/projects/${projectId}?tab=install`,
+      current: activeTab === 'install',
+    },
+    {
+      id: 'verify',
+      label: 'Verify',
+      body: 'Send one test message.',
+      href: `/projects/${projectId}/verify`,
+      current: false,
+    },
+    {
+      id: 'inbox',
+      label: 'Inbox',
+      body: 'Confirm feedback arrived.',
+      href: `/feedback?projectId=${projectId}`,
+      current: false,
+    },
+  ]
+
+  return (
+    <nav aria-label="Setup progress" className="mb-4 rounded-lg border bg-card p-2">
+      <ol className="grid gap-2 md:grid-cols-4">
+        {steps.map((step, index) => (
+          <li key={step.id}>
+            <Link
+              href={step.href}
+              className={`flex min-h-16 gap-3 rounded-md px-3 py-2 text-left transition-colors ${
+                step.current ? 'bg-primary/10 text-foreground' : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+              }`}
+              aria-current={step.current ? 'step' : undefined}
+            >
+              <span
+                className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                  step.current ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                {index + 1}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold">{step.label}</span>
+                <span className="mt-0.5 block text-xs leading-4">{step.body}</span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </nav>
   )
 }
 

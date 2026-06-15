@@ -1,0 +1,1208 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>feedbacks.dev install screen layout options</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: oklch(98.5% 0.012 135);
+        --panel: oklch(100% 0 0);
+        --panel-soft: oklch(97% 0.018 135);
+        --panel-tint: oklch(95.5% 0.04 135);
+        --line: oklch(88% 0.025 135);
+        --line-strong: oklch(78% 0.055 135);
+        --ink: oklch(18% 0.035 135);
+        --muted: oklch(43% 0.035 135);
+        --soft: oklch(58% 0.032 135);
+        --accent: oklch(57% 0.17 137);
+        --accent-dark: oklch(42% 0.14 137);
+        --accent-soft: oklch(92% 0.08 135);
+        --warning: oklch(64% 0.13 75);
+        --shadow: 0 18px 60px oklch(40% 0.04 135 / 0.12);
+        --radius: 8px;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, oklch(93% 0.065 135), transparent 34rem),
+          var(--bg);
+        color: var(--ink);
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .page {
+        width: min(1440px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 34px 0 56px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 24px;
+        align-items: end;
+        margin-bottom: 22px;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--accent-dark);
+        font-size: 12px;
+        font-weight: 760;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 860px;
+        margin-bottom: 12px;
+        font-size: clamp(34px, 5vw, 68px);
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .lede {
+        max-width: 760px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.55;
+      }
+
+      .decision-card {
+        width: min(360px, 100%);
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: oklch(100% 0 0 / 0.82);
+        box-shadow: var(--shadow);
+      }
+
+      .decision-card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .decision-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .layout-switcher,
+      .platform-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .layout-switcher {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        margin-bottom: 18px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: oklch(99% 0.006 135 / 0.92);
+        backdrop-filter: blur(18px);
+      }
+
+      .tab-button,
+      .platform-button,
+      .ghost-button,
+      .primary-button {
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--panel);
+        color: var(--ink);
+        font-weight: 700;
+        transition:
+          background 160ms ease,
+          border-color 160ms ease,
+          color 160ms ease,
+          transform 160ms ease;
+      }
+
+      .tab-button {
+        padding: 8px 14px;
+      }
+
+      .platform-button {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+
+      .tab-button:hover,
+      .platform-button:hover,
+      .ghost-button:hover,
+      .primary-button:hover {
+        transform: translateY(-1px);
+      }
+
+      .tab-button[aria-selected="true"],
+      .platform-button[aria-pressed="true"] {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: oklch(100% 0 0);
+      }
+
+      .prototype {
+        display: none;
+      }
+
+      .prototype.is-active {
+        display: block;
+      }
+
+      .shell {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .app-chrome {
+        display: grid;
+        grid-template-columns: 232px minmax(0, 1fr);
+        min-height: 760px;
+      }
+
+      .sidebar {
+        border-right: 1px solid var(--line);
+        background: oklch(98% 0.012 135);
+        padding: 18px 14px;
+      }
+
+      .logo {
+        margin-bottom: 22px;
+        font-size: 20px;
+        font-weight: 860;
+      }
+
+      .logo span {
+        color: var(--accent-dark);
+      }
+
+      .project-picker {
+        margin-bottom: 18px;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        font-size: 14px;
+        font-weight: 720;
+      }
+
+      .nav-item {
+        display: block;
+        margin: 3px 0;
+        padding: 10px 12px;
+        border-radius: var(--radius);
+        color: var(--muted);
+        font-size: 15px;
+        font-weight: 680;
+      }
+
+      .nav-item.is-active {
+        background: var(--accent-soft);
+        color: var(--accent-dark);
+      }
+
+      .content {
+        min-width: 0;
+        padding: 28px 30px 34px;
+      }
+
+      .route-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: start;
+        justify-content: space-between;
+        margin-bottom: 22px;
+      }
+
+      .route-header h2 {
+        margin-bottom: 8px;
+        font-size: clamp(26px, 3vw, 42px);
+        line-height: 1.05;
+      }
+
+      .route-header p {
+        max-width: 680px;
+        margin-bottom: 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 34px;
+        padding: 7px 11px;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        background: var(--panel-soft);
+        color: var(--accent-dark);
+        font-size: 13px;
+        font-weight: 780;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+      }
+
+      .panel-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .panel-header h3 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .panel-body {
+        padding: 16px;
+      }
+
+      .step-grid {
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr);
+        gap: 18px;
+      }
+
+      .steps {
+        display: grid;
+        gap: 8px;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+      }
+
+      .step.is-current {
+        border-color: var(--accent);
+        background: var(--panel-tint);
+      }
+
+      .step-number {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: oklch(100% 0 0);
+        font-size: 13px;
+        font-weight: 820;
+      }
+
+      .step strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
+
+      .step span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .install-board {
+        display: grid;
+        gap: 14px;
+        min-width: 0;
+      }
+
+      .snippet-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: oklch(18% 0.025 135);
+        color: oklch(96% 0.012 135);
+        overflow: hidden;
+      }
+
+      .snippet-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 13px;
+        border-bottom: 1px solid oklch(40% 0.025 135);
+      }
+
+      .snippet-toolbar strong {
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .copy-button {
+        min-height: 32px;
+        border: 1px solid oklch(58% 0.05 135);
+        border-radius: 999px;
+        background: oklch(24% 0.03 135);
+        color: oklch(98% 0.006 135);
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      pre {
+        max-height: 248px;
+        margin: 0;
+        overflow: auto;
+        padding: 16px;
+        font-family: "Geist Mono", "SFMono-Regular", Consolas, monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        white-space: pre;
+      }
+
+      .note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .callout {
+        display: grid;
+        gap: 8px;
+        padding: 13px 14px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        background: var(--panel-tint);
+      }
+
+      .callout strong {
+        font-size: 14px;
+      }
+
+      .callout p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      details {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+      }
+
+      summary {
+        min-height: 46px;
+        padding: 13px 15px;
+        cursor: pointer;
+        font-weight: 780;
+      }
+
+      details > div {
+        padding: 0 15px 15px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .primary-button,
+      .ghost-button {
+        padding: 9px 14px;
+      }
+
+      .primary-button {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: oklch(100% 0 0);
+      }
+
+      .ghost-button {
+        background: var(--panel);
+      }
+
+      .two-column {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 16px;
+      }
+
+      .checklist {
+        display: grid;
+        gap: 9px;
+      }
+
+      .check-item {
+        display: grid;
+        grid-template-columns: 24px minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        padding: 11px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+
+      .check {
+        display: grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent-dark);
+        font-size: 13px;
+        font-weight: 860;
+      }
+
+      .check-item strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 14px;
+      }
+
+      .check-item span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .platform-cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .platform-card {
+        min-height: 116px;
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        text-align: left;
+      }
+
+      .platform-card[aria-pressed="true"] {
+        border-color: var(--accent);
+        background: var(--panel-tint);
+      }
+
+      .platform-card strong {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 15px;
+      }
+
+      .platform-card span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.42;
+      }
+
+      .accordion-stack {
+        display: grid;
+        gap: 10px;
+      }
+
+      .timeline {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .timeline-item {
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+      }
+
+      .timeline-item strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .timeline-item p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .mobile-bottom {
+        display: none;
+      }
+
+      @media (max-width: 1020px) {
+        .hero,
+        .app-chrome,
+        .step-grid,
+        .two-column {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          display: none;
+        }
+
+        .platform-cards,
+        .timeline {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 680px) {
+        .page {
+          width: min(100% - 24px, 1440px);
+          padding-top: 20px;
+        }
+
+        .content {
+          padding: 18px;
+        }
+
+        .route-header h2 {
+          font-size: 28px;
+        }
+
+        .platform-cards,
+        .timeline {
+          grid-template-columns: 1fr;
+        }
+
+        .layout-switcher {
+          position: static;
+        }
+
+        .tab-button,
+        .platform-button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Install screen concepts</p>
+          <h1>One install screen, one obvious next action.</h1>
+          <p class="lede">
+            These prototypes test a clearer structure: pick the platform first, show one
+            matching snippet, verify one feedback item, then keep customization, agent
+            setup, and edge-case docs behind deliberate disclosure.
+          </p>
+        </div>
+        <aside class="decision-card">
+          <strong>Recommended direction</strong>
+          <p>
+            Use option A or B. Both preserve the quick install path and remove the
+            stretched boxes that made small text look lost.
+          </p>
+        </aside>
+      </header>
+
+      <nav class="layout-switcher" aria-label="Layout options">
+        <button class="tab-button" type="button" data-layout="guided" aria-selected="true">
+          A. Guided stepper
+        </button>
+        <button class="tab-button" type="button" data-layout="command" aria-selected="false">
+          B. Compact command
+        </button>
+        <button class="tab-button" type="button" data-layout="accordion" aria-selected="false">
+          C. Accordion docs
+        </button>
+        <button class="tab-button" type="button" data-layout="cards" aria-selected="false">
+          D. Platform cards
+        </button>
+      </nav>
+
+      <section class="prototype is-active" data-prototype="guided">
+        <div class="shell">
+          <div class="app-chrome">
+            <aside class="sidebar">
+              <div class="logo">feedbacks<span>.dev</span></div>
+              <div class="project-picker">my first test project</div>
+              <span class="nav-item">Dashboard</span>
+              <span class="nav-item">Feedback</span>
+              <span class="nav-item is-active">Projects</span>
+              <span class="nav-item">Billing</span>
+              <span class="nav-item">Settings</span>
+            </aside>
+            <main class="content">
+              <div class="route-header">
+                <div>
+                  <div class="status-pill"><span class="dot"></span> Not installed yet</div>
+                  <h2>Install feedback in three steps</h2>
+                  <p>
+                    Choose where this site runs, copy the matching code, then send one
+                    test message. Everything else can wait.
+                  </p>
+                </div>
+                <button class="ghost-button" type="button">Open verify page</button>
+              </div>
+
+              <section class="panel">
+                <div class="panel-header">
+                  <h3>Step 1: choose your platform</h3>
+                  <div class="platform-strip" data-platform-group>
+                    <button class="platform-button" type="button" data-platform="website" aria-pressed="true">
+                      Website
+                    </button>
+                    <button class="platform-button" type="button" data-platform="wordpress" aria-pressed="false">
+                      WordPress
+                    </button>
+                    <button class="platform-button" type="button" data-platform="react" aria-pressed="false">
+                      React
+                    </button>
+                    <button class="platform-button" type="button" data-platform="next" aria-pressed="false">
+                      Next.js
+                    </button>
+                    <button class="platform-button" type="button" data-platform="vue" aria-pressed="false">
+                      Vue
+                    </button>
+                    <button class="platform-button" type="button" data-platform="htmlblock" aria-pressed="false">
+                      HTML block
+                    </button>
+                    <button class="platform-button" type="button" data-platform="mobile" aria-pressed="false">
+                      Mobile app
+                    </button>
+                  </div>
+                </div>
+                <div class="panel-body step-grid">
+                  <div class="steps">
+                    <div class="step is-current">
+                      <div class="step-number">1</div>
+                      <div><strong>Copy the code</strong><span data-platform-note>Paste before the body close, or use a global footer/code injection field.</span></div>
+                    </div>
+                    <div class="step">
+                      <div class="step-number">2</div>
+                      <div><strong>Run your site</strong><span>Look for the Feedback launcher on a real page, not just in an editor preview.</span></div>
+                    </div>
+                    <div class="step">
+                      <div class="step-number">3</div>
+                      <div><strong>Verify one message</strong><span>Send a test item and confirm it reaches the inbox.</span></div>
+                    </div>
+                  </div>
+                  <div class="install-board">
+                    <div class="snippet-card">
+                      <div class="snippet-toolbar">
+                        <strong data-snippet-title>Website snippet</strong>
+                        <button class="copy-button" type="button" data-copy>Copy</button>
+                      </div>
+                      <pre><code data-snippet></code></pre>
+                    </div>
+                    <div class="callout">
+                      <strong data-platform-answer>Works on normal websites.</strong>
+                      <p data-platform-detail>
+                        Use this when you can place a script globally before the body close.
+                      </p>
+                    </div>
+                    <details>
+                      <summary>Advanced: custom trigger, CSP, React/Vue notes</summary>
+                      <div>
+                        Keep these secondary. They are useful after the first live test,
+                        but they should not compete with copy, run, verify.
+                      </div>
+                    </details>
+                    <details>
+                      <summary>AI builder setup</summary>
+                      <div>
+                        Generate a short-lived setup packet only when the developer wants
+                        an agent to install and verify the widget for them.
+                      </div>
+                    </details>
+                  </div>
+                </div>
+              </section>
+            </main>
+          </div>
+        </div>
+      </section>
+
+      <section class="prototype" data-prototype="command">
+        <div class="shell">
+          <main class="content">
+            <div class="route-header">
+              <div>
+                <div class="status-pill"><span class="dot"></span> First install</div>
+                <h2>Copy, run, verify.</h2>
+                <p>
+                  This is the tightest version. It behaves like a product control panel,
+                  not a documentation page.
+                </p>
+              </div>
+              <button class="primary-button" type="button">Verify install</button>
+            </div>
+
+            <div class="two-column">
+              <section class="panel">
+                <div class="panel-header">
+                  <h3>Install code</h3>
+                  <div class="platform-strip" data-platform-group>
+                    <button class="platform-button" type="button" data-platform="website" aria-pressed="true">Website</button>
+                    <button class="platform-button" type="button" data-platform="wordpress" aria-pressed="false">WordPress</button>
+                    <button class="platform-button" type="button" data-platform="react" aria-pressed="false">React</button>
+                    <button class="platform-button" type="button" data-platform="next" aria-pressed="false">Next.js</button>
+                    <button class="platform-button" type="button" data-platform="mobile" aria-pressed="false">Mobile</button>
+                  </div>
+                </div>
+                <div class="panel-body install-board">
+                  <p class="note" data-platform-note></p>
+                  <div class="snippet-card">
+                    <div class="snippet-toolbar">
+                      <strong data-snippet-title></strong>
+                      <button class="copy-button" type="button" data-copy>Copy</button>
+                    </div>
+                    <pre><code data-snippet></code></pre>
+                  </div>
+                  <details>
+                    <summary>Show advanced setup</summary>
+                    <div>
+                      Custom trigger, modal/embed mode, CSP, and framework package notes
+                      live here. This area starts closed.
+                    </div>
+                  </details>
+                </div>
+              </section>
+
+              <aside class="panel">
+                <div class="panel-header">
+                  <h3>Checklist</h3>
+                </div>
+                <div class="panel-body checklist">
+                  <div class="check-item">
+                    <div class="check">1</div>
+                    <div><strong>Platform selected</strong><span>Snippet changes to match the install target.</span></div>
+                  </div>
+                  <div class="check-item">
+                    <div class="check">2</div>
+                    <div><strong>Code copied</strong><span>No extra reading before the main action.</span></div>
+                  </div>
+                  <div class="check-item">
+                    <div class="check">3</div>
+                    <div><strong>Test feedback sent</strong><span>Success state should route to the inbox.</span></div>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </main>
+        </div>
+      </section>
+
+      <section class="prototype" data-prototype="accordion">
+        <div class="shell">
+          <main class="content">
+            <div class="route-header">
+              <div>
+                <div class="status-pill"><span class="dot"></span> Minimal docs mode</div>
+                <h2>Install by platform</h2>
+                <p>
+                  This option keeps a docs-like page, but every platform is a collapsed
+                  drawer. Only the recommended Website drawer opens first.
+                </p>
+              </div>
+            </div>
+
+            <div class="accordion-stack">
+              <details open>
+                <summary>Website, recommended</summary>
+                <div class="install-board">
+                  <p class="note">
+                    Best when you control the app shell, layout file, footer, or template.
+                  </p>
+                  <div class="snippet-card">
+                    <div class="snippet-toolbar">
+                      <strong>Website snippet</strong>
+                      <button class="copy-button" type="button" data-copy>Copy</button>
+                    </div>
+                    <pre><code data-static="website"></code></pre>
+                  </div>
+                </div>
+              </details>
+              <details>
+                <summary>WordPress or website builder</summary>
+                <div class="install-board">
+                  <p class="note">
+                    Works if the platform allows custom scripts. A site-wide footer
+                    injection is better than a one-page HTML block.
+                  </p>
+                  <div class="snippet-card">
+                    <div class="snippet-toolbar">
+                      <strong>WordPress guidance</strong>
+                      <button class="copy-button" type="button" data-copy>Copy</button>
+                    </div>
+                    <pre><code data-static="wordpress"></code></pre>
+                  </div>
+                </div>
+              </details>
+              <details>
+                <summary>React, Next.js, or Vue</summary>
+                <div class="install-board">
+                  <p class="note">
+                    Framework code should be shown only after the user chooses a
+                    framework. The default should stay Website.
+                  </p>
+                  <div class="snippet-card">
+                    <div class="snippet-toolbar">
+                      <strong>React example</strong>
+                      <button class="copy-button" type="button" data-copy>Copy</button>
+                    </div>
+                    <pre><code data-static="react"></code></pre>
+                  </div>
+                </div>
+              </details>
+              <details>
+                <summary>Native mobile app</summary>
+                <div class="install-board">
+                  <p class="note">
+                    Native apps should not be given the web script as if it will work.
+                    Route them to API or SDK guidance.
+                  </p>
+                  <div class="snippet-card">
+                    <div class="snippet-toolbar">
+                      <strong>Mobile app guidance</strong>
+                    </div>
+                    <pre><code data-static="mobile"></code></pre>
+                  </div>
+                </div>
+              </details>
+              <details>
+                <summary>AI builder setup</summary>
+                <div>
+                  Keep agent setup closed until requested. It should generate a
+                  short-lived setup packet and explain exactly what the agent may access.
+                </div>
+              </details>
+            </div>
+          </main>
+        </div>
+      </section>
+
+      <section class="prototype" data-prototype="cards">
+        <div class="shell">
+          <main class="content">
+            <div class="route-header">
+              <div>
+                <div class="status-pill"><span class="dot"></span> Visual chooser</div>
+                <h2>What are you installing into?</h2>
+                <p>
+                  This version is friendliest for beginners. It asks one plain question,
+                  then shows the exact next action.
+                </p>
+              </div>
+            </div>
+
+            <section class="panel">
+              <div class="panel-body install-board">
+                <div class="platform-cards" data-platform-card-group>
+                  <button class="platform-card" type="button" data-platform="website" aria-pressed="true">
+                    <strong>Website</strong>
+                    <span>Plain HTML, Webflow custom code, app shell, or footer template.</span>
+                  </button>
+                  <button class="platform-card" type="button" data-platform="wordpress" aria-pressed="false">
+                    <strong>WordPress</strong>
+                    <span>Use global footer injection. HTML blocks may be page-only.</span>
+                  </button>
+                  <button class="platform-card" type="button" data-platform="react" aria-pressed="false">
+                    <strong>React app</strong>
+                    <span>Load once in your root layout or component tree.</span>
+                  </button>
+                  <button class="platform-card" type="button" data-platform="mobile" aria-pressed="false">
+                    <strong>Mobile app</strong>
+                    <span>Native apps need API or SDK guidance, not a web script.</span>
+                  </button>
+                </div>
+
+                <div class="two-column">
+                  <div class="snippet-card">
+                    <div class="snippet-toolbar">
+                      <strong data-snippet-title></strong>
+                      <button class="copy-button" type="button" data-copy>Copy</button>
+                    </div>
+                    <pre><code data-snippet></code></pre>
+                  </div>
+                  <div class="install-board">
+                    <div class="callout">
+                      <strong data-platform-answer></strong>
+                      <p data-platform-detail></p>
+                    </div>
+                    <div class="timeline">
+                      <div class="timeline-item">
+                        <strong>Copy</strong>
+                        <p>Use only the snippet for the selected platform.</p>
+                      </div>
+                      <div class="timeline-item">
+                        <strong>Run</strong>
+                        <p>Check the live app or published page.</p>
+                      </div>
+                      <div class="timeline-item">
+                        <strong>Verify</strong>
+                        <p>Send one feedback item and open the inbox.</p>
+                      </div>
+                    </div>
+                    <details>
+                      <summary>Customize after install</summary>
+                      <div>
+                        Button text, colors, embed mode, and trigger behavior should
+                        remain separate from the first install screen.
+                      </div>
+                    </details>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </main>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const snippets = {
+        website: {
+          title: "Website snippet",
+          note: "Paste this before the body close, or into a global footer/custom-code field.",
+          answer: "Works on normal websites.",
+          detail: "Best when the script is loaded site-wide, near the end of the page.",
+          code: `<script
+  src="https://app.feedbacks.dev/widget/latest.js"
+  data-project="fb_2e95a8d347be4cf99c055a6499ae26408463f315"
+  data-api-url="https://app.feedbacks.dev/api/feedback"
+  data-config-version="1"
+  defer
+><\\/script>`
+        },
+        wordpress: {
+          title: "WordPress guidance",
+          note: "Use a header/footer code plugin, theme footer, or site-wide custom-code area.",
+          answer: "Yes, with one condition.",
+          detail: "WordPress works when it allows custom scripts. A one-page HTML block may only load the widget on that page.",
+          code: `Recommended WordPress install:
+1. Open your site-wide header/footer code tool.
+2. Add the script in the footer, before the body close.
+3. Publish, open the live page, then verify one feedback item.
+
+<script
+  src="https://app.feedbacks.dev/widget/latest.js"
+  data-project="fb_2e95a8d347be4cf99c055a6499ae26408463f315"
+  data-api-url="https://app.feedbacks.dev/api/feedback"
+  data-config-version="1"
+  defer
+><\\/script>`
+        },
+        react: {
+          title: "React loader",
+          note: "Use this for React web apps. Load it once near the app root.",
+          answer: "Yes, for React websites.",
+          detail: "React Native is different. This applies to browser-based React apps only.",
+          code: `import { useEffect } from "react"
+
+export function FeedbackWidget() {
+  useEffect(() => {
+    const script = document.createElement("script")
+    script.src = "https://app.feedbacks.dev/widget/latest.js"
+    script.dataset.project = "fb_2e95a8d347be4cf99c055a6499ae26408463f315"
+    script.dataset.apiUrl = "https://app.feedbacks.dev/api/feedback"
+    script.dataset.configVersion = "1"
+    script.defer = true
+    document.body.appendChild(script)
+    return () => script.remove()
+  }, [])
+
+  return null
+}`
+        },
+        next: {
+          title: "Next.js app router",
+          note: "Use this in your root layout or a client component loaded once.",
+          answer: "Yes, for Next.js websites.",
+          detail: "The snippet should be loaded client-side. Do not put browser-only widget code in a Server Component.",
+          code: `"use client"
+
+import Script from "next/script"
+
+export function FeedbackWidgetScript() {
+  return (
+    <Script
+      src="https://app.feedbacks.dev/widget/latest.js"
+      data-project="fb_2e95a8d347be4cf99c055a6499ae26408463f315"
+      data-api-url="https://app.feedbacks.dev/api/feedback"
+      data-config-version="1"
+      strategy="afterInteractive"
+    />
+  )
+}`
+        },
+        vue: {
+          title: "Vue loader",
+          note: "Use this for Vue web apps. Mount it once in the app shell.",
+          answer: "Yes, for Vue websites.",
+          detail: "Keep the loader in one place so route changes do not add duplicate widgets.",
+          code: `<script setup>
+import { onMounted, onUnmounted } from "vue"
+
+let script
+
+onMounted(() => {
+  script = document.createElement("script")
+  script.src = "https://app.feedbacks.dev/widget/latest.js"
+  script.dataset.project = "fb_2e95a8d347be4cf99c055a6499ae26408463f315"
+  script.dataset.apiUrl = "https://app.feedbacks.dev/api/feedback"
+  script.dataset.configVersion = "1"
+  script.defer = true
+  document.body.appendChild(script)
+})
+
+onUnmounted(() => script?.remove())
+<\\/script>`
+        },
+        htmlblock: {
+          title: "HTML block guidance",
+          note: "Use only when the builder allows raw scripts in that block.",
+          answer: "Sometimes.",
+          detail: "Many builders strip scripts, sandbox embeds, or run them only on the one page. Prefer site-wide custom code when available.",
+          code: `Try the same Website snippet in the HTML/custom-code block.
+
+Important checks:
+- Does the builder allow script tags?
+- Is the block rendered on the live site, not only preview?
+- Is the block inside an iframe or sandbox?
+- Do you need the widget on every page?
+
+If scripts are stripped, use the builder's site-wide custom code area.`
+        },
+        mobile: {
+          title: "Mobile app guidance",
+          note: "Native mobile apps cannot run this web snippet directly.",
+          answer: "Not with the script snippet.",
+          detail: "Native iOS, Android, React Native, and Flutter need a native SDK, WebView injection, or API-based feedback form.",
+          code: `Native mobile path:
+1. Do not paste the web script into native app code.
+2. Use a WebView only if the feedback UI lives inside web content.
+3. Otherwise use the feedback API or a future native SDK.
+
+Recommended product behavior:
+- Show API guidance now.
+- Mark native SDKs as coming soon if they are not built.
+- Do not pretend the browser widget works in native screens.`
+        }
+      }
+
+      function setLayout(layout) {
+        document.querySelectorAll("[data-layout]").forEach((button) => {
+          button.setAttribute("aria-selected", String(button.dataset.layout === layout))
+        })
+        document.querySelectorAll("[data-prototype]").forEach((section) => {
+          section.classList.toggle("is-active", section.dataset.prototype === layout)
+        })
+      }
+
+      function setPlatform(platform) {
+        const selected = snippets[platform] || snippets.website
+        document.querySelectorAll("[data-platform]").forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.platform === platform))
+        })
+        document.querySelectorAll("[data-snippet]").forEach((node) => {
+          node.textContent = selected.code
+        })
+        document.querySelectorAll("[data-snippet-title]").forEach((node) => {
+          node.textContent = selected.title
+        })
+        document.querySelectorAll("[data-platform-note]").forEach((node) => {
+          node.textContent = selected.note
+        })
+        document.querySelectorAll("[data-platform-answer]").forEach((node) => {
+          node.textContent = selected.answer
+        })
+        document.querySelectorAll("[data-platform-detail]").forEach((node) => {
+          node.textContent = selected.detail
+        })
+      }
+
+      document.querySelectorAll("[data-layout]").forEach((button) => {
+        button.addEventListener("click", () => setLayout(button.dataset.layout))
+      })
+
+      document.querySelectorAll("[data-platform]").forEach((button) => {
+        button.addEventListener("click", () => setPlatform(button.dataset.platform))
+      })
+
+      document.querySelectorAll("[data-copy]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const card = button.closest(".snippet-card")
+          const code = card?.querySelector("code")?.textContent || ""
+          try {
+            await navigator.clipboard.writeText(code)
+            const old = button.textContent
+            button.textContent = "Copied"
+            setTimeout(() => {
+              button.textContent = old
+            }, 1200)
+          } catch {
+            button.textContent = "Select code"
+          }
+        })
+      })
+
+      document.querySelectorAll("[data-static]").forEach((node) => {
+        node.textContent = snippets[node.dataset.static]?.code || ""
+      })
+
+      setPlatform("website")
+    </script>
+  </body>
+</html>

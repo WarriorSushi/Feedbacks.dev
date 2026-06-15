@@ -26,6 +26,8 @@ export interface EntitlementSet {
   apiAccess: boolean
   publicBoards: boolean
   webhooks: boolean
+  webhookEndpointLimit: number | null
+  webhookDeliveryLogLimit: number | null
   mcp: boolean
   customBranding: boolean
 }
@@ -45,10 +47,12 @@ export const PLAN_MATRIX: Record<PlanTier, EntitlementSet> = {
     projectLimit: 1,
     feedbackMonthlyLimit: 500,
     historyDays: 30,
-    apiAccess: false,
+    apiAccess: true,
     publicBoards: true,
-    webhooks: false,
-    mcp: false,
+    webhooks: true,
+    webhookEndpointLimit: 1,
+    webhookDeliveryLogLimit: 10,
+    mcp: true,
     customBranding: false,
   },
   pro: {
@@ -61,6 +65,8 @@ export const PLAN_MATRIX: Record<PlanTier, EntitlementSet> = {
     apiAccess: true,
     publicBoards: true,
     webhooks: true,
+    webhookEndpointLimit: null,
+    webhookDeliveryLogLimit: null,
     mcp: true,
     customBranding: true,
   },

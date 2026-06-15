@@ -237,6 +237,20 @@ export function createGitHubEndpoint(): GitHubEndpoint {
   }
 }
 
+export function countActiveWebhookEndpoints(config: WebhookConfig): number {
+  let count = 0
+
+  for (const kind of WEBHOOK_TYPES) {
+    const endpoints = kind === 'github'
+      ? config.github?.endpoints || []
+      : config[kind]?.endpoints || []
+
+    count += endpoints.filter((endpoint) => endpoint.enabled !== false).length
+  }
+
+  return count
+}
+
 export function listWebhookEndpointStates(
   config: WebhookConfig,
   deliveries: WebhookDeliveryLog[] = [],

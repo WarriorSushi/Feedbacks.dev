@@ -65,6 +65,11 @@ async function waitForDeliveries(
 test('configures endpoints, sends tests, and replays deliveries from the integrations UI', async ({ page }) => {
   await signInWithTestSession(page)
   const project = await createProjectViaApi(page, { name: `Playwright Webhooks ${Date.now().toString(36)}` })
+  const summaryResponse = await page.request.get('/api/billing/sync')
+  expect(summaryResponse.ok()).toBe(true)
+  const summary = await summaryResponse.json()
+  const userId = summary.account.user_id as string
+  await setBillingPlan(userId, 'pro')
 
   await page.goto(`/projects/${project.id}?tab=integrations`)
   await expect(page.locator('[data-project-tabs-ready="true"]')).toBeVisible()
@@ -178,7 +183,7 @@ test('integrations UI shows saved endpoints', async ({ page }) => {
   await expect(slackSection.getByRole('button', { name: 'Send test' })).toBeVisible()
 })
 
-test('free plan opens integrations without requesting forbidden delivery logs', async ({ page }) => {
+test('free plan can use one active integration endpoint', async ({ page }) => {
   await signInWithTestSession(page)
   const project = await createProjectViaApi(page, { name: `Playwright Free Webhooks ${Date.now().toString(36)}` })
   const summaryResponse = await page.request.get('/api/billing/sync')
@@ -192,7 +197,12 @@ test('free plan opens integrations without requesting forbidden delivery logs', 
 
     await page.goto(`/projects/${project.id}?tab=integrations`)
     await expect(page.locator('[data-project-tabs-ready="true"]')).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Unlock delivery logs, replay, and live routing with Pro' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Route important feedback where your team already works' })).toBeVisible()
+    await expect(page.getByText(/0 of 1 active endpoint used on Free/i)).toBeVisible()
+    await expect(page.locator('[data-webhook-kind="slack"]')).toBeVisible()
+    await page.locator('[data-webhook-kind="slack"]').getByRole('button', { name: 'Add endpoint' }).click()
+    await expect(page.getByText(/1 of 1 active endpoint used on Free/i)).toBeVisible()
+    await expect(page.locator('[data-webhook-kind="discord"]').getByRole('button', { name: 'Add endpoint' })).toBeDisabled()
     await new Promise((resolve) => setTimeout(resolve, 1000))
     const deliveryRequests = await page.evaluate((path) => {
       return performance
@@ -201,7 +211,7 @@ test('free plan opens integrations without requesting forbidden delivery logs', 
         .map((entry) => entry.name)
     }, deliveriesPath)
 
-    expect(deliveryRequests).toEqual([])
+    expect(deliveryRequests.length).toBeGreaterThanOrEqual(1)
   } finally {
     await setBillingPlan(userId, 'pro')
   }

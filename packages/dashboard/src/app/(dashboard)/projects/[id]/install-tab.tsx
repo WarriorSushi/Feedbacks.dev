@@ -40,6 +40,8 @@ interface ProjectSetupStatus {
   newFeedback: number
 }
 
+type InstallPlatform = 'website' | 'wordpress' | 'html-block' | 'react' | 'next' | 'vue' | 'mobile'
+
 export function InstallTab({
   project,
   projectKey,
@@ -56,6 +58,7 @@ export function InstallTab({
   const [setupPacketError, setSetupPacketError] = React.useState<string | null>(null)
   const [setupTokens, setSetupTokens] = React.useState<SetupTokenStatus[]>([])
   const [projectSetupStatus, setProjectSetupStatus] = React.useState<ProjectSetupStatus | null>(null)
+  const [activePlatform, setActivePlatform] = React.useState<InstallPlatform>('website')
   const appOrigin = publicEnv.NEXT_PUBLIC_APP_ORIGIN
   const savedConfig = React.useMemo(
     () => project.settings?.widget_config || {},
@@ -73,6 +76,8 @@ export function InstallTab({
     [appOrigin, projectKey, savedConfig],
   )
   const websiteSnippet = snippets.find((snippet) => snippet.label === 'Website')?.code || ''
+  const reactSnippet = snippets.find((snippet) => snippet.label === 'React')?.code || ''
+  const vueSnippet = snippets.find((snippet) => snippet.label === 'Vue')?.code || ''
   const widgetScriptUrl = buildWidgetScriptUrl(appOrigin)
   const feedbackApiUrl = buildFeedbackApiUrl(appOrigin)
   const cspSnippet = `default-src 'self';\nscript-src 'self' ${new URL(widgetScriptUrl).origin};\nconnect-src 'self' ${new URL(feedbackApiUrl).origin};\nstyle-src 'self' 'unsafe-inline';\nimg-src 'self' data: blob:;`
@@ -225,18 +230,114 @@ ${JSON.stringify(setupPacket, null, 2)}`
   })
   const installSteps = [
     {
-      title: 'Copy Website snippet',
-      body: 'Paste it where global scripts load, usually before the closing body tag.',
+      title: 'Choose platform',
+      body: 'Pick the environment where this widget will run.',
     },
     {
-      title: 'Run hosted verification',
-      body: 'Submit one test item from the project verification page.',
+      title: 'Copy code',
+      body: 'Use the code block only. Placement notes stay outside it.',
     },
     {
-      title: 'Confirm inbox',
-      body: 'Open the project inbox and check for URL and browser context.',
+      title: 'Verify one message',
+      body: 'Submit a test item and confirm it reaches the inbox.',
     },
   ]
+  const nextSnippet = projectKey ? `"use client"
+
+import Script from "next/script"
+
+export function FeedbacksWidgetScript() {
+  return (
+    <Script
+      src="${widgetScriptUrl}"
+      data-project="${projectKey}"
+      data-api-url="${feedbackApiUrl}"
+      strategy="afterInteractive"
+    />
+  )
+}` : ''
+  const installTargets: Array<{
+    id: InstallPlatform
+    label: string
+    title: string
+    body: string
+    code: string | null
+    language: string
+    placement: string
+    expected: string
+  }> = [
+    {
+      id: 'website',
+      label: 'Website',
+      title: 'Website script',
+      body: 'Best for plain HTML, app shells, templates, and global custom-code fields.',
+      code: websiteSnippet,
+      language: 'html',
+      placement: 'Paste before the closing body tag, or in a site-wide footer/custom-code field.',
+      expected: expectedResult,
+    },
+    {
+      id: 'wordpress',
+      label: 'WordPress',
+      title: 'WordPress script',
+      body: 'Use the same Website script, installed through a footer/header code tool.',
+      code: websiteSnippet,
+      language: 'html',
+      placement: 'Use a site-wide footer injection plugin, theme footer, or custom-code area. A page HTML block may only load on that page.',
+      expected: expectedResult,
+    },
+    {
+      id: 'html-block',
+      label: 'HTML block',
+      title: 'HTML block script',
+      body: 'Works only when the builder allows raw scripts in the block.',
+      code: websiteSnippet,
+      language: 'html',
+      placement: 'Prefer global custom code. If using a block, publish the live page and confirm the builder did not strip or sandbox the script.',
+      expected: expectedResult,
+    },
+    {
+      id: 'react',
+      label: 'React',
+      title: 'React component',
+      body: 'Use when your web app has a React root where the widget should load once.',
+      code: reactSnippet,
+      language: 'tsx',
+      placement: 'Render this once near your app root, layout, or provider tree.',
+      expected: expectedResult,
+    },
+    {
+      id: 'next',
+      label: 'Next.js',
+      title: 'Next.js component',
+      body: 'Use a client component with next/script so the widget loads after hydration.',
+      code: nextSnippet,
+      language: 'tsx',
+      placement: 'Render this client component from your root layout or app shell.',
+      expected: expectedResult,
+    },
+    {
+      id: 'vue',
+      label: 'Vue',
+      title: 'Vue component',
+      body: 'Use when your web app has a Vue shell where the widget should load once.',
+      code: vueSnippet,
+      language: 'vue',
+      placement: 'Mount once in the app shell so route changes do not create duplicate widgets.',
+      expected: expectedResult,
+    },
+    {
+      id: 'mobile',
+      label: 'Mobile app',
+      title: 'Native mobile guidance',
+      body: 'The browser script does not run inside native iOS, Android, React Native, or Flutter screens.',
+      code: null,
+      language: 'text',
+      placement: 'Use a WebView only for web content. For native screens, use the REST API or wait for a native SDK.',
+      expected: 'No browser widget appears in native UI unless the app is rendering web content in a WebView.',
+    },
+  ]
+  const selectedTarget = installTargets.find((target) => target.id === activePlatform) || installTargets[0]
 
   return (
     <div className="space-y-6">
@@ -251,10 +352,10 @@ ${JSON.stringify(setupPacket, null, 2)}`
                 <Badge variant="outline">{modeLabel} mode</Badge>
               </div>
               <h2 className="mt-3 text-xl font-semibold tracking-tight">
-                Copy the Website snippet, verify once, then customize.
+                Install the saved widget, then verify once.
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                This page uses your saved widget settings. Keep the first install minimal so you can prove feedback reaches the inbox before changing advanced options.
+                This page uses your last saved customization. Choose the platform, copy only the code, then send one test message.
               </p>
             </div>
 
@@ -341,15 +442,61 @@ ${JSON.stringify(setupPacket, null, 2)}`
       <Card>
         <CardHeader>
           <div>
-            <CardTitle className="text-lg">Recommended install</CardTitle>
+            <CardTitle className="text-lg">Install code</CardTitle>
             <CardDescription>
-              Paste this exact snippet where your site loads global scripts. It already includes this project key and your last saved widget settings.
+              Select the environment you are installing into. Instructions stay outside the code block so copy-paste stays clean.
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-5">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Install platform">
+            {installTargets.map((target) => (
+              <button
+                key={target.id}
+                type="button"
+                aria-pressed={activePlatform === target.id}
+                onClick={() => setActivePlatform(target.id)}
+                className={`min-h-9 rounded-full border px-3 text-sm font-medium transition-colors ${
+                  activePlatform === target.id
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'bg-background text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                }`}
+              >
+                {target.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-lg border bg-muted/10 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-foreground">{selectedTarget.title}</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">{selectedTarget.body}</p>
+              </div>
+              {selectedTarget.id === 'mobile' && (
+                <Link href={`/projects/${project.id}?tab=api`}>
+                  <Button variant="outline" size="sm">Open API docs</Button>
+                </Link>
+              )}
+            </div>
+          </div>
+
           {projectKey ? (
-            <CodeSnippet tabs={[{ label: 'Website', code: websiteSnippet, language: 'html' }]} />
+            selectedTarget.code ? (
+              <CodeSnippet
+                tabs={[
+                  {
+                    label: selectedTarget.label,
+                    code: selectedTarget.code,
+                    language: selectedTarget.language,
+                  },
+                ]}
+              />
+            ) : (
+              <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm leading-6 text-muted-foreground">
+                Native mobile apps do not use a browser script tag. Use the API from your backend, or inject the Website snippet only inside WebView content.
+              </div>
+            )
           ) : (
             <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
               Generate a fresh key to reveal a new install snippet. Existing deployed clients keep working with the old key because only the raw database copy was removed.
@@ -359,44 +506,47 @@ ${JSON.stringify(setupPacket, null, 2)}`
           <div className="divide-y rounded-lg border bg-muted/10">
             <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
               <p className="text-sm font-medium text-foreground">Where this goes</p>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Paste it where global scripts load, usually just before{' '}
-                <code className="rounded bg-muted px-1 py-0.5 text-xs">&lt;/body&gt;</code>.
-              </p>
+              <p className="text-sm leading-6 text-muted-foreground">{selectedTarget.placement}</p>
             </div>
             <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
               <p className="text-sm font-medium text-foreground">What appears</p>
-              <p className="text-sm leading-6 text-muted-foreground">{expectedResult}</p>
+              <p className="text-sm leading-6 text-muted-foreground">{selectedTarget.expected}</p>
             </div>
             <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
-              <p className="text-sm font-medium text-foreground">Why trust it</p>
+              <p className="text-sm font-medium text-foreground">Next step</p>
               <p className="text-sm leading-6 text-muted-foreground">
-                One shared config model generates dashboard snippets, framework examples, and hosted verification.
+                Open verification, send one test message, then confirm it appears in the inbox.
               </p>
             </div>
           </div>
 
           <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
-            Need to change the button, use your own trigger, or embed the form directly on a page? Go back to <span className="font-medium text-foreground">Customize</span>, save the design, then return here for the updated snippet.
+            Need to change the button, use your own trigger, or embed the form directly on a page? Open <span className="font-medium text-foreground">Customize</span>, save changes, then return for updated code.
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Bot className="h-4 w-4" />
+      <details className="group rounded-xl border bg-card">
+        <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Bot className="h-4 w-4" />
+              </div>
+              <Badge variant="secondary">Agent setup</Badge>
+              <Badge variant="outline">Copyable prompt</Badge>
             </div>
-            <Badge variant="secondary">Agent setup</Badge>
-            <Badge variant="outline">Copyable prompt</Badge>
+            <p className="mt-3 text-lg font-semibold text-foreground">Give this to your AI builder</p>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+              Optional setup packet and prompt for Cursor, Claude Code, Codex, Windsurf, or another repo-aware builder.
+            </p>
           </div>
-          <CardTitle className="text-lg">Give this to your AI builder</CardTitle>
-          <CardDescription>
-            This is the first agent-assisted setup slice: a safe prompt with the project key, canonical snippets, endpoint, and verification task. It uses only data already shown on this install screen.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          <span className="text-sm font-medium text-primary">
+            <span className="group-open:hidden">Show agent setup</span>
+            <span className="hidden group-open:inline">Hide agent setup</span>
+          </span>
+        </summary>
+        <div className="space-y-4 border-t px-6 py-5">
           {!projectKey && (
             <div className="rounded-lg border border-primary/30 bg-primary/[0.04] p-4 text-sm text-muted-foreground">
               Generate a fresh project key before using the prompt in a real codebase. The current prompt includes a placeholder so your agent does not guess credentials.
@@ -518,8 +668,8 @@ ${JSON.stringify(setupPacket, null, 2)}`
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </details>
 
       <Card>
         <CardHeader>
@@ -579,33 +729,6 @@ ${JSON.stringify(setupPacket, null, 2)}`
           </div>
         </CardContent>
       </Card>
-
-      <details className="group rounded-xl border bg-card">
-        <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">
-          <div>
-            <p className="text-lg font-semibold text-foreground">Need React or Vue instead?</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              These examples are generated from the same saved config. Use them when your app shell is React or Vue.
-            </p>
-          </div>
-          <span className="text-sm font-medium text-primary">Show framework examples</span>
-        </summary>
-        <div className="border-t px-6 py-5">
-          {projectKey ? (
-            <CodeSnippet
-              tabs={snippets.map((snippet) => ({
-                label: snippet.label,
-                code: snippet.code,
-                language: snippet.language,
-              }))}
-            />
-          ) : (
-            <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
-              Framework examples appear after you generate a fresh key.
-            </div>
-          )}
-        </div>
-      </details>
 
       <details className="group rounded-xl border bg-card">
         <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">

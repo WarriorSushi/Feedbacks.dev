@@ -14,20 +14,23 @@ test('creates a project and lands on customization before install', async ({ pag
 
   await expect(page).toHaveURL(/\/projects\/[^/]+\?created=1&tab=customize/, { timeout: 30_000 })
   await expect(page.getByRole('button', { name: 'Customize', exact: true })).toBeVisible()
-  await expect(page.getByText('Start by choosing how the widget should appear.')).toBeVisible()
+  await expect(page.getByText('Save the widget look and placement.')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Make the feedback form fit your product' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Live form preview' })).toBeVisible()
-  await expect(page.getByRole('button', { name: /Floating button Add a launcher/ })).toBeVisible()
-  await expect(page.getByRole('button', { name: /Your own button Open the form/ })).toBeVisible()
-  await expect(page.getByRole('button', { name: /Form on a page Embed the full/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Floating button Adds a feedback button/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Custom trigger Connects feedback/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Inline form Embeds the full/ })).toBeVisible()
 
   await page.getByRole('button', { name: 'Install', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Install the saved widget you just designed' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Install the saved widget, then verify once.' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Copy Website snippet' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Open verification page' })).toBeVisible()
-  await expect(page.getByText('1. Copy the Website snippet.')).toBeVisible()
-  await expect(page.getByText('2. Verify one test message.')).toBeVisible()
-  await expect(page.getByText('3. Confirm it lands in the inbox.')).toBeVisible()
+  await expect(page.getByText('Choose platform')).toBeVisible()
+  await expect(page.getByText('Copy code')).toBeVisible()
+  await expect(page.getByText('Verify one message')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'WordPress' })).toBeVisible()
+  await page.getByRole('button', { name: 'HTML block' }).click()
+  await expect(page.getByText(/Prefer global custom code/i)).toBeVisible()
 })
 
 test('copy-paste install guidance stays visible for an existing project', async ({ page }) => {
@@ -36,13 +39,16 @@ test('copy-paste install guidance stays visible for an existing project', async 
 
   await page.goto(projectInstallPath(project.id), { waitUntil: 'domcontentloaded' })
 
-  await expect(page.getByRole('heading', { name: 'Install the saved widget you just designed' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Recommended install' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Install the saved widget, then verify once.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Install code' })).toBeVisible()
   await expect(
-    page.getByText(/Paste the snippet into your site where global scripts load/i),
+    page.getByText(/Paste before the closing body tag/i),
   ).toBeVisible({ timeout: 30_000 })
   await expect(
     page.getByText(/Look for the floating "Feedback" launcher near the lower-right corner/i).first(),
   ).toBeVisible({ timeout: 30_000 })
   await expect(page.getByRole('link', { name: 'Open verification page' })).toBeVisible()
+  await page.getByRole('button', { name: 'Mobile app' }).click()
+  await expect(page.getByText(/browser script does not run inside native/i)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Open API docs' })).toBeVisible()
 })

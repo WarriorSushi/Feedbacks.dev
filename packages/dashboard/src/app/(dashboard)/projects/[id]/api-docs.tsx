@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -101,6 +100,13 @@ export function ApiDocs({
   const endpoints = projectKey
     ? [
         {
+          method: 'GET' as const,
+          path: '/api/v1/projects',
+          description: 'List the project attached to this API key. API keys are scoped to one project.',
+          code: `curl ${baseUrl}/api/v1/projects \\
+  -H "X-API-Key: ${projectKey}"`,
+        },
+        {
           method: 'POST' as const,
           path: '/api/v1/feedback',
           description: 'Submit feedback with optional structured data from an app, script, or agent.',
@@ -150,19 +156,14 @@ export function ApiDocs({
       <Card className="border-primary/30 bg-primary/[0.04]">
         <CardHeader>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">Pro feature</Badge>
+            <Badge variant="secondary">Available on Free</Badge>
             <Badge variant="outline">REST + MCP</Badge>
           </div>
-          <CardTitle className="mt-3 text-base">API and MCP access are part of Pro</CardTitle>
+          <CardTitle className="mt-3 text-base">Use API and MCP when code or agents need feedback access</CardTitle>
           <CardDescription>
-            The widget, dashboard, and optional public board work on Free. Upgrade to Pro when you want programmatic feedback access, agent tooling, and the rest of the paid routing surface.
+            Free access follows your Free project, monthly feedback, and history limits. Keep this key server-side or in trusted agent configuration.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Link href="/billing">
-            <Button variant="outline" size="sm">Open Billing</Button>
-          </Link>
-        </CardContent>
       </Card>
 
       <Card>
@@ -204,26 +205,50 @@ export function ApiDocs({
         <>
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">REST endpoints</CardTitle>
-              <CardDescription>Start with submit feedback. Open the other examples only when you need them.</CardDescription>
+              <CardTitle className="text-base">Quick start: submit feedback</CardTitle>
+              <CardDescription>Use this from a backend, script, or trusted agent. Do not expose this key in public browser code.</CardDescription>
             </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-hidden rounded-b-lg border-t">
-                {endpoints.map((endpoint, index) => (
-                  <EndpointExample key={endpoint.path + endpoint.method} {...endpoint} defaultOpen={index === 0} />
-                ))}
-              </div>
+            <CardContent>
+              <CodeBlock code={endpoints.find((endpoint) => endpoint.path === '/api/v1/feedback' && endpoint.method === 'POST')?.code || ''} />
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">MCP server</CardTitle>
-              <CardDescription>
-                Connect repo-aware agents to submit feedback, verify installs, and read project setup packets.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <details className="group rounded-xl border bg-card">
+            <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">
+              <div>
+                <p className="text-base font-semibold text-foreground">Endpoint reference</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Open this when you need listing, project stats, or triage updates.
+                </p>
+              </div>
+              <span className="text-sm font-medium text-primary">
+                <span className="group-open:hidden">Show endpoints</span>
+                <span className="hidden group-open:inline">Hide endpoints</span>
+              </span>
+            </summary>
+            <CardContent className="p-0">
+              <div className="overflow-hidden border-t">
+                {endpoints.map((endpoint, index) => (
+                  <EndpointExample key={endpoint.path + endpoint.method} {...endpoint} defaultOpen={index === 1} />
+                ))}
+              </div>
+            </CardContent>
+          </details>
+
+          <details className="group rounded-xl border bg-card">
+            <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">
+              <div>
+                <p className="text-base font-semibold text-foreground">MCP server and agent tools</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Connect repo-aware agents to submit feedback, verify installs, and read setup packets.
+                </p>
+              </div>
+              <span className="text-sm font-medium text-primary">
+                <span className="group-open:hidden">Show MCP setup</span>
+                <span className="hidden group-open:inline">Hide MCP setup</span>
+              </span>
+            </summary>
+            <div className="space-y-4 border-t px-6 py-5">
           <p className="text-sm text-muted-foreground">
             Add this to your <code className="bg-muted px-1 rounded">.mcp.json</code> or Claude Code settings:
           </p>
@@ -271,8 +296,8 @@ export function ApiDocs({
 // → Agent calls update_feedback_status`} />
             </div>
           </details>
-            </CardContent>
-          </Card>
+            </div>
+          </details>
         </>
       ) : null}
     </div>

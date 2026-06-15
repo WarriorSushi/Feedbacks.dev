@@ -4,7 +4,7 @@ import { assertFeatureAccess } from '@/lib/billing'
 import { hasE2EBypass } from '@/lib/e2e'
 import { resendWebhookDelivery, sendTestWebhook } from '@/lib/webhook-delivery'
 import type { WebhookEndpoint, GitHubEndpoint } from '@/lib/types'
-import { normalizeWebhookConfig } from '@/lib/webhook-config'
+import { countActiveWebhookEndpoints, normalizeWebhookConfig } from '@/lib/webhook-config'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -29,8 +29,9 @@ async function getAuthedProject(projectId: string, request: NextRequest) {
         error: NextResponse.json({ error: feature.message, code: feature.code }, { status: 403 }),
       }
     }
+    return { project, admin, summary: feature.summary }
   }
-  return { project, admin }
+  return { project, admin, summary: null }
 }
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
@@ -50,9 +51,23 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { id } = await params
     const result = await getAuthedProject(id, request)
     if ('error' in result && !('admin' in result)) return result.error
-    const { admin } = result as Exclude<typeof result, { error: NextResponse }>
+    const { admin, summary } = result as Exclude<typeof result, { error: NextResponse }>
 
     const webhooks = normalizeWebhookConfig(await request.json())
+    const endpointLimit = summary?.entitlements.webhookEndpointLimit ?? null
+    const activeEndpointCount = countActiveWebhookEndpoints(webhooks)
+
+    if (endpointLimit !== null && activeEndpointCount > endpointLimit) {
+      return NextResponse.json(
+        {
+          error: `Free plan includes ${endpointLimit} active integration endpoint. Disable another endpoint or upgrade to Pro.`,
+          code: 'webhook_endpoint_limit_reached',
+          limit: endpointLimit,
+          activeEndpointCount,
+        },
+        { status: 403 },
+      )
+    }
 
     const { data, error } = await admin
       .from('projects')
