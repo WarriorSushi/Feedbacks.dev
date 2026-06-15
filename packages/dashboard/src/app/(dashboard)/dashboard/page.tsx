@@ -185,10 +185,10 @@ export default async function DashboardPage() {
             <CardContent className="p-6 sm:p-8">
               <Badge className="bg-primary/90 text-primary-foreground">First run</Badge>
               <h1 className="mt-5 max-w-2xl text-2xl font-semibold tracking-tight sm:text-3xl">
-                Good {getGreeting()}, {displayName}. Create one project, copy one snippet, verify one test message.
+                Good {getGreeting()}, {displayName}. Create one project, choose the form style, send one test.
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-                feedbacks.dev starts with the install path. Customization, public boards, API access, and integrations can wait until the widget is collecting feedback.
+                Start with the basic setup path. Advanced settings, public boards, API access, and integrations can wait until feedback reaches the inbox.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link href="/projects/new">
@@ -210,14 +210,14 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="text-base">What happens next</CardTitle>
               <CardDescription>
-                The dashboard will take you straight to install after the project is created.
+                The dashboard keeps the first setup run in order.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {[
                 ['1', 'Create project', 'Only the project name is required.'],
-                ['2', 'Copy snippet', 'Website install is the recommended default.'],
-                ['3', 'Verify feedback', 'Send one test item and open the inbox.'],
+                ['2', 'Customize form', 'Pick floating button, custom trigger, or inline form.'],
+                ['3', 'Install and test', 'Copy the matching code, then check the inbox.'],
               ].map(([step, title, body]) => (
                 <div key={step} className="flex gap-3 rounded-lg border bg-muted/20 p-3">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
@@ -236,9 +236,9 @@ export default async function DashboardPage() {
         <Card>
           <CardContent className="divide-y p-0">
             {[
-              { Icon: Code2, title: 'Copy-paste install', body: 'Generated from the same config model used by docs and verification.' },
+              { Icon: Code2, title: 'Code matches your saved form', body: 'The install screen uses the style you saved in Customize.' },
               { Icon: ShieldCheck, title: 'Safe by default', body: 'The first snippet uses the browser-safe project key, not private server credentials.' },
-              { Icon: Inbox, title: 'First proof fast', body: 'After hosted verification works, the inbox becomes the workspace for triage and routing.' },
+              { Icon: Inbox, title: 'One test proves the loop', body: 'Send a short test message, then use the inbox for triage and routing.' },
             ].map(({ Icon, title, body }) => (
               <div key={title} className="flex gap-3 px-5 py-4">
                 <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -269,9 +269,9 @@ export default async function DashboardPage() {
               {unread === 1 ? 'item' : 'items'} waiting in your inbox.
             </>
           ) : total > 0 ? (
-            'All caught up — here\'s your overview.'
+            'All caught up. Here is your overview.'
           ) : (
-            'Install the widget to start collecting feedback.'
+            'Customize a project, install the code, then send one test message.'
           )}
         </p>
         <div className="flex items-center gap-2 pt-1">
@@ -327,16 +327,16 @@ export default async function DashboardPage() {
                 },
                 {
                   step: 2,
-                  title: 'Copy the install snippet',
-                  description: 'Paste the Website snippet, then verify the widget renders',
+                  title: 'Choose the form style',
+                  description: 'Save the placement before copying install code',
                   href: null,
                   done: false,
                   cta: null,
                 },
                 {
                   step: 3,
-                  title: 'Send a test feedback item',
-                  description: 'Use the hosted verify page, then confirm it in the inbox',
+                  title: 'Install and send one test',
+                  description: 'Paste the matching code, then confirm the inbox item',
                   href: null,
                   done: false,
                   cta: null,
@@ -492,7 +492,7 @@ export default async function DashboardPage() {
                 <Inbox className="h-10 w-10 text-muted-foreground/40" />
                 <p className="mt-4 text-sm font-medium">No feedback yet</p>
                 <p className="mt-1.5 max-w-[240px] text-xs leading-relaxed text-muted-foreground">
-                  Install the widget on a project and feedback will appear here as it arrives.
+                  Set up a project and feedback will appear here as it arrives.
                 </p>
                 <Link href="/projects/new" className="mt-4">
                   <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs">
@@ -543,8 +543,9 @@ export default async function DashboardPage() {
                         {fb.agent_name && (
                           <>
                             <span className="text-[11px] text-muted-foreground/35">·</span>
-                            <span className="text-[11px] text-muted-foreground">
-                              🤖 {fb.agent_name}
+                            <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                              <Bot className="h-3 w-3" />
+                              {fb.agent_name}
                             </span>
                           </>
                         )}

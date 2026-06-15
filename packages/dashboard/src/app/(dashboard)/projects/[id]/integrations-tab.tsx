@@ -56,8 +56,8 @@ const HEALTH_LABELS: Record<EndpointHealthStatus, string> = {
 
 function webhooksLockReason(summary: BillingSummary | null) {
   return summary
-    ? `Your ${summary.entitlements.label} plan does not include this feature.`
-    : 'Upgrade to Pro to use webhook routing, logs, and replay.'
+    ? `Webhook routing is not available on your current ${summary.entitlements.label} plan.`
+    : 'Webhook routing, logs, and replay are temporarily unavailable.'
 }
 
 const SECTION_META: Array<{
@@ -580,10 +580,10 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
         <Card className="border-primary/30 bg-primary/[0.04]">
           <CardHeader>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-primary/90 text-primary-foreground">Upgrade required</Badge>
+              <Badge className="bg-primary/90 text-primary-foreground">Plan limit</Badge>
               <Badge variant="outline">Webhook routing</Badge>
             </div>
-            <CardTitle className="mt-3 text-base">Unlock delivery logs, replay, and live routing with Pro</CardTitle>
+            <CardTitle className="mt-3 text-base">Webhook routing is not available for this account</CardTitle>
             <CardDescription>
               {lockReason}
             </CardDescription>
@@ -593,7 +593,7 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
               <Button>Open Billing</Button>
             </Link>
             <Link href={`/projects/${project.id}?tab=install`}>
-              <Button variant="outline">Back to install</Button>
+              <Button variant="outline">Back to setup</Button>
             </Link>
           </CardContent>
         </Card>

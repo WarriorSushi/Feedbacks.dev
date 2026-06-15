@@ -21,18 +21,18 @@ export function ProjectMenu({
   return (
     <nav
       aria-label="Project menu"
-      className="sticky top-0 z-10 -mx-1 overflow-x-auto border-b bg-background/95 px-1 py-2 backdrop-blur"
+      className="sticky top-0 z-30 -mx-4 -mt-4 overflow-x-auto border-b bg-background/95 px-4 py-3 shadow-sm backdrop-blur md:-mx-6 md:-mt-6 md:px-6"
     >
-      <div className="flex min-w-max gap-1">
+      <div className="flex min-h-11 min-w-max items-center gap-2">
         {items.map((item) => (
           <Link
             key={item.id}
             href={item.href}
             aria-current={activeSection === item.id ? 'page' : undefined}
-            className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
               activeSection === item.id
-                ? 'bg-primary/10 text-foreground'
-                : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                ? 'bg-primary/10 text-foreground shadow-sm ring-1 ring-primary/10'
+                : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
             }`}
           >
             {item.label}

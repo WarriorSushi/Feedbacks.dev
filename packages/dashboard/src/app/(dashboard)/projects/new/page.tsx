@@ -11,9 +11,9 @@ import { CheckCircle2, Code2, Inbox, Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 const setupSteps = [
-  { Icon: CheckCircle2, title: 'Create project', body: 'Generate a project key automatically.' },
-  { Icon: Code2, title: 'Copy snippet', body: 'Paste the Website snippet first.' },
-  { Icon: Inbox, title: 'Verify inbox', body: 'Send one test item before changing settings.' },
+  { Icon: CheckCircle2, title: 'Create project', body: 'Name the place where feedback belongs.' },
+  { Icon: Code2, title: 'Customize first', body: 'Pick the form style before copying code.' },
+  { Icon: Inbox, title: 'Install and test', body: 'Paste code, send one test, then check the inbox.' },
 ]
 
 export default function NewProjectPage() {
@@ -55,7 +55,7 @@ export default function NewProjectPage() {
       if (payload.api_key) {
         rememberProjectApiKey(payload.id, payload.api_key)
       }
-      router.push(`/projects/${payload.id}?created=1&tab=install`)
+      router.push(`/projects/${payload.id}?created=1&tab=customize`)
     } catch {
       setError('Failed to create project')
     } finally {
@@ -77,7 +77,7 @@ export default function NewProjectPage() {
           <CardHeader>
             <CardTitle>Create your first project</CardTitle>
             <CardDescription>
-              One name is enough. The next screen opens on the Website snippet so you can install before customizing.
+              One name is enough. Next you choose the form style, then copy the matching code.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -135,7 +135,7 @@ export default function NewProjectPage() {
             )}
             <Button type="submit" size="lg" className="w-full" disabled={loading || !name.trim()}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create project and show install
+              Create project and customize
             </Button>
           </form>
           </CardContent>
@@ -145,7 +145,7 @@ export default function NewProjectPage() {
           <CardHeader>
             <CardTitle className="text-base">Setup stays linear</CardTitle>
             <CardDescription>
-              This avoids the old all-in-one setup maze.
+              One screen at a time, no setup maze.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">

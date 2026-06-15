@@ -36,6 +36,7 @@ import {
   CircleHelp,
   MessageSquare,
   Bot,
+  ClipboardList,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -537,7 +538,7 @@ function FeedbackInboxInner() {
             disabled={bulkLoading}
             onClick={() => bulkUpdateStatus('planned')}
           >
-            <span className="text-sm leading-none">📋</span>
+            <ClipboardList className="h-3.5 w-3.5 text-primary" />
             Plan
           </Button>
           <Button
@@ -792,8 +793,8 @@ function EmptyState({
       <p className="mt-4 text-sm font-medium">{hasProjects ? 'Your inbox is empty' : 'No feedback path is installed yet'}</p>
       <p className="mt-1.5 max-w-[260px] text-xs leading-relaxed text-muted-foreground">
         {hasProjects
-          ? 'Install or verify a project and new submissions will appear here with URL and browser context.'
-          : 'Create one project first. The next screen gives you the Website snippet and hosted verification page.'}
+          ? 'Open a project, finish Setup, then send one test from your site. New feedback will appear here with page and browser context.'
+          : 'Create one project first. Then choose the form style, install the code, and send one test.'}
       </p>
       <Link href={hasProjects ? '/projects' : '/projects/new'} className="mt-4">
         <Button variant="outline" size="sm" className="h-10 gap-1.5 text-xs">

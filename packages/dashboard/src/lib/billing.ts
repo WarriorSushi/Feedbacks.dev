@@ -301,7 +301,7 @@ export async function assertFeatureAccess(
       allowed: false as const,
       summary,
       code: 'feature_not_in_plan' as const,
-      message: `Your ${summary.entitlements.label} plan does not include this feature.`,
+      message: `This feature is not available on your current ${summary.entitlements.label} plan.`,
     }
   }
 

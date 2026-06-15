@@ -112,6 +112,14 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
   const feedbackLimitText = summary.entitlements.feedbackMonthlyLimit
     ? `${summary.usage.feedbackThisMonth}/${summary.entitlements.feedbackMonthlyLimit}`
     : `${summary.usage.feedbackThisMonth}`
+  const webhookEndpointText =
+    summary.entitlements.webhookEndpointLimit === null
+      ? 'Unlimited active endpoints'
+      : `${summary.entitlements.webhookEndpointLimit} active endpoint`
+  const webhookHistoryText =
+    summary.entitlements.webhookDeliveryLogLimit === null
+      ? 'Full delivery history'
+      : `Latest ${summary.entitlements.webhookDeliveryLogLimit} deliveries`
 
   return (
     <div className="space-y-6">
@@ -180,18 +188,19 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
         <CardHeader>
           <CardTitle className="text-base">Entitlements</CardTitle>
           <CardDescription>
-            One plan matrix should drive marketing copy, gating, and the dashboard.
+            Free includes the core setup tools with smaller limits. Pro raises those limits for teams.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
           <div className="rounded-lg border bg-muted/20 p-4 text-sm">
             <p className="font-medium">Included now</p>
             <ul className="mt-2 space-y-1 text-muted-foreground">
-              <li>REST API: {summary.entitlements.apiAccess ? 'Yes' : 'No'}</li>
-              <li>Public boards: {summary.entitlements.publicBoards ? 'Yes' : 'No'}</li>
-              <li>Webhooks: {summary.entitlements.webhooks ? 'Yes' : 'No'}</li>
-              <li>MCP / AI agent API: {summary.entitlements.mcp ? 'Yes' : 'No'}</li>
-              <li>Custom branding: {summary.entitlements.customBranding ? 'Yes' : 'No'}</li>
+              <li>REST API: {summary.entitlements.apiAccess ? 'Available' : 'Not included'}</li>
+              <li>Public boards: {summary.entitlements.publicBoards ? 'Available' : 'Not included'}</li>
+              <li>Webhooks: {summary.entitlements.webhooks ? webhookEndpointText : 'Not included'}</li>
+              <li>Webhook logs: {summary.entitlements.webhooks ? webhookHistoryText : 'Not included'}</li>
+              <li>MCP / AI agent API: {summary.entitlements.mcp ? 'Available' : 'Not included'}</li>
+              <li>Custom branding: {summary.entitlements.customBranding ? 'Available' : 'Upgrade to Pro'}</li>
             </ul>
           </div>
           <div className="rounded-lg border bg-muted/20 p-4 text-sm">

@@ -9,8 +9,8 @@ test('creates a project and lands on customization before install', async ({ pag
   await signInWithTestSession(page)
 
   await page.goto('/projects/new')
-  await page.getByLabel('Project Name *').fill(`Playwright Install ${Date.now().toString(36)}`)
-  await page.getByRole('button', { name: 'Create Project' }).click()
+  await page.getByLabel('Project name').fill(`Playwright Install ${Date.now().toString(36)}`)
+  await page.getByRole('button', { name: 'Create project and customize' }).click()
 
   await expect(page).toHaveURL(/\/projects\/[^/]+\?created=1&tab=customize/, { timeout: 30_000 })
   await expect(page.getByRole('link', { name: /Setup/ })).toBeVisible()

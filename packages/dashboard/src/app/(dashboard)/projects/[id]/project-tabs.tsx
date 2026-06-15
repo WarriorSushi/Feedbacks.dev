@@ -138,6 +138,8 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
 
   return (
     <div className="space-y-6" data-project-tabs-ready={isInteractive ? 'true' : 'false'}>
+      <ProjectMenu projectId={project.id} activeSection={activeSection} />
+
       <div>
         <Link
           href="/projects"
@@ -175,7 +177,6 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
         </div>
       </div>
 
-      <ProjectMenu projectId={project.id} activeSection={activeSection} />
       {activeSection === 'setup' && <SetupProgress projectId={project.id} activeStep={activeSetupStep} />}
 
       {activeTab === 'install' && (
