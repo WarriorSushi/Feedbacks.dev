@@ -38,6 +38,7 @@ For a new internal staging, recovery, or disposable verification project, run th
 14. `sql/014_fix_rate_limit_uuid_generation.sql` — fixes rate-limit UUID generation on locked function search paths
 15. `sql/015_server_managed_votes.sql` — removes direct client vote writes; board votes go through server API routes
 16. `sql/016_agent_setup_audit.sql` — audit log for short-lived AI setup packet creation and reads
+17. `sql/017_agent_setup_token_revocation.sql` — revocable agent setup packet token registry
 
 **How for internal/staging use:** apply the files through the Supabase CLI or copy-paste the contents of each file into the SQL Editor and click "Run".
 

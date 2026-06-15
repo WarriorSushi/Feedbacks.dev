@@ -13,6 +13,26 @@ export async function GET(request: NextRequest) {
 
     const payload = verifyAgentSetupToken(token)
     const admin = await createAdminSupabase()
+    const { data: tokenRecord, error: tokenError } = await admin
+      .from('agent_setup_tokens')
+      .select('token_id, revoked_at, expires_at')
+      .eq('token_id', payload.tokenId)
+      .eq('project_id', payload.projectId)
+      .eq('user_id', payload.userId)
+      .maybeSingle()
+
+    if (tokenError || !tokenRecord) {
+      return NextResponse.json({ error: 'Setup token is not registered or has been revoked.' }, { status: 401 })
+    }
+
+    if (tokenRecord.revoked_at) {
+      return NextResponse.json({ error: 'Setup token has been revoked.' }, { status: 401 })
+    }
+
+    if (new Date(tokenRecord.expires_at).getTime() <= Date.now()) {
+      return NextResponse.json({ error: 'Setup token has expired.' }, { status: 401 })
+    }
+
     const { data: project } = await admin
       .from('projects')
       .select('*')

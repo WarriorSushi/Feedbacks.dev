@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CodeSnippet } from '@/components/code-snippet'
 import { Badge } from '@/components/ui/badge'
-import { Bot, Check, Copy, ExternalLink, Loader2, Sparkles } from 'lucide-react'
+import { Bot, Check, Copy, ExternalLink, Loader2, RefreshCw, Sparkles, XCircle } from 'lucide-react'
 
 interface InstallTabProps {
   project: Project
@@ -26,6 +26,18 @@ interface InstallTabProps {
   rotatingApiKey: boolean
   onRotateApiKey: () => Promise<void>
   created: boolean
+}
+
+interface SetupTokenStatus {
+  token_id: string
+  expires_at: string
+  revoked_at: string | null
+  created_at: string
+}
+
+interface ProjectSetupStatus {
+  totalFeedback: number
+  newFeedback: number
 }
 
 export function InstallTab({
@@ -37,9 +49,13 @@ export function InstallTab({
   created,
 }: InstallTabProps) {
   const [copied, setCopied] = React.useState(false)
-  const [setupPacket, setSetupPacket] = React.useState<{ packetUrl: string; expiresAt: string } | null>(null)
+  const [setupPacket, setSetupPacket] = React.useState<{ tokenId: string; packetUrl: string; expiresAt: string } | null>(null)
   const [setupPacketLoading, setSetupPacketLoading] = React.useState(false)
+  const [setupTokensLoading, setSetupTokensLoading] = React.useState(false)
+  const [revokingTokenId, setRevokingTokenId] = React.useState<string | null>(null)
   const [setupPacketError, setSetupPacketError] = React.useState<string | null>(null)
+  const [setupTokens, setSetupTokens] = React.useState<SetupTokenStatus[]>([])
+  const [projectSetupStatus, setProjectSetupStatus] = React.useState<ProjectSetupStatus | null>(null)
   const appOrigin = publicEnv.NEXT_PUBLIC_APP_ORIGIN
   const savedConfig = React.useMemo(
     () => project.settings?.widget_config || {},
@@ -122,6 +138,33 @@ ${JSON.stringify(setupPacket, null, 2)}`
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const loadSetupTokens = React.useCallback(async () => {
+    setSetupTokensLoading(true)
+    try {
+      const response = await fetch(`/api/projects/${project.id}/setup-token`, { cache: 'no-store' })
+      if (!response.ok) return
+      const payload = await response.json()
+      setSetupTokens(Array.isArray(payload.tokens) ? payload.tokens : [])
+    } finally {
+      setSetupTokensLoading(false)
+    }
+  }, [project.id])
+
+  React.useEffect(() => {
+    void loadSetupTokens()
+  }, [loadSetupTokens])
+
+  const loadProjectSetupStatus = React.useCallback(async () => {
+    const response = await fetch(`/api/projects/${project.id}`, { cache: 'no-store' })
+    if (!response.ok) return
+    const payload = await response.json()
+    setProjectSetupStatus(payload.stats || null)
+  }, [project.id])
+
+  React.useEffect(() => {
+    void loadProjectSetupStatus()
+  }, [loadProjectSetupStatus])
+
   const createSetupPacketLink = async () => {
     if (!projectKey) {
       setSetupPacketError('Generate a fresh project key before creating a setup packet link.')
@@ -141,15 +184,45 @@ ${JSON.stringify(setupPacket, null, 2)}`
         throw new Error(payload.error || 'Failed to create setup packet link')
       }
       setSetupPacket({
+        tokenId: payload.tokenId,
         packetUrl: payload.packetUrl,
         expiresAt: payload.expiresAt,
       })
+      await loadSetupTokens()
     } catch (error) {
       setSetupPacketError(error instanceof Error ? error.message : 'Failed to create setup packet link')
     } finally {
       setSetupPacketLoading(false)
     }
   }
+
+  const revokeSetupToken = async (tokenId: string) => {
+    setRevokingTokenId(tokenId)
+    setSetupPacketError(null)
+    try {
+      const response = await fetch(`/api/projects/${project.id}/setup-token`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenId }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(payload.error || 'Failed to revoke setup token')
+      }
+      if (setupPacket?.tokenId === tokenId) {
+        setSetupPacket(null)
+      }
+      await loadSetupTokens()
+    } catch (error) {
+      setSetupPacketError(error instanceof Error ? error.message : 'Failed to revoke setup token')
+    } finally {
+      setRevokingTokenId(null)
+    }
+  }
+
+  const activeSetupTokens = setupTokens.filter((token) => {
+    return !token.revoked_at && new Date(token.expires_at).getTime() > Date.now()
+  })
 
   return (
     <div className="space-y-6">
@@ -338,6 +411,61 @@ ${JSON.stringify(setupPacket, null, 2)}`
                 </p>
               </div>
             )}
+            <div className="mt-4 rounded-lg border bg-background/70 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Packet link status</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {activeSetupTokens.length > 0
+                      ? `${activeSetupTokens.length} active setup ${activeSetupTokens.length === 1 ? 'link' : 'links'}`
+                      : 'No active setup packet links.'}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-1.5 text-xs"
+                  onClick={() => void loadSetupTokens()}
+                  disabled={setupTokensLoading}
+                >
+                  {setupTokensLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                  Refresh
+                </Button>
+              </div>
+              {setupTokens.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {setupTokens.slice(0, 3).map((token) => {
+                    const isActive = !token.revoked_at && new Date(token.expires_at).getTime() > Date.now()
+                    return (
+                      <div key={token.token_id} className="flex flex-col gap-2 rounded-md border bg-muted/20 p-3 text-xs sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="font-medium text-foreground">
+                            {isActive ? 'Active link' : token.revoked_at ? 'Revoked link' : 'Expired link'}
+                          </p>
+                          <p className="mt-0.5 text-muted-foreground">
+                            Created {new Date(token.created_at).toLocaleString()} · Expires {new Date(token.expires_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 shrink-0 gap-1.5 text-xs text-destructive hover:text-destructive"
+                          disabled={!isActive || revokingTokenId === token.token_id}
+                          onClick={() => void revokeSetupToken(token.token_id)}
+                        >
+                          {revokingTokenId === token.token_id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <XCircle className="h-3.5 w-3.5" />
+                          )}
+                          Revoke
+                        </Button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           </div>
           <CodeSnippet
             tabs={[
@@ -375,6 +503,14 @@ ${JSON.stringify(setupPacket, null, 2)}`
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="rounded-lg border bg-muted/20 p-4">
+            <p className="text-sm font-medium text-foreground">Current setup status</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {projectSetupStatus && projectSetupStatus.totalFeedback > 0
+                ? `${projectSetupStatus.totalFeedback} feedback ${projectSetupStatus.totalFeedback === 1 ? 'item has' : 'items have'} reached this project. ${projectSetupStatus.newFeedback} ${projectSetupStatus.newFeedback === 1 ? 'is' : 'are'} still new.`
+                : 'No feedback has reached this project yet. Run hosted verification after installing the snippet.'}
+            </p>
+          </div>
           <div className="grid gap-3 md:grid-cols-3">
             {[
               'Open the verification page in a new tab.',

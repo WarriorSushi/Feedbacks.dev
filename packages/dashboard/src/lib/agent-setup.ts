@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto'
+import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto'
 import {
   buildFeedbackApiUrl,
   buildRuntimeWidgetConfig,
@@ -14,6 +14,7 @@ export const AGENT_SETUP_TOKEN_TTL_MS = 30 * 60 * 1000
 
 export interface AgentSetupTokenPayload {
   scope: 'project_setup_packet'
+  tokenId: string
   projectId: string
   userId: string
   projectKey: string
@@ -68,10 +69,11 @@ function signPayload(encodedPayload: string) {
   return createHmac('sha256', setupSecret()).update(encodedPayload).digest('base64url')
 }
 
-export function createAgentSetupToken(payload: Omit<AgentSetupTokenPayload, 'scope' | 'expiresAt'>) {
+export function createAgentSetupToken(payload: Omit<AgentSetupTokenPayload, 'scope' | 'tokenId' | 'expiresAt'>) {
   const fullPayload: AgentSetupTokenPayload = {
     ...payload,
     scope: 'project_setup_packet',
+    tokenId: randomUUID(),
     expiresAt: new Date(Date.now() + AGENT_SETUP_TOKEN_TTL_MS).toISOString(),
   }
   const encodedPayload = encodeBase64Url(JSON.stringify(fullPayload))
@@ -101,7 +103,7 @@ export function verifyAgentSetupToken(token: string): AgentSetupTokenPayload {
   if (payload.scope !== 'project_setup_packet') {
     throw new Error('Invalid setup token scope')
   }
-  if (!payload.projectId || !payload.userId || !payload.projectKey || !payload.expiresAt) {
+  if (!payload.tokenId || !payload.projectId || !payload.userId || !payload.projectKey || !payload.expiresAt) {
     throw new Error('Invalid setup token payload')
   }
   if (new Date(payload.expiresAt).getTime() <= Date.now()) {
