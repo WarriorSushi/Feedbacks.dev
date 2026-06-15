@@ -139,10 +139,12 @@ Add billing, captcha, and email variables only when those surfaces are enabled i
 
 Vercel Hobby accounts reject cron schedules that run more than once per day. The checked-in Vercel config therefore uses daily cron schedules so Hobby production deploys can succeed.
 
-For fast webhook retry processing, use one of these before launch traffic depends on retries:
+The hosted production project uses a two-layer free scheduler setup:
 
-- upgrade the Vercel project to a plan that supports `*/5 * * * *`
-- keep the Vercel cron daily and add an external scheduler that calls `/api/cron/webhook-jobs` every 5 minutes with `Authorization: Bearer <CRON_SECRET>`
+- Vercel cron remains daily as the platform-managed backup.
+- GitHub Actions calls `/api/cron/webhook-jobs` every 5 minutes with `Authorization: Bearer <CRON_SECRET>`.
+
+Keep `CRON_SECRET` configured in both Vercel production env and GitHub Actions repository secrets. If GitHub Actions is delayed or disabled, webhook retries fall back to the daily Vercel cron. If the product later needs stricter retry timing, upgrade the Vercel project to a plan that supports `*/5 * * * *` or move the scheduler to a dedicated queue/worker.
 
 ---
 
