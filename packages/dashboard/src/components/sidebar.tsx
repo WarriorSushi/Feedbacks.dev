@@ -12,8 +12,6 @@ import {
   CreditCard,
   Settings,
   LogOut,
-  Moon,
-  Sun,
   ChevronDown,
   ChevronUp,
   Menu,
@@ -24,9 +22,9 @@ import {
   Globe,
   ExternalLink,
 } from 'lucide-react'
-import { useTheme } from 'next-themes'
 import type { Project } from '@/lib/types'
 import { createClient } from '@/lib/supabase-browser'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -57,7 +55,6 @@ interface SidebarProps {
 export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
   const [projectOpen, setProjectOpen] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [collapsed, setCollapsed] = React.useState(false)
@@ -280,23 +277,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
       {/* Footer — always visible at bottom */}
       <div className="shrink-0 space-y-1 border-t p-2.5">
         {/* Theme toggle */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            'w-full text-[13px] font-medium text-muted-foreground hover:text-foreground',
-            collapsed ? 'justify-center px-2' : 'justify-start px-3'
-          )}
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          title={collapsed ? (theme === 'dark' ? 'Light mode' : 'Dark mode') : undefined}
-        >
-          {theme === 'dark' ? (
-            <Sun className={cn('h-[17px] w-[17px] shrink-0', !collapsed && 'mr-2.5')} />
-          ) : (
-            <Moon className={cn('h-[17px] w-[17px] shrink-0', !collapsed && 'mr-2.5')} />
-          )}
-          {!collapsed && (theme === 'dark' ? 'Light mode' : 'Dark mode')}
-        </Button>
+        <ThemeToggle collapsed={collapsed} />
 
         {/* User row */}
         <div
