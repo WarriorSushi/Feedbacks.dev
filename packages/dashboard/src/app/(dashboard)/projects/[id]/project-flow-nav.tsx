@@ -21,7 +21,7 @@ export function ProjectMenu({
   return (
     <nav
       aria-label="Project menu"
-      className="sticky top-0 z-30 -mx-4 -mt-4 overflow-x-auto border-b bg-background/95 px-4 py-3 shadow-sm backdrop-blur md:-mx-6 md:-mt-6 md:px-6"
+      className="sticky top-0 z-30 -mx-4 -mt-4 overflow-x-auto border-b border-primary/25 bg-primary/[0.09] px-4 py-3 shadow-[0_1px_0_hsl(var(--primary)/0.16),0_14px_28px_-24px_hsl(var(--primary)/0.65)] backdrop-blur dark:border-primary/35 dark:bg-primary/[0.16] md:-mx-6 md:-mt-6 md:px-6"
     >
       <div className="flex min-h-11 min-w-max items-center gap-2">
         {items.map((item) => (
@@ -31,8 +31,8 @@ export function ProjectMenu({
             aria-current={activeSection === item.id ? 'page' : undefined}
             className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
               activeSection === item.id
-                ? 'bg-primary/10 text-foreground shadow-sm ring-1 ring-primary/10'
-                : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                ? 'bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/30'
+                : 'text-foreground/75 hover:bg-background/70 hover:text-foreground dark:text-foreground/80 dark:hover:bg-background/35'
             }`}
           >
             {item.label}
