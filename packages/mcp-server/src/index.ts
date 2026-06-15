@@ -8,6 +8,7 @@ import {
   updateFeedbackStatusParams,
   searchFeedbackParams,
   setupPacketParams,
+  submitTestFeedbackParams,
 } from './tools.js'
 
 function readCliOption(name: string): string | undefined {
@@ -64,12 +65,49 @@ async function getProjectId(): Promise<string> {
 }
 
 server.tool(
+  'list_projects',
+  'List projects available to this API key',
+  {},
+  async () => {
+    const result = await apiRequest('/projects')
+    return {
+      content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
+    }
+  }
+)
+
+server.tool(
   'get_project_setup_packet',
   'Get exact widget install snippets, endpoints, and verification steps for the project',
   setupPacketParams.shape,
   async (params) => {
     const projectId = params.project_id || await getProjectId()
     const result = await apiRequest(`/projects/${projectId}/setup-packet`)
+    return {
+      content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
+    }
+  }
+)
+
+server.tool(
+  'submit_test_feedback',
+  'Submit a test feedback item to verify the project inbox receives agent/API submissions',
+  submitTestFeedbackParams.shape,
+  async (params) => {
+    const result = await apiRequest('/feedback', {
+      method: 'POST',
+      body: JSON.stringify({
+        message: params.message,
+        type: 'question',
+        priority: 'low',
+        url: params.url,
+        agent_name: 'feedbacks-mcp',
+        structured_data: {
+          verification: true,
+          source: 'submit_test_feedback',
+        },
+      }),
+    })
     return {
       content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
     }

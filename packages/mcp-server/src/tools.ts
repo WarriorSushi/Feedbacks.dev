@@ -42,3 +42,8 @@ export const searchFeedbackParams = z.object({
 export const setupPacketParams = z.object({
   project_id: z.string().optional().describe('Project ID. Defaults to the project attached to this API key.'),
 })
+
+export const submitTestFeedbackParams = z.object({
+  message: z.string().min(2).default('feedbacks.dev install verification from MCP').describe('Test feedback message'),
+  url: z.string().url().optional().describe('Page URL where the widget was tested'),
+})

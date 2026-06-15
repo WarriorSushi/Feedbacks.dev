@@ -206,6 +206,8 @@ export function ApiDocs({
             <h4 className="font-medium text-sm">Available MCP Tools</h4>
             <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
               <li><code className="bg-muted px-1 rounded">submit_feedback</code> — Submit a bug report or feature request</li>
+              <li><code className="bg-muted px-1 rounded">submit_test_feedback</code> — Send a verification item to the inbox</li>
+              <li><code className="bg-muted px-1 rounded">list_projects</code> — List the project attached to this API key</li>
               <li><code className="bg-muted px-1 rounded">get_project_setup_packet</code> — Fetch exact install snippets and verification steps</li>
               <li><code className="bg-muted px-1 rounded">list_feedback</code> — List recent feedback (paginated, filterable)</li>
               <li><code className="bg-muted px-1 rounded">update_feedback_status</code> — Change feedback status/priority</li>
