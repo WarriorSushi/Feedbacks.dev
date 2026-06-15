@@ -83,10 +83,12 @@ Status refresh on 14 June 2026:
 
 ## Cron Jobs
 
-- [ ] Webhook jobs cron runs every 5 minutes.
+- [ ] Webhook jobs cron runs every 5 minutes on Vercel Pro or an external scheduler. Hobby deployment uses a daily fallback because Vercel Hobby rejects sub-daily cron schedules.
 - [ ] Notification digest cron runs daily.
 - [ ] `CRON_SECRET` exists in Vercel production env so Vercel sends `Authorization: Bearer <CRON_SECRET>` to cron routes.
 - [ ] Manual internal webhook job processing route is not publicly usable without its secret.
+
+15 June 2026 note: production deploy was blocked by Vercel Hobby plan cron limits when `/api/cron/webhook-jobs` used `*/5 * * * *`. The repo now uses a daily Vercel-compatible fallback. Restore a 5-minute scheduler through Vercel Pro or an external cron provider before relying on fast queued webhook retries.
 
 ## Widget Assets
 

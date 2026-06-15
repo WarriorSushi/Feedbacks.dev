@@ -135,6 +135,15 @@ VOTE_HMAC_SECRET
 
 Add billing, captcha, and email variables only when those surfaces are enabled in production.
 
+### Cron plan note
+
+Vercel Hobby accounts reject cron schedules that run more than once per day. The checked-in Vercel config therefore uses daily cron schedules so Hobby production deploys can succeed.
+
+For fast webhook retry processing, use one of these before launch traffic depends on retries:
+
+- upgrade the Vercel project to a plan that supports `*/5 * * * *`
+- keep the Vercel cron daily and add an external scheduler that calls `/api/cron/webhook-jobs` every 5 minutes with `Authorization: Bearer <CRON_SECRET>`
+
 ---
 
 ## Step 5: Deploy to Vercel

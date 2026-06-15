@@ -40,7 +40,7 @@ Claude's 25 May audit was useful, but several items it listed are now fixed.
 
 Fixed since then:
 
-- Cron config split-brain is fixed. Only `packages/dashboard/vercel.json` remains, with webhook jobs every 5 minutes and notification digests daily.
+- Cron config split-brain is fixed. Only `packages/dashboard/vercel.json` remains. On Vercel Hobby it uses daily cron schedules; fast webhook retries need Vercel Pro or an external scheduler.
 - Project stats RPCs are covered by `sql/012_project_stats_and_digest_rls.sql`.
 - `notification_digests` now has RLS and policies in `sql/012_project_stats_and_digest_rls.sql`.
 - Widget `html2canvas` SRI is fixed and unit-tested.
