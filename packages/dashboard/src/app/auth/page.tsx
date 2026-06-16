@@ -14,6 +14,7 @@ import { Github, Mail, Loader2, ArrowRight, CheckCircle2, KeyRound } from 'lucid
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { sanitizeRedirectPath } from '@/lib/redirects'
 
 const features = [
   'Sign in and land on project setup with the install snippet ready',
@@ -36,7 +37,8 @@ function AuthPageInner() {
   const [sent, setSent] = React.useState(false)
   const [error, setError] = React.useState('')
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/projects/new'
+  const redirect = sanitizeRedirectPath(searchParams.get('redirect'), '/projects/new')
+  const encodedRedirect = encodeURIComponent(redirect)
 
   const supabase = React.useMemo(() => createClient(), [])
 
@@ -67,7 +69,7 @@ function AuthPageInner() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodedRedirect}`,
       },
     })
 
@@ -84,7 +86,7 @@ function AuthPageInner() {
     await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}`,
+        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodedRedirect}`,
       },
     })
   }
