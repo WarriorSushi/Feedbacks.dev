@@ -145,13 +145,14 @@ export default async function LandingPage() {
                 </Badge>
               </div>
 
-              <h1 className="max-w-3xl text-4xl font-black leading-[1] tracking-tighter sm:text-5xl">
-                Collecting user feedbacks & more, just became ridiculously simple
+              <h1 className="max-w-3xl text-3xl font-black leading-[1.04] tracking-tighter sm:text-4xl lg:text-[2.8rem]">
+                <span className="text-[#88C916]">Collecting user feedbacks & more</span>
+                <span>, just became ridiculously simple</span>
               </h1>
 
               <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">
-                Install a lightweight widget, capture context, and move signal into your inbox,
-                public boards, webhooks, or AI agent workflows.
+                Copy, paste, and start collecting from your userbase. Route every useful signal
+                anywhere you work.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
