@@ -164,14 +164,14 @@ export default async function LandingPage() {
 
             <div className="relative">
               <div className="absolute -inset-6 rounded-[2rem] bg-primary/14 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[2rem] border bg-card shadow-2xl shadow-primary/10">
+              <div className="relative overflow-hidden rounded-[1.75rem] border bg-card p-1 shadow-2xl shadow-primary/10">
                 <Image
                   src="/hero_section_image.webp"
                   alt="feedbacks.dev dashboard showing simple user feedback collection"
                   width={1200}
                   height={900}
                   priority
-                  className="h-auto w-full object-cover"
+                  className="h-auto w-full rounded-[1.45rem] object-cover"
                 />
               </div>
             </div>

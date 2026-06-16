@@ -295,38 +295,33 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
                 )}
               </Link>
               {item.href === '/projects' && isActive && !collapsed && visibleProjects.length > 0 && (
-                <details open className="ml-6 rounded-md border-l pl-2">
-                  <summary className="cursor-pointer py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Project list
-                  </summary>
-                  <div className="space-y-0.5 pb-1">
-                    {visibleProjects.map((project, index) => {
-                      const selected = project.id === currentProjectId
-                      return (
-                        <Link
-                          key={project.id}
-                          href={`/projects/${project.id}`}
-                          onClick={() => beginNavigation(`/projects/${project.id}`)}
-                          onMouseEnter={() => router.prefetch(`/projects/${project.id}`)}
-                          onFocus={() => router.prefetch(`/projects/${project.id}`)}
-                          className={cn(
-                            'flex items-center gap-2 rounded-md px-2 py-1.5 text-[12px] transition-[background-color,color,transform] active:scale-[0.98]',
-                            selected
-                              ? 'bg-primary/10 font-medium text-primary'
-                              : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-                          )}
-                        >
-                          {pendingHref === `/projects/${project.id}` ? (
-                            <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
-                          ) : (
-                            <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', projectColors[index % projectColors.length])} />
-                          )}
-                          <span className="truncate">{project.name}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                </details>
+                <div className="ml-6 space-y-0.5 border-l py-1 pl-2">
+                  {visibleProjects.map((project, index) => {
+                    const selected = project.id === currentProjectId
+                    return (
+                      <Link
+                        key={project.id}
+                        href={`/projects/${project.id}`}
+                        onClick={() => beginNavigation(`/projects/${project.id}`)}
+                        onMouseEnter={() => router.prefetch(`/projects/${project.id}`)}
+                        onFocus={() => router.prefetch(`/projects/${project.id}`)}
+                        className={cn(
+                          'flex items-center gap-2 rounded-md px-2 py-1.5 text-[12px] transition-[background-color,color,transform] active:scale-[0.98]',
+                          selected
+                            ? 'bg-primary/10 font-medium text-primary'
+                            : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                        )}
+                      >
+                        {pendingHref === `/projects/${project.id}` ? (
+                          <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
+                        ) : (
+                          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', projectColors[index % projectColors.length])} />
+                        )}
+                        <span className="truncate">{project.name}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
               )}
             </React.Fragment>
           )
