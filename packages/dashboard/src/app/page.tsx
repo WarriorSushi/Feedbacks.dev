@@ -134,13 +134,13 @@ export default async function LandingPage() {
         <div className="relative mx-auto max-w-6xl px-6 pb-10 pt-8 md:pb-14 md:pt-10">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(460px,1.1fr)] lg:items-center">
             <div className="min-w-0">
-              <div className="mb-6 flex flex-wrap items-center gap-2">
-                <Badge variant="secondary" className="gap-1.5 border-primary/20 bg-primary/[0.09] px-3 py-1 text-xs font-semibold text-primary">
-                  <Sparkles className="h-3 w-3" />
+              <div className="mb-5 flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <Badge variant="secondary" className="shrink-0 gap-1 border-primary/20 bg-primary/[0.09] px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                  <Sparkles className="h-2.5 w-2.5" />
                   Install-first feedback stack
                 </Badge>
-                <Badge variant="outline" className="gap-1.5 bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground">
-                  <Bot className="h-3 w-3" />
+                <Badge variant="outline" className="shrink-0 gap-1 bg-card/70 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  <Bot className="h-2.5 w-2.5" />
                   Agent-ready setup path
                 </Badge>
               </div>
@@ -155,23 +155,23 @@ export default async function LandingPage() {
                 anywhere you work.
               </p>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
-                  <Button size="lg" className="group h-12 px-7 font-semibold shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/25">
-                    {isLoggedIn ? 'Go to Dashboard' : 'Start collecting feedback'}
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              <div className="mt-7 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+                <Link href={isLoggedIn ? '/dashboard' : '/auth'} className="min-w-0">
+                  <Button size="lg" className="group h-11 w-full gap-1.5 px-3 text-[13px] font-semibold shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/25 sm:h-12 sm:w-auto sm:px-7 sm:text-sm">
+                    <span className="truncate">{isLoggedIn ? 'Go to Dashboard' : 'Start collecting'}</span>
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 sm:h-4 sm:w-4" />
                   </Button>
                 </Link>
-                <Link href="#install">
-                  <Button variant="outline" size="lg" className="h-12 gap-2 bg-card/70 font-semibold">
+                <Link href="#install" className="min-w-0">
+                  <Button variant="outline" size="lg" className="h-11 w-full gap-1.5 bg-card/70 px-3 text-[13px] font-semibold sm:h-12 sm:w-auto sm:px-7 sm:text-sm">
                     See the snippet
                   </Button>
                 </Link>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-2 text-sm text-muted-foreground">
+              <div className="mt-5 flex flex-nowrap gap-1.5 overflow-x-auto pb-1 text-xs text-muted-foreground [scrollbar-width:none] sm:text-[13px] [&::-webkit-scrollbar]:hidden">
                 {['No credit card', 'Website snippet first', 'Agent handoff ready'].map((item) => (
-                  <span key={item} className="rounded-full border bg-card/70 px-3 py-1">
+                  <span key={item} className="shrink-0 rounded-full border bg-card/70 px-2.5 py-0.5">
                     {item}
                   </span>
                 ))}
