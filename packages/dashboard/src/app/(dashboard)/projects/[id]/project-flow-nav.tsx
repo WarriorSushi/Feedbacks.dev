@@ -59,6 +59,7 @@ export function ProjectMenu({
           <Link
             key={item.id}
             href={item.href}
+            prefetch={false}
             aria-current={activeSection === item.id ? 'page' : undefined}
             onClick={() => beginNavigation(item.href)}
             onMouseEnter={() => prefetch(item.href)}
@@ -125,6 +126,7 @@ export function SetupProgress({
             <li key={step.id}>
               <Link
                 href={step.href}
+                prefetch={false}
                 onClick={() => beginNavigation(step.href)}
                 onMouseEnter={() => prefetch(step.href)}
                 onFocus={() => prefetch(step.href)}

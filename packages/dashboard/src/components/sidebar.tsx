@@ -74,12 +74,16 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const search = searchParams.toString()
+  const currentHref = search ? `${pathname}?${search}` : pathname
+  const routeProjectId = pathname.match(/^\/projects\/([^/]+)/)?.[1]
+  const resolvedCurrentProjectId = currentProjectId || routeProjectId
   const [visibleProjects, setVisibleProjects] = React.useState(projects)
   const [pendingHref, setPendingHref] = React.useState<string | null>(null)
   const [projectOpen, setProjectOpen] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [collapsed, setCollapsed] = React.useState(pathname === '/dashboard/boards')
-  const [expandedProjectId, setExpandedProjectId] = React.useState<string | null>(currentProjectId ?? null)
+  const [expandedProjectId, setExpandedProjectId] = React.useState<string | null>(resolvedCurrentProjectId ?? null)
   const dropdownRef = React.useRef<HTMLDivElement>(null)
   const supabase = React.useMemo(() => createClient(), [])
 
@@ -88,10 +92,10 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
   }, [projects])
 
   React.useEffect(() => {
-    if (currentProjectId) {
-      setExpandedProjectId(currentProjectId)
+    if (resolvedCurrentProjectId) {
+      setExpandedProjectId(resolvedCurrentProjectId)
     }
-  }, [currentProjectId])
+  }, [resolvedCurrentProjectId])
 
   React.useEffect(() => {
     const removeDeletedProject = (event: Event) => {
@@ -105,7 +109,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
     return () => window.removeEventListener('feedbacks:project-deleted', removeDeletedProject)
   }, [])
 
-  const currentProject = visibleProjects.find((p) => p.id === currentProjectId) || visibleProjects[0]
+  const currentProject = visibleProjects.find((p) => p.id === resolvedCurrentProjectId) || visibleProjects[0]
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -130,7 +134,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
   React.useEffect(() => {
     setMobileOpen(false)
     setPendingHref(null)
-  }, [pathname])
+  }, [currentHref])
 
   React.useEffect(() => {
     if (pathname === '/dashboard/boards') {
@@ -140,11 +144,11 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
 
   const beginNavigation = React.useCallback(
     (href: string) => {
-      if (href === pathname) return
+      if (href === currentHref) return
       setPendingHref(href)
       router.prefetch(href)
     },
-    [pathname, router],
+    [currentHref, router],
   )
 
   const activeProjectTab = pathname.startsWith('/projects/') ? searchParams.get('tab') || 'customize' : null
@@ -165,6 +169,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
         >
           <Link
             href="/dashboard"
+            prefetch={false}
             onClick={() => beginNavigation('/dashboard')}
             onMouseEnter={() => router.prefetch('/dashboard')}
             onFocus={() => router.prefetch('/dashboard')}
@@ -224,11 +229,12 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
             <div className="min-h-0">
               <div className="mt-1 overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md shadow-black/5">
                 {visibleProjects.map((p, i) => {
-                  const isSelected = p.id === currentProjectId
+                  const isSelected = p.id === resolvedCurrentProjectId
                   return (
                     <Link
                       key={p.id}
                       href={`/projects/${p.id}`}
+                      prefetch={false}
                       onClick={() => {
                         beginNavigation(`/projects/${p.id}`)
                         setProjectOpen(false)
@@ -270,6 +276,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
         <div className="shrink-0 border-b p-2.5">
           <Link
             href="/projects/new"
+            prefetch={false}
             onClick={() => beginNavigation('/projects/new')}
             onMouseEnter={() => router.prefetch('/projects/new')}
             onFocus={() => router.prefetch('/projects/new')}
@@ -293,6 +300,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
             <React.Fragment key={item.href}>
               <Link
                 href={item.href}
+                prefetch={false}
                 title={collapsed ? item.label : undefined}
                 aria-label={collapsed ? item.label : undefined}
                 onClick={() => beginNavigation(item.href)}
@@ -329,7 +337,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
               {item.href === '/projects' && isActive && !collapsed && visibleProjects.length > 0 && (
                 <div className="ml-6 space-y-0.5 border-l py-1 pl-2">
                   {visibleProjects.map((project, index) => {
-                    const selected = project.id === currentProjectId
+                    const selected = project.id === resolvedCurrentProjectId
                     const expanded = expandedProjectId === project.id
                     return (
                       <div key={project.id} className="space-y-0.5">
@@ -368,6 +376,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
                                 <Link
                                   key={subItem.key}
                                   href={href}
+                                  prefetch={false}
                                   onClick={() => beginNavigation(href)}
                                   onMouseEnter={() => router.prefetch(href)}
                                   onFocus={() => router.prefetch(href)}
@@ -493,7 +502,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
     <>
       {/* ── Mobile top bar ──────────────────────────────────────────────── */}
       <div className="flex h-14 shrink-0 items-center justify-between border-b bg-card px-4 md:hidden">
-        <Link href="/dashboard" className="font-semibold transition-opacity active:opacity-70">
+        <Link href="/dashboard" prefetch={false} className="font-semibold transition-opacity active:opacity-70">
           <BrandWordmark className="text-[17px]" markClassName="h-6 w-6" />
         </Link>
         <Button

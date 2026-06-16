@@ -17,17 +17,20 @@ export default async function DashboardLayout({
     redirect('/auth')
   }
 
-  const [{ data: projects }, { data: boardSettings }] = await Promise.all([
-    supabase
-      .from('projects')
-      .select('id, name')
-      .eq('owner_user_id', user.id)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('public_board_settings')
-      .select('project_id, slug, enabled')
-      .eq('enabled', true),
-  ])
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id, name')
+    .eq('owner_user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  const projectIds = (projects || []).map((project: { id: string }) => project.id)
+  const { data: boardSettings } = projectIds.length > 0
+    ? await supabase
+        .from('public_board_settings')
+        .select('project_id, slug, enabled')
+        .eq('enabled', true)
+        .in('project_id', projectIds)
+    : { data: [] }
 
   // Extract current project ID from URL path
   const headersList = await headers()
