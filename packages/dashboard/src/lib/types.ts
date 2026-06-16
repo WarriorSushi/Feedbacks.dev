@@ -38,6 +38,12 @@ export interface Project {
 export interface ProjectSettings {
   widget_config?: WidgetConfig
   notifications?: NotificationSettings
+  widget_origin_restriction?: WidgetOriginRestriction
+}
+
+export interface WidgetOriginRestriction {
+  enabled?: boolean
+  origins?: string[]
 }
 
 export interface WebhookConfig {

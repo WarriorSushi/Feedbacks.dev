@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
+import { parseAllowedOrigins } from '@/lib/origin-allowlist'
 import { ArrowLeft, Copy, Check, Loader2, Trash2, Download, RefreshCw, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { BoardSettingsTab } from './board-settings'
@@ -258,6 +260,12 @@ function SettingsTab({ project }: { project: Project }) {
   const router = useRouter()
   const [name, setName] = React.useState(project.name)
   const [domain, setDomain] = React.useState(project.domain || '')
+  const [restrictOrigins, setRestrictOrigins] = React.useState(
+    Boolean(project.settings?.widget_origin_restriction?.enabled),
+  )
+  const [allowedOriginsText, setAllowedOriginsText] = React.useState(
+    (project.settings?.widget_origin_restriction?.origins || []).join('\n'),
+  )
   const [saving, setSaving] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
   const [confirmDelete, setConfirmDelete] = React.useState(false)
@@ -265,17 +273,41 @@ function SettingsTab({ project }: { project: Project }) {
 
   const handleSave = async () => {
     setSaving(true)
-    const { error } = await supabase
-      .from('projects')
-      .update({
+    const origins = parseAllowedOrigins(allowedOriginsText)
+
+    if (restrictOrigins && origins.length === 0) {
+      setSaving(false)
+      toast({
+        title: 'Add at least one allowed site',
+        description: 'Use full URLs like https://example.com, one per line.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    const response = await fetch(`/api/projects/${project.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         name: name.trim(),
         domain: domain.trim() || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', project.id)
+        settings: {
+          ...project.settings,
+          widget_origin_restriction: {
+            enabled: restrictOrigins,
+            origins,
+          },
+        },
+      }),
+    })
+    const payload = await response.json().catch(() => null)
     setSaving(false)
-    if (error) {
-      toast({ title: 'Failed to save settings', description: error.message, variant: 'destructive' })
+    if (!response.ok) {
+      toast({
+        title: 'Failed to save settings',
+        description: payload?.error || 'Please try again.',
+        variant: 'destructive',
+      })
       return
     }
     toast({ title: 'Project settings saved' })
@@ -316,6 +348,36 @@ function SettingsTab({ project }: { project: Project }) {
               onChange={(e) => setDomain(e.target.value)}
               placeholder="myapp.com"
             />
+          </div>
+          <div className="rounded-lg border border-border/80 bg-muted/30 p-4">
+            <div className="flex items-start gap-3">
+              <input
+                id="restrict-widget-origins"
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded border-border accent-primary"
+                checked={restrictOrigins}
+                onChange={(event) => setRestrictOrigins(event.target.checked)}
+              />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Label htmlFor="restrict-widget-origins" className="text-sm font-semibold">
+                  Restrict widget submissions to my sites
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Leave this off while installing. Turn it on after the widget works to block submissions from other websites using your project key.
+                </p>
+                <Textarea
+                  value={allowedOriginsText}
+                  onChange={(event) => setAllowedOriginsText(event.target.value)}
+                  placeholder={`https://example.com\nhttps://app.example.com`}
+                  rows={3}
+                  disabled={!restrictOrigins}
+                  aria-label="Allowed widget origins"
+                />
+                <p className="text-xs text-muted-foreground">
+                  One origin per line. Use only scheme and domain, like https://example.com. Do not include paths.
+                </p>
+              </div>
+            </div>
           </div>
           <Button onClick={handleSave} disabled={saving}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

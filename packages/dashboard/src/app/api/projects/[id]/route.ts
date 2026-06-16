@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedUserAndProject } from '@/lib/api-auth'
+import { sanitizeWidgetOriginRestriction } from '@/lib/origin-allowlist'
 import { sanitizeSavedWidgetConfig } from '@feedbacks/shared'
 
 type RouteParams = { params: Promise<{ id: string }> }
@@ -73,6 +74,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         settings.widget_config = sanitizeSavedWidgetConfig(
           settings.widget_config as Parameters<typeof sanitizeSavedWidgetConfig>[0],
         )
+      }
+      if ('widget_origin_restriction' in settings) {
+        settings.widget_origin_restriction = sanitizeWidgetOriginRestriction(settings.widget_origin_restriction)
       }
       updates.settings = settings
     }

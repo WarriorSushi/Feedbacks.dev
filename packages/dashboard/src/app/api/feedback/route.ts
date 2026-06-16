@@ -3,7 +3,9 @@ import { createAdminSupabase } from '@/lib/supabase-server'
 import { assertCanReceiveFeedback, incrementFeedbackUsage } from '@/lib/billing'
 import { hasE2EBypass } from '@/lib/e2e'
 import { notifyProjectOwnerOfNewFeedback } from '@/lib/notifications'
+import { isWidgetRequestOriginAllowed } from '@/lib/origin-allowlist'
 import { hashProjectApiKey } from '@/lib/project-api-keys'
+import { publicEnv } from '@/lib/public-env'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { enqueueWebhookJobs, processWebhookJobs } from '@/lib/webhook-delivery'
 import type { FeedbackType, FeedbackPriority, Project } from '@/lib/types'
@@ -129,6 +131,15 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!project) return jsonError('Invalid API key', 401)
+
+    const originAllowed = isWidgetRequestOriginAllowed(
+      request,
+      (project as Project).settings?.widget_origin_restriction,
+      { trustedOrigins: [publicEnv.NEXT_PUBLIC_APP_ORIGIN] },
+    )
+    if (!originAllowed) {
+      return jsonError('This site is not allowed to submit feedback for this project.', 403)
+    }
 
     if (!hasE2EBypass(request)) {
       const entitlement = await assertCanReceiveFeedback(project.owner_user_id)
