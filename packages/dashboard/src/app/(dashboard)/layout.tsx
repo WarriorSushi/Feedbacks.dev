@@ -52,7 +52,7 @@ export default async function DashboardLayout({
         currentProjectId={currentProjectId}
         boardSlugs={boardSlugs}
       />
-      <main className="min-h-0 flex-1 overflow-y-auto bg-muted/35 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] dark:bg-background md:pb-0">
+      <main className="min-h-0 flex-1 overflow-y-auto bg-muted/35 pb-[env(safe-area-inset-bottom,0px)] dark:bg-background">
         <div className="mx-auto max-w-7xl px-4 py-4 md:px-6 md:py-6">{children}</div>
       </main>
     </div>

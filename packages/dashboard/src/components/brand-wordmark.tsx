@@ -9,6 +9,7 @@ interface BrandWordmarkProps {
   textClassName?: string
   dotClassName?: string
   priority?: boolean
+  intro?: boolean
 }
 
 export function BrandWordmark({
@@ -17,6 +18,7 @@ export function BrandWordmark({
   textClassName,
   dotClassName,
   priority = false,
+  intro = false,
 }: BrandWordmarkProps) {
   return (
     <span className={cn('inline-flex items-center gap-2', className)}>
@@ -27,9 +29,13 @@ export function BrandWordmark({
         height={28}
         priority={priority}
         aria-hidden="true"
-        className={cn('h-6 w-6 shrink-0 rounded-md object-contain', markClassName)}
+        className={cn(
+          'h-6 w-6 shrink-0 rounded-md object-contain',
+          intro && 'brand-wordmark-mark-intro',
+          markClassName,
+        )}
       />
-      <span className={cn('tracking-tight', textClassName)}>
+      <span className={cn('tracking-tight', intro && 'brand-wordmark-text-intro', textClassName)}>
         feedbacks<span className={cn('text-primary', dotClassName)}>.dev</span>
       </span>
     </span>

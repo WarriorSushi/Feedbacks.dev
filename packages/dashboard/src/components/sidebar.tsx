@@ -34,11 +34,11 @@ import { ThemeToggle } from '@/components/theme-toggle'
 type SidebarProject = Pick<Project, 'id' | 'name'>
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/feedback',  label: 'Feedback',  icon: MessageSquare },
   { href: '/projects',  label: 'Projects',  icon: FolderOpen },
   { href: '/integrations', label: 'Integrations', icon: Webhook },
-  { href: '/boards', label: 'Public Boards', icon: Globe },
+  { href: '/dashboard/boards', label: 'Public Boards', icon: Globe },
   { href: '/api-docs', label: 'API', icon: Code2 },
   { href: '/billing',   label: 'Billing',   icon: CreditCard },
   { href: '/settings',  label: 'Settings',  icon: Settings },
@@ -78,7 +78,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
   const [pendingHref, setPendingHref] = React.useState<string | null>(null)
   const [projectOpen, setProjectOpen] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
-  const [collapsed, setCollapsed] = React.useState(false)
+  const [collapsed, setCollapsed] = React.useState(pathname === '/dashboard/boards')
   const [expandedProjectId, setExpandedProjectId] = React.useState<string | null>(currentProjectId ?? null)
   const dropdownRef = React.useRef<HTMLDivElement>(null)
   const supabase = React.useMemo(() => createClient(), [])
@@ -132,6 +132,12 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
     setPendingHref(null)
   }, [pathname])
 
+  React.useEffect(() => {
+    if (pathname === '/dashboard/boards') {
+      setCollapsed(true)
+    }
+  }, [pathname])
+
   const beginNavigation = React.useCallback(
     (href: string) => {
       if (href === pathname) return
@@ -165,7 +171,11 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
             className="whitespace-nowrap font-semibold transition-opacity active:opacity-70"
             tabIndex={collapsed ? -1 : 0}
           >
-            <BrandWordmark className="text-[17px]" markClassName="h-6 w-6" />
+            <BrandWordmark
+              className="text-[17px]"
+              markClassName="h-6 w-6"
+              intro={!collapsed}
+            />
           </Link>
         </div>
         <Button
@@ -278,7 +288,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
       {/* Nav — scrolls when it overflows, pushes footer to bottom when it doesn't */}
       <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto p-2.5">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+          const isActive = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(item.href + '/')
           return (
             <React.Fragment key={item.href}>
               <Link
@@ -528,53 +538,6 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
         {sidebarContent}
       </aside>
 
-      {/* ── Mobile bottom nav ───────────────────────────────────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 flex border-t bg-card/95 backdrop-blur-xl md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={isActive ? 'page' : undefined}
-              onClick={() => beginNavigation(item.href)}
-              onMouseEnter={() => router.prefetch(item.href)}
-              onFocus={() => router.prefetch(item.href)}
-              className={cn(
-                'relative flex flex-1 flex-col items-center gap-[3px] pb-1.5 pt-2.5',
-                'transition-[color,transform] duration-150 active:scale-[0.96]',
-                isActive ? 'text-primary' : 'text-muted-foreground'
-              )}
-            >
-              <span
-                className={cn(
-                  'absolute left-1/2 top-0 h-0.5 -translate-x-1/2 rounded-full bg-primary',
-                  'transition-all duration-200 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]',
-                  isActive ? 'w-8 opacity-100' : 'w-0 opacity-0'
-                )}
-              />
-              {pendingHref === item.href ? (
-                <Loader2 className="h-[19px] w-[19px] animate-spin" />
-              ) : (
-                <item.icon
-                  className={cn(
-                    'h-[19px] w-[19px] transition-transform duration-150',
-                    isActive && 'scale-[1.08]'
-                  )}
-                />
-              )}
-              <span
-                className={cn(
-                  'text-[11px] font-medium transition-all duration-150',
-                  isActive ? 'opacity-100' : 'opacity-60'
-                )}
-              >
-                {item.label}
-              </span>
-            </Link>
-          )
-        })}
-      </div>
     </>
   )
 }

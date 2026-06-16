@@ -1,8 +1,21 @@
 import { Skeleton } from '@/components/ui/skeleton'
+import Image from 'next/image'
 
 export default function DashboardLoading() {
   return (
     <div className="space-y-7 animate-pulse">
+      <div className="flex items-center justify-center py-2">
+        <Image
+          src="/new_logo_feedbacks.dev.svg"
+          alt=""
+          width={48}
+          height={48}
+          aria-hidden="true"
+          className="h-12 w-12 animate-logo-load-pop opacity-85"
+          priority
+        />
+      </div>
+
       {/* Header */}
       <div className="space-y-2">
         <Skeleton className="h-7 w-64" />

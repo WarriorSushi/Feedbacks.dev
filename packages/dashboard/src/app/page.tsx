@@ -23,6 +23,13 @@ import {
   Globe,
   SlidersHorizontal,
   PanelTop,
+  Bug,
+  Heart,
+  Lightbulb,
+  Star,
+  Mail,
+  Camera,
+  Plus,
 } from 'lucide-react'
 import { ScrollHeader, WidgetDemo } from './widget-demo-client'
 
@@ -37,6 +44,187 @@ const installSnippet = generateInstallSnippets({
 
 const freePlan = PLAN_MATRIX.free
 const proPlan = PLAN_MATRIX.pro
+
+function LandingHeroSystem() {
+  const inputs = [
+    { Icon: Bug, label: 'Bug report', color: 'text-red-300' },
+    { Icon: Zap, label: 'Feature request', color: 'text-amber-300' },
+    { Icon: Heart, label: 'Praise', color: 'text-rose-300' },
+    { Icon: Lightbulb, label: 'Idea', color: 'text-yellow-300' },
+    { Icon: Star, label: 'Rating', color: 'text-lime-300' },
+    { Icon: MessageSquare, label: 'Customer feedback', color: 'text-emerald-300' },
+    { Icon: Camera, label: 'Screenshot', color: 'text-violet-300' },
+    { Icon: Mail, label: 'Email', color: 'text-zinc-200' },
+  ]
+  const outputs = [
+    { Icon: Github, label: 'GitHub Issues' },
+    { Icon: MessageSquare, label: 'Slack' },
+    { Icon: MessageSquare, label: 'Discord' },
+    { Icon: Mail, label: 'Email' },
+    { Icon: Globe, label: 'Public boards' },
+    { Icon: MessageSquare, label: 'Discussions' },
+    { Icon: Webhook, label: 'Webhooks' },
+    { Icon: Bot, label: 'AI agent workflows' },
+  ]
+  const feedbackRows = [
+    ['Add dark mode support', 'Feature request', 'Open'],
+    ['Payment fails on checkout', 'Bug report', 'In progress'],
+    ['Love the new dashboard!', 'Praise', 'Resolved'],
+  ]
+
+  return (
+    <div className="relative overflow-hidden rounded-[1.75rem] border border-lime-300/15 bg-zinc-950 p-4 shadow-2xl shadow-primary/10 sm:p-5">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_52%,hsl(var(--primary)/0.28),transparent_25%),radial-gradient(circle_at_18%_42%,hsl(var(--primary)/0.18),transparent_22%),radial-gradient(circle_at_82%_42%,hsl(var(--primary)/0.18),transparent_22%)]" />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-15"
+        style={{
+          backgroundImage:
+            'linear-gradient(hsl(var(--primary)/0.25) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)/0.18) 1px, transparent 1px)',
+          backgroundSize: '34px 34px',
+          maskImage: 'linear-gradient(to top, black, transparent 70%)',
+        }}
+      />
+
+      <svg
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-[22%] hidden h-[48%] w-full text-primary/70 md:block"
+        viewBox="0 0 1000 420"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <marker id="hero-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="currentColor" />
+          </marker>
+          <filter id="hero-glow">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        {[86, 132, 178, 224, 270, 316, 362].map((y) => (
+          <path
+            key={`left-${y}`}
+            d={`M120 ${y} C255 ${y} 260 210 420 210`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            markerEnd="url(#hero-arrow)"
+            filter="url(#hero-glow)"
+          />
+        ))}
+        {[86, 132, 178, 224, 270, 316, 362].map((y) => (
+          <path
+            key={`right-${y}`}
+            d={`M580 210 C740 210 745 ${y} 880 ${y}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            markerEnd="url(#hero-arrow)"
+            filter="url(#hero-glow)"
+          />
+        ))}
+      </svg>
+
+      <div className="relative grid gap-4 md:grid-cols-[150px_minmax(0,1fr)_150px] lg:grid-cols-[160px_minmax(0,1fr)_160px]">
+        <div className="order-2 grid grid-cols-2 gap-2 md:order-1 md:block md:space-y-2">
+          {inputs.map(({ Icon, label, color }) => (
+            <div key={label} className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-zinc-900/80 px-3 py-2 text-xs font-medium text-zinc-100 shadow-lg shadow-black/20">
+              <Icon className={`h-4 w-4 shrink-0 ${color}`} />
+              <span className="leading-tight">{label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="order-1 min-w-0 md:order-2">
+          <div className="relative mx-auto min-h-[430px] max-w-[620px] md:min-h-[570px]">
+            <div className="absolute inset-x-0 top-4 rounded-2xl border border-white/12 bg-zinc-950/78 p-4 shadow-2xl shadow-black/45 backdrop-blur">
+              <div className="flex items-center justify-between">
+                <BrandWordmark
+                  className="font-semibold text-zinc-50"
+                  markClassName="h-9 w-9"
+                  textClassName="text-lg"
+                />
+                <div className="flex items-center gap-2">
+                  <div className="h-9 w-9 rounded-lg border border-white/10 bg-white/5" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                    <Plus className="h-4 w-4" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 grid grid-cols-4 gap-2">
+                {[
+                  ['128', 'Open'],
+                  ['36', 'In progress'],
+                  ['89', 'Resolved'],
+                  ['4.8', 'Avg. rating'],
+                ].map(([value, label]) => (
+                  <div key={label} className="rounded-xl border border-white/8 bg-white/[0.04] px-3 py-3 text-center">
+                    <p className="text-lg font-semibold text-zinc-50">{value}</p>
+                    <p className="mt-1 text-[10px] text-zinc-500">{label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 flex gap-5 border-b border-white/10 text-xs text-zinc-500">
+                {['Inbox', 'Triage', 'Tags', 'Integrations'].map((tab, index) => (
+                  <span key={tab} className={index === 0 ? 'border-b border-primary pb-2 text-zinc-50' : 'pb-2'}>
+                    {tab}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {feedbackRows.map(([title, type, status], index) => (
+                  <div key={title} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-white/8 bg-white/[0.035] px-3 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-medium text-zinc-100">{title}</p>
+                      <p className="mt-1 text-[10px] text-zinc-500">{type}</p>
+                    </div>
+                    <span className="rounded-md border border-primary/20 bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary">
+                      {status}
+                    </span>
+                    {index === 2 && (
+                      <div className="col-span-2 hidden h-16 rounded-lg border border-white/8 bg-zinc-950/80 md:block" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="absolute inset-x-0 bottom-2 flex justify-center">
+              <div className="absolute bottom-0 h-28 w-64 rounded-full bg-primary/20 blur-3xl" />
+              <Image
+                src="/feedbacks.dev_mascot.png"
+                alt="feedbacks.dev mascot routing feedback into product workflows"
+                width={512}
+                height={512}
+                priority
+                className="relative z-10 h-[260px] w-[260px] object-contain drop-shadow-[0_24px_44px_rgba(132,255,48,0.18)] sm:h-[320px] sm:w-[320px] md:h-[380px] md:w-[380px]"
+              />
+            </div>
+          </div>
+          <div className="pb-2 text-center">
+            <p className="text-sm text-zinc-400">Collect feedback in minutes.</p>
+            <p className="text-2xl font-black tracking-tight text-primary">Route it anywhere.</p>
+            <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-primary" />
+          </div>
+        </div>
+
+        <div className="order-3 grid grid-cols-2 gap-2 md:block md:space-y-2">
+          {outputs.map(({ Icon, label }) => (
+            <div key={label} className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-zinc-900/80 px-3 py-2 text-xs font-medium text-zinc-100 shadow-lg shadow-black/20">
+              <Icon className="h-4 w-4 shrink-0 text-zinc-200" />
+              <span className="leading-tight">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // ─── Page (Server Component) ──────────────────────────────────────────────────
 
@@ -107,15 +295,6 @@ export default async function LandingPage() {
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,hsl(var(--primary)/0.14),transparent_32%),linear-gradient(180deg,hsl(var(--primary)/0.055),transparent_42%)]" />
-        <Image
-          src="/new_logo_feedbacks.dev.svg"
-          alt=""
-          width={500}
-          height={500}
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-28 top-10 h-[28rem] w-[28rem] select-none opacity-[0.045] blur-[0.2px] dark:opacity-[0.07] md:-left-20 md:h-[34rem] md:w-[34rem]"
-          priority
-        />
         <div
           className="absolute inset-0 opacity-[0.045] dark:opacity-[0.07]"
           style={{
@@ -173,16 +352,7 @@ export default async function LandingPage() {
 
             <div className="relative">
               <div className="absolute -inset-6 rounded-[2rem] bg-primary/14 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[1.75rem] border bg-card p-1 shadow-2xl shadow-primary/10">
-                <Image
-                  src="/hero_section_image.webp"
-                  alt="feedbacks.dev dashboard showing simple user feedback collection"
-                  width={1200}
-                  height={900}
-                  priority
-                  className="h-auto w-full rounded-[1.45rem] object-cover"
-                />
-              </div>
+              <LandingHeroSystem />
             </div>
           </div>
         </div>
@@ -268,6 +438,14 @@ export default async function LandingPage() {
             </div>
           </div>
           <div className="relative min-h-[430px] overflow-hidden rounded-3xl border bg-[radial-gradient(circle_at_25%_20%,hsl(var(--primary)/0.18),transparent_34%),hsl(var(--card))] p-8">
+            <Image
+              src="/new_logo_feedbacks.dev.svg"
+              alt=""
+              width={500}
+              height={500}
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-24 -top-20 h-72 w-72 select-none opacity-[0.055] dark:opacity-[0.085] sm:h-96 sm:w-96"
+            />
             <div
               className="absolute inset-0 opacity-[0.05]"
               style={{
@@ -430,6 +608,16 @@ export default async function LandingPage() {
       <section className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-6xl">
           <div className="relative overflow-hidden rounded-3xl border bg-card px-8 py-20 text-center shadow-2xl shadow-black/[0.05] md:px-16">
+            <div className="relative z-10 mb-8 flex justify-center">
+              <Image
+                src="/new_logo_feedbacks.dev.svg"
+                alt=""
+                width={100}
+                height={100}
+                aria-hidden="true"
+                className="h-20 w-20 sm:h-[100px] sm:w-[100px]"
+              />
+            </div>
             {/* Dot grid texture */}
             <div
               className="pointer-events-none absolute inset-0 opacity-[0.05]"
