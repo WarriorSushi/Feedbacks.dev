@@ -44,7 +44,7 @@ export const PLAN_MATRIX: Record<PlanTier, EntitlementSet> = {
     planTier: 'free',
     label: 'Free',
     monthlyPrice: 0,
-    projectLimit: 1,
+    projectLimit: 2,
     feedbackMonthlyLimit: 500,
     historyDays: 30,
     apiAccess: true,

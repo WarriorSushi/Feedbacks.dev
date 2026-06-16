@@ -9,6 +9,7 @@ test('free plan exposes limited API, MCP, and webhook access', async () => {
   const { getEntitlementsForPlan } = await loadPlans()
   const free = getEntitlementsForPlan('free')
 
+  assert.equal(free.projectLimit, 2)
   assert.equal(free.apiAccess, true)
   assert.equal(free.mcp, true)
   assert.equal(free.webhooks, true)

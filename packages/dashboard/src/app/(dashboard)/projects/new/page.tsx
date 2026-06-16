@@ -46,7 +46,7 @@ export default function NewProjectPage() {
       const payload = await response.json()
       if (!response.ok) {
         if (payload.code === 'project_limit_reached') {
-          setLimitMessage(payload.error || 'Free plan includes 1 project. Upgrade to Pro to create more projects.')
+          setLimitMessage(payload.error || 'Free plan includes 2 projects. Upgrade to Pro to create more.')
         }
         setError(payload.error || 'Failed to create project')
         return

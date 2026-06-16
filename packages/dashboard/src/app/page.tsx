@@ -360,7 +360,7 @@ export default async function LandingPage() {
               <p className="mb-6 text-sm text-muted-foreground">Free forever. No credit card.</p>
               <ul className="mb-8 space-y-3">
                 {[
-                  `${freePlan.projectLimit} project`,
+                  `${freePlan.projectLimit} projects`,
                   `${freePlan.feedbackMonthlyLimit} feedback / month`,
                   'Dashboard + widget install',
                   'Optional public board',

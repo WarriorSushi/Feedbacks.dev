@@ -266,7 +266,7 @@ export async function assertCanCreateProject(userId: string, email?: string | nu
       allowed: false as const,
       summary,
       code: 'project_limit_reached' as const,
-      message: 'Free plan includes 1 project. Upgrade to Pro to create more projects.',
+      message: `Free plan includes ${summary.entitlements.projectLimit} projects. Upgrade to Pro to create more.`,
     }
   }
 
