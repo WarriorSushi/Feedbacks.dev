@@ -23,12 +23,6 @@ import {
   Globe,
   SlidersHorizontal,
   PanelTop,
-  Bug,
-  Heart,
-  Lightbulb,
-  Star,
-  Mail,
-  Camera,
 } from 'lucide-react'
 import { ScrollHeader, WidgetDemo } from './widget-demo-client'
 
@@ -45,124 +39,16 @@ const freePlan = PLAN_MATRIX.free
 const proPlan = PLAN_MATRIX.pro
 
 function LandingHeroSystem() {
-  const inputs = [
-    { Icon: Bug, label: 'Bug report', color: 'text-red-300' },
-    { Icon: Zap, label: 'Feature request', color: 'text-amber-300' },
-    { Icon: Heart, label: 'Praise', color: 'text-rose-300' },
-    { Icon: Lightbulb, label: 'Idea', color: 'text-yellow-300' },
-    { Icon: Star, label: 'Rating', color: 'text-lime-300' },
-    { Icon: MessageSquare, label: 'Customer feedback', color: 'text-emerald-300' },
-    { Icon: Camera, label: 'Screenshot', color: 'text-violet-300' },
-    { Icon: Mail, label: 'Email', color: 'text-zinc-200' },
-  ]
-  const outputs = [
-    { Icon: Github, label: 'GitHub Issues' },
-    { Icon: MessageSquare, label: 'Slack' },
-    { Icon: MessageSquare, label: 'Discord' },
-    { Icon: Mail, label: 'Email' },
-    { Icon: Globe, label: 'Public boards' },
-    { Icon: MessageSquare, label: 'Discussions' },
-    { Icon: Webhook, label: 'Webhooks' },
-    { Icon: Bot, label: 'AI agent workflows' },
-  ]
-  const pathStops = [70, 150, 230, 310, 390, 470, 550, 630]
-
   return (
-    <div className="relative overflow-hidden rounded-[1.75rem] border border-lime-300/15 bg-zinc-950 p-3 shadow-2xl shadow-primary/10 sm:p-5">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--primary)/0.24),transparent_23%),radial-gradient(circle_at_16%_50%,hsl(var(--primary)/0.13),transparent_20%),radial-gradient(circle_at_84%_50%,hsl(var(--primary)/0.13),transparent_20%)]" />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-12"
-        style={{
-          backgroundImage:
-            'linear-gradient(hsl(var(--primary)/0.25) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)/0.18) 1px, transparent 1px)',
-          backgroundSize: '34px 34px',
-          maskImage: 'linear-gradient(to top, black, transparent 70%)',
-        }}
+    <div className="overflow-hidden rounded-[15px] border border-border/70 bg-card shadow-2xl shadow-primary/10">
+      <Image
+        src="/hero_banner_image.png"
+        alt="feedbacks.dev feedback routing overview"
+        width={1080}
+        height={1080}
+        priority
+        className="h-auto w-full rounded-[15px] object-cover"
       />
-
-      <svg
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full text-primary/75"
-        viewBox="0 0 1000 700"
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <marker id="hero-arrow-in" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" fill="currentColor" />
-          </marker>
-          <marker id="hero-arrow-out" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" fill="currentColor" />
-          </marker>
-          <filter id="hero-glow">
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        {pathStops.map((y) => (
-          <path
-            key={`left-${y}`}
-            d={`M170 ${y} C285 ${y} 305 350 430 350`}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            markerEnd="url(#hero-arrow-in)"
-            filter="url(#hero-glow)"
-          />
-        ))}
-        {pathStops.map((y) => (
-          <path
-            key={`right-${y}`}
-            d={`M570 350 C695 350 715 ${y} 830 ${y}`}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            markerEnd="url(#hero-arrow-out)"
-            filter="url(#hero-glow)"
-          />
-        ))}
-      </svg>
-
-      <div className="relative grid min-h-[360px] grid-cols-[minmax(76px,1fr)_104px_minmax(76px,1fr)] items-center gap-2 sm:min-h-[460px] sm:grid-cols-[minmax(118px,1fr)_178px_minmax(118px,1fr)] sm:gap-3 md:min-h-[560px] md:grid-cols-[160px_minmax(220px,1fr)_160px] lg:grid-cols-[170px_minmax(280px,1fr)_170px]">
-        <div className="space-y-1.5 sm:space-y-2">
-          {inputs.map(({ Icon, label, color }) => (
-            <div key={label} className="flex min-h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-zinc-900/86 px-1.5 py-1 text-[9px] font-medium leading-tight text-zinc-100 shadow-lg shadow-black/20 sm:min-h-10 sm:gap-2 sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs">
-              <Icon className={`h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4 ${color}`} />
-              <span>{label}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="relative z-10 mx-auto flex aspect-[0.72] w-full max-w-[104px] items-center justify-center overflow-visible rounded-[1.25rem] border border-white/10 bg-zinc-950/35 shadow-2xl shadow-primary/10 backdrop-blur-[1px] sm:max-w-[178px] sm:rounded-[1.75rem] md:max-w-[330px]">
-          <div className="absolute inset-2 rounded-[1rem] border border-primary/10 bg-primary/[0.035] sm:rounded-[1.4rem]" />
-          <div className="absolute inset-x-[-20%] bottom-[12%] h-[22%] rounded-full bg-primary/25 blur-2xl" />
-          <Image
-            src="/feedbacks.dev_mascot.png"
-            alt="feedbacks.dev mascot routing feedback into product workflows"
-            width={512}
-            height={512}
-            priority
-            className="relative z-10 h-auto w-[132px] max-w-none object-contain drop-shadow-[0_18px_34px_rgba(132,255,48,0.18)] sm:w-[236px] md:w-[430px]"
-          />
-        </div>
-
-        <div className="space-y-1.5 sm:space-y-2">
-          {outputs.map(({ Icon, label }) => (
-            <div key={label} className="flex min-h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-zinc-900/86 px-1.5 py-1 text-[9px] font-medium leading-tight text-zinc-100 shadow-lg shadow-black/20 sm:min-h-10 sm:gap-2 sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs">
-              <Icon className="h-3.5 w-3.5 shrink-0 text-zinc-200 sm:h-4 sm:w-4" />
-              <span>{label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="relative z-10 mt-4 pb-2 text-center sm:mt-6">
-        <p className="text-sm text-zinc-400">Collect feedback in minutes.</p>
-        <p className="text-2xl font-black tracking-tight text-primary">Route it anywhere.</p>
-        <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-primary" />
-      </div>
     </div>
   )
 }
