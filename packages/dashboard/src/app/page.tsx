@@ -107,6 +107,15 @@ export default async function LandingPage() {
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,hsl(var(--primary)/0.14),transparent_32%),linear-gradient(180deg,hsl(var(--primary)/0.055),transparent_42%)]" />
+        <Image
+          src="/new_logo_feedbacks.dev.svg"
+          alt=""
+          width={500}
+          height={500}
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-28 top-10 h-[28rem] w-[28rem] select-none opacity-[0.045] blur-[0.2px] dark:opacity-[0.07] md:-left-20 md:h-[34rem] md:w-[34rem]"
+          priority
+        />
         <div
           className="absolute inset-0 opacity-[0.045] dark:opacity-[0.07]"
           style={{

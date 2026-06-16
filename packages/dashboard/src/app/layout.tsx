@@ -11,12 +11,10 @@ export const metadata: Metadata = {
   description: 'Collect meaningful in-product feedback in minutes. Lightweight widget, powerful dashboard, smart integrations.',
   icons: {
     icon: [
-      { url: '/logo_new.webp', type: 'image/webp' },
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.png', type: 'image/png' },
+      { url: '/new_logo_feedbacks.dev.svg', type: 'image/svg+xml' },
     ],
-    apple: [{ url: '/logo_new.webp', type: 'image/webp' }],
+    shortcut: [{ url: '/new_logo_feedbacks.dev.svg', type: 'image/svg+xml' }],
+    apple: [{ url: '/new_logo_feedbacks.dev.svg', type: 'image/svg+xml' }],
   },
 }
 

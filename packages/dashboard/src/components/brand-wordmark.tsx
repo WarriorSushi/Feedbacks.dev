@@ -21,7 +21,7 @@ export function BrandWordmark({
   return (
     <span className={cn('inline-flex items-center gap-2', className)}>
       <Image
-        src="/logo_new.webp"
+        src="/new_logo_feedbacks.dev.svg"
         alt=""
         width={28}
         height={28}
