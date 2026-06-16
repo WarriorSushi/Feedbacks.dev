@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { BrandWordmark } from '@/components/brand-wordmark'
 import {
   LayoutDashboard,
   MessageSquare,
@@ -28,6 +29,8 @@ import type { Project } from '@/lib/types'
 import { createClient } from '@/lib/supabase-browser'
 import { ThemeToggle } from '@/components/theme-toggle'
 
+type SidebarProject = Pick<Project, 'id' | 'name'>
+
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/feedback',  label: 'Feedback',  icon: MessageSquare },
@@ -50,7 +53,7 @@ const projectColors = [
 
 interface SidebarProps {
   user: { email?: string; user_metadata?: { avatar_url?: string; full_name?: string } }
-  projects: Project[]
+  projects: SidebarProject[]
   currentProjectId?: string
   boardSlugs?: Record<string, string>
 }
@@ -137,10 +140,10 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
             onClick={() => beginNavigation('/dashboard')}
             onMouseEnter={() => router.prefetch('/dashboard')}
             onFocus={() => router.prefetch('/dashboard')}
-            className="whitespace-nowrap text-[17px] font-semibold tracking-tight transition-opacity active:opacity-70"
+            className="whitespace-nowrap font-semibold transition-opacity active:opacity-70"
             tabIndex={collapsed ? -1 : 0}
           >
-            feedbacks<span className="text-primary">.dev</span>
+            <BrandWordmark className="text-[17px]" markClassName="h-6 w-6" />
           </Link>
         </div>
         <Button
@@ -426,8 +429,8 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
     <>
       {/* ── Mobile top bar ──────────────────────────────────────────────── */}
       <div className="flex h-14 shrink-0 items-center justify-between border-b bg-card px-4 md:hidden">
-        <Link href="/dashboard" className="text-[17px] font-semibold tracking-tight">
-          feedbacks<span className="text-primary">.dev</span>
+        <Link href="/dashboard" className="font-semibold transition-opacity active:opacity-70">
+          <BrandWordmark className="text-[17px]" markClassName="h-6 w-6" />
         </Link>
         <Button
           variant="ghost"

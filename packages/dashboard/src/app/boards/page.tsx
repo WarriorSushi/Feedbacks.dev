@@ -3,6 +3,7 @@ import { BoardDirectoryClient } from './board-directory-client'
 import Link from 'next/link'
 import { ArrowRight, Compass } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { BrandWordmark } from '@/components/brand-wordmark'
 
 export const metadata = {
   title: 'Public Product Boards',
@@ -24,8 +25,8 @@ export default async function BoardsPage({
     <div className="min-h-screen bg-[linear-gradient(180deg,_hsl(var(--background))_0%,_hsl(var(--muted))_100%)]">
       <header className="border-b bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="text-lg font-bold tracking-tight">
-            feedbacks<span className="text-primary">.dev</span>
+          <Link href="/" className="font-bold transition-opacity active:opacity-70">
+            <BrandWordmark className="text-lg" priority />
           </Link>
           <div className="flex items-center gap-2">
             <Link href="/auth">

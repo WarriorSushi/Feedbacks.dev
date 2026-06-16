@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { BrandWordmark } from '@/components/brand-wordmark'
 
 export const metadata: Metadata = {
   title: 'Feature Board — feedbacks.dev',
@@ -20,9 +21,9 @@ export default function PublicBoardLayout({
             href="https://feedbacks.dev"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            className="font-semibold text-gray-600 transition-colors hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
           >
-            feedbacks.dev
+            <BrandWordmark markClassName="h-4 w-4" dotClassName="text-current" />
           </a>
         </div>
       </footer>

@@ -114,8 +114,11 @@ export function SetupProgress({
   ]
 
   return (
-    <nav aria-label="Setup steps" className="rounded-lg border bg-card p-2">
-      <ol className="grid gap-2 md:grid-cols-4">
+    <nav
+      aria-label="Setup steps"
+      className="rounded-xl border-2 border-foreground/15 bg-card p-3 shadow-[inset_0_1px_0_hsl(var(--background)/0.7)] dark:border-primary/25"
+    >
+      <ol className="grid gap-3 md:grid-cols-4">
         {steps.map((step, index) => {
           const current = activeStep === step.id
           return (
@@ -125,14 +128,18 @@ export function SetupProgress({
                 onClick={() => beginNavigation(step.href)}
                 onMouseEnter={() => prefetch(step.href)}
                 onFocus={() => prefetch(step.href)}
-                className={`flex min-h-14 gap-3 rounded-md px-3 py-2 text-left transition-[background-color,color,transform] active:scale-[0.99] ${
-                  current ? 'bg-primary/10 text-foreground' : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                className={`flex min-h-[4.75rem] gap-3 rounded-xl border-2 px-4 py-3 text-left transition-[background-color,color,box-shadow,transform,filter] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-x-1 active:translate-y-1 active:shadow-none ${
+                  current
+                    ? 'translate-x-1 translate-y-1 border-primary bg-primary/20 text-foreground shadow-none dark:bg-primary/25'
+                    : 'border-foreground/25 bg-background text-foreground shadow-[5px_5px_0_hsl(var(--foreground)/0.22)] hover:-translate-y-0.5 hover:bg-primary/[0.07] hover:shadow-[6px_6px_0_hsl(var(--foreground)/0.28)] dark:border-primary/35 dark:bg-background/80 dark:shadow-[5px_5px_0_hsl(var(--primary)/0.28)] dark:hover:bg-primary/[0.12]'
                 }`}
                 aria-current={current ? 'step' : undefined}
               >
                 <span
-                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                    current ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                  className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
+                    current
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-foreground/25 bg-muted text-foreground dark:border-primary/35 dark:bg-primary/15'
                   }`}
                 >
                   {pendingHref === step.href ? <Loader2 className="h-3 w-3 animate-spin" /> : index + 1}

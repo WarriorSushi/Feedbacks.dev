@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { BrandWordmark } from '@/components/brand-wordmark'
 
 interface BoardFooterProps {
   canModerate: boolean
@@ -15,7 +16,11 @@ export function BoardFooter({ canModerate, projectId }: BoardFooterProps) {
           href="https://feedbacks.dev"
           className="font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          Powered by feedbacks.dev — install feedback first, publish boards when ready
+          <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-1">
+            <span>Powered by</span>
+            <BrandWordmark markClassName="h-4 w-4" dotClassName="text-current" />
+            <span>— install feedback first, publish boards when ready</span>
+          </span>
         </Link>
         {canModerate && (
           <Link

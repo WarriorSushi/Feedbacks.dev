@@ -6,6 +6,7 @@ import { generateInstallSnippets } from '@feedbacks/shared'
 import { createClient } from '@/lib/supabase-browser'
 import { publicEnv } from '@/lib/public-env'
 import { Button } from '@/components/ui/button'
+import { BrandWordmark } from '@/components/brand-wordmark'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
@@ -114,10 +115,13 @@ function AuthPageInner() {
           {/* Top: logo */}
           <Link
             href="/"
-            className="inline-flex items-baseline gap-[2px] text-xl font-semibold tracking-tight text-white/90"
+            className="font-semibold text-white/90 transition-opacity hover:text-white active:opacity-70"
           >
-            feedbacks
-            <span className="text-[hsl(238_72%_78%)]">.dev</span>
+            <BrandWordmark
+              className="text-xl"
+              markClassName="h-7 w-7"
+              dotClassName="text-[hsl(238_72%_78%)]"
+            />
           </Link>
 
           {/* Middle: headline + features */}
@@ -193,9 +197,9 @@ function AuthPageInner() {
         <div className="mb-10 text-center lg:hidden">
           <Link
             href="/"
-            className="inline-flex items-baseline gap-[2px] text-xl font-semibold tracking-tight"
+            className="font-semibold transition-opacity active:opacity-70"
           >
-            feedbacks<span className="text-primary">.dev</span>
+            <BrandWordmark className="text-xl" markClassName="h-7 w-7" />
           </Link>
           <h1 className="mt-3 text-2xl font-bold tracking-tight">
             Sign in and start setup.

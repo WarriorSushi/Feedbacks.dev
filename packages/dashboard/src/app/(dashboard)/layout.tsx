@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { Sidebar } from '@/components/sidebar'
-import type { Project } from '@/lib/types'
 
 export default async function DashboardLayout({
   children,
@@ -21,7 +20,7 @@ export default async function DashboardLayout({
   const [{ data: projects }, { data: boardSettings }] = await Promise.all([
     supabase
       .from('projects')
-      .select('*')
+      .select('id, name')
       .eq('owner_user_id', user.id)
       .order('created_at', { ascending: false }),
     supabase
@@ -49,7 +48,7 @@ export default async function DashboardLayout({
           email: user.email,
           user_metadata: user.user_metadata as { avatar_url?: string; full_name?: string },
         }}
-        projects={(projects as Project[]) || []}
+        projects={(projects as Array<{ id: string; name: string }>) || []}
         currentProjectId={currentProjectId}
         boardSlugs={boardSlugs}
       />

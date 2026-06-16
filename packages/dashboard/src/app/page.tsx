@@ -1,9 +1,10 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { BrandWordmark } from '@/components/brand-wordmark'
 import { PLAN_MATRIX, generateInstallSnippets } from '@feedbacks/shared'
 import { CodeSnippet } from '@/components/code-snippet'
-import { LandingShowcase } from '@/components/landing-showcase'
 import { publicEnv } from '@/lib/public-env'
 import { createServerSupabase } from '@/lib/supabase-server'
 import {
@@ -34,14 +35,6 @@ const installSnippet = generateInstallSnippets({
   appOrigin,
 }).find((snippet) => snippet.label === 'Website')?.code || ''
 
-const vibeCoderPrompt = `Add feedback collection to my app with feedbacks.dev.
-
-Use the setup packet from the dashboard.
-Install the Website snippet first unless the app has a cleaner React or Vue entry point.
-Run the app locally.
-Submit one test report from a real page.
-Confirm the report appears in the feedbacks.dev inbox with URL and browser context.`
-
 const freePlan = PLAN_MATRIX.free
 const proPlan = PLAN_MATRIX.pro
 
@@ -56,9 +49,8 @@ export default async function LandingPage() {
       {/* ── Nav ─────────────────────────────────────────────────────────────── */}
       <ScrollHeader>
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="text-lg font-bold tracking-tight">
-            feedbacks
-            <span className="text-primary">.dev</span>
+          <Link href="/" className="font-bold transition-opacity active:opacity-70">
+            <BrandWordmark className="text-lg" priority />
           </Link>
           <div className="flex items-center gap-2">
             <Link href="/boards" className="hidden sm:block">
@@ -139,8 +131,7 @@ export default async function LandingPage() {
               </div>
 
               <h1 className="max-w-3xl text-4xl font-black leading-[1] tracking-tighter sm:text-5xl">
-                Collect feedback in minutes.{' '}
-                <span className="block text-primary">Route it anywhere.</span>
+                Collecting user feedbacks & more, just became ridiculously simple
               </h1>
 
               <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">
@@ -172,9 +163,16 @@ export default async function LandingPage() {
             </div>
 
             <div className="relative">
-              <div className="absolute -inset-6 rounded-[2rem] bg-primary/10 blur-3xl" />
-              <div className="relative">
-                <LandingShowcase websiteSnippet={installSnippet} agentPrompt={vibeCoderPrompt} />
+              <div className="absolute -inset-6 rounded-[2rem] bg-primary/14 blur-3xl" />
+              <div className="relative overflow-hidden rounded-[2rem] border bg-card shadow-2xl shadow-primary/10">
+                <Image
+                  src="/hero_section_image.webp"
+                  alt="feedbacks.dev dashboard showing simple user feedback collection"
+                  width={1200}
+                  height={900}
+                  priority
+                  className="h-auto w-full object-cover"
+                />
               </div>
             </div>
           </div>
@@ -474,9 +472,8 @@ export default async function LandingPage() {
       {/* ── Footer ───────────────────────────────────────────────────────────── */}
       <footer className="border-t px-6 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
-          <span className="text-sm font-bold tracking-tight">
-            feedbacks
-            <span className="text-primary">.dev</span>
+          <span className="font-bold">
+            <BrandWordmark className="text-sm" markClassName="h-5 w-5" />
           </span>
           <div className="flex items-center gap-6 text-xs text-muted-foreground">
             <Link href="/boards" className="transition-colors hover:text-foreground">
