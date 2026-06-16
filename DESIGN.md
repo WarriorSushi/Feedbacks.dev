@@ -12,7 +12,7 @@ Developer-led teams, indie founders, and small SaaS builders. They should feel t
 
 ## Scene
 
-A developer is adding feedback collection during a normal build session, switching between code, docs, and the dashboard on a laptop or desktop monitor. The UI should stay light-first, compact, and readable under ordinary work lighting.
+A developer is adding feedback collection during a normal build session, switching between code, docs, and the dashboard on a laptop or desktop monitor. The UI should default to dark mode for focus and continuity with developer tools, while keeping light mode available and equally usable.
 
 ## Principles
 
@@ -24,7 +24,7 @@ A developer is adding feedback collection during a normal build session, switchi
 
 ## Visual System
 
-- Theme: light-first with restrained dark surfaces only where code readability benefits.
+- Theme: dark-first by default, with restrained contrast, crisp separation, and a fully usable light mode for users who choose it.
 - Typography: system sans or the existing app font stack. Fixed sizes, no viewport-scaled product text.
 - Accent: controlled green/primary accent for primary actions, active state, success, and focus. Do not use accent as decoration.
 - Structure: crisp 1px borders, neutral panels, compact spacing, and clear section separation.
