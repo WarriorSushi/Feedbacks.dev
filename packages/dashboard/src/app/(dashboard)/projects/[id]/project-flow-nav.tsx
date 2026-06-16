@@ -1,7 +1,37 @@
+'use client'
+
+import * as React from 'react'
 import Link from 'next/link'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 
 export type ProjectSection = 'setup' | 'integrations' | 'board' | 'api' | 'settings'
 export type SetupStep = 'customize' | 'install' | 'verify' | 'inbox'
+
+function usePendingProjectLink() {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const [pendingHref, setPendingHref] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    setPendingHref(null)
+  }, [pathname, searchParams])
+
+  const beginNavigation = React.useCallback(
+    (href: string) => {
+      const currentHref = searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname
+      if (href === currentHref) return
+      setPendingHref(href)
+      router.prefetch(href)
+    },
+    [pathname, router, searchParams],
+  )
+
+  const prefetch = React.useCallback((href: string) => router.prefetch(href), [router])
+
+  return { pendingHref, beginNavigation, prefetch }
+}
 
 export function ProjectMenu({
   projectId,
@@ -10,6 +40,7 @@ export function ProjectMenu({
   projectId: string
   activeSection: ProjectSection
 }) {
+  const { pendingHref, beginNavigation, prefetch } = usePendingProjectLink()
   const items: Array<{ id: ProjectSection; label: string; href: string }> = [
     { id: 'setup', label: 'Setup', href: `/projects/${projectId}?tab=customize` },
     { id: 'integrations', label: 'Integrations', href: `/projects/${projectId}?tab=integrations` },
@@ -29,12 +60,16 @@ export function ProjectMenu({
             key={item.id}
             href={item.href}
             aria-current={activeSection === item.id ? 'page' : undefined}
-            className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
+            onClick={() => beginNavigation(item.href)}
+            onMouseEnter={() => prefetch(item.href)}
+            onFocus={() => prefetch(item.href)}
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-[background-color,color,box-shadow,transform] active:scale-[0.98] ${
               activeSection === item.id
                 ? 'bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/30'
                 : 'text-foreground/75 hover:bg-background/70 hover:text-foreground dark:text-foreground/80 dark:hover:bg-background/35'
             }`}
           >
+            {pendingHref === item.href && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" />}
             {item.label}
           </Link>
         ))}
@@ -50,6 +85,7 @@ export function SetupProgress({
   projectId: string
   activeStep: SetupStep
 }) {
+  const { pendingHref, beginNavigation, prefetch } = usePendingProjectLink()
   const steps: Array<{ id: SetupStep; label: string; body: string; href: string }> = [
     {
       id: 'customize',
@@ -86,7 +122,10 @@ export function SetupProgress({
             <li key={step.id}>
               <Link
                 href={step.href}
-                className={`flex min-h-14 gap-3 rounded-md px-3 py-2 text-left transition-colors ${
+                onClick={() => beginNavigation(step.href)}
+                onMouseEnter={() => prefetch(step.href)}
+                onFocus={() => prefetch(step.href)}
+                className={`flex min-h-14 gap-3 rounded-md px-3 py-2 text-left transition-[background-color,color,transform] active:scale-[0.99] ${
                   current ? 'bg-primary/10 text-foreground' : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
                 }`}
                 aria-current={current ? 'step' : undefined}
@@ -96,7 +135,7 @@ export function SetupProgress({
                     current ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                   }`}
                 >
-                  {index + 1}
+                  {pendingHref === step.href ? <Loader2 className="h-3 w-3 animate-spin" /> : index + 1}
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-semibold">{step.label}</span>

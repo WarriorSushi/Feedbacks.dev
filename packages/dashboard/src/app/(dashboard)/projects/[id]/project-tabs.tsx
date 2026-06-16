@@ -290,7 +290,11 @@ function SettingsTab({ project }: { project: Project }) {
       setDeleting(false)
       return
     }
-    router.push('/projects')
+    window.dispatchEvent(
+      new CustomEvent('feedbacks:project-deleted', { detail: { projectId: project.id } }),
+    )
+    router.replace('/projects')
+    router.refresh()
   }
 
   return (

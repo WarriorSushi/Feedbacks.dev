@@ -22,6 +22,7 @@ import {
   Globe,
   ExternalLink,
   Plus,
+  Loader2,
 } from 'lucide-react'
 import type { Project } from '@/lib/types'
 import { createClient } from '@/lib/supabase-browser'
@@ -57,13 +58,31 @@ interface SidebarProps {
 export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const [visibleProjects, setVisibleProjects] = React.useState(projects)
+  const [pendingHref, setPendingHref] = React.useState<string | null>(null)
   const [projectOpen, setProjectOpen] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [collapsed, setCollapsed] = React.useState(false)
   const dropdownRef = React.useRef<HTMLDivElement>(null)
   const supabase = React.useMemo(() => createClient(), [])
 
-  const currentProject = projects.find((p) => p.id === currentProjectId) || projects[0]
+  React.useEffect(() => {
+    setVisibleProjects(projects)
+  }, [projects])
+
+  React.useEffect(() => {
+    const removeDeletedProject = (event: Event) => {
+      const projectId = (event as CustomEvent<{ projectId?: string }>).detail?.projectId
+      if (!projectId) return
+      setVisibleProjects((current) => current.filter((project) => project.id !== projectId))
+      setProjectOpen(false)
+    }
+
+    window.addEventListener('feedbacks:project-deleted', removeDeletedProject)
+    return () => window.removeEventListener('feedbacks:project-deleted', removeDeletedProject)
+  }, [])
+
+  const currentProject = visibleProjects.find((p) => p.id === currentProjectId) || visibleProjects[0]
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -87,10 +106,20 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
   // Close mobile nav on route change
   React.useEffect(() => {
     setMobileOpen(false)
+    setPendingHref(null)
   }, [pathname])
 
+  const beginNavigation = React.useCallback(
+    (href: string) => {
+      if (href === pathname) return
+      setPendingHref(href)
+      router.prefetch(href)
+    },
+    [pathname, router],
+  )
+
   const currentProjectColorClass =
-    projectColors[projects.indexOf(currentProject!) % projectColors.length] ?? 'bg-muted-foreground'
+    projectColors[visibleProjects.indexOf(currentProject!) % projectColors.length] ?? 'bg-muted-foreground'
 
   /* ── Shared sidebar content (used in both mobile drawer & desktop aside) ── */
   const sidebarContent = (
@@ -105,7 +134,10 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
         >
           <Link
             href="/dashboard"
-            className="whitespace-nowrap text-[17px] font-semibold tracking-tight"
+            onClick={() => beginNavigation('/dashboard')}
+            onMouseEnter={() => router.prefetch('/dashboard')}
+            onFocus={() => router.prefetch('/dashboard')}
+            className="whitespace-nowrap text-[17px] font-semibold tracking-tight transition-opacity active:opacity-70"
             tabIndex={collapsed ? -1 : 0}
           >
             feedbacks<span className="text-primary">.dev</span>
@@ -123,7 +155,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
       </div>
 
       {/* Project switcher */}
-      {projects.length > 0 && !collapsed && (
+      {visibleProjects.length > 0 && !collapsed && (
         <div className="shrink-0 border-b p-2.5" ref={dropdownRef}>
           <button
             onClick={() => setProjectOpen(!projectOpen)}
@@ -156,16 +188,21 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
           >
             <div className="min-h-0">
               <div className="mt-1 overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md shadow-black/5">
-                {projects.map((p, i) => {
+                {visibleProjects.map((p, i) => {
                   const isSelected = p.id === currentProjectId
                   return (
                     <Link
                       key={p.id}
                       href={`/projects/${p.id}`}
-                      onClick={() => setProjectOpen(false)}
+                      onClick={() => {
+                        beginNavigation(`/projects/${p.id}`)
+                        setProjectOpen(false)
+                      }}
+                      onMouseEnter={() => router.prefetch(`/projects/${p.id}`)}
+                      onFocus={() => router.prefetch(`/projects/${p.id}`)}
                       className={cn(
                         'flex items-center justify-between px-3 py-2 text-[13px]',
-                        'transition-colors duration-100 hover:bg-accent',
+                        'transition-[background-color,color,transform] duration-100 hover:bg-accent active:scale-[0.98] active:bg-accent/80',
                         isSelected && 'bg-accent/60'
                       )}
                     >
@@ -180,7 +217,9 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
                           {p.name}
                         </span>
                       </span>
-                      {isSelected && (
+                      {pendingHref === `/projects/${p.id}` ? (
+                        <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
+                      ) : isSelected && (
                         <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
                       )}
                     </Link>
@@ -192,13 +231,20 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
         </div>
       )}
 
-      {projects.length === 0 && !collapsed && (
+      {visibleProjects.length === 0 && !collapsed && (
         <div className="shrink-0 border-b p-2.5">
           <Link
             href="/projects/new"
-            className="flex min-h-11 items-center gap-2 rounded-lg border border-primary/25 bg-primary/[0.06] px-3 py-2 text-[13px] font-medium text-primary transition-colors hover:bg-primary/[0.1]"
+            onClick={() => beginNavigation('/projects/new')}
+            onMouseEnter={() => router.prefetch('/projects/new')}
+            onFocus={() => router.prefetch('/projects/new')}
+            className="flex min-h-11 items-center gap-2 rounded-lg border border-primary/25 bg-primary/[0.06] px-3 py-2 text-[13px] font-medium text-primary transition-[background-color,transform] hover:bg-primary/[0.1] active:scale-[0.98] active:bg-primary/[0.14]"
           >
-            <Plus className="h-4 w-4 shrink-0" />
+            {pendingHref === '/projects/new' ? (
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4 shrink-0" />
+            )}
             Create first project
           </Link>
         </div>
@@ -214,9 +260,12 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
                 href={item.href}
                 title={collapsed ? item.label : undefined}
                 aria-label={collapsed ? item.label : undefined}
+                onClick={() => beginNavigation(item.href)}
+                onMouseEnter={() => router.prefetch(item.href)}
+                onFocus={() => router.prefetch(item.href)}
                 className={cn(
                   'group relative flex items-center gap-3 rounded-lg py-2 text-[13px] font-medium',
-                  'transition-all duration-150',
+                  'transition-all duration-150 active:scale-[0.98]',
                   collapsed ? 'justify-center px-2' : 'px-3',
                   isActive
                     ? [
@@ -227,37 +276,48 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
                     : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                 )}
               >
-                <item.icon
-                  className={cn(
-                    'h-[17px] w-[17px] shrink-0 transition-transform duration-150',
-                    !isActive && 'group-hover:scale-[1.08]',
-                    isActive && 'text-primary'
-                  )}
-                />
+                {pendingHref === item.href ? (
+                  <Loader2 className={cn('h-[17px] w-[17px] shrink-0 animate-spin', isActive && 'text-primary')} />
+                ) : (
+                  <item.icon
+                    className={cn(
+                      'h-[17px] w-[17px] shrink-0 transition-transform duration-150',
+                      !isActive && 'group-hover:scale-[1.08]',
+                      isActive && 'text-primary'
+                    )}
+                  />
+                )}
                 {!collapsed && (
                   <span className="truncate">{item.label}</span>
                 )}
               </Link>
-              {item.href === '/projects' && isActive && !collapsed && projects.length > 0 && (
+              {item.href === '/projects' && isActive && !collapsed && visibleProjects.length > 0 && (
                 <details open className="ml-6 rounded-md border-l pl-2">
                   <summary className="cursor-pointer py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Project list
                   </summary>
                   <div className="space-y-0.5 pb-1">
-                    {projects.map((project, index) => {
+                    {visibleProjects.map((project, index) => {
                       const selected = project.id === currentProjectId
                       return (
                         <Link
                           key={project.id}
                           href={`/projects/${project.id}`}
+                          onClick={() => beginNavigation(`/projects/${project.id}`)}
+                          onMouseEnter={() => router.prefetch(`/projects/${project.id}`)}
+                          onFocus={() => router.prefetch(`/projects/${project.id}`)}
                           className={cn(
-                            'flex items-center gap-2 rounded-md px-2 py-1.5 text-[12px] transition-colors',
+                            'flex items-center gap-2 rounded-md px-2 py-1.5 text-[12px] transition-[background-color,color,transform] active:scale-[0.98]',
                             selected
                               ? 'bg-primary/10 font-medium text-primary'
                               : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                           )}
                         >
-                          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', projectColors[index % projectColors.length])} />
+                          {pendingHref === `/projects/${project.id}` ? (
+                            <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
+                          ) : (
+                            <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', projectColors[index % projectColors.length])} />
+                          )}
                           <span className="truncate">{project.name}</span>
                         </Link>
                       )
@@ -271,7 +331,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
 
         {/* Public Board links — inside the scrollable nav area */}
         {(() => {
-          const projectsWithBoards = projects.filter((p) => boardSlugs[p.id])
+          const projectsWithBoards = visibleProjects.filter((p) => boardSlugs[p.id])
           if (projectsWithBoards.length === 0 || collapsed) return null
 
           if (projectsWithBoards.length === 1) {
@@ -420,9 +480,12 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
               key={item.href}
               href={item.href}
               aria-current={isActive ? 'page' : undefined}
+              onClick={() => beginNavigation(item.href)}
+              onMouseEnter={() => router.prefetch(item.href)}
+              onFocus={() => router.prefetch(item.href)}
               className={cn(
                 'relative flex flex-1 flex-col items-center gap-[3px] pb-1.5 pt-2.5',
-                'transition-colors duration-150',
+                'transition-[color,transform] duration-150 active:scale-[0.96]',
                 isActive ? 'text-primary' : 'text-muted-foreground'
               )}
             >
@@ -433,12 +496,16 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
                   isActive ? 'w-8 opacity-100' : 'w-0 opacity-0'
                 )}
               />
-              <item.icon
-                className={cn(
-                  'h-[19px] w-[19px] transition-transform duration-150',
-                  isActive && 'scale-[1.08]'
-                )}
-              />
+              {pendingHref === item.href ? (
+                <Loader2 className="h-[19px] w-[19px] animate-spin" />
+              ) : (
+                <item.icon
+                  className={cn(
+                    'h-[19px] w-[19px] transition-transform duration-150',
+                    isActive && 'scale-[1.08]'
+                  )}
+                />
+              )}
               <span
                 className={cn(
                   'text-[11px] font-medium transition-all duration-150',
