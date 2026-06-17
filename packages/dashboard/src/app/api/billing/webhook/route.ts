@@ -9,6 +9,13 @@ export async function POST(request: Request) {
     const verified = await verifyDodoWebhook(request)
     const admin = await createAdminSupabase()
     const context = extractBillingEventContext(verified.event as DodoEventPayload)
+    console.info('[billing:webhook] verified', {
+      webhookId: verified.webhookId,
+      eventType: context.eventType,
+      hasUserId: Boolean(context.userId),
+      hasCustomerId: Boolean(context.dodoCustomerId),
+      hasSubscriptionId: Boolean(context.dodoSubscriptionId),
+    })
 
     const { data: existing } = await admin
       .from('billing_events')
@@ -51,6 +58,12 @@ export async function POST(request: Request) {
     })
 
     if (!userId || !context.billingStatus) {
+      console.info('[billing:webhook] stored without account update', {
+        webhookId: verified.webhookId,
+        eventType: context.eventType,
+        hasUserId: Boolean(userId),
+        hasBillingStatus: Boolean(context.billingStatus),
+      })
       return NextResponse.json({ received: true })
     }
 
@@ -80,6 +93,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
+    console.warn('[billing:webhook] rejected', {
+      reason: error instanceof Error ? error.message : 'Invalid webhook',
+    })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Invalid webhook' },
       { status: 400 },

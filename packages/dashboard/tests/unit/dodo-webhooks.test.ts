@@ -7,7 +7,7 @@ process.env.NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'anon-key'
 process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'service-role-key'
 process.env.NEXT_PUBLIC_APP_ORIGIN = process.env.NEXT_PUBLIC_APP_ORIGIN || 'https://app.feedbacks.dev'
-process.env.DODO_PAYMENTS_WEBHOOK_SECRET = process.env.DODO_PAYMENTS_WEBHOOK_SECRET || 'whsec_test'
+process.env.DODO_PAYMENTS_WEBHOOK_SECRET = process.env.DODO_PAYMENTS_WEBHOOK_SECRET || `whsec_${Buffer.from('test-secret').toString('base64')}`
 
 async function loadFixture(name: string) {
   const fixtureUrl = new URL(`../fixtures/dodo/${name}.json`, import.meta.url)
@@ -42,6 +42,16 @@ function createSignedDodoWebhookRequest({
 
 function createStandardWebhookSignature(payload: string, webhookId: string, timestamp: string) {
   const digest = createHmac('sha256', process.env.DODO_PAYMENTS_WEBHOOK_SECRET!)
+    .update(`${webhookId}.${timestamp}.${payload}`)
+    .digest('base64')
+  return `v1,${digest}`
+}
+
+function createDecodedStandardWebhookSignature(payload: string, webhookId: string, timestamp: string) {
+  const secret = process.env.DODO_PAYMENTS_WEBHOOK_SECRET!
+  const encoded = secret.startsWith('whsec_') ? secret.slice('whsec_'.length) : secret
+  const decodedSecret = Buffer.from(encoded, 'base64')
+  const digest = createHmac('sha256', decodedSecret)
     .update(`${webhookId}.${timestamp}.${payload}`)
     .digest('base64')
   return `v1,${digest}`
@@ -109,6 +119,24 @@ test('verifies Standard Webhooks v1 base64 Dodo signatures', async () => {
     webhookId,
     timestamp,
     signature: createStandardWebhookSignature(payload, webhookId, timestamp),
+  })
+
+  const verified = await verifyDodoWebhook(request)
+  assert.equal(verified.webhookId, webhookId)
+  assert.equal(verified.event.type, 'subscription.active')
+})
+
+test('verifies Standard Webhooks signatures that use decoded whsec secrets', async () => {
+  const { verifyDodoWebhook } = await import(new URL('../../src/lib/dodo.ts', import.meta.url).href)
+  const fixture = await loadFixture('subscription-active')
+  const payload = JSON.stringify(fixture)
+  const webhookId = 'evt_test_decoded_standard'
+  const timestamp = Math.floor(Date.now() / 1000).toString()
+  const request = createSignedDodoWebhookRequest({
+    payload,
+    webhookId,
+    timestamp,
+    signature: createDecodedStandardWebhookSignature(payload, webhookId, timestamp),
   })
 
   const verified = await verifyDodoWebhook(request)

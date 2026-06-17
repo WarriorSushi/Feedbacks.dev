@@ -129,6 +129,33 @@ function signatureMatches(signatureHeader: string, expectedDigest: Buffer) {
   })
 }
 
+function decodeStandardWebhookSecret(secret: string) {
+  if (!secret.startsWith('whsec_')) return null
+  const encoded = secret.slice('whsec_'.length)
+  if (!encoded) return null
+
+  try {
+    const normalized = encoded.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=')
+    const decoded = Buffer.from(padded, 'base64')
+    return decoded.length > 0 ? decoded : null
+  } catch {
+    return null
+  }
+}
+
+function expectedWebhookDigests(secret: string, signedContent: string) {
+  const secrets: Array<string | Buffer> = [secret]
+  const decodedSecret = decodeStandardWebhookSecret(secret)
+  if (decodedSecret) secrets.push(decodedSecret)
+
+  return secrets.map((candidate) =>
+    createHmac('sha256', candidate)
+      .update(signedContent)
+      .digest(),
+  )
+}
+
 export async function verifyDodoWebhook(request: Request) {
   if (!env.DODO_PAYMENTS_WEBHOOK_SECRET) {
     throw new Error('Dodo webhook secret is not configured')
@@ -146,11 +173,9 @@ export async function verifyDodoWebhook(request: Request) {
   parseWebhookTimestamp(timestamp)
 
   const signedContent = `${webhookId}.${timestamp}.${payload}`
-  const expected = createHmac('sha256', env.DODO_PAYMENTS_WEBHOOK_SECRET)
-    .update(signedContent)
-    .digest()
+  const expectedDigests = expectedWebhookDigests(env.DODO_PAYMENTS_WEBHOOK_SECRET, signedContent)
 
-  if (!signatureMatches(signature, expected)) {
+  if (!expectedDigests.some((expected) => signatureMatches(signature, expected))) {
     throw new Error('Invalid webhook signature')
   }
 
