@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { BrandWordmark } from '@/components/brand-wordmark'
+import { publicEnv } from '@/lib/public-env'
 import { BoardDirectorySurface } from './board-directory-surface'
 
 export const metadata = {
@@ -15,6 +16,7 @@ export default async function BoardsPage({
   searchParams?: Promise<{ sort?: string; category?: string }>
 }) {
   const params = await searchParams
+  const authHref = `${publicEnv.NEXT_PUBLIC_APP_ORIGIN}/auth`
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_hsl(var(--background))_0%,_hsl(var(--muted))_100%)]">
@@ -24,12 +26,12 @@ export default async function BoardsPage({
             <BrandWordmark className="text-lg" priority />
           </Link>
           <div className="flex items-center gap-2">
-            <Link href="/auth">
+            <Link href={authHref}>
               <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
                 Sign in
               </Button>
             </Link>
-            <Link href="/auth">
+            <Link href={authHref}>
               <Button size="sm" className="font-semibold">
                 Create board
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />

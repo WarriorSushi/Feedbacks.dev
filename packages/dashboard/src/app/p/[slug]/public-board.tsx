@@ -22,6 +22,7 @@ import { BoardSubmitForm } from '@/components/boards/BoardSubmitForm'
 import { BoardReportModal } from '@/components/boards/BoardReportModal'
 import { BoardAnnouncements } from '@/components/boards/BoardAnnouncements'
 import { BoardFooter } from '@/components/boards/BoardFooter'
+import { publicEnv } from '@/lib/public-env'
 
 export function PublicBoard({
   board,
@@ -86,7 +87,7 @@ export function PublicBoard({
 
   const redirectToAuth = () => {
     const redirect = encodeURIComponent(`/p/${board.slug}`)
-    window.location.href = `/auth?redirect=${redirect}`
+    window.location.href = `${publicEnv.NEXT_PUBLIC_APP_ORIGIN}/auth?redirect=${redirect}`
   }
 
   const toggleWatched = async (feedbackId: string) => {

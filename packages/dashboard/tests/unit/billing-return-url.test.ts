@@ -3,14 +3,14 @@ import assert from 'node:assert/strict'
 
 import { buildBillingReturnUrl } from '../../src/lib/billing-return-url.ts'
 
-test('billing checkout returns to the same host that started checkout', () => {
+test('billing checkout returns to the canonical app host', () => {
   const request = {
     nextUrl: new URL('https://www.feedbacks.dev/api/billing/checkout'),
   }
 
   assert.equal(
     buildBillingReturnUrl(request as never, '/billing?checkout=return'),
-    'https://www.feedbacks.dev/billing?checkout=return',
+    'https://app.feedbacks.dev/billing?checkout=return',
   )
 })
 

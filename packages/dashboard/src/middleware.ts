@@ -1,8 +1,21 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getAppOrigin, getCanonicalHostRedirect, isProtectedAppPath } from '@/lib/domain-routing'
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  const earlyCanonicalRedirect = getCanonicalHostRedirect(request.nextUrl)
+  if (earlyCanonicalRedirect && !(request.nextUrl.hostname === new URL(getAppOrigin()).hostname && request.nextUrl.pathname === '/')) {
+    return NextResponse.redirect(earlyCanonicalRedirect)
+  }
+
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+
+  let supabaseResponse = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,7 +29,11 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
-          supabaseResponse = NextResponse.next({ request })
+          supabaseResponse = NextResponse.next({
+            request: {
+              headers: requestHeaders,
+            },
+          })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
@@ -29,22 +46,21 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protected routes
-  const isProtected = request.nextUrl.pathname.startsWith('/dashboard') ||
-    request.nextUrl.pathname.startsWith('/projects') ||
-    request.nextUrl.pathname.startsWith('/feedback') ||
-    request.nextUrl.pathname.startsWith('/settings')
+  const canonicalRedirect = getCanonicalHostRedirect(request.nextUrl, Boolean(user))
+  if (canonicalRedirect) {
+    return NextResponse.redirect(canonicalRedirect)
+  }
 
-  if (isProtected && !user) {
-    const url = request.nextUrl.clone()
+  if (isProtectedAppPath(request.nextUrl.pathname) && !user) {
+    const url = new URL('/auth', getAppOrigin())
     url.pathname = '/auth'
-    url.searchParams.set('redirect', request.nextUrl.pathname)
+    url.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`)
     return NextResponse.redirect(url)
   }
 
   // Redirect logged-in users away from auth page
   if (request.nextUrl.pathname === '/auth' && user) {
-    const url = request.nextUrl.clone()
+    const url = new URL('/dashboard', getAppOrigin())
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
@@ -54,6 +70,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/|cdn/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/|cdn/|widget/).*)',
   ],
 }

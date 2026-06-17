@@ -29,6 +29,8 @@ import { ScrollHeader, WidgetDemo } from './widget-demo-client'
 // ─── Code snippets ────────────────────────────────────────────────────────────
 
 const appOrigin = publicEnv.NEXT_PUBLIC_APP_ORIGIN
+const authHref = `${appOrigin}/auth`
+const dashboardHref = `${appOrigin}/dashboard`
 
 const installSnippet = generateInstallSnippets({
   projectKey: 'your-project-key',
@@ -94,7 +96,7 @@ export default async function LandingPage() {
             </a>
             <div className="mx-2 hidden h-4 w-px bg-border sm:block" />
             {isLoggedIn ? (
-              <Link href="/dashboard">
+              <Link href={dashboardHref}>
                 <Button size="sm" className="font-semibold">
                   Go to Dashboard
                   <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
@@ -102,12 +104,12 @@ export default async function LandingPage() {
               </Link>
             ) : (
               <>
-                <Link href="/auth" className="hidden sm:block">
+                <Link href={authHref} className="hidden sm:block">
                   <Button variant="ghost" size="sm">
                     Sign in
                   </Button>
                 </Link>
-                <Link href="/auth">
+                <Link href={authHref}>
                   <Button size="sm" className="font-semibold">
                     Start free
                     <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
@@ -156,7 +158,7 @@ export default async function LandingPage() {
               </p>
 
               <div className="mt-7 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
-                <Link href={isLoggedIn ? '/dashboard' : '/auth'} className="min-w-0">
+                <Link href={isLoggedIn ? dashboardHref : authHref} className="min-w-0">
                   <Button size="lg" className="group h-11 w-full gap-1.5 px-3 text-[13px] font-semibold shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/25 sm:h-12 sm:w-auto sm:px-7 sm:text-sm">
                     <span className="truncate">{isLoggedIn ? 'Go to Dashboard' : 'Start collecting'}</span>
                     <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 sm:h-4 sm:w-4" />
@@ -388,7 +390,7 @@ export default async function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
+              <Link href={isLoggedIn ? dashboardHref : authHref}>
                 <Button variant="outline" className="w-full font-semibold">
                   {isLoggedIn ? 'Go to Dashboard' : 'Get started'}
                 </Button>
@@ -421,7 +423,7 @@ export default async function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
+              <Link href={isLoggedIn ? dashboardHref : authHref}>
                 <Button className="w-full font-semibold shadow-lg shadow-primary/20">
                   {isLoggedIn ? 'Go to Dashboard' : 'Start free trial'}
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -465,7 +467,7 @@ export default async function LandingPage() {
                 only after the core loop is working.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
-                <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
+                <Link href={isLoggedIn ? dashboardHref : authHref}>
                   <Button
                     size="lg"
                     className="h-12 px-8 font-semibold shadow-lg shadow-primary/20"
