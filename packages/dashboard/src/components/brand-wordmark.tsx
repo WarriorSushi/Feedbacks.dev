@@ -8,6 +8,7 @@ interface BrandWordmarkProps {
   markClassName?: string
   textClassName?: string
   dotClassName?: string
+  markSrc?: string
   priority?: boolean
   intro?: boolean
 }
@@ -17,13 +18,14 @@ export function BrandWordmark({
   markClassName,
   textClassName,
   dotClassName,
+  markSrc = '/new_logo_feedbacks.dev.svg',
   priority = false,
   intro = false,
 }: BrandWordmarkProps) {
   return (
     <span className={cn('inline-flex items-center gap-2', className)}>
       <Image
-        src="/new_logo_feedbacks.dev.svg"
+        src={markSrc}
         alt=""
         width={28}
         height={28}

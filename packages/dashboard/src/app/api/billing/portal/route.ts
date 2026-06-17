@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createDodoCustomerPortalSession } from '@/lib/dodo'
-import { env, isBillingEnabled } from '@/lib/env'
+import { isBillingEnabled } from '@/lib/env'
 import { getCurrentUserBillingSummary } from '@/lib/billing'
+import { buildBillingReturnUrl } from '@/lib/billing-return-url'
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
     if (!isBillingEnabled()) {
       return NextResponse.json({ error: 'Billing is not configured yet' }, { status: 503 })
@@ -20,7 +21,7 @@ export async function POST() {
 
     const session = await createDodoCustomerPortalSession({
       customerId: summary.account.dodo_customer_id,
-      returnUrl: `${env.NEXT_PUBLIC_APP_ORIGIN}/billing?portal=return`,
+      returnUrl: buildBillingReturnUrl(request, '/billing?portal=return'),
     })
 
     const portalUrl = session.link || session.portal_url

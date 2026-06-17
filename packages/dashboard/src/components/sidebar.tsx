@@ -30,6 +30,7 @@ import {
 import type { Project } from '@/lib/types'
 import { createClient } from '@/lib/supabase-browser'
 import { ThemeToggle } from '@/components/theme-toggle'
+import type { BillingStatus, PlanTier } from '@feedbacks/shared'
 
 type SidebarProject = Pick<Project, 'id' | 'name'>
 
@@ -68,9 +69,13 @@ interface SidebarProps {
   projects: SidebarProject[]
   currentProjectId?: string
   boardSlugs?: Record<string, string>
+  billingAccount?: {
+    plan_tier: PlanTier
+    billing_status: BillingStatus
+  } | null
 }
 
-export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: SidebarProps) {
+export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, billingAccount }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -110,6 +115,9 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
   }, [])
 
   const currentProject = visibleProjects.find((p) => p.id === resolvedCurrentProjectId) || visibleProjects[0]
+  const showProBrand =
+    billingAccount?.plan_tier === 'pro' &&
+    (billingAccount.billing_status === 'active' || billingAccount.billing_status === 'trialing')
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -178,7 +186,8 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
           >
             <BrandWordmark
               className="text-[17px]"
-              markClassName="h-6 w-6"
+              markClassName={cn('h-6 w-6', showProBrand && 'rounded-lg')}
+              markSrc={showProBrand ? '/feedbacks.dev_pro_monthly.svg' : undefined}
               intro={!collapsed}
             />
           </Link>
@@ -503,7 +512,11 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {} }: S
       {/* ── Mobile top bar ──────────────────────────────────────────────── */}
       <div className="flex h-14 shrink-0 items-center justify-between border-b bg-card px-4 md:hidden">
         <Link href="/dashboard" prefetch={false} className="font-semibold transition-opacity active:opacity-70">
-          <BrandWordmark className="text-[17px]" markClassName="h-6 w-6" />
+          <BrandWordmark
+            className="text-[17px]"
+            markClassName={cn('h-6 w-6', showProBrand && 'rounded-lg')}
+            markSrc={showProBrand ? '/feedbacks.dev_pro_monthly.svg' : undefined}
+          />
         </Link>
         <Button
           variant="ghost"

@@ -42,7 +42,7 @@ function getDodoAuthHeaders() {
   }
 }
 
-async function dodoRequest<T>(path: string, body: Record<string, unknown>): Promise<T> {
+async function dodoRequest<T>(path: string, body: Record<string, unknown> = {}): Promise<T> {
   const response = await fetch(`${getApiBase()}${path}`, {
     method: 'POST',
     headers: getDodoAuthHeaders(),
@@ -75,11 +75,12 @@ export async function createDodoCheckoutSession(payload: DodoCheckoutRequest) {
 }
 
 export async function createDodoCustomerPortalSession(payload: DodoPortalRequest) {
+  const query = new URLSearchParams({ return_url: payload.returnUrl })
   return dodoRequest<{
     link?: string
     portal_url?: string
     session_id?: string
-  }>(`/customers/${payload.customerId}/customer-portal/session`, {})
+  }>(`/customers/${payload.customerId}/customer-portal/session?${query.toString()}`)
 }
 
 function headerValue(headers: Headers, key: string) {

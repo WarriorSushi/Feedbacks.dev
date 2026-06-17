@@ -3,6 +3,7 @@ import { createDodoCheckoutSession } from '@/lib/dodo'
 import { env, isBillingEnabled } from '@/lib/env'
 import { getCurrentUserBillingSummary, getOrCreateBillingAccount } from '@/lib/billing'
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server'
+import { buildBillingReturnUrl } from '@/lib/billing-return-url'
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
           : typeof user.user_metadata?.name === 'string'
             ? user.user_metadata.name
             : null,
-      returnUrl: `${env.NEXT_PUBLIC_APP_ORIGIN}/billing?checkout=return`,
+      returnUrl: buildBillingReturnUrl(request, '/billing?checkout=return'),
       metadata: {
         user_id: user.id,
         billing_period: billingPeriod,

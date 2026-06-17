@@ -23,6 +23,12 @@ export default async function DashboardLayout({
     .eq('owner_user_id', user.id)
     .order('created_at', { ascending: false })
 
+  const { data: billingAccount } = await supabase
+    .from('billing_accounts')
+    .select('plan_tier, billing_status')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
   const projectIds = (projects || []).map((project: { id: string }) => project.id)
   const { data: boardSettings } = projectIds.length > 0
     ? await supabase
@@ -54,6 +60,7 @@ export default async function DashboardLayout({
         projects={(projects as Array<{ id: string; name: string }>) || []}
         currentProjectId={currentProjectId}
         boardSlugs={boardSlugs}
+        billingAccount={billingAccount}
       />
       <main className="min-h-0 flex-1 overflow-y-auto bg-muted/35 pb-[env(safe-area-inset-bottom,0px)] dark:bg-background">
         <div className="mx-auto max-w-7xl px-4 py-4 md:px-6 md:py-6">{children}</div>
