@@ -244,7 +244,7 @@ function ApiKeyBadge({
       {apiKey ? (
         <button onClick={copy} className="flex items-center gap-1.5" aria-label="Copy API key">
           <Badge variant="outline" className="font-mono text-xs">
-            Key visible · ••••{lastFour || apiKey.slice(-4)}
+            {copied ? 'Copied key' : 'Key visible'} · ••••{lastFour || apiKey.slice(-4)}
           </Badge>
           {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
         </button>

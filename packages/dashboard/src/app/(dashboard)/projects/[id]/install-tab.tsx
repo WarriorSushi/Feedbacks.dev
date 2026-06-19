@@ -16,8 +16,9 @@ import { publicEnv } from '@/lib/public-env'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CodeSnippet } from '@/components/code-snippet'
+import { CopyButton } from '@/components/copy-button'
 import { Badge } from '@/components/ui/badge'
-import { Bot, Copy, ExternalLink, Loader2, RefreshCw, Sparkles, XCircle } from 'lucide-react'
+import { Bot, ExternalLink, Loader2, RefreshCw, Sparkles, XCircle } from 'lucide-react'
 
 interface InstallTabProps {
   project: Project
@@ -440,10 +441,7 @@ export function FeedbacksWidgetScript() {
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">{selectedTarget.body}</p>
               </div>
               {selectedTarget.code && (
-                <Button onClick={() => void navigator.clipboard.writeText(selectedTarget.code || '')} size="sm">
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy code
-                </Button>
+                <CopyButton value={selectedTarget.code} label="Copy code" copiedLabel="Copied" size="sm" />
               )}
               {selectedTarget.id === 'mobile' && (
                 <Link href={`/projects/${project.id}?tab=api`}>

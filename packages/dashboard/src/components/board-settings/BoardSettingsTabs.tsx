@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation'
 import type { BoardReport, Project } from '@/lib/types'
 import type { BoardAnnouncement, BoardBranding } from '@/lib/public-board'
 import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/copy-button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Check, Copy, ExternalLink, Globe2, Loader2, Lock, Rocket, Settings2 } from 'lucide-react'
+import { Check, ExternalLink, Globe2, Loader2, Lock, Rocket, Settings2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { BoardIdentitySection } from './BoardIdentitySection'
@@ -101,7 +102,6 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
   const router = useRouter()
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
-  const [copied, setCopied] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState<TabId>('identity')
   const [settings, setSettings] = React.useState<BoardSettingsState>(createDefaultSettings(project))
   const [reports, setReports] = React.useState<BoardReport[]>([])
@@ -252,12 +252,6 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
     await persistSettings(nextSettings, 'Public board enabled')
   }
 
-  const copyUrl = async () => {
-    await navigator.clipboard.writeText(boardUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   const updateAnnouncement = (index: number, patch: Partial<BoardAnnouncement>) => {
     const nextAnnouncements = [...settings.announcements]
     nextAnnouncements[index] = { ...nextAnnouncements[index], ...patch }
@@ -369,10 +363,7 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
                   Enable and save
                 </Button>
               )}
-              <Button variant="outline" onClick={copyUrl} disabled={!settings.slug}>
-                {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                Copy link
-              </Button>
+              <CopyButton value={boardUrl} label="Copy link" copiedLabel="Copied" variant="outline" disabled={!settings.slug} />
               {canOpenBoard ? (
                 <Button variant="outline" asChild>
                   <a href={boardUrl} target="_blank" rel="noopener noreferrer">

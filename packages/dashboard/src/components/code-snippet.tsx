@@ -1,9 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { Check, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/copy-button'
 
 interface CodeTab {
   label: string
@@ -20,13 +19,6 @@ interface CodeSnippetProps {
 
 export function CodeSnippet({ tabs, className, wrap = false, maxHeightClassName }: CodeSnippetProps) {
   const [activeTab, setActiveTab] = React.useState(0)
-  const [copied, setCopied] = React.useState(false)
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(tabs[activeTab].code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   return (
     <div className={cn('overflow-hidden rounded-lg border bg-muted', className)}>
@@ -49,18 +41,17 @@ export function CodeSnippet({ tabs, className, wrap = false, maxHeightClassName 
         </div>
       )}
       <div className="relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-2 top-2 h-8 w-8"
-          onClick={handleCopy}
-          aria-label={`Copy ${tabs[activeTab].label} code block`}
-        >
-          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-        </Button>
+        <CopyButton
+          value={tabs[activeTab].code}
+          label="Copy"
+          copiedLabel="Copied"
+          variant="outline"
+          size="sm"
+          className="absolute right-2 top-2 z-10 h-8 bg-background/95 px-2 text-xs shadow-sm backdrop-blur"
+        />
         <pre
           className={cn(
-            'p-4 text-sm',
+            'p-4 pr-24 text-sm',
             wrap ? 'overflow-x-hidden overflow-y-auto whitespace-pre-wrap break-words' : 'overflow-x-auto',
             maxHeightClassName
           )}

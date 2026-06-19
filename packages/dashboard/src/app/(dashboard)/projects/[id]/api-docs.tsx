@@ -1,34 +1,15 @@
 'use client'
-
-import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { CopyButton } from '@/components/copy-button'
 import type { Project } from '@/lib/types'
-
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false)
-  return (
-    <Button
-      variant="outline"
-      size="sm"
-      aria-label="Copy to clipboard"
-      onClick={() => {
-        navigator.clipboard.writeText(text)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      }}
-    >
-      {copied ? 'Copied' : 'Copy'}
-    </Button>
-  )
-}
 
 function CodeBlock({ code, language = 'bash' }: { code: string; language?: string }) {
   return (
     <div className="relative" aria-label={`${language} code sample`}>
       <div className="absolute right-2 top-2 z-10">
-        <CopyButton text={code} />
+        <CopyButton value={code} variant="outline" size="sm" className="bg-background/95" />
       </div>
       <pre className="max-h-96 overflow-auto rounded-lg bg-muted p-4 pr-20 text-sm">
         <code>{code}</code>
@@ -185,7 +166,7 @@ export function ApiDocs({
               </p>
             )}
             {projectKey ? (
-              <CopyButton text={projectKey} />
+              <CopyButton value={projectKey} variant="outline" size="sm" />
             ) : (
               <Button variant="outline" size="sm" onClick={() => void onRotateApiKey()} disabled={rotatingApiKey}>
                 {rotatingApiKey ? 'Generating' : 'Generate key'}
@@ -195,7 +176,7 @@ export function ApiDocs({
           <div className="grid gap-2 px-4 py-3 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-center">
             <p className="text-sm font-medium">Base URL</p>
             <code className="break-all rounded bg-muted px-2 py-1.5 font-mono text-sm">{baseUrl}/api/v1</code>
-            <CopyButton text={`${baseUrl}/api/v1`} />
+            <CopyButton value={`${baseUrl}/api/v1`} variant="outline" size="sm" />
           </div>
         </CardContent>
       </Card>
