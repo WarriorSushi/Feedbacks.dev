@@ -311,17 +311,18 @@ Free plan checks:
 
 1. Force or create a Free account state.
 2. Open integrations.
-3. Confirm Pro-only webhook routing is blocked.
-4. Confirm delivery logs are not fetched for Free.
-5. Call `/api/v1/feedback` with an API key.
-6. Confirm MCP/API access is blocked if the plan does not allow it.
+3. Confirm Slack, Discord, GitHub Issues, and generic webhooks are visible.
+4. Confirm one active endpoint can be configured and any additional active endpoint is rejected server-side.
+5. Confirm delivery logs are fetched with the Free history cap.
+6. Call `/api/v1/feedback` with an API key.
+7. Confirm MCP/API access works within Free project, feedback, and history limits.
 
 Pro plan checks:
 
 1. Force or create a Pro account state through verified Dodo webhook state.
-2. Confirm integrations are unlocked.
+2. Confirm integrations work without the Free endpoint cap.
 3. Confirm webhook test sends work.
-4. Confirm MCP/API access works.
+4. Confirm MCP/API access works without the Free history cap.
 
 Pass condition:
 

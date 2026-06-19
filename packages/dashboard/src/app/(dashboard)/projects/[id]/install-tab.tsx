@@ -695,6 +695,11 @@ export function FeedbacksWidgetScript() {
               <Button variant="outline">Open project inbox</Button>
             </Link>
           </div>
+          {!projectKey && (
+            <p className="text-sm text-muted-foreground">
+              Generate a fresh key first. The hosted verification page needs the same key that your new snippet will use.
+            </p>
+          )}
 
           <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
             If the hosted verification page works but your own site does not, keep the saved config as-is and check snippet placement first. Most first-run issues come from where the code is pasted, not from the widget settings.

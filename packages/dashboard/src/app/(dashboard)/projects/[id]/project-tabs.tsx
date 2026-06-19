@@ -34,7 +34,13 @@ const tabs: TabId[] = ['install', 'customize', 'integrations', 'board', 'api', '
 
 export function ProjectTabs({ project, billingSummary }: ProjectTabsProps) {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
+          Loading project workspace...
+        </div>
+      }
+    >
       <ProjectTabsInner project={project} billingSummary={billingSummary} />
     </Suspense>
   )

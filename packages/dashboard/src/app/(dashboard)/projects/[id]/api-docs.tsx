@@ -97,22 +97,22 @@ export function ApiDocs({
   onRotateApiKey: () => Promise<void>
 }) {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://app.feedbacks.dev'
-  const endpoints = projectKey
-    ? [
-        {
-          method: 'GET' as const,
-          path: '/api/v1/projects',
-          description: 'List the project attached to this API key. API keys are scoped to one project.',
-          code: `curl ${baseUrl}/api/v1/projects \\
-  -H "X-API-Key: ${projectKey}"`,
-        },
-        {
-          method: 'POST' as const,
-          path: '/api/v1/feedback',
-          description: 'Submit feedback with optional structured data from an app, script, or agent.',
-          code: `curl -X POST ${baseUrl}/api/v1/feedback \\
+  const exampleApiKey = projectKey || 'YOUR_PROJECT_KEY'
+  const endpoints = [
+    {
+      method: 'GET' as const,
+      path: '/api/v1/projects',
+      description: 'List the project attached to this API key. API keys are scoped to one project.',
+      code: `curl ${baseUrl}/api/v1/projects \\
+  -H "X-API-Key: ${exampleApiKey}"`,
+    },
+    {
+      method: 'POST' as const,
+      path: '/api/v1/feedback',
+      description: 'Submit feedback with optional structured data from an app, script, or agent.',
+      code: `curl -X POST ${baseUrl}/api/v1/feedback \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: ${projectKey}" \\
+  -H "X-API-Key: ${exampleApiKey}" \\
   -d '{
     "message": "Button click throws TypeError",
     "type": "bug",
@@ -124,32 +124,31 @@ export function ApiDocs({
       "component": "LoginForm"
     }
   }'`,
-        },
-        {
-          method: 'GET' as const,
-          path: '/api/v1/feedback',
-          description: 'List feedback with pagination and filters for status, type, agent, search, page, and limit.',
-          code: `curl ${baseUrl}/api/v1/feedback?status=new&limit=10 \\
-  -H "X-API-Key: ${projectKey}"`,
-        },
-        {
-          method: 'GET' as const,
-          path: '/api/v1/projects/{id}',
-          description: 'Get project details and stats for the project attached to this API key.',
-          code: `curl ${baseUrl}/api/v1/projects/${project.id} \\
-  -H "X-API-Key: ${projectKey}"`,
-        },
-        {
-          method: 'PATCH' as const,
-          path: '/api/v1/projects/{id}/feedback',
-          description: 'Update feedback status, priority, or tags after triage.',
-          code: `curl -X PATCH "${baseUrl}/api/v1/projects/${project.id}/feedback?feedback_id=FEEDBACK_ID" \\
+    },
+    {
+      method: 'GET' as const,
+      path: '/api/v1/feedback',
+      description: 'List feedback with pagination and filters for status, type, agent, search, page, and limit.',
+      code: `curl ${baseUrl}/api/v1/feedback?status=new&limit=10 \\
+  -H "X-API-Key: ${exampleApiKey}"`,
+    },
+    {
+      method: 'GET' as const,
+      path: '/api/v1/projects/{id}',
+      description: 'Get project details and stats for the project attached to this API key.',
+      code: `curl ${baseUrl}/api/v1/projects/${project.id} \\
+  -H "X-API-Key: ${exampleApiKey}"`,
+    },
+    {
+      method: 'PATCH' as const,
+      path: '/api/v1/projects/{id}/feedback',
+      description: 'Update feedback status, priority, or tags after triage.',
+      code: `curl -X PATCH "${baseUrl}/api/v1/projects/${project.id}/feedback?feedback_id=FEEDBACK_ID" \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: ${projectKey}" \\
+  -H "X-API-Key: ${exampleApiKey}" \\
   -d '{"status": "in_progress", "priority": "high"}'`,
-        },
-      ]
-    : []
+    },
+  ]
 
   return (
     <div className="space-y-6">
@@ -161,7 +160,7 @@ export function ApiDocs({
           </div>
           <CardTitle className="mt-3 text-base">Use API and MCP when code or agents need feedback access</CardTitle>
           <CardDescription>
-            Free access follows your Free project, monthly feedback, and history limits. Keep this key server-side or in trusted agent configuration.
+            Free access follows your Free project, monthly feedback, and history limits. Use the key in backend code or trusted agent configuration, not public browser code.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -170,7 +169,7 @@ export function ApiDocs({
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Connection details</CardTitle>
           <CardDescription>
-            Use the project key as the `X-API-Key` header. Keep server-side secrets out of browser code.
+            Use the project key as the `X-API-Key` header for REST and MCP. Generate a fresh key if the real value is hidden.
           </CardDescription>
         </CardHeader>
         <CardContent className="divide-y rounded-b-lg border-t p-0">
@@ -201,54 +200,54 @@ export function ApiDocs({
         </CardContent>
       </Card>
 
-      {projectKey ? (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Quick start: submit feedback</CardTitle>
-              <CardDescription>Use this from a backend, script, or trusted agent. Do not expose this key in public browser code.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CodeBlock code={endpoints.find((endpoint) => endpoint.path === '/api/v1/feedback' && endpoint.method === 'POST')?.code || ''} />
-            </CardContent>
-          </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Quick start: submit feedback</CardTitle>
+          <CardDescription>
+            Use this from a backend, script, or trusted agent. {projectKey ? 'Do not expose this key in public browser code.' : 'Generate a fresh key before copying a real command.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CodeBlock code={endpoints.find((endpoint) => endpoint.path === '/api/v1/feedback' && endpoint.method === 'POST')?.code || ''} />
+        </CardContent>
+      </Card>
 
-          <details className="group rounded-xl border bg-card">
-            <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">
-              <div>
-                <p className="text-base font-semibold text-foreground">Endpoint reference</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Open this when you need listing, project stats, or triage updates.
-                </p>
-              </div>
-              <span className="text-sm font-medium text-primary">
-                <span className="group-open:hidden">Show endpoints</span>
-                <span className="hidden group-open:inline">Hide endpoints</span>
-              </span>
-            </summary>
-            <CardContent className="p-0">
-              <div className="overflow-hidden border-t">
-                {endpoints.map((endpoint, index) => (
-                  <EndpointExample key={endpoint.path + endpoint.method} {...endpoint} defaultOpen={index === 1} />
-                ))}
-              </div>
-            </CardContent>
-          </details>
+      <details className="group rounded-xl border bg-card">
+        <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">
+          <div>
+            <p className="text-base font-semibold text-foreground">Endpoint reference</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Open this when you need listing, project stats, or triage updates.
+            </p>
+          </div>
+          <span className="text-sm font-medium text-primary">
+            <span className="group-open:hidden">Show endpoints</span>
+            <span className="hidden group-open:inline">Hide endpoints</span>
+          </span>
+        </summary>
+        <CardContent className="p-0">
+          <div className="overflow-hidden border-t">
+            {endpoints.map((endpoint, index) => (
+              <EndpointExample key={endpoint.path + endpoint.method} {...endpoint} defaultOpen={index === 1} />
+            ))}
+          </div>
+        </CardContent>
+      </details>
 
-          <details className="group rounded-xl border bg-card">
-            <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">
-              <div>
-                <p className="text-base font-semibold text-foreground">MCP server and agent tools</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Connect repo-aware agents to submit feedback, verify installs, and read setup packets.
-                </p>
-              </div>
-              <span className="text-sm font-medium text-primary">
-                <span className="group-open:hidden">Show MCP setup</span>
-                <span className="hidden group-open:inline">Hide MCP setup</span>
-              </span>
-            </summary>
-            <div className="space-y-4 border-t px-6 py-5">
+      <details className="group rounded-xl border bg-card">
+        <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">
+          <div>
+            <p className="text-base font-semibold text-foreground">MCP server and agent tools</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Connect repo-aware agents to submit feedback, verify installs, and read setup packets.
+            </p>
+          </div>
+          <span className="text-sm font-medium text-primary">
+            <span className="group-open:hidden">Show MCP setup</span>
+            <span className="hidden group-open:inline">Hide MCP setup</span>
+          </span>
+        </summary>
+        <div className="space-y-4 border-t px-6 py-5">
           <p className="text-sm text-muted-foreground">
             Add this to your <code className="bg-muted px-1 rounded">.mcp.json</code> or Claude Code settings:
           </p>
@@ -257,7 +256,7 @@ export function ApiDocs({
     "command": "npx",
     "args": ["@feedbacks/mcp-server"],
     "env": {
-      "FEEDBACKS_API_KEY": "${projectKey}",
+      "FEEDBACKS_API_KEY": "${exampleApiKey}",
       "FEEDBACKS_API_URL": "${baseUrl}"
     }
   }
@@ -296,10 +295,8 @@ export function ApiDocs({
 // → Agent calls update_feedback_status`} />
             </div>
           </details>
-            </div>
-          </details>
-        </>
-      ) : null}
+        </div>
+      </details>
     </div>
   )
 }

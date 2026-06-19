@@ -15,7 +15,7 @@ export default function TermsPage() {
 
         <h1 className="text-3xl font-bold tracking-tight">Terms of Service</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Last updated: March 2026
+          Last updated: June 2026
         </p>
 
         <div className="prose prose-zinc mt-8 max-w-none dark:prose-invert">
@@ -60,9 +60,10 @@ export default function TermsPage() {
 
           <h2>7. Pricing</h2>
           <p>
-            The Free tier includes limited projects, monthly feedback volume, and a 30-day history window.
-            Pro unlocks additional projects, unlimited history, webhook routing, and the AI / MCP surfaces.
-            Billing is handled through Dodo Payments and subscription changes take effect after verified billing events are processed.
+            The Free tier includes limited projects, monthly feedback volume, 30-day visible history,
+            limited webhooks, and API / MCP access. Pro raises or removes those limits for larger teams.
+            Billing is handled through Dodo Payments. Plan changes take effect after verified billing
+            events are processed on our server.
           </p>
 
           <h2>8. Termination</h2>
@@ -74,6 +75,12 @@ export default function TermsPage() {
           <h2>9. Changes</h2>
           <p>
             We may update these terms. Continued use after changes means acceptance.
+          </p>
+
+          <h2>10. Contact</h2>
+          <p>
+            For billing, account, privacy, or support questions, contact us at{' '}
+            <a href="mailto:pashaseenainc@gmail.com" className="underline">pashaseenainc@gmail.com</a>.
           </p>
         </div>
       </div>

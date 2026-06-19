@@ -136,18 +136,20 @@ The fast retry path is handled by GitHub Actions while the project remains on Ve
 - [ ] Claude Code config is tested.
 - [ ] Cursor config is tested.
 - [ ] Generic MCP stdio config is tested.
-- [ ] Free plan blocks MCP/API where expected.
-- [ ] Pro plan allows MCP/API where expected.
+- [x] Free plan allows limited MCP/API access.
+- [x] Pro plan allows uncapped MCP/API access within product-level operational limits.
 
 ## Dodo Payments
 
-- [ ] Dodo test checkout returns to `/billing`.
-- [ ] Plan changes only after verified webhook state updates.
-- [ ] Valid current Dodo webhook passes verification.
-- [ ] Invalid signature is rejected.
-- [ ] Stale timestamp is rejected.
-- [ ] Too-far-future timestamp is rejected.
-- [ ] Real Dodo signature format is confirmed against the implementation.
+- [x] Dodo test checkout returns to `/billing` on `https://app.feedbacks.dev`.
+- [x] Plan changes only after verified webhook state updates.
+- [x] Valid current Dodo webhook passes verification.
+- [x] Invalid signature is rejected.
+- [x] Stale timestamp is rejected.
+- [x] Too-far-future timestamp is rejected.
+- [x] Real Dodo Standard Webhooks signature format is confirmed against the implementation.
+
+19 June 2026 note: keep Dodo Payments in test mode until final production launch. User-confirmed test checkout and webhook entitlement updates work. The verified webhook, not the browser return, remains the source of truth for Pro state.
 
 ## Browser Acceptance
 

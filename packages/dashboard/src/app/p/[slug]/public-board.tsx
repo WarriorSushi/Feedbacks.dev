@@ -262,6 +262,35 @@ export function PublicBoard({
       className="min-h-screen bg-[linear-gradient(180deg,_hsl(var(--background))_0%,_hsl(var(--muted))_100%)]"
     >
       {board.customCss ? <style>{board.customCss}</style> : null}
+      {viewerSignedIn && (
+        <div className="sticky top-0 z-30 border-b bg-background/92 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/78">
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 text-sm">
+            <span className="font-medium text-foreground">Signed in to feedbacks.dev</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/dashboard"
+                className="rounded-lg border bg-card px-3 py-1.5 font-medium text-foreground transition-colors hover:border-primary/35 hover:text-primary active:translate-y-px"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/dashboard/boards"
+                className="rounded-lg border bg-card px-3 py-1.5 font-medium text-foreground transition-colors hover:border-primary/35 hover:text-primary active:translate-y-px"
+              >
+                Public boards
+              </Link>
+              {canModerate && (
+                <Link
+                  href={`/projects/${board.projectId}?tab=board`}
+                  className="rounded-lg bg-primary px-3 py-1.5 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px"
+                >
+                  Manage board
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <BoardHero
         board={board}
         feedbackCount={feedback.length}

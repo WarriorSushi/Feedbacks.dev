@@ -15,7 +15,7 @@ export default function PrivacyPage() {
 
         <h1 className="text-3xl font-bold tracking-tight">Privacy Policy</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Last updated: March 2026
+          Last updated: June 2026
         </p>
 
         <div className="prose prose-zinc mt-8 max-w-none dark:prose-invert">
@@ -26,7 +26,7 @@ export default function PrivacyPage() {
           <ul>
             <li>Account information (email, name via GitHub OAuth or magic link)</li>
             <li>Project configuration data</li>
-            <li>Feedback submitted through your widgets (messages, ratings, screenshots)</li>
+            <li>Feedback submitted through your widgets (messages, ratings, URLs, browser context, screenshots, and optional contact details)</li>
           </ul>
 
           <h2>How We Use Your Information</h2>
@@ -56,7 +56,8 @@ export default function PrivacyPage() {
           <p>
             Your data is retained as long as your account is active. When you delete a project,
             all associated feedback is permanently removed. Free plans only surface the most recent
-            30 days of history, but upgrading restores older history without recreating it. Account deletion removes all data.
+            30 days of history in the product, but upgrading restores older stored history without recreating it.
+            Account deletion removes account-owned product data.
           </p>
 
           <h2>Your Rights</h2>
@@ -68,8 +69,8 @@ export default function PrivacyPage() {
 
           <h2>Contact</h2>
           <p>
-            Questions about this policy? Open an issue on our{' '}
-            <a href="https://github.com/WarriorSushi/feedbacks.dev-2026" className="underline">GitHub repository</a>.
+            Questions about this policy or your data? Email{' '}
+            <a href="mailto:pashaseenainc@gmail.com" className="underline">pashaseenainc@gmail.com</a>.
           </p>
         </div>
       </div>

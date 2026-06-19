@@ -3,6 +3,7 @@ import { createAdminSupabase, createServerSupabase } from '@/lib/supabase-server
 import { assertFeatureAccess } from '@/lib/billing'
 import { hasE2EBypass } from '@/lib/e2e'
 import { listWebhookEndpointStates, normalizeWebhookConfig } from '@/lib/webhook-config'
+import { getWebhookDeliveryLogQueryLimit } from '@/lib/webhook-delivery-limits'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -40,7 +41,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
     const { project, admin, summary } = result as Exclude<typeof result, { error: NextResponse }>
     const normalized = normalizeWebhookConfig(project.webhooks)
-    const logLimit = summary?.entitlements.webhookDeliveryLogLimit ?? 30
+    const logLimit = getWebhookDeliveryLogQueryLimit(summary?.entitlements)
     const { data: deliveries, error } = await admin
       .from('webhook_deliveries')
       .select('id, event, kind, url, status, status_code, response_body, attempt, payload, created_at')

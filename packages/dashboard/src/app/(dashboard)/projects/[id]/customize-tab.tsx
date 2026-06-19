@@ -505,7 +505,7 @@ export function CustomizeTab({
           <CardContent className="space-y-4 p-6">
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <Badge variant={hasUnsavedChanges ? 'default' : 'secondary'}>
-                {hasUnsavedChanges ? 'Previewing unsaved changes' : 'Preview matches saved config'}
+                {hasUnsavedChanges ? 'Previewing unsaved changes' : 'Showing saved version'}
               </Badge>
               <Badge variant="outline">{draftModeLabel}</Badge>
             </div>
