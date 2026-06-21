@@ -115,6 +115,7 @@ export interface Feedback {
   agent_session_id: string | null
   structured_data: StructuredFeedbackData | null
   resolved_at: string | null
+  read_at: string | null
   created_at: string
   updated_at: string
   // Joined

@@ -120,6 +120,7 @@ export async function POST(
       metadata: {},
       is_public: true,
       vote_count: 0,
+      read_at: null,
     })
     .select('id')
     .single()

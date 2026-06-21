@@ -126,6 +126,7 @@ export async function POST(request: NextRequest) {
       attachments: null,
       metadata,
       is_archived: false,
+      read_at: null,
       agent_name: agentName,
       agent_session_id: agentSessionId,
       structured_data: structuredData,

@@ -2,6 +2,7 @@ import { createServerSupabase } from '@/lib/supabase-server'
 import { getCurrentUserBillingSummary, getHistoryCutoff } from '@/lib/billing'
 import { notFound } from 'next/navigation'
 import type { Feedback, FeedbackNote } from '@/lib/types'
+import { getFeedbackReadAtUpdate } from '@/lib/feedback-read-state'
 import { cn, formatDate, getTypeColor, statusConfig } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -78,6 +79,19 @@ export default async function FeedbackDetailPage({
   if (!feedback) notFound()
 
   const fb = feedback as Feedback
+  const readAtUpdate = getFeedbackReadAtUpdate(fb)
+  if (readAtUpdate) {
+    const { error } = await supabase
+      .from('feedback')
+      .update(readAtUpdate)
+      .eq('id', fb.id)
+      .is('read_at', null)
+
+    if (!error) {
+      fb.read_at = readAtUpdate.read_at
+    }
+  }
+
   const hasDetails = Boolean(
     fb.projects ||
       fb.email ||

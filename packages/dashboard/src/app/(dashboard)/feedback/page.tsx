@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { getHistoryWindowStart } from '@feedbacks/shared'
+import { isFeedbackUnread, parseFeedbackReadStateFilter } from '@/lib/feedback-read-state'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -96,6 +97,7 @@ function FeedbackInboxInner() {
   const agent = searchParams.get('agent') || ''
   const projectId = searchParams.get('projectId') || ''
   const tag = searchParams.get('tag') || ''
+  const read = parseFeedbackReadStateFilter(searchParams.get('read'))
   const [searchInput, setSearchInput] = React.useState(search)
   const [tagInput, setTagInput] = React.useState(tag)
   const [bulkTagInput, setBulkTagInput] = React.useState('')
@@ -149,6 +151,7 @@ function FeedbackInboxInner() {
     if (agent) query = query.not('agent_name', 'is', null)
     if (projectId) query = query.eq('project_id', projectId)
     if (tag) query = query.contains('tags', [tag])
+    if (read === 'unread') query = query.is('read_at', null)
     const historyCutoff = billingSummary ? getHistoryWindowStart(billingSummary.entitlements) : null
     if (historyCutoff) query = query.gte('created_at', historyCutoff)
 
@@ -157,7 +160,7 @@ function FeedbackInboxInner() {
     setTotal(count || 0)
     setSelected(new Set())
     setLoading(false)
-  }, [supabase, page, projectId, status, tag, type, search, agent, billingSummary])
+  }, [supabase, page, projectId, status, tag, type, search, agent, read, billingSummary])
 
   React.useEffect(() => {
     fetchFeedback()
@@ -256,7 +259,7 @@ function FeedbackInboxInner() {
 
   const clearBulkSelection = () => setSelected(new Set())
 
-  const hasFilters = status || type || search || agent || projectId || tag
+  const hasFilters = status || type || search || agent || projectId || tag || read === 'unread'
 
   return (
     <div className="animate-fade-in space-y-4 pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
@@ -342,10 +345,17 @@ function FeedbackInboxInner() {
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
           {/* Status group */}
           <FilterPill
-            active={!status}
-            onClick={() => updateParams({ status: '' })}
+            active={!status && read === 'all'}
+            onClick={() => updateParams({ status: '', read: '' })}
           >
             All
+          </FilterPill>
+          <FilterPill
+            active={read === 'unread'}
+            onClick={() => updateParams({ read: read === 'unread' ? '' : 'unread' })}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            Unread
           </FilterPill>
           {statuses.map((s) => (
             <FilterPill
@@ -389,7 +399,7 @@ function FeedbackInboxInner() {
               onClick={() => {
                 setSearchInput('')
                 setTagInput('')
-                updateParams({ status: '', type: '', q: '', agent: '', projectId: '', tag: '' })
+                updateParams({ status: '', type: '', q: '', agent: '', projectId: '', tag: '', read: '' })
               }}
               className="ml-1 flex min-h-10 flex-shrink-0 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:min-h-8"
             >
@@ -430,7 +440,7 @@ function FeedbackInboxInner() {
           <EmptyState hasFilters={!!hasFilters} hasProjects={projects.length > 0} onClear={() => {
             setSearchInput('')
             setTagInput('')
-            updateParams({ status: '', type: '', q: '', agent: '', projectId: '', tag: '' })
+            updateParams({ status: '', type: '', q: '', agent: '', projectId: '', tag: '', read: '' })
           }} />
         ) : (
           <div>
@@ -630,13 +640,13 @@ function FeedbackRow({
   selected: boolean
   onToggle: () => void
 }) {
-  const isNew = fb.status === 'new'
+  const isUnread = isFeedbackUnread(fb)
 
   return (
     <div
       className={cn(
         'group relative flex items-start gap-3 border-b px-4 py-3.5 transition-colors last:border-b-0',
-        isNew
+        isUnread
           ? 'bg-primary/[0.04] ring-1 ring-inset ring-primary/15 hover:bg-primary/[0.06] dark:bg-primary/[0.07]'
           : 'hover:bg-accent/30',
         selected && 'bg-accent/50'
@@ -655,17 +665,25 @@ function FeedbackRow({
         href={`/feedback/${fb.id}`}
         className="flex min-w-0 flex-1 items-start gap-2.5"
       >
+        <span
+          aria-hidden="true"
+          className={cn(
+            'mt-2 h-2 w-2 shrink-0 rounded-full transition-colors',
+            isUnread ? 'bg-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.12)]' : 'bg-transparent'
+          )}
+        />
         <TypeIcon type={fb.type} className="mt-0.5 shrink-0 text-muted-foreground" />
 
         <div className="min-w-0 flex-1">
           <p
             className={cn(
               'text-[13px] leading-relaxed',
-              isNew
+              isUnread
                 ? 'font-medium text-foreground'
                 : 'text-foreground/75 group-hover:text-foreground'
             )}
           >
+            {isUnread && <span className="sr-only">Unread feedback: </span>}
             {truncate(fb.message, 120)}
           </p>
 

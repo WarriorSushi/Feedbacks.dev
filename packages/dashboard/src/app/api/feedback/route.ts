@@ -294,6 +294,7 @@ export async function POST(request: NextRequest) {
       attachments,
       metadata: {},
       is_archived: false,
+      read_at: null,
       created_at: now,
       updated_at: now,
     }

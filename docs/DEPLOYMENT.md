@@ -39,6 +39,8 @@ For a new internal staging, recovery, or disposable verification project, run th
 15. `sql/015_server_managed_votes.sql` — removes direct client vote writes; board votes go through server API routes
 16. `sql/016_agent_setup_audit.sql` — audit log for short-lived AI setup packet creation and reads
 17. `sql/017_agent_setup_token_revocation.sql` — revocable agent setup packet token registry
+18. `sql/018_feedback_read_state.sql` — adds `feedback.read_at` so inbox read state stays separate from workflow status
+19. `sql/019_feedback_read_state_backfill.sql` — marks existing non-`new` feedback as read so triaged items do not appear unread
 
 **How for internal/staging use:** apply the files through the Supabase CLI or copy-paste the contents of each file into the SQL Editor and click "Run".
 

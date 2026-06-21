@@ -3,6 +3,7 @@ import { getCurrentUserBillingSummary, getHistoryCutoff } from '@/lib/billing'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { isFeedbackUnread } from '@/lib/feedback-read-state'
 import { cn, formatRelativeTime, truncate, getStatusColor } from '@/lib/utils'
 import type { Feedback } from '@/lib/types'
 import Link from 'next/link'
@@ -44,7 +45,13 @@ function TypeIcon({ type, className }: { type?: string | null; className?: strin
   return <Icon className={cn('h-4 w-4', className)} />
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ tour?: string }>
+}) {
+  const params = await searchParams
+  const showProductTour = params?.tour === '1'
   const supabase = await createServerSupabase()
   const {
     data: { user },
@@ -58,7 +65,7 @@ export default async function DashboardPage() {
 
   const [
     { count: totalCount },
-    { count: newCount },
+    { count: unreadCount },
     { data: ratingData },
     { count: projectCount },
     { count: agentCount },
@@ -70,8 +77,8 @@ export default async function DashboardPage() {
       ? supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('is_archived', false).gte('created_at', historyCutoff)
       : supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('is_archived', false)),
     (historyCutoff
-      ? supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('status', 'new').eq('is_archived', false).gte('created_at', historyCutoff)
-      : supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('status', 'new').eq('is_archived', false)),
+      ? supabase.from('feedback').select('*', { count: 'exact', head: true }).is('read_at', null).eq('is_archived', false).gte('created_at', historyCutoff)
+      : supabase.from('feedback').select('*', { count: 'exact', head: true }).is('read_at', null).eq('is_archived', false)),
     (historyCutoff
       ? supabase.from('feedback').select('rating').not('rating', 'is', null).eq('is_archived', false).gte('created_at', historyCutoff)
       : supabase.from('feedback').select('rating').not('rating', 'is', null).eq('is_archived', false)),
@@ -120,7 +127,7 @@ export default async function DashboardPage() {
   })
 
   const total = totalCount || 0
-  const unread = newCount || 0
+  const unread = unreadCount || 0
   const agents = agentCount || 0
   const projects = projectCount || 0
   const displayName =
@@ -141,7 +148,7 @@ export default async function DashboardPage() {
       value: unread,
       urgent: unread > 0,
       sub: unread > 0 ? 'needs review' : 'all caught up',
-      href: '/feedback?status=new',
+      href: '/feedback?read=unread',
     },
     {
       id: 'rating',
@@ -176,6 +183,24 @@ export default async function DashboardPage() {
     question: 'bg-sky-500',
     other: 'bg-zinc-400',
   }
+
+  const capabilityLinks = [
+    { Icon: Code2, title: 'Install widget', body: 'Copy the snippet, verify it, then customize.', href: '/projects' },
+    { Icon: Inbox, title: 'Triage inbox', body: 'Open unread feedback without changing workflow status.', href: '/feedback?read=unread' },
+    { Icon: Bell, title: 'Route updates', body: 'Send important feedback into existing team channels.', href: '/integrations' },
+    { Icon: MessageSquare, title: 'Public boards', body: 'Collect visible ideas, bugs, votes, and comments.', href: '/dashboard/boards' },
+    { Icon: Bot, title: 'API and MCP', body: 'Let trusted agents submit, search, and update feedback.', href: '/api-docs' },
+    { Icon: ShieldCheck, title: 'Plan and billing', body: 'Check usage, limits, and Pro access in one place.', href: '/billing' },
+  ]
+
+  const productTourSteps = [
+    { title: 'Install widget', body: 'Open a project, copy the Website snippet, and run hosted verification.', href: '/projects', cta: 'Open projects' },
+    { title: 'Triage inbox', body: 'Open unread items to clear the visual highlight, then change status only when you mean to.', href: '/feedback?read=unread', cta: 'Review unread' },
+    { title: 'Route signal', body: 'Connect Slack, Discord, GitHub, or a webhook after feedback reaches the inbox.', href: '/integrations', cta: 'Open integrations' },
+    { title: 'Share a board', body: 'Publish public requests when you want users to vote and discuss in the open.', href: '/dashboard/boards', cta: 'View boards' },
+    { title: 'Use API and MCP', body: 'Give trusted backends and agents project-scoped feedback access.', href: '/api-docs', cta: 'Open API' },
+    { title: 'Check billing', body: 'Review usage, history limits, and Pro access before launch traffic arrives.', href: '/billing', cta: 'Open billing' },
+  ]
 
   if (projects === 0) {
     return (
@@ -292,6 +317,11 @@ export default async function DashboardPage() {
               )}
             </Button>
           </Link>
+          <Link href="/dashboard?tour=1">
+            <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs font-medium">
+              Take product tour
+            </Button>
+          </Link>
         </div>
         {billingSummary && (
           <p className="text-xs text-muted-foreground">
@@ -303,6 +333,63 @@ export default async function DashboardPage() {
           </p>
         )}
       </div>
+
+      {showProductTour && (
+        <Card className="border-primary/25 bg-primary/[0.03]">
+          <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <CardTitle className="text-base">Product tour</CardTitle>
+              <CardDescription>
+                A quick path through the surfaces that matter after the first project exists.
+              </CardDescription>
+            </div>
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm" className="h-8 text-xs">
+                Hide tour
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent className="grid gap-x-6 gap-y-5 pt-0 md:grid-cols-2 xl:grid-cols-3">
+            {productTourSteps.map((step, index) => (
+              <div key={step.title} className="flex gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                  {index + 1}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{step.title}</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{step.body}</p>
+                  <Link href={step.href} className="mt-3 inline-flex">
+                    <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs">
+                      {step.cta}
+                      <ArrowRight className="h-3 w-3" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">What you can do</CardTitle>
+          <CardDescription>
+            Use the product in this order when you are setting up a new project.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-x-5 gap-y-4 pt-0 sm:grid-cols-2 lg:grid-cols-3">
+          {capabilityLinks.map(({ Icon, title, body, href }) => (
+            <Link key={title} href={href} className="group flex gap-3 rounded-md py-1.5">
+              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span className="min-w-0">
+                <span className="block text-sm font-medium group-hover:text-primary">{title}</span>
+                <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{body}</span>
+              </span>
+            </Link>
+          ))}
+        </CardContent>
+      </Card>
 
       {/* ─── Onboarding (shown when no projects) ──────────── */}
       {projects === 0 && (
@@ -433,7 +520,7 @@ export default async function DashboardPage() {
         {/* On mobile, show quick actions first as a horizontal scroll */}
         <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin lg:hidden">
           <Link
-            href="/feedback?status=new"
+            href="/feedback?read=unread"
             className="flex min-w-[120px] flex-shrink-0 items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-xs font-medium transition-colors hover:bg-accent"
           >
             <Bell className="h-3.5 w-3.5 text-muted-foreground" />
@@ -509,7 +596,7 @@ export default async function DashboardPage() {
                     href={`/feedback/${fb.id}`}
                     className={cn(
                       'group flex gap-3 border-b px-4 py-3 transition-colors last:border-b-0 hover:bg-accent/40',
-                      fb.status === 'new' &&
+                      isFeedbackUnread(fb) &&
                         'bg-primary/[0.04] ring-1 ring-inset ring-primary/15 hover:bg-primary/[0.06] dark:bg-primary/[0.07]'
                     )}
                   >
@@ -518,7 +605,7 @@ export default async function DashboardPage() {
                       <p
                         className={cn(
                           'text-[13px] leading-snug text-foreground/75 transition-colors group-hover:text-foreground',
-                          fb.status === 'new' && 'font-medium text-foreground/90'
+                          isFeedbackUnread(fb) && 'font-medium text-foreground/90'
                         )}
                       >
                         {truncate(fb.message, 110)}
@@ -636,7 +723,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-0.5 pb-3 pt-0">
               <Link
-                href="/feedback?status=new"
+                href="/feedback?read=unread"
                 className="flex items-center justify-between rounded-md px-2 py-2 transition-colors hover:bg-accent"
               >
                 <span className="flex items-center gap-2 text-[12px]">
