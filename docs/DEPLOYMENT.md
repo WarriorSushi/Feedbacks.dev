@@ -41,6 +41,11 @@ For a new internal staging, recovery, or disposable verification project, run th
 17. `sql/017_agent_setup_token_revocation.sql` — revocable agent setup packet token registry
 18. `sql/018_feedback_read_state.sql` — adds `feedback.read_at` so inbox read state stays separate from workflow status
 19. `sql/019_feedback_read_state_backfill.sql` — marks existing non-`new` feedback as read so triaged items do not appear unread
+20. `sql/020_optimize_agent_setup_rls.sql` — wraps agent setup owner checks in `(select auth.uid())` to clear per-row RLS auth evaluation
+21. `sql/021_split_usage_counter_write_rls.sql` — splits usage counter write-deny policies away from SELECT to reduce RLS advisor noise
+22. `sql/022_consolidate_public_board_read_rls.sql` — consolidates public board/announcement/note SELECT policies and splits owner writes
+23. `sql/023_cron_run_audit.sql` — adds service-role cron run audit rows for webhook and notification digest heartbeat checks
+24. `sql/024_webhook_digest_items.sql` — adds the durable webhook digest queue for daily batched endpoint delivery
 
 **How for internal/staging use:** apply the files through the Supabase CLI or copy-paste the contents of each file into the SQL Editor and click "Run".
 
@@ -58,7 +63,6 @@ Go to **Supabase Dashboard** → **Authentication**:
 1. **Providers → Email** → Enabled ✅
 2. Enable "Confirm email" (recommended for production)
 3. Set the Site URL (see below)
-4. In password security settings, enable leaked password protection when the Supabase plan supports it.
 
 ### GitHub OAuth
 1. **Providers → GitHub** → Enabled ✅
@@ -156,14 +160,18 @@ Keep `CRON_SECRET` configured in both Vercel production env and GitHub Actions r
 
 ## Step 5: Deploy to Vercel
 
-Current production status, refreshed 15 June 2026:
+Current production status, refreshed 23 June 2026:
 
 - Vercel project: `feedbacks-dev-dashboard`
 - Team/scope: `warriorsushis-projects`
 - Root directory: `packages/dashboard`
 - Production origin: `https://app.feedbacks.dev`
-- Latest verified production commit: `eccd20482645f5a2b0ef4150e434c1b8c2aa150b`
-- Latest verified production deployment: `dpl_FYMCZopaR98JDASYzZECsBbFichw`
+- Latest verified production base commit: `288eceae6c3c86f7d282f09fd81298170c2a5f3f`
+- Latest verified production deployment: `dpl_5qpcbmrqgc61LDaziiCk8zyzPH7U`
+- Authenticated production smoke used disposable login `test@test.com` and verified project creation, install/customize/API/integrations pages, hosted verify, widget submission, inbox/mobile density, public board submission/duplicate/report/moderation/follow/watch, webhook test sends/replays, generic digest delivery, REST API list/update, and billing page mobile density.
+- Cron audit smoke: `/api/cron/webhook-jobs` and `/api/cron/notification-digests` both returned `200` from production with `cron_runs` rows recorded at `2026-06-22 19:26 UTC`.
+- GitHub Actions scheduler path smoke: workflow dispatch run `27978342902` succeeded and recorded a `webhook_jobs` `cron_runs` row at `2026-06-22 19:27 UTC`.
+- Latest Vercel production runtime error/fatal log check returned no entries for the final smoke window.
 
 The deployment was performed through the Vercel CLI after reconnecting the GitHub integration and granting the requested repository permissions. If Git auto-deploy appears stuck again, first check whether the project is receiving GitHub deployment records, then run:
 
@@ -215,27 +223,31 @@ vercel
 
 Test this checklist:
 
-- [ ] Landing page loads at `/`
-- [ ] Can sign in via GitHub OAuth
-- [ ] Can sign in via magic link email
-- [ ] Dashboard loads at `/dashboard`
-- [ ] Can create a new project
-- [ ] Widget install tab shows correct script URL
-- [ ] Widget works when embedded on a test page
-- [ ] Can submit feedback through the widget
-- [ ] Feedback appears in the inbox
-- [ ] Can change feedback status
-- [ ] Can add internal notes
-- [ ] Public board works at `/p/[slug]`
-- [ ] Board follow/watch/report flows work when signed in
-- [ ] Announcements appear on the public board
-- [ ] `/boards` directory reflects public vs unlisted/private visibility
-- [ ] Voting works on the public board
-- [ ] Webhook test send and resend work from the integrations screen
-- [ ] Webhook retries are processed by the cron-backed queue
-- [ ] API key auth works for `/api/v1/` endpoints
-- [ ] CSV export downloads at `/api/projects/[id]/feedback.csv`
-- [ ] Privacy and Terms pages load
+- [x] Landing page loads at `/`
+- [x] Can sign in via GitHub OAuth
+- [x] Can sign in via magic link email
+- [x] Dashboard loads at `/dashboard`
+- [x] Can create a new project
+- [x] Widget install tab shows correct script URL
+- [x] Widget works when embedded on a test page
+- [x] Can submit feedback through the widget
+- [x] Feedback appears in the inbox
+- [x] Can change feedback status
+- [x] Can add internal notes
+- [x] Public board works at `/p/[slug]`
+- [x] Board follow/watch/report flows work when signed in
+- [x] Announcements appear on the public board
+- [x] `/boards` directory reflects public vs unlisted/private visibility
+- [x] Voting works on the public board
+- [x] Webhook test send and resend work from the integrations screen
+- [x] Webhook retries are processed by the cron-backed queue
+- [x] Daily digest webhook endpoints create `feedback.digest` delivery logs from `webhook_digest_items`
+- [x] `cron_runs` has recent `webhook_jobs` and `notification_digests` rows after scheduled runs
+- [x] API key auth works for `/api/v1/` endpoints
+- [x] CSV export downloads at `/api/projects/[id]/feedback.csv`
+- [x] Privacy and Terms pages load
+
+23 June 2026 evidence: authenticated production smoke covered dashboard/project/widget/inbox/board/integration/API/mobile flows on `https://app.feedbacks.dev`. A follow-up authenticated browser check fetched `/api/projects/51e80367-9ac2-46d0-8f27-431a09464190/feedback.csv` with HTTP `200` and CSV headers. Supabase `cron_runs` has recent successful `webhook_jobs` and `notification_digests` rows, and recent delivery logs include `feedback.digest`, `feedback.new`, and `feedback.test` successes.
 
 ---
 

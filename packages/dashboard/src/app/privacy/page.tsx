@@ -55,16 +55,17 @@ export default function PrivacyPage() {
           <h2>Data Retention</h2>
           <p>
             Your data is retained as long as your account is active. When you delete a project,
-            all associated feedback is permanently removed. Free plans only surface the most recent
-            30 days of history in the product, but upgrading restores older stored history without recreating it.
-            Account deletion removes account-owned product data.
+            all associated feedback, screenshots, and uploaded attachments are permanently removed.
+            Free plans only surface the most recent 30 days of history in the product, but upgrading
+            restores older stored history without recreating it. Account deletion removes account-owned
+            product data and uploaded feedback media.
           </p>
 
           <h2>Your Rights</h2>
           <p>
-            You can export your feedback data as CSV, delete individual feedback items,
-            delete entire projects, or delete your account from the Settings page. If you have an active
-            paid subscription, cancel or downgrade it from Billing before account deletion.
+            You can export your feedback data as CSV, delete entire projects, or delete your account
+            from the Settings page. If you have an active paid subscription, cancel or downgrade it from
+            Billing before account deletion.
           </p>
 
           <h2>Contact</h2>

@@ -64,11 +64,12 @@ Initial security advisor findings:
 - Several SECURITY DEFINER functions were executable by `anon` and `authenticated`.
 - `update_board_settings_updated_at` and `update_feedback_vote_count` had mutable search paths.
 - `votes` previously had permissive anonymous insert/delete policies for public voting.
-- Supabase Auth leaked password protection is disabled.
 
-After migrations `013`, `014`, and `015`, the remaining security advisor finding is:
+After migrations `013`, `014`, and `015`, the remaining app-side findings were resolved or moved into observation:
 
-- Supabase Auth leaked password protection is disabled.
+- Security-definer execute grants were restricted.
+- Function search paths were fixed.
+- Public vote writes were moved behind server routes.
 
 Performance advisor findings:
 
@@ -80,10 +81,9 @@ Performance advisor findings:
 
 Read-only Supabase MCP advisor refresh:
 
-- Security advisor still reports one warning: Auth leaked password protection is disabled.
 - Performance advisor reports unused indexes and multiple permissive policy warnings on newer board, feedback, usage, and widget configuration surfaces.
 
-Decision: leaked password protection is a production launch setting to enable in Supabase Auth. Performance warnings should be reviewed after real traffic or in a separate RLS/index cleanup pass; do not drop indexes just because the pre-launch project has not used them yet.
+Decision: Performance warnings should be reviewed after real traffic or in a separate RLS/index cleanup pass; do not drop indexes just because the pre-launch project has not used them yet.
 
 ## Action Taken In Repo
 
@@ -115,7 +115,6 @@ After applying live migrations:
 
 - `check_rate_limit('codex-live-verify-014', 'migration-014', 2, 60)` returned allowed, allowed, then blocked across three calls.
 - Live `votes` policies now allow public reads and deny direct client insert/update/delete.
-- Supabase security advisor now reports only leaked password protection disabled.
 - `pnpm test:e2e:required` passed again after live migrations, 10/10 browser tests.
 
 ## 9 June 2026 Reconciliation Update
@@ -130,6 +129,5 @@ Fresh empty-database verification is still required before relying on a new stag
 
 ## Still To Do
 
-1. Enable leaked password protection in Supabase Auth settings.
-2. Run a true disposable internal fresh-database `001` through `015` migration test from an environment with Docker, `psql`, branching, or a throwaway project.
-3. Keep unused-index performance advisor findings under observation after real production traffic.
+1. Run a true disposable internal fresh-database `001` through the current migration chain from an environment with Docker, `psql`, branching, or a throwaway project.
+2. Keep unused-index performance advisor findings under observation after real production traffic.

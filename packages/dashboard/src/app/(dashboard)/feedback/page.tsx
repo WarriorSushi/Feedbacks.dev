@@ -19,7 +19,7 @@ import {
   statusConfig as globalStatusConfig,
 } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
-import type { BillingSummary, Feedback, FeedbackStatus, FeedbackType } from '@/lib/types'
+import type { BillingSummary, Feedback, FeedbackPriority, FeedbackStatus, FeedbackType } from '@/lib/types'
 import {
   Search,
   ChevronLeft,
@@ -38,6 +38,7 @@ import {
   MessageSquare,
   Bot,
   ClipboardList,
+  EyeOff,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -45,6 +46,7 @@ const PAGE_SIZE = 20
 
 const statuses: FeedbackStatus[] = ['new', 'reviewed', 'planned', 'in_progress', 'closed']
 const types: FeedbackType[] = ['bug', 'idea', 'praise', 'question']
+const priorities: FeedbackPriority[] = ['low', 'medium', 'high', 'critical']
 
 const statusMeta = globalStatusConfig
 const typeIcons = {
@@ -95,6 +97,10 @@ function FeedbackInboxInner() {
   const type = searchParams.get('type') || ''
   const search = searchParams.get('q') || ''
   const agent = searchParams.get('agent') || ''
+  const publicOnly = searchParams.get('public') === '1'
+  const priority = priorities.includes(searchParams.get('priority') as FeedbackPriority)
+    ? (searchParams.get('priority') as FeedbackPriority)
+    : ''
   const projectId = searchParams.get('projectId') || ''
   const tag = searchParams.get('tag') || ''
   const read = parseFeedbackReadStateFilter(searchParams.get('read'))
@@ -149,6 +155,9 @@ function FeedbackInboxInner() {
     if (type) query = query.eq('type', type)
     if (search) query = query.ilike('message', `%${search}%`)
     if (agent) query = query.not('agent_name', 'is', null)
+    if (publicOnly) query = query.eq('is_public', true)
+    if (priority === 'high') query = query.in('priority', ['high', 'critical'])
+    else if (priority) query = query.eq('priority', priority)
     if (projectId) query = query.eq('project_id', projectId)
     if (tag) query = query.contains('tags', [tag])
     if (read === 'unread') query = query.is('read_at', null)
@@ -160,7 +169,7 @@ function FeedbackInboxInner() {
     setTotal(count || 0)
     setSelected(new Set())
     setLoading(false)
-  }, [supabase, page, projectId, status, tag, type, search, agent, read, billingSummary])
+  }, [supabase, page, projectId, status, tag, type, search, agent, publicOnly, priority, read, billingSummary])
 
   React.useEffect(() => {
     fetchFeedback()
@@ -257,9 +266,52 @@ function FeedbackInboxInner() {
     fetchFeedback()
   }
 
+  const bulkMarkUnread = async () => {
+    if (selected.size === 0) return
+    setBulkLoading(true)
+    const { error } = await supabase
+      .from('feedback')
+      .update({ read_at: null })
+      .in('id', Array.from(selected))
+    setBulkLoading(false)
+    if (error) {
+      toast({ title: 'Failed to mark unread', description: error.message, variant: 'destructive' })
+      return
+    }
+    toast({ title: `${selected.size} item${selected.size > 1 ? 's' : ''} marked unread` })
+    fetchFeedback()
+  }
+
   const clearBulkSelection = () => setSelected(new Set())
 
-  const hasFilters = status || type || search || agent || projectId || tag || read === 'unread'
+  const hasFilters = status || type || search || agent || publicOnly || priority || projectId || tag || read === 'unread'
+  const savedFilters = [
+    {
+      label: 'Unread',
+      active: read === 'unread' && !status && !type && !agent && !publicOnly && !priority,
+      updates: { read: 'unread', status: '', type: '', agent: '', public: '', priority: '' },
+    },
+    {
+      label: 'Bugs',
+      active: type === 'bug' && read === 'all' && !status && !agent && !publicOnly && !priority,
+      updates: { type: 'bug', read: '', status: '', agent: '', public: '', priority: '' },
+    },
+    {
+      label: 'Public board',
+      active: publicOnly && read === 'all' && !status && !type && !agent && !priority,
+      updates: { public: '1', read: '', status: '', type: '', agent: '', priority: '' },
+    },
+    {
+      label: 'Agent',
+      active: agent === '1' && read === 'all' && !status && !type && !publicOnly && !priority,
+      updates: { agent: '1', read: '', status: '', type: '', public: '', priority: '' },
+    },
+    {
+      label: 'High priority',
+      active: priority === 'high' && read === 'all' && !status && !type && !agent && !publicOnly,
+      updates: { priority: 'high', read: '', status: '', type: '', agent: '', public: '' },
+    },
+  ]
 
   return (
     <div className="animate-fade-in space-y-4 pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
@@ -343,6 +395,23 @@ function FeedbackInboxInner() {
         {/* Filter pills row — horizontal scroll on mobile */}
         <div className="-mx-4 px-4 md:mx-0 md:px-0">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+            <span className="pr-1 text-[11px] font-medium text-muted-foreground">
+              Saved
+            </span>
+            {savedFilters.map((filter) => (
+              <FilterPill
+                key={filter.label}
+                active={filter.active}
+                onClick={() => updateParams(filter.active ? { read: '', status: '', type: '', agent: '', public: '', priority: '' } : filter.updates)}
+              >
+                {filter.label}
+              </FilterPill>
+            ))}
+          </div>
+        </div>
+
+        <div className="-mx-4 px-4 md:mx-0 md:px-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
           {/* Status group */}
           <FilterPill
             active={!status && read === 'all'}
@@ -394,12 +463,28 @@ function FeedbackInboxInner() {
             Agent
           </FilterPill>
 
+          <FilterPill
+            active={publicOnly}
+            onClick={() => updateParams({ public: publicOnly ? '' : '1' })}
+          >
+            <MessageSquare className="h-3.5 w-3.5" />
+            Public board
+          </FilterPill>
+
+          <FilterPill
+            active={priority === 'high'}
+            onClick={() => updateParams({ priority: priority === 'high' ? '' : 'high' })}
+          >
+            <Star className="h-3.5 w-3.5" />
+            High priority
+          </FilterPill>
+
           {hasFilters && (
             <button
               onClick={() => {
                 setSearchInput('')
                 setTagInput('')
-                updateParams({ status: '', type: '', q: '', agent: '', projectId: '', tag: '', read: '' })
+                updateParams({ status: '', type: '', q: '', agent: '', public: '', priority: '', projectId: '', tag: '', read: '' })
               }}
               className="ml-1 flex min-h-10 flex-shrink-0 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:min-h-8"
             >
@@ -440,7 +525,7 @@ function FeedbackInboxInner() {
           <EmptyState hasFilters={!!hasFilters} hasProjects={projects.length > 0} onClear={() => {
             setSearchInput('')
             setTagInput('')
-            updateParams({ status: '', type: '', q: '', agent: '', projectId: '', tag: '', read: '' })
+            updateParams({ status: '', type: '', q: '', agent: '', public: '', priority: '', projectId: '', tag: '', read: '' })
           }} />
         ) : (
           <div>
@@ -561,6 +646,16 @@ function FeedbackInboxInner() {
             <XCircle className="h-3.5 w-3.5" />
             Close
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-[11px] font-medium"
+            disabled={bulkLoading}
+            onClick={() => void bulkMarkUnread()}
+          >
+            <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
+            Mark unread
+          </Button>
           <div className="h-4 w-px bg-border" />
           <Input
             value={bulkTagInput}
@@ -641,6 +736,7 @@ function FeedbackRow({
   onToggle: () => void
 }) {
   const isUnread = isFeedbackUnread(fb)
+  const source = getFeedbackSource(fb)
 
   return (
     <div
@@ -728,6 +824,11 @@ function FeedbackRow({
               </>
             )}
 
+            <span className="text-[10px] text-muted-foreground/30">·</span>
+            <Badge variant="outline" className="h-4 px-1.5 text-[10px]">
+              {source}
+            </Badge>
+
             {/* Project */}
             {fb.projects && (
               <>
@@ -778,6 +879,15 @@ function FeedbackRow({
       </Link>
     </div>
   )
+}
+
+function getFeedbackSource(fb: Feedback) {
+  const metadataSource = typeof fb.metadata?.source === 'string' ? fb.metadata.source.toLowerCase() : ''
+  if (fb.is_public) return 'Public board'
+  if (fb.agent_name) return 'Agent'
+  if (metadataSource === 'mcp') return 'MCP'
+  if (metadataSource === 'api') return 'API'
+  return 'Widget'
 }
 
 function EmptyState({

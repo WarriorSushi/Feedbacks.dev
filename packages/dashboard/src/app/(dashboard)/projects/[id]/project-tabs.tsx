@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { createClient } from '@/lib/supabase-browser'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { readStoredProjectApiKey, rememberProjectApiKey } from '@/lib/project-api-keys'
 import type { BillingSummary, Project } from '@/lib/types'
@@ -262,7 +261,6 @@ function ApiKeyBadge({
 }
 
 function SettingsTab({ project }: { project: Project }) {
-  const supabase = React.useMemo(() => createClient(), [])
   const router = useRouter()
   const [name, setName] = React.useState(project.name)
   const [domain, setDomain] = React.useState(project.domain || '')
@@ -322,9 +320,14 @@ function SettingsTab({ project }: { project: Project }) {
 
   const handleDelete = async () => {
     setDeleting(true)
-    const { error } = await supabase.from('projects').delete().eq('id', project.id)
-    if (error) {
-      toast({ title: 'Failed to delete project', description: error.message, variant: 'destructive' })
+    const response = await fetch(`/api/projects/${project.id}`, { method: 'DELETE' })
+    const payload = await response.json().catch(() => null)
+    if (!response.ok) {
+      toast({
+        title: 'Failed to delete project',
+        description: payload?.error || 'Please try again.',
+        variant: 'destructive',
+      })
       setDeleting(false)
       return
     }

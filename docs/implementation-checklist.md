@@ -22,27 +22,27 @@ Authoritative product direction still lives in:
 ## Immediate recovery priorities
 
 ### 1. Setup trust
-- [ ] keep hosted customer setup and internal operator docs clearly separated
+- [x] keep hosted customer setup and internal operator docs clearly separated
 - [x] keep deployment docs aligned with the full ordered migration chain
-- [ ] keep local Playwright setup aligned with `packages/dashboard/.env.local`
+- [x] keep local Playwright setup aligned with `packages/dashboard/.env.local`
 - [x] remove or neutralize references that assume `archived_project/` exists
 
 ### 2. Acceptance confidence
-- [ ] run the existing Playwright install flow
-- [ ] run the hosted verify flow
-- [ ] run board submit, moderation, and directory flows
-- [ ] capture any real failures as implementation bugs, not vague planning notes
+- [x] run the existing Playwright install flow
+- [x] run the hosted verify flow
+- [x] run board submit, moderation, and directory flows
+- [x] capture any real failures as implementation bugs, not vague planning notes
 
 ### 3. Product-story alignment
-- [ ] tighten homepage messaging around install speed and triage clarity
-- [ ] keep auth and onboarding focused on “create project, paste snippet, verify”
-- [ ] keep public boards positioned as a deliberate extension, not the first-run story
-- [ ] use the repo design context in `.impeccable.md` for future UI changes
+- [x] tighten homepage messaging around install speed and triage clarity
+- [x] keep auth and onboarding focused on “create project, paste snippet, verify”
+- [x] keep public boards positioned as a deliberate extension, not the first-run story
+- Future UI changes should keep using the repo design context in `.impeccable.md`.
 
 ### 4. Architecture cleanup
-- [ ] move remaining direct client-side table writes behind API routes
-- [ ] keep widget config, snippet generation, and saved config on one canonical path
-- [ ] keep public board queries and moderation paths scalable enough for higher board volume
+- [x] move remaining direct client-side table writes behind API routes
+- [x] keep widget config, snippet generation, and saved config on one canonical path
+- [x] keep public board queries and moderation paths scalable enough for higher board volume
 
 ## Notes
 

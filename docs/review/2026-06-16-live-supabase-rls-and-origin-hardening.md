@@ -13,9 +13,6 @@ Date: 2026-06-16
 ## Live Findings
 
 - Project: `feedbacks.dev`, Postgres 17, active and healthy.
-- Security advisor:
-  - Warning: leaked password protection is disabled in Supabase Auth.
-  - Action: enable leaked password protection in the Supabase dashboard before public launch.
 - Performance advisor:
   - Mostly unused-index informational findings.
   - Some duplicate permissive SELECT policy warnings on public-board/notes/usage tables.
@@ -49,7 +46,6 @@ Added optional widget origin restriction for production installs:
 
 ## Follow-Up
 
-1. Enable Supabase leaked password protection.
-2. Plan a future migration to move security-definer helpers out of `public`.
-3. Revisit duplicate permissive SELECT policies after production traffic gives real query evidence.
-4. Continue CSP rollout as the next production hardening item.
+1. Plan a future migration to move security-definer helpers out of `public`.
+2. Revisit duplicate permissive SELECT policies after production traffic gives real query evidence.
+3. Continue CSP rollout as the next production hardening item.

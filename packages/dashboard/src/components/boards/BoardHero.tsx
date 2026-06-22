@@ -50,21 +50,11 @@ export function BoardHero({
 
   return (
     <section
-      className="relative overflow-hidden border-b border-border/80"
+      className="relative overflow-hidden border-b border-border/80 bg-background"
       style={{
-        background:
-          `radial-gradient(circle at 16% 12%, ${accent}26, transparent 32%), ` +
-          `linear-gradient(135deg, ${accent}18, hsl(var(--background)) 52%, hsl(var(--card)) 100%)`,
+        borderColor: `${accent}26`,
       }}
     >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.08] dark:opacity-[0.12]"
-        style={{
-          backgroundImage:
-            'linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)',
-          backgroundSize: '34px 34px',
-        }}
-      />
       <div className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <Link
@@ -92,31 +82,31 @@ export function BoardHero({
         <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
           <div className="min-w-0">
             <div
-              className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border bg-card/80 text-3xl shadow-sm backdrop-blur"
+              className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl border bg-card text-2xl"
               style={{ borderColor: `${accent}40` }}
               aria-hidden="true"
             >
               {board.branding.logoEmoji || displayTitle.slice(0, 1).toUpperCase()}
             </div>
-            <h1 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-tighter text-foreground sm:text-5xl lg:text-6xl">
+            <h1 className="max-w-4xl text-3xl font-bold leading-tight text-foreground sm:text-4xl lg:text-5xl">
               {displayTitle}
             </h1>
             <p className="mt-5 max-w-3xl text-base leading-7 text-foreground/72 sm:text-lg">
               {heroDescription}
             </p>
 
-            <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <span className="rounded-full border bg-card/75 px-3 py-1.5 shadow-sm backdrop-blur">
+            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+              <span>
                 <strong className="font-semibold text-foreground">{feedbackCount}</strong> requests
               </span>
-              <span className="rounded-full border bg-card/75 px-3 py-1.5 shadow-sm backdrop-blur">
+              <span>
                 <strong className="font-semibold text-foreground">{totalVotes}</strong> votes
               </span>
-              <span className="rounded-full border bg-card/75 px-3 py-1.5 font-medium text-foreground/75 shadow-sm backdrop-blur">
+              <span className="font-medium text-foreground/75">
                 {submissionLabel}
               </span>
               {board.branding.tagline && (
-                <span className="rounded-full border bg-card/75 px-3 py-1.5 shadow-sm backdrop-blur">
+                <span>
                   {board.branding.tagline}
                 </span>
               )}
@@ -127,7 +117,7 @@ export function BoardHero({
                 {categories.map((category) => (
                   <span
                     key={category}
-                    className="inline-flex rounded-md border border-border bg-card/75 px-2.5 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur"
+                    className="inline-flex rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground"
                   >
                     {category}
                   </span>
@@ -147,7 +137,7 @@ export function BoardHero({
             )}
           </div>
 
-          <div className="rounded-2xl border bg-card/78 p-4 shadow-sm backdrop-blur">
+          <div className="rounded-xl border bg-card p-4">
             <p className="text-sm font-semibold text-foreground">Have something to add?</p>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
               Vote first, then add a fresh request when the board does not already cover it.

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase, createServerSupabase } from '@/lib/supabase-server'
 import { isBoardPubliclyAccessible } from '@/lib/public-board'
+import { notifyPublicBoardSubscribersOfStatusChange } from '@/lib/notifications'
 
 const ALLOWED_STATUSES = new Set(['new', 'reviewed', 'planned', 'in_progress', 'closed'])
 
@@ -51,7 +52,7 @@ export async function POST(
 
   const { data: feedback } = await admin
     .from('feedback')
-    .select('id')
+    .select('id, message, status, is_public')
     .eq('id', feedback_id)
     .eq('project_id', board.project_id)
     .single()
@@ -84,6 +85,21 @@ export async function POST(
 
   if (error) {
     return NextResponse.json({ error: 'Failed to update status' }, { status: 500 })
+  }
+
+  if (feedback.is_public && feedback.status !== value) {
+    void notifyPublicBoardSubscribersOfStatusChange({
+      board: {
+        id: board.id,
+        slug: board.slug,
+        title: board.title,
+        display_name: board.display_name,
+      },
+      feedback,
+      oldStatus: feedback.status,
+      newStatus: value,
+      actorUserId: user.id,
+    })
   }
 
   return NextResponse.json({ success: true })

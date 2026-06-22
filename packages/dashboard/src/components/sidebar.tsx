@@ -26,6 +26,7 @@ import {
   Loader2,
   Webhook,
   Code2,
+  CircleHelp,
 } from 'lucide-react'
 import type { Project } from '@/lib/types'
 import { createClient } from '@/lib/supabase-browser'
@@ -463,6 +464,28 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
 
       {/* Footer — always visible at bottom */}
       <div className="shrink-0 space-y-1 border-t p-2.5">
+        <Link
+          href="/dashboard?tour=1"
+          prefetch={false}
+          title={collapsed ? 'Take product tour' : undefined}
+          aria-label={collapsed ? 'Take product tour' : undefined}
+          onClick={() => beginNavigation('/dashboard?tour=1')}
+          onMouseEnter={() => router.prefetch('/dashboard?tour=1')}
+          onFocus={() => router.prefetch('/dashboard?tour=1')}
+          className={cn(
+            'group flex items-center gap-2.5 rounded-lg py-2 text-[12px] font-medium text-muted-foreground',
+            'transition-[background-color,color,transform] duration-150 hover:bg-accent hover:text-foreground active:scale-[0.98]',
+            collapsed ? 'justify-center px-0' : 'px-2.5',
+          )}
+        >
+          {pendingHref === '/dashboard?tour=1' ? (
+            <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
+          ) : (
+            <CircleHelp className="h-3.5 w-3.5 shrink-0 transition-transform duration-150 group-hover:scale-[1.08]" />
+          )}
+          {!collapsed && <span className="truncate">Take product tour</span>}
+        </Link>
+
         {/* Theme toggle */}
         <ThemeToggle collapsed={collapsed} />
 

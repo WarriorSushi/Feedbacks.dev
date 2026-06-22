@@ -106,15 +106,7 @@ function sanitizeColor(value: unknown): string | undefined {
 }
 
 function sanitizeCategories(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) return undefined
-
-  const categories = value
-    .filter((entry): entry is string => typeof entry === 'string')
-    .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean)
-    .slice(0, 8)
-
-  return categories.length > 0 ? [...new Set(categories)] : undefined
+  return normalizeBoardCategories(value)
 }
 
 function sanitizeVisibility(value: unknown): BoardVisibility | undefined {
@@ -321,3 +313,4 @@ export function isBoardListedInDirectory(
   const branding = parseBoardBranding(input)
   return (branding.visibility || 'public') === 'public' && branding.directoryOptIn !== false
 }
+import { normalizeBoardCategories } from './board-categories'

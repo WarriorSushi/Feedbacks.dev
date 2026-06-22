@@ -1,6 +1,6 @@
-import Image from 'next/image'
 import { Compass } from 'lucide-react'
 import { loadBoardDirectoryEntries, type BoardSortMode } from '@/lib/board-discovery'
+import { buildDirectoryCategoryOptions } from '@/lib/board-categories'
 import { BoardDirectoryClient } from './board-directory-client'
 import { cn } from '@/lib/utils'
 
@@ -16,7 +16,7 @@ export async function BoardDirectorySurface({
   variant = 'public',
 }: BoardDirectorySurfaceProps) {
   const entries = await loadBoardDirectoryEntries()
-  const categories = [...new Set(entries.flatMap((entry) => entry.branding.categories || []))].sort()
+  const categories = buildDirectoryCategoryOptions(entries.map((entry) => entry.branding.categories || []))
   const totalRequests = entries.reduce((sum, entry) => sum + entry.feedbackCount, 0)
   const totalReplies = entries.reduce((sum, entry) => sum + entry.publicReplyCount, 0)
   const dashboard = variant === 'dashboard'
@@ -29,15 +29,6 @@ export async function BoardDirectorySurface({
           dashboard ? 'rounded-xl' : 'rounded-2xl',
         )}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,hsl(var(--primary)/0.16),transparent_32%)]" />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.045] dark:opacity-[0.07]"
-          style={{
-            backgroundImage:
-              'linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)',
-            backgroundSize: '36px 36px',
-          }}
-        />
         <div className={cn(
           'relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end',
           dashboard ? 'px-5 py-7' : 'px-6 py-10',
@@ -80,24 +71,12 @@ export async function BoardDirectorySurface({
         </div>
       </section>
 
-      {dashboard && (
-        <div className="flex items-center justify-center">
-          <Image
-            src="/new_logo_feedbacks.dev.svg"
-            alt=""
-            width={100}
-            height={100}
-            aria-hidden="true"
-            className="h-16 w-16 opacity-75 sm:h-[88px] sm:w-[88px] md:h-[100px] md:w-[100px]"
-          />
-        </div>
-      )}
-
       <BoardDirectoryClient
         entries={entries}
         categories={categories}
         initialSort={(sort as BoardSortMode) || 'trending'}
         initialCategory={category?.trim().toLowerCase() || ''}
+        variant={variant}
       />
     </div>
   )

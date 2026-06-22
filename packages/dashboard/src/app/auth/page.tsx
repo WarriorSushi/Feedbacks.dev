@@ -344,11 +344,11 @@ function AuthPageInner() {
           {/* Footer */}
           <p className="mt-8 text-center text-xs text-muted-foreground">
             By continuing, you agree to our{' '}
-            <Link href="/terms" className="underline underline-offset-2 transition-colors hover:text-foreground">
+            <Link href="/terms" prefetch={false} className="underline underline-offset-2 transition-colors hover:text-foreground">
               Terms
             </Link>{' '}
             and{' '}
-            <Link href="/privacy" className="underline underline-offset-2 transition-colors hover:text-foreground">
+            <Link href="/privacy" prefetch={false} className="underline underline-offset-2 transition-colors hover:text-foreground">
               Privacy Policy
             </Link>
           </p>

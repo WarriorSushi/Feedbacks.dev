@@ -2,8 +2,9 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { ArrowUpRight, Search } from 'lucide-react'
+import { ArrowUpRight, FolderOpen, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { normalizeBoardCategory, type BoardCategoryOption } from '@/lib/board-categories'
 import type { BoardBranding } from '@/lib/public-board'
 
 type BoardSortMode = 'trending' | 'active' | 'responsive' | 'shipping' | 'new'
@@ -49,9 +50,10 @@ const SORT_OPTIONS: Array<{ value: BoardSortMode; label: string; description: st
 
 interface BoardDirectoryClientProps {
   entries: BoardDirectoryEntry[]
-  categories: string[]
+  categories: BoardCategoryOption[]
   initialSort: BoardSortMode
   initialCategory: string
+  variant?: 'public' | 'dashboard'
 }
 
 function formatActivity(date: string | null, fallback: string) {
@@ -79,9 +81,10 @@ export function BoardDirectoryClient({
   categories,
   initialSort,
   initialCategory,
+  variant = 'public',
 }: BoardDirectoryClientProps) {
   const [sort, setSort] = React.useState<BoardSortMode>(initialSort)
-  const [category, setCategory] = React.useState(initialCategory)
+  const [category, setCategory] = React.useState(normalizeBoardCategory(initialCategory) || '')
   const [search, setSearch] = React.useState('')
   const [ready, setReady] = React.useState(false)
 
@@ -107,6 +110,8 @@ export function BoardDirectoryClient({
     }
     return sortEntries(filtered, sort)
   }, [entries, category, search, sort])
+  const hasNoBoards = entries.length === 0
+  const dashboard = variant === 'dashboard'
 
   return (
     <div data-board-directory-ready={ready ? 'true' : 'false'}>
@@ -167,16 +172,17 @@ export function BoardDirectoryClient({
               </button>
               {categories.map((entry) => (
                 <button
-                  key={entry}
-                  onClick={() => setCategory(category === entry ? '' : entry)}
+                  key={entry.value}
+                  onClick={() => setCategory(category === entry.value ? '' : entry.value)}
                   className={cn(
                     'rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
-                    category === entry
+                    category === entry.value
                       ? 'border-foreground bg-foreground text-background'
                       : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground',
                   )}
                 >
-                  {entry}
+                  {entry.label}
+                  <span className="ml-1 text-[10px] opacity-70">{entry.count}</span>
                 </button>
               ))}
             </div>
@@ -192,12 +198,12 @@ export function BoardDirectoryClient({
         </div>
       </section>
 
-      <section className="mt-6 grid gap-4 xl:grid-cols-2">
+      <section className="mt-6 grid min-w-0 gap-4 xl:grid-cols-2">
         {sorted.map((entry) => (
           <Link
             key={entry.slug}
             href={`/p/${entry.slug}`}
-            className="group rounded-2xl border border-border/80 bg-card p-5 shadow-sm transition-colors hover:border-foreground/20 hover:shadow-md"
+            className="group min-w-0 rounded-2xl border border-border/80 bg-card p-5 shadow-sm transition-colors hover:border-foreground/20 hover:shadow-md"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex items-start gap-3">
@@ -221,7 +227,7 @@ export function BoardDirectoryClient({
               </div>
             </div>
 
-            <p className="mt-4 text-sm leading-7 text-foreground/72">
+            <p className="mt-4 break-words text-sm leading-7 text-foreground/72">
               {entry.branding.tagline || entry.description}
             </p>
 
@@ -230,7 +236,7 @@ export function BoardDirectoryClient({
                 {entry.branding.categories.slice(0, 4).map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                    className="max-w-full break-words rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"
                   >
                     {tag}
                   </span>
@@ -261,12 +267,31 @@ export function BoardDirectoryClient({
 
       {sorted.length === 0 && (
         <div className="mt-6 rounded-2xl border border-dashed border-border/80 bg-card px-6 py-12 text-center shadow-sm">
-          <h2 className="text-xl font-semibold text-foreground">No boards match that filter yet</h2>
-          <p className="mt-3 text-sm leading-7 text-foreground/68">
-            {search.trim()
-              ? `No results for "${search}". Try a different search.`
-              : 'Try a different category or switch back to all boards.'}
+          <FolderOpen className="mx-auto h-9 w-9 text-muted-foreground/45" />
+          <h2 className="mt-4 text-xl font-semibold text-foreground">
+            {hasNoBoards
+              ? dashboard
+                ? 'No public boards are published yet'
+                : 'No public boards yet'
+              : 'No boards match that filter yet'}
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-foreground/68">
+            {hasNoBoards
+              ? dashboard
+                ? 'Open a project, configure its board, and publish only when you are ready to collect public requests, votes, and replies.'
+                : 'Boards will appear here when teams publish public feedback spaces.'
+              : search.trim()
+                ? `No results for "${search}". Try a different search.`
+                : 'Try a different category or switch back to all boards.'}
           </p>
+          {hasNoBoards && dashboard && (
+            <Link
+              href="/projects"
+              className="mt-5 inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Open projects
+            </Link>
+          )}
         </div>
       )}
     </div>

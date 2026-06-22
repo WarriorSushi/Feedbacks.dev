@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
+import { ArrowRight, Check, Loader2 } from 'lucide-react'
 
 export type ProjectSection = 'setup' | 'integrations' | 'board' | 'api' | 'settings'
 export type SetupStep = 'customize' | 'install' | 'verify' | 'inbox'
@@ -91,64 +91,124 @@ export function SetupProgress({
     {
       id: 'customize',
       label: 'Customize',
-      body: 'Pick how the form looks.',
+      body: 'Confirm the form style.',
       href: `/projects/${projectId}?tab=customize`,
     },
     {
       id: 'install',
       label: 'Install',
-      body: 'Copy code for your site.',
+      body: 'Copy the matching code.',
       href: `/projects/${projectId}?tab=install`,
     },
     {
       id: 'verify',
       label: 'Verify',
-      body: 'Send one test.',
+      body: 'Send one test message.',
       href: `/projects/${projectId}/verify`,
     },
     {
       id: 'inbox',
       label: 'Inbox',
-      body: 'Check it arrived.',
+      body: 'Confirm it arrived.',
       href: `/feedback?projectId=${projectId}`,
     },
   ]
+  const activeIndex = Math.max(steps.findIndex((step) => step.id === activeStep), 0)
+  const nextActionByStep: Record<SetupStep, { title: string; body: string; href: string; label: string }> = {
+    customize: {
+      title: 'Next: confirm the form style',
+      body: 'Use the defaults or adjust placement and labels. Then copy the generated install code.',
+      href: `/projects/${projectId}?tab=install`,
+      label: 'Continue to install',
+    },
+    install: {
+      title: 'Next: copy code and run verification',
+      body: 'Paste the selected snippet into your app shell, then use the hosted page to send one known-good test.',
+      href: `/projects/${projectId}/verify`,
+      label: 'Open verification',
+    },
+    verify: {
+      title: 'Next: confirm the test reached the inbox',
+      body: 'After submitting one test message, check the project inbox for URL and browser context.',
+      href: `/feedback?projectId=${projectId}`,
+      label: 'Open project inbox',
+    },
+    inbox: {
+      title: 'Next: triage the first item',
+      body: 'Open the test item, mark the workflow status intentionally, and keep read state separate.',
+      href: `/feedback?projectId=${projectId}`,
+      label: 'Open project inbox',
+    },
+  }
+  const nextAction = nextActionByStep[activeStep]
 
   return (
     <nav
       aria-label="Setup steps"
-      className="rounded-xl border-2 border-foreground/15 bg-card p-3 shadow-[inset_0_1px_0_hsl(var(--background)/0.7)] dark:border-primary/25"
+      className="rounded-xl border border-primary/25 bg-card shadow-sm"
     >
-      <ol className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+            Setup progress
+          </p>
+          <h2 className="mt-2 text-base font-semibold text-foreground">{nextAction.title}</h2>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">{nextAction.body}</p>
+        </div>
+        <Link
+          href={nextAction.href}
+          prefetch={false}
+          onClick={() => beginNavigation(nextAction.href)}
+          onMouseEnter={() => prefetch(nextAction.href)}
+          onFocus={() => prefetch(nextAction.href)}
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-[background-color,transform] hover:bg-primary/90 active:scale-[0.98]"
+        >
+          {pendingHref === nextAction.href ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ArrowRight className="h-4 w-4" />
+          )}
+          {nextAction.label}
+        </Link>
+      </div>
+
+      <ol className="grid border-t bg-muted/20 md:grid-cols-4">
         {steps.map((step, index) => {
           const current = activeStep === step.id
+          const completed = index < activeIndex
           return (
-            <li key={step.id}>
+            <li key={step.id} className="border-t first:border-t-0 md:border-l md:border-t-0 md:first:border-l-0">
               <Link
                 href={step.href}
                 prefetch={false}
                 onClick={() => beginNavigation(step.href)}
                 onMouseEnter={() => prefetch(step.href)}
                 onFocus={() => prefetch(step.href)}
-                className={`flex min-h-[4.75rem] gap-3 rounded-xl border-2 px-4 py-3 text-left transition-[background-color,color,box-shadow,transform,filter] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-x-1 active:translate-y-1 active:shadow-none ${
-                  current
-                    ? 'translate-x-1 translate-y-1 border-primary bg-primary/20 text-foreground shadow-none dark:bg-primary/25'
-                    : 'border-foreground/25 bg-background text-foreground shadow-[5px_5px_0_hsl(var(--foreground)/0.22)] hover:-translate-y-0.5 hover:bg-primary/[0.07] hover:shadow-[6px_6px_0_hsl(var(--foreground)/0.28)] dark:border-primary/35 dark:bg-background/80 dark:shadow-[5px_5px_0_hsl(var(--primary)/0.28)] dark:hover:bg-primary/[0.12]'
+                className={`flex min-h-16 gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/45 ${
+                  current ? 'bg-primary/[0.08]' : ''
                 }`}
                 aria-current={current ? 'step' : undefined}
               >
                 <span
-                  className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
-                    current
+                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${
+                    completed
                       ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-foreground/25 bg-muted text-foreground dark:border-primary/35 dark:bg-primary/15'
+                      : current
+                        ? 'border-primary text-primary'
+                        : 'border-border bg-background text-muted-foreground'
                   }`}
                 >
-                  {pendingHref === step.href ? <Loader2 className="h-3 w-3 animate-spin" /> : index + 1}
+                  {pendingHref === step.href ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : completed ? (
+                    <Check className="h-3 w-3" />
+                  ) : (
+                    index + 1
+                  )}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-semibold">{step.label}</span>
-                  <span className="mt-0.5 block text-xs leading-4">{step.body}</span>
+                  <span className="block text-sm font-medium text-foreground">{step.label}</span>
+                  <span className="mt-0.5 block text-xs leading-4 text-muted-foreground">{step.body}</span>
                 </span>
               </Link>
             </li>

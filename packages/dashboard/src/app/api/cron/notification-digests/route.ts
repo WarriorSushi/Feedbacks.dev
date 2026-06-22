@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
+import { finishCronRun, startCronRun } from '@/lib/cron-runs'
 import { sendDailyFeedbackDigest } from '@/lib/notifications'
 
 function isAuthorized(request: NextRequest) {
@@ -25,8 +26,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  let admin: Awaited<ReturnType<typeof createAdminSupabase>> | null = null
+  let cronRunId: string | null = null
+
   try {
-    const admin = await createAdminSupabase()
+    admin = await createAdminSupabase()
+    cronRunId = await startCronRun(admin, 'notification_digests')
     const { digestDate, windowStart, windowEnd } = getDigestWindow()
     const { data: settingsRows } = await admin
       .from('user_settings')
@@ -66,8 +71,21 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    await finishCronRun(admin, cronRunId, {
+      status: 'succeeded',
+      processedCount: processed,
+      sentCount: sent,
+      metadata: { digestDate, windowStart, windowEnd },
+    })
+
     return NextResponse.json({ processed, sent, digestDate })
-  } catch {
+  } catch (error) {
+    if (admin) {
+      await finishCronRun(admin, cronRunId, {
+        status: 'failed',
+        errorMessage: error instanceof Error ? error.message : 'Internal server error',
+      })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

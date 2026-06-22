@@ -148,6 +148,29 @@ export function ApiDocs({
 
       <Card>
         <CardHeader className="pb-3">
+          <CardTitle className="text-base">Operational limits and trust boundaries</CardTitle>
+          <CardDescription>
+            Keep API and MCP traffic in trusted runtime contexts. The browser widget uses its generated browser-safe key instead.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="divide-y rounded-b-lg border-t p-0">
+          {[
+            ['Project scope', 'Each API key can access only its attached project.'],
+            ['Plan limits', 'Free access follows the shared Free plan quotas and history window; Pro removes the short history limit.'],
+            ['Rate limits', 'Public submission paths are rate limited and return friendly errors instead of exposing internals.'],
+            ['Webhook payloads', 'Generic webhooks include a version field. Current payload version: 2026-06-22.'],
+            ['Linear', 'Use a signed generic webhook recipe when routing feedback into Linear.'],
+          ].map(([label, body]) => (
+            <div key={label} className="grid gap-1 px-4 py-3 md:grid-cols-[160px_minmax(0,1fr)]">
+              <p className="text-sm font-medium text-foreground">{label}</p>
+              <p className="text-sm leading-6 text-muted-foreground">{body}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base">Connection details</CardTitle>
           <CardDescription>
             Use the project key as the `X-API-Key` header for REST and MCP. Generate a fresh key if the real value is hidden.

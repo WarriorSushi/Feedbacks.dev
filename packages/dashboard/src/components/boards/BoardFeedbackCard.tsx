@@ -1,6 +1,6 @@
 'use client'
 
-import { MessageSquareQuote, ShieldAlert } from 'lucide-react'
+import { ArrowUp, MessageSquareQuote, ShieldAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   typeConfig,
@@ -28,19 +28,18 @@ function UpvoteButton({
     <button
       onClick={onClick}
       disabled={loading}
+      aria-pressed={voted}
       className={cn(
-        'flex w-14 shrink-0 flex-col items-center justify-center rounded-xl border border-border/80 bg-background px-2 py-3 text-sm shadow-sm transition-colors sm:w-[58px]',
+        'flex w-14 shrink-0 flex-col items-center justify-center rounded-lg border border-border/80 bg-background px-2 py-2.5 text-sm transition-colors sm:w-[58px]',
         voted
-          ? 'border-primary/25 bg-primary/10 text-primary'
+          ? 'border-primary/35 bg-primary/10 text-primary'
           : 'text-foreground/72 hover:border-primary/25 hover:text-foreground',
         loading && 'cursor-not-allowed opacity-60',
       )}
     >
-      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-        Votes
-      </span>
-      <span className="mt-2 text-xl leading-none">&uarr;</span>
+      <ArrowUp className="h-4 w-4" />
       <span className="mt-1 text-base font-semibold tabular-nums text-foreground">{count}</span>
+      <span className="text-[10px] font-medium text-muted-foreground">votes</span>
     </button>
   )
 }
@@ -116,11 +115,11 @@ export function BoardFeedbackCard({
             )}
           </button>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
             {type && (
               <span
                 className={cn(
-                  'inline-flex rounded-md border px-2.5 py-1 text-xs font-medium',
+                  'inline-flex rounded-md border px-2 py-0.5 font-medium',
                   type.tone,
                 )}
               >
@@ -129,19 +128,19 @@ export function BoardFeedbackCard({
             )}
             <span
               className={cn(
-                'inline-flex rounded-md border px-2.5 py-1 text-xs font-medium',
+                'inline-flex rounded-md border px-2 py-0.5 font-medium',
                 status.tone,
               )}
             >
               {status.label}
             </span>
             {replyCount > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-1 font-medium text-muted-foreground">
                 <MessageSquareQuote className="h-3.5 w-3.5" />
                 {replyCount} {replyCount === 1 ? 'team reply' : 'team replies'}
               </span>
             )}
-            <span className="text-xs text-muted-foreground">{relativeTime(item.created_at)}</span>
+            <span>{relativeTime(item.created_at)}</span>
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">

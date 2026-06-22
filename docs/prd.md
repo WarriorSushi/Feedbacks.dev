@@ -33,7 +33,7 @@ When a message is important, I want to move it into my existing workflow so feed
 - I can trust the install code to work.
 - I can collect feedback that includes enough context to be actionable.
 - I can quickly distinguish bugs, ideas, praise, and noise.
-- I can route important items to Slack, Linear, GitHub, or email workflows.
+- I can route important items to Slack, GitHub, generic webhooks, or email workflows. Linear can be supported through a generic webhook recipe until it is promoted as a first-class integration.
 
 ## 5. Launch scope
 

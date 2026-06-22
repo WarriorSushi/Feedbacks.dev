@@ -3,6 +3,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { CURATED_BOARD_CATEGORIES, getBoardCategoryLabel, normalizeBoardCategories } from '@/lib/board-categories'
+import { cn } from '@/lib/utils'
 import type { BoardBranding, BoardVisibility } from '@/lib/public-board'
 
 interface BoardVisibilitySettings {
@@ -22,6 +24,14 @@ export function BoardVisibilitySection({
   onBrandingChange,
 }: BoardVisibilitySectionProps) {
   const visibility = settings.branding.visibility || 'public'
+  const categories = settings.branding.categories || []
+
+  const toggleCategory = (category: string) => {
+    const nextCategories = categories.includes(category)
+      ? categories.filter((entry) => entry !== category)
+      : [...categories, category]
+    onBrandingChange({ categories: normalizeBoardCategories(nextCategories) || [] })
+  }
 
   return (
     <Card>
@@ -67,17 +77,41 @@ export function BoardVisibilitySection({
             <Label htmlFor="board-categories">Categories</Label>
             <Input
               id="board-categories"
-              value={settings.branding.categories?.join(', ') || ''}
+              value={categories.join(', ')}
               onChange={(e) =>
                 onBrandingChange({
-                  categories: e.target.value
-                    .split(',')
-                    .map((entry) => entry.trim().toLowerCase())
-                    .filter(Boolean),
+                  categories: normalizeBoardCategories(e.target.value.split(',')) || [],
                 })
               }
               placeholder="saas, developer-tools, analytics"
             />
+            <p className="text-xs text-muted-foreground">
+              Use two to four stable categories so sparse directories stay scannable.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Suggested categories</Label>
+          <div className="flex flex-wrap gap-2">
+            {CURATED_BOARD_CATEGORIES.map((category) => {
+              const selected = categories.includes(category)
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => toggleCategory(category)}
+                  className={cn(
+                    'rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
+                    selected
+                      ? 'border-foreground bg-foreground text-background'
+                      : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground',
+                  )}
+                >
+                  {getBoardCategoryLabel(category)}
+                </button>
+              )
+            })}
           </div>
         </div>
 

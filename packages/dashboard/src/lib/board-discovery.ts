@@ -116,7 +116,7 @@ export function recommendBoards(
     .map((entry) => ({
       entry,
       score:
-        entry.branding.categories?.filter((category) => categorySet.has(category)).length || 0 +
+        (entry.branding.categories?.filter((category) => categorySet.has(category)).length || 0) +
         entry.scores.active / 100 +
         entry.trustScore / 100,
     }))

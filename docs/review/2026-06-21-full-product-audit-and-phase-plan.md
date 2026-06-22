@@ -12,6 +12,8 @@ The biggest remaining product risk is not missing foundations. It is promise dis
 
 The next implementation work should avoid a large tutorial or another all-in-one setup screen. The best path is a staged hardening pass: make first-run activation impossible to miss, make inbox triage feel crisp, make public boards credible and closed-loop, then deepen integrations and API/MCP around the workflows that already exist.
 
+Follow-up on 2026-06-23: Phase 1 through Phase 5 launch-hardening slices were implemented and documented in `docs/product-status.md`. Remaining work is now limited to real-traffic monitoring, Dodo production go-live verification, and post-traffic index review.
+
 ## What Is Delivered
 
 | Area | Delivery status | Notes |
@@ -39,9 +41,9 @@ The next implementation work should avoid a large tutorial or another all-in-one
 
 ### P1: PRD Mentions Linear, But Product Does Not Ship Linear
 
-The PRD says users can route important items to Slack, Linear, GitHub, or email workflows. The app currently exposes Slack, Discord, GitHub Issues, generic webhooks, and email account notifications. Linear is not implemented.
+At audit time, the PRD said users could route important items to Slack, Linear, GitHub, or email workflows while the app exposed Slack, Discord, GitHub Issues, generic webhooks, and email account notifications.
 
-Decision needed: either build Linear as a first-class Pro integration or remove Linear from launch-facing promises until a generic webhook recipe is enough.
+Resolved on 2026-06-23: Linear is deferred as a first-class integration. Launch copy and `docs/prd.md` now position generic webhooks as the supported workaround, with `docs/integration-recipes.md` documenting a Linear recipe.
 
 ### P1: Public Board Follow/Watch State Is Not A Closed Loop
 
@@ -49,21 +51,29 @@ The schema and routes support `board_follows` and `feedback_watches`, and the pu
 
 This makes "follow product updates" partially hollow. Either ship watcher emails/in-app notifications or downgrade the copy to "save watched requests" until notifications exist.
 
+Resolved on 2026-06-23: watcher/follower notification fanout now sends status and team-reply updates to board followers and item watchers, with unit coverage in `packages/dashboard/tests/unit/notifications.test.ts`.
+
 ### P1: Migration And Production Data Discipline Still Needs A Repeatable Runner
 
 Recent live Supabase work succeeded, but the project still relies on manual SQL files and documented reconciliation. That is manageable for a solo launch, but risky once billing, read state, notification digests, watches, and public boards all depend on schema accuracy.
 
 Next step should be a documented migration ledger workflow with production/staging checks, generated database types, and a release checklist that proves expected columns, indexes, triggers, policies, and buckets.
 
+Resolved on 2026-06-23 for launch: migrations `020` through `024` are applied, generated database types are committed, `pnpm supabase:check` validates the live schema/buckets, and the ops checklist records the manual migration workflow.
+
 ### P2: "Smart Dashboard" Overpromises Pattern Detection
 
 The dashboard has useful counts, recent feedback, type distribution, unread state, agent counts, and capability links. It does not yet identify recurring issues, summarize trends, or cluster signal. Marketing and README language should say "triage dashboard" unless a real signal intelligence slice is built.
+
+Follow-up on 2026-06-23: launch copy now uses triage/workflow language for the shipped dashboard. Recurring issue intelligence remains unpromoted.
 
 ### P2: Assignment And Team Collaboration Are Not A Complete Surface
 
 README and older docs imply assign/team collaboration. Current product has owner account, internal notes, status, tags, integrations, and public replies, but not team invitations, roles, assignees, mentions, or ownership queues.
 
 This is fine for launch if positioned as developer-first/small-team-owner workflow. Avoid selling it as a multi-seat product until team roles exist.
+
+Follow-up on 2026-06-23: `docs/product-status.md` keeps multi-seat team management, assignment queues, mentions, and role-based collaboration explicitly deferred.
 
 ### P2: Public Boards Need More Product Credibility
 
@@ -78,6 +88,8 @@ The public board mechanics are strong, but the experience can be sharpened:
 ### P2: First-Run Onboarding Exists, But Is Not Persisted Or Context-Aware Enough
 
 The dashboard now has first-run copy, a capability section, and `/dashboard?tour=1`. This is a safe first slice. It should become a light, persistent product tour with completion state in `user_settings`, a manual "Take product tour" entry, and page-level empty states.
+
+Resolved on 2026-06-23: first-run activation now has persisted tour state, a manual tour entry, setup progress, and page-level empty states without turning install into a wizard.
 
 Do not turn this into a wizard. The install path should stay project-first: customize, install, verify one message.
 
@@ -130,7 +142,7 @@ Existing coverage is better than typical for this stage. The highest-value addit
 
 - E2E: first-run user creates project, customizes, installs/verifies, opens inbox, marks read, and changes status intentionally.
 - E2E: public board visitor submits, sees duplicate suggestion, votes, signs in, watches a request, owner posts team reply.
-- Unit: watcher/follower notification fanout once implemented.
+- Unit: watcher/follower notification fanout for status and team-reply updates.
 - Unit: notification email escaping/sanitization.
 - Integration: webhook digest behavior if endpoint `delivery: digest` is truly supported.
 - CI/staging: Supabase schema audit command that fails when required columns, triggers, policies, or buckets are missing.
@@ -259,4 +271,3 @@ Acceptance:
 4. Add email HTML escaping tests.
 5. Add Supabase schema check/generation workflow.
 6. Run full verification: `pnpm type-check`, `pnpm lint`, `pnpm test:unit`, and targeted E2E for install, inbox, boards, and webhooks.
-

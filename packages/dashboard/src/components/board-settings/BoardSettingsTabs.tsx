@@ -44,7 +44,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'identity', label: 'Identity' },
   { id: 'content', label: 'Content' },
   { id: 'visibility', label: 'Visibility' },
-  { id: 'advanced', label: 'Advanced' },
+  { id: 'advanced', label: 'Moderation' },
 ]
 
 function slugify(text: string): string {
@@ -437,6 +437,26 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
               </div>
             </div>
           </div>
+
+          <div className="rounded-xl border bg-background px-4 py-4">
+            <p className="text-sm font-semibold text-foreground">Public promise</p>
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              {[
+                ['Review cadence', 'Check new public requests on a predictable rhythm before asking customers to follow the board.'],
+                ['Status discipline', 'Use public replies for context and only mark work in progress or shipped when the team is ready to stand behind it.'],
+                ['Privacy expectations', 'Keep private customer details out of public replies and move sensitive follow-up into a private channel.'],
+              ].map(([label, description]) => (
+                <div key={label} className="rounded-lg border bg-muted/10 px-3 py-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-foreground/72">
+                    {description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -454,6 +474,11 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
             )}
           >
             {tab.label}
+            {tab.id === 'advanced' && stats.openReportCount > 0 && (
+              <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-[10px]">
+                {stats.openReportCount}
+              </Badge>
+            )}
           </button>
         ))}
       </div>

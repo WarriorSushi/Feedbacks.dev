@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase, createServerSupabase } from '@/lib/supabase-server'
 import { getBillingSummaryForUser } from '@/lib/billing'
+import { cleanupFeedbackStorageForUserProjects } from '@/lib/feedback-storage-cleanup'
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
 
     const admin = await createAdminSupabase()
 
+    await cleanupFeedbackStorageForUserProjects(admin, user.id)
     await admin.from('billing_accounts').delete().eq('user_id', user.id)
     await admin.from('user_settings').delete().eq('user_id', user.id)
     await admin.from('projects').delete().eq('owner_user_id', user.id)

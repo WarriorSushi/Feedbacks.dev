@@ -92,7 +92,6 @@ Read-only checks on 6th June 2026 found:
 - Security advisor warnings for mutable function search paths on older board/vote trigger functions.
 - Performance advisor warnings for unindexed Phase 6 foreign keys.
 - Performance advisor warnings where RLS policies used direct `auth.uid()` instead of `(select auth.uid())`.
-- Auth leaked password protection is disabled in Supabase Auth settings.
 
 Actions in this pass:
 
@@ -102,13 +101,11 @@ Actions in this pass:
 - Updated rate limiting to prefer the atomic RPC.
 - Updated deployment docs with migration `013`.
 - Applied live Supabase migrations `013`, `014`, and `015`.
-- Re-ran Supabase security advisors; the remaining security warning is leaked password protection disabled in Auth settings.
 - Verified `pnpm type-check`, `pnpm lint`, `pnpm test:unit`, and `pnpm test:e2e:required` pass after the repo changes and live migrations.
 
 Still manual:
 
-- Enable leaked password protection in Supabase Auth settings.
-- Run the fresh `001` through `015` chain on a disposable internal clean database when the environment supports it.
+- Run the fresh `001` through the current migration chain on a disposable internal clean database when the environment supports it.
 - Keep unused-index performance advisor findings under observation after real traffic.
 
 ## Next Step 4 Work

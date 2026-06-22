@@ -27,9 +27,14 @@ Verified on 14 June 2026:
 - No connector secret values were printed, committed, or hard-coded.
 - Test credentials were read from local `.env.local` only and are not intended for production use.
 
-Still pending:
+Verified on 23 June 2026 during authenticated production smoke:
 
-- Dashboard delivery-history verification and replay for Slack, Discord, generic webhooks, and GitHub.
+- Dashboard delivery-history verification and replay for Slack, Discord, generic webhooks, and GitHub against hosted production routes.
+- Generic webhook digest delivery through the scheduled webhook jobs cron route.
+- Server-side Pro entitlement behavior for connector caps using the disposable smoke account.
+
+Still pending before production billing go-live:
+
 - Dodo sandbox or staging checkout.
 - Real Dodo webhook signature verification.
 - Free/Pro entitlement verification driven by real Dodo webhook state.

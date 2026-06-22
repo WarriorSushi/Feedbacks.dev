@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase, createServerSupabase } from '@/lib/supabase-server'
 import { isBoardPubliclyAccessible } from '@/lib/public-board'
+import { notifyPublicBoardSubscribersOfTeamReply } from '@/lib/notifications'
 
 export async function POST(
   request: NextRequest,
@@ -32,7 +33,7 @@ export async function POST(
   // Verify user owns the project
   const { data: project } = await admin
     .from('projects')
-    .select('id')
+    .select('id, owner_user_id')
     .eq('id', board.project_id)
     .eq('owner_user_id', user.id)
     .single()
@@ -55,7 +56,7 @@ export async function POST(
   // Verify feedback belongs to this project
   const { data: feedback } = await admin
     .from('feedback')
-    .select('id')
+    .select('id, message, status')
     .eq('id', feedback_id)
     .eq('project_id', board.project_id)
     .single()
@@ -80,6 +81,18 @@ export async function POST(
     console.error('Comment insert error:', insertErr)
     return NextResponse.json({ error: 'Failed to save comment' }, { status: 500 })
   }
+
+  void notifyPublicBoardSubscribersOfTeamReply({
+    board: {
+      id: board.id,
+      slug: board.slug,
+      title: board.title,
+      display_name: board.display_name,
+    },
+    feedback,
+    replyContent: content.trim(),
+    actorUserId: user.id,
+  })
 
   return NextResponse.json({ success: true, comment: note }, { status: 201 })
 }

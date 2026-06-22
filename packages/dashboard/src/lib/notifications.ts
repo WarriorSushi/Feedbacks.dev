@@ -3,6 +3,13 @@ import { createAdminSupabase } from '@/lib/supabase-server'
 export { escapeEmailHtml } from './notification-html'
 import { escapeEmailHtml } from './notification-html'
 import type { Feedback, NotificationSettings, Project } from '@/lib/types'
+import {
+  buildPublicBoardReplyEmail,
+  buildPublicBoardStatusEmail,
+  mergePublicBoardSubscriberIds,
+  type PublicBoardNotificationBoard,
+  type PublicBoardNotificationFeedback,
+} from './public-board-notifications'
 
 interface EmailPayload {
   to: string
@@ -153,6 +160,110 @@ export async function notifyUserOfBillingFailure(input: {
     })
   } catch (error) {
     console.error('Failed to send billing failure notification', error)
+  }
+}
+
+async function getPublicBoardRecipientEmails(input: {
+  boardId: string
+  feedbackId: string
+  excludeUserId?: string | null
+}) {
+  const admin = await createAdminSupabase()
+  const [{ data: follows }, { data: watches }] = await Promise.all([
+    admin.from('board_follows').select('user_id').eq('board_id', input.boardId),
+    admin.from('feedback_watches').select('user_id').eq('feedback_id', input.feedbackId),
+  ])
+
+  const userIds = mergePublicBoardSubscriberIds({
+    followUserIds: ((follows || []) as Array<{ user_id: string }>).map((row) => row.user_id),
+    watchUserIds: ((watches || []) as Array<{ user_id: string }>).map((row) => row.user_id),
+    excludeUserId: input.excludeUserId,
+  })
+
+  const emailResults = await Promise.all(
+    userIds.map(async (userId) => {
+      const { data: settingsRow } = await admin
+        .from('user_settings')
+        .select('notification_settings')
+        .eq('user_id', userId)
+        .maybeSingle()
+      const settings = (settingsRow?.notification_settings || {}) as NotificationSettings
+      if (settings.email === false) return null
+
+      const { data } = await admin.auth.admin.getUserById(userId)
+      return settings.emailAddress || data.user?.email || null
+    }),
+  )
+
+  return Array.from(new Set(emailResults.filter((email): email is string => Boolean(email))))
+}
+
+export async function notifyPublicBoardSubscribersOfStatusChange(input: {
+  board: PublicBoardNotificationBoard
+  feedback: PublicBoardNotificationFeedback
+  oldStatus?: string | null
+  newStatus: string
+  actorUserId?: string | null
+}) {
+  if (!isEmailEnabled()) return { sent: 0 }
+  if (input.oldStatus === input.newStatus) return { sent: 0 }
+
+  try {
+    const recipients = await getPublicBoardRecipientEmails({
+      boardId: input.board.id,
+      feedbackId: input.feedback.id,
+      excludeUserId: input.actorUserId,
+    })
+    if (recipients.length === 0) return { sent: 0 }
+
+    const { subject, text, html } = buildPublicBoardStatusEmail({
+      appOrigin: env.NEXT_PUBLIC_APP_ORIGIN,
+      board: input.board,
+      feedback: input.feedback,
+      oldStatus: input.oldStatus,
+      newStatus: input.newStatus,
+    })
+
+    const results = await Promise.allSettled(
+      recipients.map((to) => sendResendEmail({ to, subject, text, html })),
+    )
+    return { sent: results.filter((result) => result.status === 'fulfilled').length }
+  } catch (error) {
+    console.error('Failed to send public board status notifications', error)
+    return { sent: 0 }
+  }
+}
+
+export async function notifyPublicBoardSubscribersOfTeamReply(input: {
+  board: PublicBoardNotificationBoard
+  feedback: PublicBoardNotificationFeedback
+  replyContent: string
+  actorUserId?: string | null
+}) {
+  if (!isEmailEnabled()) return { sent: 0 }
+
+  try {
+    const recipients = await getPublicBoardRecipientEmails({
+      boardId: input.board.id,
+      feedbackId: input.feedback.id,
+      excludeUserId: input.actorUserId,
+    })
+    if (recipients.length === 0) return { sent: 0 }
+
+    const { subject, text, html } = buildPublicBoardReplyEmail({
+      appOrigin: env.NEXT_PUBLIC_APP_ORIGIN,
+      board: input.board,
+      feedback: input.feedback,
+      replyContent: input.replyContent,
+    })
+
+    const results = await Promise.allSettled(
+      recipients.map((to) => sendResendEmail({ to, subject, text, html })),
+    )
+    return { sent: results.filter((result) => result.status === 'fulfilled').length }
+  } catch (error) {
+    console.error('Failed to send public board reply notifications', error)
+    return { sent: 0 }
   }
 }
 

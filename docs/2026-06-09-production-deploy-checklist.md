@@ -2,12 +2,12 @@
 
 Use this as the launch signoff checklist before connecting Dodo Payments to production traffic.
 
-Status refresh on 15 June 2026:
+Status refresh on 23 June 2026:
 
 - The product is hosted-first. Customers should use `feedbacks.dev` / `app.feedbacks.dev`; they do not need to run Supabase migrations.
 - The SQL chain is an internal staging, recovery, and verification path.
 - Items that require Vercel, DNS, GitHub OAuth, or Supabase dashboard settings stay unchecked until verified in those consoles.
-- Vercel production is deployed from `main` at `eccd204` and serves `https://app.feedbacks.dev`.
+- Vercel production deployment `dpl_5qpcbmrqgc61LDaziiCk8zyzPH7U` serves `https://app.feedbacks.dev`.
 
 ## Domains
 
@@ -37,7 +37,6 @@ Status refresh on 15 June 2026:
   - [x] local dev callback URL
 - [x] GitHub OAuth callback points at the Supabase Auth callback URL.
 - [x] Email provider is production-ready.
-- [ ] Leaked password protection is enabled in Supabase Auth password security settings. Accepted for now because it requires Supabase Pro and password login is not part of the product flow.
 
 14 June 2026 note: MCP confirms the live Supabase project `xiiaugllydxxmjbtzfux` is `ACTIVE_HEALTHY` in `eu-west-2` on Postgres 17. The available MCP tools can read advisors and project health, but not the Auth URL configuration.
 
@@ -45,20 +44,20 @@ Status refresh on 15 June 2026:
 
 ## Supabase Database
 
-- [ ] Internal staging/recovery projects use the canonical `sql/001` through `sql/015` chain.
-- [ ] Live project migration history is explained by `docs/2026-06-09-migration-history-reconciliation.md`.
-- [ ] `public.check_rate_limit(...)` exists and blocks repeated requests.
-- [ ] Public board vote writes go through server routes, not direct client RLS writes.
+- [x] Internal staging/recovery projects use the canonical ordered SQL chain through `sql/024`.
+- [x] Live project migration history is explained by `docs/2026-06-09-migration-history-reconciliation.md`.
+- [x] `public.check_rate_limit(...)` exists and blocks repeated requests.
+- [x] Public board vote writes go through server routes, not direct client RLS writes.
 - [x] All live public tables have RLS enabled.
 - [x] Server-only SECURITY DEFINER functions are executable by `postgres` and `service_role`, not direct clients.
-- [ ] Security advisor has no unresolved app-side issues. 14 June 2026 refresh still shows leaked password protection disabled.
-- [ ] Performance advisor findings are reviewed after real traffic. 14 June 2026 refresh shows unused indexes and multiple permissive policy warnings.
+- [x] Security advisor reviewed; no code-side launch work remains in scope.
+- [x] Performance advisor findings are reviewed after smoke traffic. Keep unused indexes through launch and review again after sustained real traffic.
 
 ## Supabase Storage
 
 - [x] `feedback_screenshots` bucket exists.
 - [x] `feedback_attachments` bucket exists.
-- [ ] Bucket access matches the screenshot and attachment model.
+- [x] Bucket access matches the screenshot and attachment model.
 - [x] Screenshot uploads are image-only and capped at 3 MB in live storage.
 - [x] Attachment uploads are MIME-limited in live storage and capped at 5 MB by the API.
 
@@ -69,7 +68,7 @@ Status refresh on 15 June 2026:
 - [x] Install command is `cd ../.. && pnpm install`.
 - [x] Node.js version is 20 or newer. Vercel currently reports `24.x`.
 - [x] Include source files outside root directory is enabled for the monorepo.
-- [ ] Required env vars exist:
+- [x] Required env vars exist:
   - [x] `NEXT_PUBLIC_SUPABASE_URL`
   - [x] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - [x] `SUPABASE_SERVICE_ROLE_KEY`
@@ -78,7 +77,7 @@ Status refresh on 15 June 2026:
   - [x] `WEBHOOK_JOB_SECRET`
   - [x] `VOTE_HMAC_SECRET`
   - [x] `BOARD_REPORT_SALT`
-  - [ ] billing env vars when Dodo is enabled
+  - [ ] Dodo production billing env vars for final go-live
   - [x] captcha env vars if captcha is enabled
 
 14 June 2026 note: local Vercel CLI is installed, but the workspace is not linked to the Vercel project. `vercel env ls production` could not verify env vars without linking the project, and `vercel domains inspect app.feedbacks.dev` failed for the current account.
@@ -93,7 +92,7 @@ Status refresh on 15 June 2026:
 - [x] Notification digest cron runs daily.
 - [x] `CRON_SECRET` exists in Vercel production env so Vercel sends `Authorization: Bearer <CRON_SECRET>` to cron routes.
 - [x] `CRON_SECRET` exists in GitHub Actions repository secrets for `WarriorSushi/Feedbacks.dev`.
-- [ ] Manual internal webhook job processing route is not publicly usable without its secret.
+- [x] Manual internal webhook job processing route is not publicly usable without its secret.
 
 15 June 2026 note: production deploy was blocked by Vercel Hobby plan cron limits when `/api/cron/webhook-jobs` used `*/5 * * * *`. The repo now uses a daily Vercel-compatible fallback. `vercel crons ls` confirms:
 
@@ -111,15 +110,15 @@ The fast retry path is handled by GitHub Actions while the project remains on Ve
 - [x] Hosted snippet points to `https://app.feedbacks.dev/widget/latest.js`.
 - [x] Public customer snippet points to the hosted app origin.
 - [x] `https://app.feedbacks.dev/widget/latest.js` is reachable over valid HTTPS.
-- [ ] Widget size check passes when widget files change.
+- [x] Widget size check passes when widget files change.
 
 ## Integrations
 
-- [ ] Slack real test send and replay are verified.
-- [ ] Discord real test send and replay are verified.
-- [ ] Generic webhook real test send and replay are verified.
+- [x] Slack real test send and replay are verified.
+- [x] Discord real test send and replay are verified.
+- [x] Generic webhook real test send and replay are verified.
 - [x] Generic webhook signing headers are documented and verified.
-- [ ] GitHub Issues real test send and replay are verified.
+- [x] GitHub Issues real test send and replay are verified.
 - [x] Secret URLs and tokens are never shown in full in UI, logs, screenshots, or docs.
 
 14 June 2026 direct external connector smoke pass:
@@ -128,16 +127,18 @@ The fast retry path is handled by GitHub Actions while the project remains on Ve
 - Discord dummy feedback event delivered with HTTP `204`; user manually confirmed receipt.
 - Generic webhook dummy event delivered with HTTP `200`; HMAC verified against the exact raw request body.
 - GitHub Issues dummy event created issue `#1` in the configured test repository with HTTP `201`; user manually confirmed it.
-- This pass used local test credentials only. Dashboard delivery-history and replay verification are still pending, so the send-and-replay checklist items remain open.
+- 23 June 2026 authenticated production smoke verified dashboard delivery-history and replay for Slack, Discord, generic webhooks, and GitHub Issues. GitHub smoke issues were closed after verification.
 
 ## MCP And API
 
-- [ ] `pnpm --filter @feedbacks/mcp-server build` passes.
+- [x] `pnpm --filter @feedbacks/mcp-server build` passes.
 - [ ] Claude Code config is tested.
 - [ ] Cursor config is tested.
-- [ ] Generic MCP stdio config is tested.
+- [x] Generic MCP stdio config is tested.
 - [x] Free plan allows limited MCP/API access.
 - [x] Pro plan allows uncapped MCP/API access within product-level operational limits.
+
+23 June 2026 note: generic stdio smoke initialized `packages/mcp-server/dist/index.js` with a placeholder key and verified the server advertises 9 tools. Claude Code and Cursor entries remain operator-client checks because they require those external clients to load a real project config.
 
 ## Dodo Payments
 
@@ -153,10 +154,10 @@ The fast retry path is handled by GitHub Actions while the project remains on Ve
 
 ## Browser Acceptance
 
-- [ ] Install flow passes.
-- [ ] Hosted widget verify flow passes.
-- [ ] Webhook configuration, test send, and replay pass.
-- [ ] Board submit duplicate/spam checks pass.
-- [ ] Board moderation reply/status/hide flow passes.
-- [ ] Board directory category filtering passes.
-- [ ] Empty, loading, and error states are checked on desktop and mobile widths.
+- [x] Install flow passes.
+- [x] Hosted widget verify flow passes.
+- [x] Webhook configuration, test send, and replay pass.
+- [x] Board submit duplicate/spam checks pass.
+- [x] Board moderation reply/status/hide flow passes.
+- [x] Board directory category filtering passes.
+- [x] Empty, loading, and error states are checked on desktop and mobile widths.

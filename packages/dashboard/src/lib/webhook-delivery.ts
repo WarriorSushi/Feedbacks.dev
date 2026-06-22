@@ -4,13 +4,13 @@ import { notifyUserOfWebhookFailure } from '@/lib/notifications'
 import { normalizeWebhookConfig, type WebhookKind } from '@/lib/webhook-config'
 import { buildE2ETestWebhookUrl, getE2EBypassSecret, isE2ETestWebhookUrl } from '@/lib/e2e'
 import { buildGenericWebhookSignatureHeaders } from '@/lib/webhook-signing'
-
-export interface WebhookPayload {
-  event: 'feedback.new' | 'feedback.test'
-  feedback: Partial<Feedback>
-  project: Pick<Project, 'id' | 'name'>
-  timestamp: string
-}
+import {
+  buildDigestPayload,
+  buildPayload,
+  isDigestPayload,
+  type WebhookDeliveryPayload,
+  type WebhookPayload,
+} from './webhook-payloads'
 
 /** Blocklist of private/reserved IP ranges for SSRF prevention */
 function isPrivateUrl(urlStr: string): boolean {
@@ -43,16 +43,30 @@ function isPrivateUrl(urlStr: string): boolean {
   }
 }
 
-export function buildPayload(feedback: Partial<Feedback>, project: Pick<Project, 'id' | 'name'>, event: WebhookPayload['event'] = 'feedback.new'): WebhookPayload {
-  return {
-    event,
-    feedback,
-    project,
-    timestamp: new Date().toISOString(),
+function buildSlackBody(payload: WebhookDeliveryPayload) {
+  if (isDigestPayload(payload)) {
+    const sample = payload.feedbacks.slice(0, 5)
+    return {
+      text: `${payload.count} feedback items on ${payload.project.name}`,
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*${payload.count} feedback items* on *${payload.project.name}*`,
+          },
+        },
+        ...sample.map((item) => ({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `• *${item.type ?? 'feedback'}*${item.priority ? ` [${item.priority}]` : ''}: ${item.message ?? ''}`,
+          },
+        })),
+      ],
+    }
   }
-}
 
-function buildSlackBody(payload: WebhookPayload) {
   const f = payload.feedback
   return {
     text: `New ${f.type ?? 'feedback'} on ${payload.project.name}`,
@@ -70,7 +84,28 @@ function buildSlackBody(payload: WebhookPayload) {
   }
 }
 
-function buildDiscordBody(payload: WebhookPayload) {
+function buildDiscordBody(payload: WebhookDeliveryPayload) {
+  if (isDigestPayload(payload)) {
+    return {
+      content: `${payload.count} feedback items on **${payload.project.name}**`,
+      embeds: [
+        {
+          title: 'Feedback digest',
+          description: payload.feedbacks
+            .slice(0, 8)
+            .map((item) => `• **${item.type ?? 'feedback'}**: ${item.message ?? ''}`)
+            .join('\n'),
+          color: 0x22c55e,
+          fields: [
+            { name: 'Items', value: String(payload.count), inline: true },
+            { name: 'Window', value: `${payload.window.start} to ${payload.window.end}`, inline: false },
+          ],
+          timestamp: payload.timestamp,
+        },
+      ],
+    }
+  }
+
   const f = payload.feedback
   return {
     content: `New ${f.type ?? 'feedback'} on **${payload.project.name}**`,
@@ -90,7 +125,37 @@ function buildDiscordBody(payload: WebhookPayload) {
   }
 }
 
-async function createGitHubIssue(endpoint: GitHubEndpoint, payload: WebhookPayload) {
+async function createGitHubIssue(endpoint: GitHubEndpoint, payload: WebhookDeliveryPayload) {
+  if (isDigestPayload(payload)) {
+    const [owner, repo] = endpoint.repo.split('/')
+    const labels = endpoint.labels ? endpoint.labels.split(',').map(l => l.trim()) : []
+    labels.push('feedback')
+
+    const body = [
+      `**Feedback digest from ${payload.project.name}**`,
+      '',
+      `Window: ${payload.window.start} to ${payload.window.end}`,
+      '',
+      ...payload.feedbacks.map((item, index) => (
+        `${index + 1}. **${item.type ?? 'feedback'}**${item.priority ? ` [${item.priority}]` : ''}: ${item.message ?? ''}`
+      )),
+    ].join('\n')
+
+    return fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${endpoint.token}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: `[feedback digest] ${payload.count} items from ${payload.project.name}`,
+        body,
+        labels,
+      }),
+    })
+  }
+
   const f = payload.feedback
   const [owner, repo] = endpoint.repo.split('/')
   const labels = endpoint.labels ? endpoint.labels.split(',').map(l => l.trim()) : []
@@ -144,7 +209,7 @@ export function matchesWebhookRules(endpoint: WebhookEndpoint, feedback: Partial
 async function deliverSingle(
   type: WebhookKind,
   endpoint: WebhookEndpoint | GitHubEndpoint,
-  payload: WebhookPayload,
+  payload: WebhookDeliveryPayload,
   projectId: string,
   admin: Awaited<ReturnType<typeof createAdminSupabase>>
 ) {
@@ -275,10 +340,10 @@ async function deliverSingle(
 
 interface QueuedWebhookPayload {
   endpoint: WebhookEndpoint | GitHubEndpoint
-  payload: WebhookPayload
+  payload: WebhookDeliveryPayload
 }
 
-function buildQueuedPayload(endpoint: WebhookEndpoint | GitHubEndpoint, payload: WebhookPayload): QueuedWebhookPayload {
+function buildQueuedPayload(endpoint: WebhookEndpoint | GitHubEndpoint, payload: WebhookDeliveryPayload): QueuedWebhookPayload {
   return { endpoint, payload }
 }
 
@@ -296,7 +361,7 @@ function parseQueuedPayload(value: unknown): QueuedWebhookPayload {
 
   return {
     endpoint: endpoint as WebhookEndpoint | GitHubEndpoint,
-    payload: payload as WebhookPayload,
+    payload: payload as WebhookDeliveryPayload,
   }
 }
 
@@ -331,6 +396,7 @@ export async function enqueueWebhookJobs(
   const admin = await createAdminSupabase()
   const normalizedWebhooks = normalizeWebhookConfig(webhooks)
   const rows: Array<Record<string, unknown>> = []
+  const digestRows: Array<Record<string, unknown>> = []
 
   for (const type of ['slack', 'discord', 'generic'] as const) {
     const group = normalizedWebhooks[type]
@@ -339,7 +405,7 @@ export async function enqueueWebhookJobs(
     for (const endpoint of group.endpoints) {
       if (!endpoint.enabled) continue
       if (!matchesWebhookRules(endpoint, feedback)) continue
-      rows.push({
+      const row = {
         project_id: project.id,
         kind: type,
         endpoint_id: endpoint.id,
@@ -350,7 +416,9 @@ export async function enqueueWebhookJobs(
         attempt: 0,
         max_attempts: event === 'feedback.test' ? 1 : 4,
         next_attempt_at: new Date().toISOString(),
-      })
+      }
+      if (endpoint.delivery === 'digest' && event === 'feedback.new') digestRows.push(row)
+      else rows.push(row)
     }
   }
 
@@ -358,7 +426,7 @@ export async function enqueueWebhookJobs(
     for (const endpoint of normalizedWebhooks.github.endpoints) {
       if (!endpoint.enabled) continue
       if (!matchesWebhookRules(endpoint, feedback)) continue
-      rows.push({
+      const row = {
         project_id: project.id,
         kind: 'github',
         endpoint_id: endpoint.id,
@@ -369,8 +437,18 @@ export async function enqueueWebhookJobs(
         attempt: 0,
         max_attempts: event === 'feedback.test' ? 1 : 4,
         next_attempt_at: new Date().toISOString(),
-      })
+      }
+      if (endpoint.delivery === 'digest' && event === 'feedback.new') digestRows.push(row)
+      else rows.push(row)
     }
+  }
+
+  if (digestRows.length > 0) {
+    const digestDate = new Date().toISOString().slice(0, 10)
+    const { error } = await admin
+      .from('webhook_digest_items')
+      .insert(digestRows.map((row) => ({ ...row, digest_date: digestDate })))
+    if (error) throw new Error(error.message)
   }
 
   if (rows.length === 0) return []
@@ -385,6 +463,144 @@ export async function enqueueWebhookJobs(
   }
 
   return (data || []).map((row) => row.id as string)
+}
+
+type WebhookDigestItemRow = {
+  id: string
+  project_id: string
+  kind: WebhookKind
+  endpoint_id: string | null
+  endpoint_url: string
+  payload: unknown
+  attempt: number
+  max_attempts: number
+  digest_date: string
+  created_at: string
+}
+
+function digestGroupKey(row: Pick<WebhookDigestItemRow, 'project_id' | 'kind' | 'endpoint_id' | 'endpoint_url' | 'digest_date'>) {
+  return [
+    row.project_id,
+    row.kind,
+    row.endpoint_id || '',
+    row.endpoint_url,
+    row.digest_date,
+  ].join('::')
+}
+
+async function requeueStaleWebhookDigestItems(
+  admin: Awaited<ReturnType<typeof createAdminSupabase>>,
+  staleBefore: string,
+) {
+  await admin
+    .from('webhook_digest_items')
+    .update({
+      status: 'retrying',
+      locked_at: null,
+      last_error: 'Recovered stale processing lock',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('status', 'processing')
+    .lt('locked_at', staleBefore)
+}
+
+export async function processWebhookDigests({ limit = 100 }: { limit?: number } = {}) {
+  const admin = await createAdminSupabase()
+  const staleBefore = new Date(Date.now() - 15 * 60 * 1000).toISOString()
+  await requeueStaleWebhookDigestItems(admin, staleBefore)
+
+  const { data: items, error } = await admin
+    .from('webhook_digest_items')
+    .select('id, project_id, kind, endpoint_id, endpoint_url, payload, attempt, max_attempts, digest_date, created_at')
+    .in('status', ['pending', 'retrying'])
+    .lte('next_attempt_at', new Date().toISOString())
+    .order('digest_date', { ascending: true })
+    .order('created_at', { ascending: true })
+    .limit(limit)
+
+  if (error || !items || items.length === 0) return []
+
+  const grouped = new Map<string, WebhookDigestItemRow[]>()
+  for (const item of items as WebhookDigestItemRow[]) {
+    const key = digestGroupKey(item)
+    const current = grouped.get(key) || []
+    current.push(item)
+    grouped.set(key, current)
+  }
+
+  const results: Array<{ digestKey: string; deliveryId: string; status: 'success' | 'failed'; itemCount: number }> = []
+
+  for (const [key, group] of grouped) {
+    const ids = group.map((item) => item.id)
+    const nextAttempt = Math.max(...group.map((item) => item.attempt)) + 1
+    const { data: claimed } = await admin
+      .from('webhook_digest_items')
+      .update({
+        status: 'processing',
+        attempt: nextAttempt,
+        locked_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .in('id', ids)
+      .in('status', ['pending', 'retrying'])
+      .select('id, project_id, kind, payload, attempt, max_attempts, created_at')
+
+    if (!claimed || claimed.length === 0) continue
+
+    try {
+      const queuedItems = claimed.map((item) => parseQueuedPayload(item.payload))
+      const first = queuedItems[0]
+      const feedbacks = queuedItems
+        .map((item) => isDigestPayload(item.payload) ? null : item.payload.feedback)
+        .filter((item): item is Partial<Feedback> => Boolean(item))
+      const timestamps = queuedItems
+        .map((item) => item.payload.timestamp)
+        .sort()
+      const digestPayload = buildDigestPayload(
+        feedbacks,
+        first.payload.project,
+        timestamps[0] || new Date().toISOString(),
+        timestamps[timestamps.length - 1] || new Date().toISOString(),
+      )
+      const firstClaimed = claimed[0]
+      const delivery = await deliverSingle(
+        firstClaimed.kind as WebhookKind,
+        first.endpoint,
+        digestPayload,
+        firstClaimed.project_id,
+        admin,
+      )
+
+      const exhausted = delivery.status === 'failed' && nextAttempt >= Math.max(...group.map((item) => item.max_attempts))
+      await admin
+        .from('webhook_digest_items')
+        .update({
+          status: delivery.status === 'success' ? 'succeeded' : exhausted ? 'failed' : 'retrying',
+          next_attempt_at: delivery.status === 'success' ? new Date().toISOString() : exhausted ? new Date().toISOString() : nextAttemptAt(nextAttempt),
+          locked_at: null,
+          last_error: delivery.status === 'success' ? null : 'Digest delivery failed',
+          last_delivery_id: delivery.deliveryId,
+          updated_at: new Date().toISOString(),
+        })
+        .in('id', claimed.map((item) => item.id))
+
+      results.push({ digestKey: key, deliveryId: delivery.deliveryId, status: delivery.status, itemCount: claimed.length })
+    } catch (jobError) {
+      const exhausted = nextAttempt >= Math.max(...group.map((item) => item.max_attempts))
+      await admin
+        .from('webhook_digest_items')
+        .update({
+          status: exhausted ? 'failed' : 'retrying',
+          next_attempt_at: exhausted ? new Date().toISOString() : nextAttemptAt(nextAttempt),
+          locked_at: null,
+          last_error: jobError instanceof Error ? jobError.message : 'Digest processing failed',
+          updated_at: new Date().toISOString(),
+        })
+        .in('id', ids)
+    }
+  }
+
+  return results
 }
 
 export async function processWebhookJobs({
@@ -575,8 +791,8 @@ export async function resendWebhookDelivery(
   }
 
   const payload = typeof delivery.payload === 'string'
-    ? JSON.parse(delivery.payload) as WebhookPayload
-    : delivery.payload as WebhookPayload | null
+    ? JSON.parse(delivery.payload) as WebhookDeliveryPayload
+    : delivery.payload as WebhookDeliveryPayload | null
 
   if (!payload || typeof payload !== 'object' || !payload.event) {
     throw new Error('Delivery payload is missing or invalid')

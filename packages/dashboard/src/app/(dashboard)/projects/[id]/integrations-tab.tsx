@@ -165,7 +165,18 @@ function EndpointRulesEditor({
 
   return (
     <div className="space-y-3 rounded-lg border bg-muted/10 p-3">
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-4">
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">Delivery timing</label>
+          <select
+            className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+            value={endpoint.delivery || 'immediate'}
+            onChange={(e) => onChange({ ...endpoint, delivery: e.target.value as 'immediate' | 'digest' })}
+          >
+            <option value="immediate">Immediate</option>
+            <option value="digest">Daily digest</option>
+          </select>
+        </div>
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">Payload format</label>
           <select

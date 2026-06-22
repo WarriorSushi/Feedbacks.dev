@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedUserAndProject } from '@/lib/api-auth'
 import { sanitizeWidgetOriginRestriction } from '@/lib/origin-allowlist'
+import { cleanupFeedbackStorageForProjectIds } from '@/lib/feedback-storage-cleanup'
 import { sanitizeSavedWidgetConfig } from '@feedbacks/shared'
 
 type RouteParams = { params: Promise<{ id: string }> }
@@ -105,6 +106,8 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     if ('error' in result) return result.error
 
     const { admin } = result
+
+    await cleanupFeedbackStorageForProjectIds(admin, [id])
 
     // Rely on CASCADE for related records (feedback, webhook_deliveries, etc.)
     const { error } = await admin.from('projects').delete().eq('id', id)
