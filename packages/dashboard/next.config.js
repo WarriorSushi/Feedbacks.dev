@@ -39,7 +39,6 @@ function buildCspReportOnlyHeader() {
     `connect-src ${connectSources.join(' ')}`,
     "worker-src 'self' blob:",
     "frame-src 'self'",
-    'upgrade-insecure-requests',
     'report-uri /api/security/csp-report',
   ].join('; ')
 }

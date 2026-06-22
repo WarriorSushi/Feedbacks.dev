@@ -59,6 +59,7 @@ export function BoardHero({
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <Link
             href="/boards"
+            prefetch={false}
             className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
