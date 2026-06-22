@@ -4,7 +4,7 @@
 
 ### The feedback stack for developers who ship.
 
-Embeddable widget + smart dashboard + public voting boards + AI agent API — a full-surface feedback product for teams that want fast setup without giving up operational depth.
+Embeddable widget + triage dashboard + public voting boards + AI agent API — a full-surface feedback product for teams that want fast setup without giving up operational depth.
 
 [![FSL-1.1-MIT](https://img.shields.io/badge/license-FSL--1.1--MIT-blue?style=flat-square)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/WarriorSushi/feedbacks.dev-2026/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/WarriorSushi/feedbacks.dev-2026/actions)
@@ -47,8 +47,8 @@ pnpm add @feedbacks/widget
 ></script>
 ```
 
-### Smart Dashboard
-Not just an inbox. Filter by type, priority, and status. Assign, tag, and track feedback through your workflow. Team notes and internal discussions on every item.
+### Triage Dashboard
+Not just a form dump. Filter by type, priority, status, tags, unread state, project, and agent source. Add internal notes, tag feedback, and move items through an intentional workflow without marking opened items as reviewed.
 
 ### Public Voting Boards
 Let your users vote on features and report bugs publicly. Custom branding, announcements, moderation tools, and spam protection built in.
@@ -77,7 +77,7 @@ curl https://app.feedbacks.dev/api/v1/feedback \
 ```
 
 ### Webhooks
-Push feedback to Slack, Discord, GitHub Issues, or any HTTP endpoint. Instant or digest delivery. Filter by type, rating, or tags. Generic webhooks support optional HMAC signing headers.
+Push feedback to Slack, Discord, GitHub Issues, or any HTTP endpoint. Delivery logs, replay, health states, endpoint rules, and retry jobs help keep routing operational. Generic webhooks support optional HMAC signing headers.
 
 ### Privacy-First
 No tracking scripts. No cookies. No third-party analytics in the widget. The hosted service keeps feedback data in feedbacks.dev's managed Supabase project, protected by RLS and server-side write paths.
@@ -136,6 +136,7 @@ pnpm build
 ### Launch Docs
 
 - [Hosted production deployment guide](docs/DEPLOYMENT.md)
+- [Product implementation status](docs/product-status.md)
 - [MCP setup](docs/MCP.md)
 - [Migration reconciliation for maintainers](docs/2026-06-09-migration-history-reconciliation.md)
 - [Production deploy checklist](docs/2026-06-09-production-deploy-checklist.md)

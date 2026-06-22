@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, ArrowUpRight, ExternalLink, MessageSquarePlus } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, Bell, BellOff, ExternalLink, Loader2, MessageSquarePlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { BoardInfo } from './board-types'
 
@@ -10,8 +10,11 @@ interface BoardHeroProps {
   feedbackCount: number
   totalVotes: number
   canModerate: boolean
+  followed: boolean
+  followLoading: boolean
   projectId: string
   onSubmitClick: () => void
+  onToggleFollow: () => void
 }
 
 function getWebsiteHost(url: string | undefined) {
@@ -28,8 +31,11 @@ export function BoardHero({
   feedbackCount,
   totalVotes,
   canModerate,
+  followed,
+  followLoading,
   projectId,
   onSubmitClick,
+  onToggleFollow,
 }: BoardHeroProps) {
   const displayTitle =
     board.displayName || board.branding.heroTitle || board.title || 'Public feedback board'
@@ -146,8 +152,24 @@ export function BoardHero({
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
               Vote first, then add a fresh request when the board does not already cover it.
             </p>
+            <Button
+              type="button"
+              variant={followed ? 'outline' : 'secondary'}
+              onClick={onToggleFollow}
+              disabled={followLoading}
+              className="mt-4 w-full gap-2 font-semibold"
+            >
+              {followLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : followed ? (
+                <BellOff className="h-4 w-4" />
+              ) : (
+                <Bell className="h-4 w-4" />
+              )}
+              {followed ? 'Following board' : 'Follow board'}
+            </Button>
             {board.allow_submissions && (
-              <Button onClick={onSubmitClick} className="mt-4 w-full gap-2 font-semibold">
+              <Button onClick={onSubmitClick} className="mt-2 w-full gap-2 font-semibold">
                 Share feedback
                 <MessageSquarePlus className="h-4 w-4" />
               </Button>

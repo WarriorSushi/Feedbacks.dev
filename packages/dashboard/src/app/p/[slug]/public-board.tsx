@@ -31,6 +31,7 @@ export function PublicBoard({
   initialAnnouncements = [],
   canModerate = false,
   viewerSignedIn = false,
+  initialFollowed = false,
   initialWatchedIds = [],
   recommendations = [],
 }: {
@@ -51,6 +52,7 @@ export function PublicBoard({
   const [search, setSearch] = React.useState('')
   const [votedIds, setVotedIds] = React.useState<Set<string>>(new Set())
   const [watchedIds, setWatchedIds] = React.useState<Set<string>>(new Set(initialWatchedIds))
+  const [followed, setFollowed] = React.useState(initialFollowed)
   const [votingId, setVotingId] = React.useState<string | null>(null)
   const [expandedId, setExpandedId] = React.useState<string | null>(null)
   const [showSubmit, setShowSubmit] = React.useState(false)
@@ -61,6 +63,7 @@ export function PublicBoard({
   const [ready, setReady] = React.useState(false)
   const [showRecommendations, setShowRecommendations] = React.useState(false)
   const [voteError, setVoteError] = React.useState<string | null>(null)
+  const [followLoading, setFollowLoading] = React.useState(false)
   const votesKey = `votes:${board.slug}`
 
   const commentsByFeedback = React.useMemo(() => {
@@ -88,6 +91,33 @@ export function PublicBoard({
   const redirectToAuth = () => {
     const redirect = encodeURIComponent(`/p/${board.slug}`)
     window.location.href = `${publicEnv.NEXT_PUBLIC_APP_ORIGIN}/auth?redirect=${redirect}`
+  }
+
+  const toggleFollow = async () => {
+    if (followLoading) return
+    setFollowLoading(true)
+    const following = !followed
+    try {
+      const response = await fetch(`/api/boards/${board.slug}/follow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ following }),
+      })
+
+      if (response.status === 401) {
+        redirectToAuth()
+        return
+      }
+
+      if (!response.ok) {
+        window.alert('Could not update your board follow right now.')
+        return
+      }
+
+      setFollowed(following)
+    } finally {
+      setFollowLoading(false)
+    }
   }
 
   const toggleWatched = async (feedbackId: string) => {
@@ -296,8 +326,11 @@ export function PublicBoard({
         feedbackCount={feedback.length}
         totalVotes={totalVotes}
         canModerate={canModerate}
+        followed={followed}
+        followLoading={followLoading}
         projectId={board.projectId}
         onSubmitClick={() => setShowSubmit(true)}
+        onToggleFollow={() => void toggleFollow()}
       />
 
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">

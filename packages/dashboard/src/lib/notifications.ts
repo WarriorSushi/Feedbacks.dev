@@ -1,5 +1,7 @@
 import { env, isEmailEnabled } from '@/lib/env'
 import { createAdminSupabase } from '@/lib/supabase-server'
+export { escapeEmailHtml } from './notification-html'
+import { escapeEmailHtml } from './notification-html'
 import type { Feedback, NotificationSettings, Project } from '@/lib/types'
 
 interface EmailPayload {
@@ -64,6 +66,12 @@ export async function notifyProjectOwnerOfNewFeedback(
     if (!notificationSettings.email || !emailAddress) return
 
     const subject = `[feedbacks.dev] New ${feedback.type || 'feedback'} on ${project.name}`
+    const safeSubject = escapeEmailHtml(subject)
+    const safeProjectName = escapeEmailHtml(project.name)
+    const safeType = escapeEmailHtml(feedback.type || 'feedback')
+    const safeMessage = escapeEmailHtml(feedback.message)
+    const safeReporterEmail = feedback.email ? escapeEmailHtml(feedback.email) : null
+    const safeUrl = feedback.url ? escapeEmailHtml(feedback.url) : null
     const lines = [
       `Project: ${project.name}`,
       `Type: ${feedback.type || 'feedback'}`,
@@ -80,12 +88,12 @@ export async function notifyProjectOwnerOfNewFeedback(
       text: lines.join('\n'),
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5;">
-          <h2>${subject}</h2>
-          <p><strong>Project:</strong> ${project.name}</p>
-          <p><strong>Type:</strong> ${feedback.type || 'feedback'}</p>
-          <p><strong>Message:</strong><br/>${feedback.message}</p>
-          ${feedback.email ? `<p><strong>Reporter email:</strong> ${feedback.email}</p>` : ''}
-          ${feedback.url ? `<p><strong>URL:</strong> ${feedback.url}</p>` : ''}
+          <h2>${safeSubject}</h2>
+          <p><strong>Project:</strong> ${safeProjectName}</p>
+          <p><strong>Type:</strong> ${safeType}</p>
+          <p><strong>Message:</strong><br/>${safeMessage}</p>
+          ${safeReporterEmail ? `<p><strong>Reporter email:</strong> ${safeReporterEmail}</p>` : ''}
+          ${safeUrl ? `<p><strong>URL:</strong> ${safeUrl}</p>` : ''}
           ${feedback.rating ? `<p><strong>Rating:</strong> ${feedback.rating}/5</p>` : ''}
         </div>
       `,
@@ -100,15 +108,17 @@ export async function notifyUserOfWebhookFailure(userId: string, projectName: st
     const { notificationSettings, emailAddress } = await getUserNotificationSettings(userId)
     if (!notificationSettings.email || !notificationSettings.webhookFailures || !emailAddress) return
 
+    const safeProjectName = escapeEmailHtml(projectName)
+    const safeEndpointUrl = escapeEmailHtml(endpointUrl)
     await sendResendEmail({
       to: emailAddress,
       subject: `[feedbacks.dev] Webhook disabled for ${projectName}`,
       text: `An integration endpoint was auto-disabled after repeated failures.\n\nProject: ${projectName}\nEndpoint: ${endpointUrl}`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5;">
-          <h2>Webhook disabled for ${projectName}</h2>
+          <h2>Webhook disabled for ${safeProjectName}</h2>
           <p>An integration endpoint was auto-disabled after repeated failures.</p>
-          <p><strong>Endpoint:</strong> ${endpointUrl}</p>
+          <p><strong>Endpoint:</strong> ${safeEndpointUrl}</p>
         </div>
       `,
     })
@@ -126,15 +136,17 @@ export async function notifyUserOfBillingFailure(input: {
     const { notificationSettings, emailAddress } = await getUserNotificationSettings(input.userId)
     const recipient = input.billingEmail || emailAddress
     if (!recipient || notificationSettings.billingFailures === false) return
+    const reason = input.reason || 'A payment failed or your subscription needs attention.'
+    const safeReason = escapeEmailHtml(reason)
 
     await sendResendEmail({
       to: recipient,
       subject: '[feedbacks.dev] Billing needs attention',
-      text: `${input.reason || 'A payment failed or your subscription needs attention.'}\n\nOpen Billing in feedbacks.dev to update your subscription.`,
+      text: `${reason}\n\nOpen Billing in feedbacks.dev to update your subscription.`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5;">
           <h2>Billing needs attention</h2>
-          <p>${input.reason || 'A payment failed or your subscription needs attention.'}</p>
+          <p>${safeReason}</p>
           <p>Open Billing in feedbacks.dev to review your plan, payment method, or renewal state.</p>
         </div>
       `,
@@ -200,10 +212,10 @@ export async function sendDailyFeedbackDigest(userId: string, windowStart: strin
 
     const htmlSections = Array.from(grouped.entries())
       .map(([projectId, items]) => {
-        const title = projectNameById.get(projectId) || 'Project'
+        const title = escapeEmailHtml(projectNameById.get(projectId) || 'Project')
         const list = items
           .slice(0, 5)
-          .map((item) => `<li><strong>${item.type || 'feedback'}:</strong> ${item.message}</li>`)
+          .map((item) => `<li><strong>${escapeEmailHtml(item.type || 'feedback')}:</strong> ${escapeEmailHtml(item.message)}</li>`)
           .join('')
         const extra = items.length > 5 ? `<p style="color:#6b7280;">+${items.length - 5} more</p>` : ''
         return `<div style="margin-bottom:20px;"><h3>${title} (${items.length})</h3><ul>${list}</ul>${extra}</div>`

@@ -24,6 +24,7 @@ import {
   CircleHelp,
   MessageSquare,
 } from 'lucide-react'
+import { DashboardProductTour } from './dashboard-product-tour'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -51,7 +52,7 @@ export default async function DashboardPage({
   searchParams?: Promise<{ tour?: string }>
 }) {
   const params = await searchParams
-  const showProductTour = params?.tour === '1'
+  const requestedProductTour = params?.tour === '1'
   const supabase = await createServerSupabase()
   const {
     data: { user },
@@ -72,6 +73,7 @@ export default async function DashboardPage({
     { data: recentFeedback },
     { data: typeDist },
     { data: sparkData },
+    { data: userSettings },
   ] = await Promise.all([
     (historyCutoff
       ? supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('is_archived', false).gte('created_at', historyCutoff)
@@ -100,6 +102,11 @@ export default async function DashboardPage({
       .select('created_at')
       .gte('created_at', historyCutoff && historyCutoff > sevenDaysAgoStr ? historyCutoff : sevenDaysAgoStr)
       .eq('is_archived', false),
+    supabase
+      .from('user_settings')
+      .select('preferences')
+      .eq('user_id', user!.id)
+      .maybeSingle(),
   ])
 
   const avgRating =
@@ -132,6 +139,12 @@ export default async function DashboardPage({
   const projects = projectCount || 0
   const displayName =
     user?.user_metadata?.name || user?.email?.split('@')[0] || 'there'
+  const preferences =
+    userSettings?.preferences && typeof userSettings.preferences === 'object'
+      ? (userSettings.preferences as { productTourCompletedAt?: string })
+      : {}
+  const productTourCompleted = Boolean(preferences.productTourCompletedAt)
+  const showProductTour = requestedProductTour || (!productTourCompleted && projects > 0)
 
   const statCards = [
     {
@@ -334,42 +347,7 @@ export default async function DashboardPage({
         )}
       </div>
 
-      {showProductTour && (
-        <Card className="border-primary/25 bg-primary/[0.03]">
-          <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <CardTitle className="text-base">Product tour</CardTitle>
-              <CardDescription>
-                A quick path through the surfaces that matter after the first project exists.
-              </CardDescription>
-            </div>
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="h-8 text-xs">
-                Hide tour
-              </Button>
-            </Link>
-          </CardHeader>
-          <CardContent className="grid gap-x-6 gap-y-5 pt-0 md:grid-cols-2 xl:grid-cols-3">
-            {productTourSteps.map((step, index) => (
-              <div key={step.title} className="flex gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                  {index + 1}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{step.title}</p>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{step.body}</p>
-                  <Link href={step.href} className="mt-3 inline-flex">
-                    <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs">
-                      {step.cta}
-                      <ArrowRight className="h-3 w-3" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+      {showProductTour && <DashboardProductTour steps={productTourSteps} />}
 
       <Card>
         <CardHeader className="pb-3">

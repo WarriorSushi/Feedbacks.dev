@@ -10,6 +10,8 @@ The MCP server talks to the hosted REST API with a project API key. It does not 
 - A feedbacks.dev project API key
 - API access enabled for the account plan
 
+Project API keys are for trusted backends, CLIs, and agent configuration. Do not put them in public browser code. The browser widget uses the separate browser-safe project key in the generated install snippet.
+
 Hosted API URL:
 
 ```text
