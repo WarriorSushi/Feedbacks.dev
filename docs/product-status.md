@@ -28,7 +28,7 @@ This document tracks the stable product status after the full product audit in `
 - Cron routes write service-role-only `cron_runs` heartbeat rows for webhook retry and notification digest production verification.
 - Webhook digest delivery stores `webhook_digest_items`, batches daily digest endpoint deliveries through the webhook cron, and records `feedback.digest` delivery logs.
 - HTML escaping for user-supplied feedback content in notification emails.
-- Production smoke on 23 June 2026 verified the hosted authenticated loop, public board loop, webhook test/replay loop, generic digest loop, REST API list/update loop, hosted verify page, cron audit rows, and mobile density for directory, inbox, integrations, board settings, and billing.
+- Production smoke on 23 June 2026 verified the hosted authenticated loop, public board loop, webhook test/replay loop, generic digest loop, REST API list/update loop, hosted verify page, cron audit rows, and mobile density for directory, inbox, integrations, board settings, and billing. Post-push polish smoke on deployment `dpl_H5xCf7tkuX7kWCHhedcYGZvrZh3x` also verified public board, directory, landing, and auth surfaces with no browser console/page errors or mobile horizontal overflow.
 
 ## Promises To Avoid Until Implemented
 

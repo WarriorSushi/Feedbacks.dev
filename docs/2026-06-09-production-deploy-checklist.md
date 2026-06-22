@@ -7,7 +7,7 @@ Status refresh on 23 June 2026:
 - The product is hosted-first. Customers should use `feedbacks.dev` / `app.feedbacks.dev`; they do not need to run Supabase migrations.
 - The SQL chain is an internal staging, recovery, and verification path.
 - Items that require Vercel, DNS, GitHub OAuth, or Supabase dashboard settings stay unchecked until verified in those consoles.
-- Vercel production deployment `dpl_5qpcbmrqgc61LDaziiCk8zyzPH7U` serves `https://app.feedbacks.dev`.
+- Vercel production runtime deployment `dpl_H5xCf7tkuX7kWCHhedcYGZvrZh3x` was verified on `https://app.feedbacks.dev`.
 
 ## Domains
 

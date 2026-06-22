@@ -72,7 +72,8 @@ Latest smoke result from 2026-06-23:
 
 - Passed with disposable login `test@test.com` against `https://app.feedbacks.dev`.
 - Verified hosted project creation, hosted verify, widget submission, inbox/mobile density, public board submit/duplicate/report/moderation/follow/watch, Slack/Discord/GitHub/generic webhook test sends and replays, generic daily digest delivery, REST API list/update, cron audit rows, GitHub Actions scheduler dispatch, and final production runtime logs.
-- Fixed and redeployed two issues found by smoke: mobile directory card overflow and auth-page legal-link cross-origin prefetch console noise.
+- Fixed and redeployed smoke issues found during launch hardening: mobile directory card overflow, auth-page legal-link cross-origin prefetch console noise, cross-surface board navigation prefetch noise, report-only CSP warning noise, and public-board date hydration mismatch.
+- Final post-push smoke on `dpl_H5xCf7tkuX7kWCHhedcYGZvrZh3x` verified public board, board directory, landing, and auth surfaces with no browser console/page errors and no mobile horizontal overflow.
 
 ## Storage Retention
 

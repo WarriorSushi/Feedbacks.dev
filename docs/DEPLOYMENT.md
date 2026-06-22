@@ -166,12 +166,13 @@ Current production status, refreshed 23 June 2026:
 - Team/scope: `warriorsushis-projects`
 - Root directory: `packages/dashboard`
 - Production origin: `https://app.feedbacks.dev`
-- Latest verified production base commit: `288eceae6c3c86f7d282f09fd81298170c2a5f3f`
-- Latest verified production deployment: `dpl_5qpcbmrqgc61LDaziiCk8zyzPH7U`
+- Latest verified production runtime commit: `2435a2ac28a0ca2a516eb987a10473133ecc84ab`
+- Latest verified production runtime deployment: `dpl_H5xCf7tkuX7kWCHhedcYGZvrZh3x`
 - Authenticated production smoke used disposable login `test@test.com` and verified project creation, install/customize/API/integrations pages, hosted verify, widget submission, inbox/mobile density, public board submission/duplicate/report/moderation/follow/watch, webhook test sends/replays, generic digest delivery, REST API list/update, and billing page mobile density.
 - Cron audit smoke: `/api/cron/webhook-jobs` and `/api/cron/notification-digests` both returned `200` from production with `cron_runs` rows recorded at `2026-06-22 19:26 UTC`.
 - GitHub Actions scheduler path smoke: workflow dispatch run `27978342902` succeeded and recorded a `webhook_jobs` `cron_runs` row at `2026-06-22 19:27 UTC`.
 - Latest Vercel production runtime error/fatal log check returned no entries for the final smoke window.
+- Post-push polish smoke on deployment `dpl_H5xCf7tkuX7kWCHhedcYGZvrZh3x` verified public board, board directory, landing, and auth surfaces with no browser console/page errors and no mobile horizontal overflow. GitHub Actions cron dispatch run `27982508167` succeeded and recorded a `webhook_jobs` heartbeat at `2026-06-22 20:40 UTC`.
 
 The deployment was performed through the Vercel CLI after reconnecting the GitHub integration and granting the requested repository permissions. If Git auto-deploy appears stuck again, first check whether the project is receiving GitHub deployment records, then run:
 
@@ -247,7 +248,7 @@ Test this checklist:
 - [x] CSV export downloads at `/api/projects/[id]/feedback.csv`
 - [x] Privacy and Terms pages load
 
-23 June 2026 evidence: authenticated production smoke covered dashboard/project/widget/inbox/board/integration/API/mobile flows on `https://app.feedbacks.dev`. A follow-up authenticated browser check fetched `/api/projects/51e80367-9ac2-46d0-8f27-431a09464190/feedback.csv` with HTTP `200` and CSV headers. Supabase `cron_runs` has recent successful `webhook_jobs` and `notification_digests` rows, and recent delivery logs include `feedback.digest`, `feedback.new`, and `feedback.test` successes.
+23 June 2026 evidence: authenticated production smoke covered dashboard/project/widget/inbox/board/integration/API/mobile flows on `https://app.feedbacks.dev`. A follow-up authenticated browser check fetched `/api/projects/51e80367-9ac2-46d0-8f27-431a09464190/feedback.csv` with HTTP `200` and CSV headers. Supabase `cron_runs` has recent successful `webhook_jobs` and `notification_digests` rows, and recent delivery logs include `feedback.digest`, `feedback.new`, and `feedback.test` successes. Final post-push browser smoke also verified public board, board directory, landing, and auth pages on mobile widths without console/page errors or horizontal overflow.
 
 ---
 
