@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Check, Loader2, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Loader2, MoveLeft, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase-browser'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -13,6 +13,7 @@ interface ProductTourStep {
   body: string
   href: string
   target: string
+  pointerLabel?: string
 }
 
 interface SpotlightRect {
@@ -27,52 +28,67 @@ const PANEL_WIDTH = 360
 
 const productTourSteps: ProductTourStep[] = [
   {
-    title: 'Start from the dashboard',
-    body: 'Use these actions to create projects, jump to the inbox, or restart this guided walkthrough.',
+    title: 'Dashboard',
+    body: 'This is home. Come here when you want the quick summary: unread feedback, recent activity, and the next useful action.',
     href: '/dashboard',
-    target: '[data-tour="dashboard-actions"]',
+    target: '[data-tour="nav-dashboard"]',
+    pointerLabel: 'Dashboard menu',
   },
   {
-    title: 'Switch and set up projects',
-    body: 'Each project has its own widget install, public board, routing, and API setup.',
+    title: 'Feedback',
+    body: 'This is the inbox. New messages from your users land here. Read, filter, tag, and decide what needs action.',
+    href: '/feedback',
+    target: '[data-tour="nav-feedback"]',
+    pointerLabel: 'Feedback menu',
+  },
+  {
+    title: 'Projects',
+    body: 'A project is one app or website. Open Projects to customize the form, copy the install snippet, and run a test.',
     href: '/projects',
-    target: '[data-tour="project-surface"]',
+    target: '[data-tour="nav-projects"]',
+    pointerLabel: 'Projects menu',
   },
   {
-    title: 'Triage the inbox',
-    body: 'Search, filter, and focus on unread feedback without changing workflow status by accident.',
-    href: '/feedback?read=unread',
-    target: '[data-tour="inbox-filters"]',
-  },
-  {
-    title: 'Review feedback rows',
-    body: 'Open an item for context, or select multiple rows when you need a focused bulk action.',
-    href: '/feedback?read=unread',
-    target: '[data-tour="inbox-list"]',
-  },
-  {
-    title: 'Publish public boards',
-    body: 'Use board discovery and board settings when requests should be visible for voting and discussion.',
-    href: '/dashboard/boards',
-    target: '[data-tour="boards-directory"]',
-  },
-  {
-    title: 'Route important signal',
-    body: 'Pick a project and connect Slack, Discord, GitHub, or webhook destinations after feedback arrives.',
+    title: 'Integrations',
+    body: 'Use this when you want important feedback sent somewhere else, like Slack, Discord, GitHub, or a webhook.',
     href: '/integrations',
-    target: '[data-tour="project-surface"]',
+    target: '[data-tour="nav-integrations"]',
+    pointerLabel: 'Integrations menu',
   },
   {
-    title: 'Use API and MCP access',
-    body: 'Give trusted backends and agents project-scoped access instead of broad account credentials.',
+    title: 'Public Boards',
+    body: 'Use this when selected feedback should be public. Users can vote, add requests, and follow updates.',
+    href: '/dashboard/boards',
+    target: '[data-tour="nav-boards"]',
+    pointerLabel: 'Public Boards menu',
+  },
+  {
+    title: 'API',
+    body: 'Use this when code, scripts, or AI agents need to submit, search, or update feedback for a project.',
     href: '/api-docs',
-    target: '[data-tour="project-surface"]',
+    target: '[data-tour="nav-api"]',
+    pointerLabel: 'API menu',
   },
   {
-    title: 'Retake this tour later',
-    body: 'Settings keeps the tour restart action available even after you skip or finish it.',
+    title: 'Billing',
+    body: 'This is where usage, plan limits, checkout, and the billing portal live.',
+    href: '/billing',
+    target: '[data-tour="nav-billing"]',
+    pointerLabel: 'Billing menu',
+  },
+  {
+    title: 'Tutorials',
+    body: 'Use Tutorials when you want a slower lesson or a safe practice area before touching real data.',
+    href: '/tutorials',
+    target: '[data-tour="nav-tutorials"]',
+    pointerLabel: 'Tutorials menu',
+  },
+  {
+    title: 'Settings',
+    body: 'Settings holds your profile, notifications, theme, account actions, and a way to retake this tour.',
     href: '/settings',
-    target: '[data-tour="settings-tour"]',
+    target: '[data-tour="nav-settings"]',
+    pointerLabel: 'Settings menu',
   },
 ]
 
@@ -153,6 +169,7 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
 
   React.useEffect(() => {
     if (!open) return
+    window.dispatchEvent(new CustomEvent('feedbacks:expand-sidebar'))
 
     let frame = 0
     const measureSpotlight = () => {
@@ -222,14 +239,27 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
     }
   }
 
-  const closeTour = React.useCallback(() => {
+  const closeTour = React.useCallback((returnToDashboard = false) => {
     setOpen(false)
     setSpotlight(null)
+    if (returnToDashboard) {
+      router.replace('/dashboard')
+      return
+    }
     if (pathname === '/dashboard' && searchParams.get('tour') === '1') {
       router.replace('/dashboard')
     }
     router.refresh()
   }, [pathname, router, searchParams])
+
+  const goToStep = (nextIndex: number) => {
+    const safeIndex = clamp(nextIndex, 0, productTourSteps.length - 1)
+    const nextStep = productTourSteps[safeIndex]
+    setStepIndex(safeIndex)
+    if (!isCurrentHref(pathname, searchParams, nextStep.href)) {
+      router.push(nextStep.href)
+    }
+  }
 
   const skipTour = async () => {
     try {
@@ -249,7 +279,7 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
     try {
       await savePreference('productTourCompletedAt')
       toast({ title: 'Product tour complete' })
-      closeTour()
+      closeTour(true)
     } catch (error) {
       toast({
         title: 'Could not save tour progress',
@@ -271,6 +301,8 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
     ? clamp(spotlight.left, 16, panelMaxLeft)
     : clamp(viewport.width / 2 - PANEL_WIDTH / 2, 16, panelMaxLeft)
   const finalStep = stepIndex === productTourSteps.length - 1
+  const arrowTop = spotlight ? spotlight.top + spotlight.height / 2 - 16 : 0
+  const arrowLeft = spotlight ? spotlight.left + spotlight.width + 10 : 0
 
   return (
     <div className="fixed inset-0 z-[90] pointer-events-none">
@@ -297,6 +329,13 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
             className="pointer-events-none fixed rounded-xl border-2 border-primary bg-transparent shadow-[0_0_0_4px_hsl(var(--primary)/0.20),0_0_36px_hsl(var(--primary)/0.38)]"
             style={spotlight}
           />
+          <div
+            className="pointer-events-none fixed hidden items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs font-semibold text-foreground shadow-xl md:flex"
+            style={{ top: arrowTop, left: arrowLeft }}
+          >
+            <MoveLeft className="h-4 w-4 text-primary" />
+            {activeStep.pointerLabel || 'Look here'}
+          </div>
         </>
       ) : (
         <div className="pointer-events-auto fixed inset-0 bg-black/60" />
@@ -312,7 +351,7 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-              Step {stepIndex + 1} of {productTourSteps.length}
+              Navigation tour · Step {stepIndex + 1} of {productTourSteps.length}
             </p>
             <h2 id="product-tour-title" className="mt-2 text-base font-semibold">
               {activeStep.title}
@@ -339,7 +378,7 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
             variant="ghost"
             size="sm"
             className="h-8 gap-1.5"
-            onClick={() => setStepIndex((value) => Math.max(0, value - 1))}
+            onClick={() => goToStep(stepIndex - 1)}
             disabled={stepIndex === 0 || saving}
           >
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -354,7 +393,7 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
               className="h-8 gap-1.5"
               onClick={() => {
                 if (finalStep) void finishTour()
-                else setStepIndex((value) => value + 1)
+                else goToStep(stepIndex + 1)
               }}
               disabled={saving}
             >

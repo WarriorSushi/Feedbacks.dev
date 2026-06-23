@@ -162,16 +162,22 @@ export default function SettingsPage() {
 
       <Card data-tour="settings-tour">
         <CardHeader>
-          <CardTitle className="text-lg">Product tour</CardTitle>
+          <CardTitle className="text-lg">Tutorials</CardTitle>
           <CardDescription>
-            Restart the guided walkthrough for the dashboard, inbox, boards, integrations, and API surfaces.
+            Restart the quick navigation tour or open guided practice lessons.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-wrap gap-2">
           <Link href="/dashboard?tour=1">
             <Button variant="outline" className="gap-2">
               <CircleHelp className="h-4 w-4" />
               Retake guided tour
+            </Button>
+          </Link>
+          <Link href="/tutorials">
+            <Button className="gap-2">
+              <CircleHelp className="h-4 w-4" />
+              Open tutorial center
             </Button>
           </Link>
         </CardContent>

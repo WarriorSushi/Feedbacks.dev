@@ -27,6 +27,7 @@ import {
   Webhook,
   Code2,
   CircleHelp,
+  BookOpen,
 } from 'lucide-react'
 import type { Project } from '@/lib/types'
 import { createClient } from '@/lib/supabase-browser'
@@ -43,6 +44,7 @@ const navItems = [
   { href: '/dashboard/boards', label: 'Public Boards', icon: Globe, tourId: 'nav-boards' },
   { href: '/api-docs', label: 'API', icon: Code2, tourId: 'nav-api' },
   { href: '/billing',   label: 'Billing',   icon: CreditCard, tourId: 'nav-billing' },
+  { href: '/tutorials', label: 'Tutorials', icon: BookOpen, tourId: 'nav-tutorials' },
   { href: '/settings',  label: 'Settings',  icon: Settings, tourId: 'nav-settings' },
 ]
 
@@ -150,6 +152,12 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
       setCollapsed(true)
     }
   }, [pathname])
+
+  React.useEffect(() => {
+    const expandForTour = () => setCollapsed(false)
+    window.addEventListener('feedbacks:expand-sidebar', expandForTour)
+    return () => window.removeEventListener('feedbacks:expand-sidebar', expandForTour)
+  }, [])
 
   const beginNavigation = React.useCallback(
     (href: string) => {
