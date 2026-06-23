@@ -32,7 +32,7 @@ export function ProjectSurfacePicker({
   items,
 }: ProjectSurfacePickerProps) {
   return (
-    <div className="space-y-6">
+    <div data-tour="project-surface" className="space-y-6">
       <div className="max-w-2xl">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
           {eyebrow}

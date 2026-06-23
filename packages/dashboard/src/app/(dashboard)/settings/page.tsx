@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { AlertTriangle, Loader2, Mail } from 'lucide-react'
+import { AlertTriangle, CircleHelp, Loader2, Mail } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
@@ -159,6 +159,23 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold">Settings</h1>
+
+      <Card data-tour="settings-tour">
+        <CardHeader>
+          <CardTitle className="text-lg">Product tour</CardTitle>
+          <CardDescription>
+            Restart the guided walkthrough for the dashboard, inbox, boards, integrations, and API surfaces.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link href="/dashboard?tour=1">
+            <Button variant="outline" className="gap-2">
+              <CircleHelp className="h-4 w-4" />
+              Retake guided tour
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Profile */}
       <Card>

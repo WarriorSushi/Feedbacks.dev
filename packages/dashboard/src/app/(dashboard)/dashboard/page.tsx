@@ -24,7 +24,6 @@ import {
   CircleHelp,
   MessageSquare,
 } from 'lucide-react'
-import { DashboardProductTour } from './dashboard-product-tour'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -46,13 +45,7 @@ function TypeIcon({ type, className }: { type?: string | null; className?: strin
   return <Icon className={cn('h-4 w-4', className)} />
 }
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ tour?: string }>
-}) {
-  const params = await searchParams
-  const requestedProductTour = params?.tour === '1'
+export default async function DashboardPage() {
   const supabase = await createServerSupabase()
   const {
     data: { user },
@@ -73,7 +66,6 @@ export default async function DashboardPage({
     { data: recentFeedback },
     { data: typeDist },
     { data: sparkData },
-    { data: userSettings },
   ] = await Promise.all([
     (historyCutoff
       ? supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('is_archived', false).gte('created_at', historyCutoff)
@@ -102,11 +94,6 @@ export default async function DashboardPage({
       .select('created_at')
       .gte('created_at', historyCutoff && historyCutoff > sevenDaysAgoStr ? historyCutoff : sevenDaysAgoStr)
       .eq('is_archived', false),
-    supabase
-      .from('user_settings')
-      .select('preferences')
-      .eq('user_id', user!.id)
-      .maybeSingle(),
   ])
 
   const avgRating =
@@ -139,12 +126,6 @@ export default async function DashboardPage({
   const projects = projectCount || 0
   const displayName =
     user?.user_metadata?.name || user?.email?.split('@')[0] || 'there'
-  const preferences =
-    userSettings?.preferences && typeof userSettings.preferences === 'object'
-      ? (userSettings.preferences as { productTourCompletedAt?: string })
-      : {}
-  const productTourCompleted = Boolean(preferences.productTourCompletedAt)
-  const showProductTour = requestedProductTour || (!productTourCompleted && projects > 0)
 
   const statCards = [
     {
@@ -204,15 +185,6 @@ export default async function DashboardPage({
     { Icon: MessageSquare, title: 'Public boards', body: 'Collect visible ideas, bugs, votes, and comments.', href: '/dashboard/boards' },
     { Icon: Bot, title: 'API and MCP', body: 'Let trusted agents submit, search, and update feedback.', href: '/api-docs' },
     { Icon: ShieldCheck, title: 'Plan and billing', body: 'Check usage, limits, and Pro access in one place.', href: '/billing' },
-  ]
-
-  const productTourSteps = [
-    { title: 'Install widget', body: 'Open a project, copy the Website snippet, and run hosted verification.', href: '/projects', cta: 'Open projects' },
-    { title: 'Triage inbox', body: 'Open unread items to clear the visual highlight, then change status only when you mean to.', href: '/feedback?read=unread', cta: 'Review unread' },
-    { title: 'Route signal', body: 'Connect Slack, Discord, GitHub, or a webhook after feedback reaches the inbox.', href: '/integrations', cta: 'Open integrations' },
-    { title: 'Share a board', body: 'Publish public requests when you want users to vote and discuss in the open.', href: '/dashboard/boards', cta: 'View boards' },
-    { title: 'Use API and MCP', body: 'Give trusted backends and agents project-scoped feedback access.', href: '/api-docs', cta: 'Open API' },
-    { title: 'Check billing', body: 'Review usage, history limits, and Pro access before launch traffic arrives.', href: '/billing', cta: 'Open billing' },
   ]
 
   if (projects === 0) {
@@ -312,7 +284,7 @@ export default async function DashboardPage({
             'Customize a project, install the code, then send one test message.'
           )}
         </p>
-        <div className="flex items-center gap-2 pt-1">
+        <div data-tour="dashboard-actions" className="flex items-center gap-2 pt-1">
           <Link href="/projects/new">
             <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs font-medium">
               <Plus className="h-3.5 w-3.5" />
@@ -347,9 +319,7 @@ export default async function DashboardPage({
         )}
       </div>
 
-      {showProductTour && <DashboardProductTour steps={productTourSteps} />}
-
-      <Card>
+      <Card data-tour="dashboard-capabilities">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">What you can do</CardTitle>
           <CardDescription>

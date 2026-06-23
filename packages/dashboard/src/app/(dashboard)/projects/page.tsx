@@ -33,7 +33,7 @@ export default async function ProjectsPage() {
   })
 
   return (
-    <div className="space-y-6">
+    <div data-tour="project-surface" className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Projects</h1>

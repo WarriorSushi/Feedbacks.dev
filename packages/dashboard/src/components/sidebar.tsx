@@ -36,14 +36,14 @@ import type { BillingStatus, PlanTier } from '@feedbacks/shared'
 type SidebarProject = Pick<Project, 'id' | 'name'>
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/feedback',  label: 'Feedback',  icon: MessageSquare },
-  { href: '/projects',  label: 'Projects',  icon: FolderOpen },
-  { href: '/integrations', label: 'Integrations', icon: Webhook },
-  { href: '/dashboard/boards', label: 'Public Boards', icon: Globe },
-  { href: '/api-docs', label: 'API', icon: Code2 },
-  { href: '/billing',   label: 'Billing',   icon: CreditCard },
-  { href: '/settings',  label: 'Settings',  icon: Settings },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true, tourId: 'nav-dashboard' },
+  { href: '/feedback',  label: 'Feedback',  icon: MessageSquare, tourId: 'nav-feedback' },
+  { href: '/projects',  label: 'Projects',  icon: FolderOpen, tourId: 'nav-projects' },
+  { href: '/integrations', label: 'Integrations', icon: Webhook, tourId: 'nav-integrations' },
+  { href: '/dashboard/boards', label: 'Public Boards', icon: Globe, tourId: 'nav-boards' },
+  { href: '/api-docs', label: 'API', icon: Code2, tourId: 'nav-api' },
+  { href: '/billing',   label: 'Billing',   icon: CreditCard, tourId: 'nav-billing' },
+  { href: '/settings',  label: 'Settings',  icon: Settings, tourId: 'nav-settings' },
 ]
 
 const projectSubItems = [
@@ -206,7 +206,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
 
       {/* Project switcher */}
       {visibleProjects.length > 0 && !collapsed && (
-        <div className="shrink-0 border-b p-2.5" ref={dropdownRef}>
+        <div data-tour="project-switcher" className="shrink-0 border-b p-2.5" ref={dropdownRef}>
           <button
             onClick={() => setProjectOpen(!projectOpen)}
             className={cn(
@@ -310,6 +310,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
             <React.Fragment key={item.href}>
               <Link
                 href={item.href}
+                data-tour={item.tourId}
                 prefetch={false}
                 title={collapsed ? item.label : undefined}
                 aria-label={collapsed ? item.label : undefined}
@@ -469,7 +470,13 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
           prefetch={false}
           title={collapsed ? 'Take product tour' : undefined}
           aria-label={collapsed ? 'Take product tour' : undefined}
-          onClick={() => beginNavigation('/dashboard?tour=1')}
+          data-tour="take-product-tour"
+          onClick={() => {
+            if (pathname === '/dashboard') {
+              window.dispatchEvent(new CustomEvent('feedbacks:start-product-tour'))
+            }
+            beginNavigation('/dashboard?tour=1')
+          }}
           onMouseEnter={() => router.prefetch('/dashboard?tour=1')}
           onFocus={() => router.prefetch('/dashboard?tour=1')}
           className={cn(

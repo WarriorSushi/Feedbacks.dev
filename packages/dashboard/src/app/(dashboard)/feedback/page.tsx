@@ -285,34 +285,6 @@ function FeedbackInboxInner() {
   const clearBulkSelection = () => setSelected(new Set())
 
   const hasFilters = status || type || search || agent || publicOnly || priority || projectId || tag || read === 'unread'
-  const savedFilters = [
-    {
-      label: 'Unread',
-      active: read === 'unread' && !status && !type && !agent && !publicOnly && !priority,
-      updates: { read: 'unread', status: '', type: '', agent: '', public: '', priority: '' },
-    },
-    {
-      label: 'Bugs',
-      active: type === 'bug' && read === 'all' && !status && !agent && !publicOnly && !priority,
-      updates: { type: 'bug', read: '', status: '', agent: '', public: '', priority: '' },
-    },
-    {
-      label: 'Public board',
-      active: publicOnly && read === 'all' && !status && !type && !agent && !priority,
-      updates: { public: '1', read: '', status: '', type: '', agent: '', priority: '' },
-    },
-    {
-      label: 'Agent',
-      active: agent === '1' && read === 'all' && !status && !type && !publicOnly && !priority,
-      updates: { agent: '1', read: '', status: '', type: '', public: '', priority: '' },
-    },
-    {
-      label: 'High priority',
-      active: priority === 'high' && read === 'all' && !status && !type && !agent && !publicOnly,
-      updates: { priority: 'high', read: '', status: '', type: '', agent: '', public: '' },
-    },
-  ]
-
   return (
     <div className="animate-fade-in space-y-4 pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
       {/* ─── Header ─────────────────────────────────────── */}
@@ -392,25 +364,7 @@ function FeedbackInboxInner() {
           </form>
         </div>
 
-        {/* Filter pills row — horizontal scroll on mobile */}
-        <div className="-mx-4 px-4 md:mx-0 md:px-0">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
-            <span className="pr-1 text-[11px] font-medium text-muted-foreground">
-              Saved
-            </span>
-            {savedFilters.map((filter) => (
-              <FilterPill
-                key={filter.label}
-                active={filter.active}
-                onClick={() => updateParams(filter.active ? { read: '', status: '', type: '', agent: '', public: '', priority: '' } : filter.updates)}
-              >
-                {filter.label}
-              </FilterPill>
-            ))}
-          </div>
-        </div>
-
-        <div className="-mx-4 px-4 md:mx-0 md:px-0">
+        <div data-tour="inbox-filters" className="-mx-4 px-4 md:mx-0 md:px-0">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
           {/* Status group */}
           <FilterPill
@@ -516,7 +470,7 @@ function FeedbackInboxInner() {
       </div>
 
       {/* ─── Main List ────────────────────────────────────── */}
-      <Card className="overflow-hidden">
+      <Card data-tour="inbox-list" className="overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

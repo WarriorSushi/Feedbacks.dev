@@ -22,7 +22,10 @@ export async function BoardDirectorySurface({
   const dashboard = variant === 'dashboard'
 
   return (
-    <div className={dashboard ? 'space-y-6' : 'mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12'}>
+    <div
+      data-tour={dashboard ? 'boards-directory' : undefined}
+      className={dashboard ? 'space-y-6' : 'mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12'}
+    >
       <section
         className={cn(
           'relative overflow-hidden border border-border/80 bg-card shadow-sm',

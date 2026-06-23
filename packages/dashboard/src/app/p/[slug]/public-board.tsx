@@ -329,6 +329,7 @@ export function PublicBoard({
         followed={followed}
         followLoading={followLoading}
         projectId={board.projectId}
+        viewerSignedIn={viewerSignedIn}
         onSubmitClick={() => setShowSubmit(true)}
         onToggleFollow={() => void toggleFollow()}
       />

@@ -8,12 +8,13 @@ This document tracks the stable product status after the full product audit in `
 
 - Drop-in widget install path with generated snippets, setup packets, hosted verification guidance, and browser-safe project keys.
 - Widget customization for placement, labels, color, optional fields, rating/type controls, screenshot/attachment behavior, and saved install configuration.
-- Feedback inbox with search, filters, saved triage presets, bulk status/tag/read actions, source labels, unread filtering, and read/unread state via `feedback.read_at`.
+- Feedback inbox with search, unified filter pills, project/tag filters, bulk status/tag/read actions, source labels, unread filtering, and read/unread state via `feedback.read_at`.
 - Feedback detail view that marks an item read without changing workflow status.
 - Internal notes, tags, priority, public/private board state, and workflow statuses.
-- Dashboard capability discovery with a persistent product tour stored in `user_settings.preferences.productTourCompletedAt`, a manual tour entry in the authenticated sidebar, focused setup progress, and sparse board directory empty states.
+- Dashboard capability discovery with a guided cross-page product tour, persisted skip/finish state in `user_settings.preferences`, manual retake entry points in the authenticated sidebar and Settings, focused setup progress, and sparse board directory empty states.
 - Public boards with submissions, voting, comments/team replies, moderation tab/report queue, reports, announcements, branding, visibility, directory discovery, visible board follow/unfollow, and follower/watcher email fanout for status changes and team replies.
 - Public board request rows and hero hierarchy have been tightened for a calmer, more product-grade scan path.
+- Signed-in public board navigation keeps owners inside the app board directory instead of sending them to the public marketing directory.
 - Public board directory categories are normalized through a curated category helper, shown with readable labels/counts, and exposed as suggested owner setup chips.
 - Public board settings include owner-facing guidance for review cadence, status discipline, and privacy expectations before promotion.
 - Integrations for Slack, Discord, GitHub Issues, and generic webhooks with endpoint rules, immediate or daily digest delivery, delivery logs, replay, retry jobs, SSRF checks, optional generic HMAC signing, additive webhook payload versioning, and documented recipes.

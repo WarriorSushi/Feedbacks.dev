@@ -13,6 +13,7 @@ interface BoardHeroProps {
   followed: boolean
   followLoading: boolean
   projectId: string
+  viewerSignedIn?: boolean
   onSubmitClick: () => void
   onToggleFollow: () => void
 }
@@ -34,6 +35,7 @@ export function BoardHero({
   followed,
   followLoading,
   projectId,
+  viewerSignedIn = false,
   onSubmitClick,
   onToggleFollow,
 }: BoardHeroProps) {
@@ -47,6 +49,7 @@ export function BoardHero({
   const websiteHost = getWebsiteHost(board.branding.websiteUrl)
   const submissionLabel = board.allow_submissions ? 'Open submissions' : 'Read only'
   const accent = board.branding.accentColor || '#4d7c0f'
+  const allBoardsHref = viewerSignedIn ? '/dashboard/boards' : '/boards'
 
   return (
     <section
@@ -58,7 +61,7 @@ export function BoardHero({
       <div className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <Link
-            href="/boards"
+            href={allBoardsHref}
             prefetch={false}
             className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-foreground"
           >

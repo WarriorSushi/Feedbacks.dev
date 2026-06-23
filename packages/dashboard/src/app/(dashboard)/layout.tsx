@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { Sidebar } from '@/components/sidebar'
+import { ProductTour } from '@/components/product-tour'
 
 export default async function DashboardLayout({
   children,
@@ -29,6 +30,12 @@ export default async function DashboardLayout({
     .eq('user_id', user.id)
     .maybeSingle()
 
+  const { data: userSettings } = await supabase
+    .from('user_settings')
+    .select('preferences')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
   const projectIds = (projects || []).map((project: { id: string }) => project.id)
   const { data: boardSettings } = projectIds.length > 0
     ? await supabase
@@ -50,6 +57,18 @@ export default async function DashboardLayout({
     boardSlugs[b.project_id] = b.slug
   })
 
+  const preferences =
+    userSettings?.preferences && typeof userSettings.preferences === 'object'
+      ? (userSettings.preferences as {
+          productTourCompletedAt?: string
+          productTourDismissedAt?: string
+        })
+      : {}
+  const showProductTour =
+    Boolean(projects?.length) &&
+    !preferences.productTourCompletedAt &&
+    !preferences.productTourDismissedAt
+
   return (
     <div className="flex h-dvh flex-col bg-background md:flex-row">
       <Sidebar
@@ -65,6 +84,7 @@ export default async function DashboardLayout({
       <main className="min-h-0 flex-1 overflow-y-auto bg-muted/35 pb-[env(safe-area-inset-bottom,0px)] dark:bg-background">
         <div className="mx-auto max-w-7xl px-4 py-4 md:px-6 md:py-6">{children}</div>
       </main>
+      <ProductTour initialOpen={showProductTour} />
     </div>
   )
 }
