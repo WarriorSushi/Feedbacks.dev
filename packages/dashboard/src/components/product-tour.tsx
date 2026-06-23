@@ -78,7 +78,7 @@ const productTourSteps: ProductTourStep[] = [
   },
   {
     title: 'Tutorials',
-    body: 'Use Tutorials when you want a slower lesson or a safe practice area before touching real data.',
+    body: 'Use Tutorials when you want a slower explanation or a direct link to the right product area.',
     href: '/tutorials',
     target: '[data-tour="nav-tutorials"]',
     pointerLabel: 'Tutorials menu',

@@ -1,7 +1,6 @@
 import Link from 'next/link'
-import { ArrowRight, BookOpen, Code2, FolderOpen, Globe, Inbox, MessageSquare, Play, Webhook } from 'lucide-react'
+import { ArrowRight, BookOpen, Code2, FolderOpen, Globe, Inbox, MessageSquare, Webhook } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 
 const tutorials = [
   {
@@ -13,67 +12,59 @@ const tutorials = [
   },
   {
     title: 'Create a project',
-    body: 'Practice naming a project and understanding what belongs inside one project.',
-    href: '/tutorials/practice?lesson=project',
+    body: 'Create one project for each app or website where you want to collect feedback.',
+    href: '/projects/new',
     Icon: FolderOpen,
-    cta: 'Practice',
+    cta: 'Create project',
   },
   {
     title: 'Customize the feedback form',
-    body: 'Try labels, placement, color, and fields without changing a real project.',
-    href: '/tutorials/practice?lesson=form',
+    body: 'Open a project, then use Customize to set labels, placement, color, and optional fields.',
+    href: '/projects',
     Icon: MessageSquare,
-    cta: 'Practice',
+    cta: 'Open projects',
   },
   {
     title: 'Install and send a test',
-    body: 'Walk through the snippet, then send fake feedback into the practice inbox.',
-    href: '/tutorials/practice?lesson=install',
+    body: 'Copy the Website snippet from a project, paste it into your site, then send one test item.',
+    href: '/projects',
     Icon: Code2,
-    cta: 'Practice',
+    cta: 'Open install',
   },
   {
     title: 'Triage the inbox',
     body: 'Learn what unread, status, tags, priority, and public/private mean.',
-    href: '/tutorials/practice?lesson=inbox',
+    href: '/feedback',
     Icon: Inbox,
-    cta: 'Practice',
+    cta: 'Open inbox',
   },
   {
     title: 'Publish a public board',
-    body: 'See how a request becomes visible for votes and public discussion.',
-    href: '/tutorials/practice?lesson=board',
+    body: 'Use project board settings to choose what becomes public for votes and discussion.',
+    href: '/dashboard/boards',
     Icon: Globe,
-    cta: 'Practice',
+    cta: 'Open boards',
   },
   {
     title: 'Connect routing',
     body: 'Learn what integrations do before sending real feedback to another tool.',
-    href: '/tutorials/practice?lesson=integrations',
+    href: '/integrations',
     Icon: Webhook,
-    cta: 'Practice',
+    cta: 'Open routing',
   },
 ]
 
 export default function TutorialsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="max-w-2xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-            Tutorials
-          </p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight">Learn feedbacks.dev safely</h1>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Start with the map, then practice one job at a time. Practice mode uses dummy data and never changes your real projects.
-          </p>
-        </div>
-        <Link href="/tutorials/practice">
-          <Button className="gap-2">
-            <Play className="h-4 w-4" />
-            Open practice mode
-          </Button>
-        </Link>
+      <div className="max-w-2xl">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+          Tutorials
+        </p>
+        <h1 className="mt-2 text-2xl font-bold tracking-tight">Learn feedbacks.dev</h1>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Start with the map, then open the real product surface for the job you want to learn.
+        </p>
       </div>
 
       <Card className="border-primary/25 bg-primary/[0.035]">

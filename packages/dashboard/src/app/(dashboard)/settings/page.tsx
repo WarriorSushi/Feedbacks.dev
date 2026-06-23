@@ -164,7 +164,7 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="text-lg">Tutorials</CardTitle>
           <CardDescription>
-            Restart the quick navigation tour or open guided practice lessons.
+            Restart the quick navigation tour or open the tutorial center.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
