@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Check, Loader2, MoveLeft, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Loader2, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase-browser'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -13,7 +13,6 @@ interface ProductTourStep {
   body: string
   href: string
   target: string
-  pointerLabel?: string
 }
 
 interface SpotlightRect {
@@ -25,6 +24,8 @@ interface SpotlightRect {
 
 const SPOTLIGHT_PADDING = 8
 const PANEL_WIDTH = 360
+const SIDEBAR_PANEL_LEFT = 320
+const PANEL_HEIGHT_ESTIMATE = 260
 
 const productTourSteps: ProductTourStep[] = [
   {
@@ -32,63 +33,54 @@ const productTourSteps: ProductTourStep[] = [
     body: 'This is home. Come here when you want the quick summary: unread feedback, recent activity, and the next useful action.',
     href: '/dashboard',
     target: '[data-tour="nav-dashboard"]',
-    pointerLabel: 'Dashboard menu',
   },
   {
     title: 'Feedback',
     body: 'This is the inbox. New messages from your users land here. Read, filter, tag, and decide what needs action.',
     href: '/feedback',
     target: '[data-tour="nav-feedback"]',
-    pointerLabel: 'Feedback menu',
   },
   {
     title: 'Projects',
     body: 'A project is one app or website. Open Projects to customize the form, copy the install snippet, and run a test.',
     href: '/projects',
     target: '[data-tour="nav-projects"]',
-    pointerLabel: 'Projects menu',
   },
   {
     title: 'Integrations',
     body: 'Use this when you want important feedback sent somewhere else, like Slack, Discord, GitHub, or a webhook.',
     href: '/integrations',
     target: '[data-tour="nav-integrations"]',
-    pointerLabel: 'Integrations menu',
   },
   {
     title: 'Public Boards',
     body: 'Use this when selected feedback should be public. Users can vote, add requests, and follow updates.',
     href: '/dashboard/boards',
     target: '[data-tour="nav-boards"]',
-    pointerLabel: 'Public Boards menu',
   },
   {
     title: 'API',
     body: 'Use this when code, scripts, or AI agents need to submit, search, or update feedback for a project.',
     href: '/api-docs',
     target: '[data-tour="nav-api"]',
-    pointerLabel: 'API menu',
   },
   {
     title: 'Billing',
     body: 'This is where usage, plan limits, checkout, and the billing portal live.',
     href: '/billing',
     target: '[data-tour="nav-billing"]',
-    pointerLabel: 'Billing menu',
   },
   {
     title: 'Tutorials',
     body: 'Use Tutorials when you want a slower explanation or a direct link to the right product area.',
     href: '/tutorials',
     target: '[data-tour="nav-tutorials"]',
-    pointerLabel: 'Tutorials menu',
   },
   {
     title: 'Settings',
     body: 'Settings holds your profile, notifications, theme, account actions, and a way to retake this tour.',
     href: '/settings',
     target: '[data-tour="nav-settings"]',
-    pointerLabel: 'Settings menu',
   },
 ]
 
@@ -107,10 +99,27 @@ function isCurrentHref(pathname: string, searchParams: URLSearchParams, href: st
   return true
 }
 
-function getSpotlightRect(selector: string): SpotlightRect | null {
-  const target = document.querySelector<HTMLElement>(selector)
-  if (!target) return null
+function getVisibleTourTarget(selector: string): HTMLElement | null {
+  const targets = Array.from(document.querySelectorAll<HTMLElement>(selector))
+  return targets.find((target) => {
+    const rect = target.getBoundingClientRect()
+    const style = window.getComputedStyle(target)
+    return (
+      style.display !== 'none' &&
+      style.visibility !== 'hidden' &&
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.bottom > 0 &&
+      rect.right > 0 &&
+      rect.top < window.innerHeight &&
+      rect.left < window.innerWidth
+    )
+  }) || null
+}
 
+function getSpotlightRect(selector: string): SpotlightRect | null {
+  const target = getVisibleTourTarget(selector)
+  if (!target) return null
   const rect = target.getBoundingClientRect()
   const top = Math.max(SPOTLIGHT_PADDING, rect.top - SPOTLIGHT_PADDING)
   const left = Math.max(SPOTLIGHT_PADDING, rect.left - SPOTLIGHT_PADDING)
@@ -178,7 +187,7 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
       })
     }
     const focusTarget = () => {
-      const target = document.querySelector<HTMLElement>(activeStep.target)
+      const target = getVisibleTourTarget(activeStep.target)
       if (target) {
         target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' })
       }
@@ -292,17 +301,20 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
   if (!open) return null
 
   const panelMaxLeft = Math.max(16, viewport.width - PANEL_WIDTH - 16)
+  const isSidebarStep = activeStep.target.includes('nav-')
   const panelTop = spotlight
-    ? spotlight.top + spotlight.height + 14 <= viewport.height - 220
-      ? spotlight.top + spotlight.height + 14
-      : Math.max(16, spotlight.top - 222)
+    ? isSidebarStep
+      ? clamp(spotlight.top - 18, 24, Math.max(24, viewport.height - PANEL_HEIGHT_ESTIMATE))
+      : spotlight.top + spotlight.height + 14 <= viewport.height - 220
+        ? spotlight.top + spotlight.height + 14
+        : Math.max(16, spotlight.top - 222)
     : viewport.height / 2 - 120
   const panelLeft = spotlight
-    ? clamp(spotlight.left, 16, panelMaxLeft)
+    ? isSidebarStep
+      ? clamp(SIDEBAR_PANEL_LEFT, 16, panelMaxLeft)
+      : clamp(spotlight.left, 16, panelMaxLeft)
     : clamp(viewport.width / 2 - PANEL_WIDTH / 2, 16, panelMaxLeft)
   const finalStep = stepIndex === productTourSteps.length - 1
-  const arrowTop = spotlight ? spotlight.top + spotlight.height / 2 - 16 : 0
-  const arrowLeft = spotlight ? spotlight.left + spotlight.width + 10 : 0
 
   return (
     <div className="fixed inset-0 z-[90] pointer-events-none">
@@ -329,13 +341,6 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
             className="pointer-events-none fixed rounded-xl border-2 border-primary bg-transparent shadow-[0_0_0_4px_hsl(var(--primary)/0.20),0_0_36px_hsl(var(--primary)/0.38)]"
             style={spotlight}
           />
-          <div
-            className="pointer-events-none fixed hidden items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs font-semibold text-foreground shadow-xl md:flex"
-            style={{ top: arrowTop, left: arrowLeft }}
-          >
-            <MoveLeft className="h-4 w-4 text-primary" />
-            {activeStep.pointerLabel || 'Look here'}
-          </div>
         </>
       ) : (
         <div className="pointer-events-auto fixed inset-0 bg-black/60" />
@@ -408,7 +413,10 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
             </Button>
           </div>
         </div>
-        <div className="mt-3 grid grid-cols-8 gap-1">
+        <div
+          className="mt-3 grid gap-1"
+          style={{ gridTemplateColumns: `repeat(${productTourSteps.length}, minmax(0, 1fr))` }}
+        >
           {productTourSteps.map((step, index) => (
             <span
               key={step.title}
