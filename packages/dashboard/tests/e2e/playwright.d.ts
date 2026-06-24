@@ -33,6 +33,7 @@ declare module '@playwright/test' {
   }
 
   export interface Locator {
+    boundingBox(): Promise<{ x: number; y: number; width: number; height: number } | null>
     click(options?: unknown): Promise<void>
     fill(value: string): Promise<void>
     toBeVisible(): Promise<void>
@@ -44,6 +45,7 @@ declare module '@playwright/test' {
   }
 
   export interface Page {
+    setViewportSize(viewportSize: { width: number; height: number }): Promise<void>
     goto(url: string, options?: unknown): Promise<void>
     evaluate<T>(pageFunction: (...args: any[]) => T | Promise<T>, arg?: unknown): Promise<T>
     getByRole(role: string, options?: { name?: string | RegExp; exact?: boolean }): Locator

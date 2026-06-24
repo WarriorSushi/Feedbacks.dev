@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'feedbacks.dev — Developer-first feedback collection',
-  description: 'Collect meaningful in-product feedback in minutes. Lightweight widget, powerful dashboard, smart integrations.',
+  description: 'Collect meaningful in-product feedback in minutes. Lightweight widget, triage dashboard, workflow integrations.',
   icons: {
     icon: [
       { url: '/new_logo_feedbacks.dev.svg', type: 'image/svg+xml' },
@@ -25,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"

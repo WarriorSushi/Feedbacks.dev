@@ -78,6 +78,7 @@ export function ApiDocs({
   onRotateApiKey: () => Promise<void>
 }) {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://app.feedbacks.dev'
+  const mcpPackageUrl = `${baseUrl}/mcp/feedbacks-mcp-server-1.0.0.tgz`
   const exampleApiKey = projectKey || 'YOUR_PROJECT_KEY'
   const endpoints = [
     {
@@ -257,8 +258,8 @@ export function ApiDocs({
           </p>
           <CodeBlock language="json" code={`{
   "feedbacks": {
-    "command": "npx",
-    "args": ["@feedbacks/mcp-server"],
+    "command": "npm",
+    "args": ["exec", "--yes", "--package=${mcpPackageUrl}", "--", "feedbacks-mcp"],
     "env": {
       "FEEDBACKS_API_KEY": "${exampleApiKey}",
       "FEEDBACKS_API_URL": "${baseUrl}"

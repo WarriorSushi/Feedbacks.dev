@@ -1,0 +1,39 @@
+name: Process Notification Digests
+
+on:
+  schedule:
+    - cron: '15 13 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: process-notification-digests
+  cancel-in-progress: false
+
+jobs:
+  process:
+    name: Send daily notification digests
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check cron secret
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is not configured for this repository."
+            exit 1
+          fi
+
+      - name: Process notification digests
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail --silent --show-error \
+            --max-time 120 \
+            --retry 2 \
+            --retry-delay 5 \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            https://app.feedbacks.dev/api/cron/notification-digests

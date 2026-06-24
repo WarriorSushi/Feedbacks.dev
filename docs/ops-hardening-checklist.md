@@ -1,6 +1,6 @@
 # Operations Hardening Checklist
 
-Last updated: 2026-06-23
+Last updated: 2026-06-24
 
 Use this before staging or production signoff. It complements `pnpm supabase:check`, which verifies required tables, columns, and storage buckets through the Supabase Data API.
 
@@ -28,6 +28,7 @@ Latest live advisor and traffic snapshot from 2026-06-23:
 - Performance: the `usage_counters` multiple-permissive SELECT warning was cleared by `sql/021_split_usage_counter_write_rls.sql` and verified on the live project.
 - Performance: public board/read multiple-permissive SELECT warnings were cleared by `sql/022_consolidate_public_board_read_rls.sql` and verified on the live project.
 - Performance: unused-index review completed against live `pg_stat_user_indexes` and `pg_stat_user_tables` after production smoke traffic. Zero-scan indexes remain tiny, mostly 8-40 kB, and the relevant tables are still low volume. Keep them through launch and revisit after sustained production traffic instead of removing launch-support indexes early.
+- Performance follow-up on 24 June 2026 reached the same conclusion: zero-scan indexes remain small and the live tables still do not have sustained traffic. No index was removed.
 
 Required areas:
 
@@ -47,6 +48,11 @@ Confirm Vercel cron schedules are present and monitored:
 - `/api/cron/webhook-jobs`
 - `/api/cron/notification-digests`
 
+GitHub Actions also calls:
+
+- `/api/cron/webhook-jobs` every five minutes
+- `/api/cron/notification-digests` daily at 13:15 UTC
+
 Check for:
 
 - recent `cron_runs` rows for both jobs after production deploy
@@ -54,6 +60,14 @@ Check for:
 - notification digest rows missing for opted-in users
 - billing webhook rejects or stale billing state
 - repeated rate-limit spikes on public submission routes
+
+24 June 2026 live snapshot:
+
+- latest `webhook_jobs` heartbeat succeeded at `2026-06-24 08:46 UTC`
+- webhook job backlog had zero pending, processing, retrying, or failed rows
+- the stored webhook digest item was `succeeded`
+- all recorded webhook, test, and digest deliveries in the last seven days were successful
+- the Vercel notification digest schedule was present, but its latest heartbeat was still from 22 June; the external GitHub Actions fallback was added so this route no longer depends on one scheduler
 
 ## Production Smoke Tests
 

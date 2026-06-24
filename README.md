@@ -67,7 +67,7 @@ Your AI agents can file bugs and query feedback programmatically. Built-in MCP s
 
 ```bash
 # MCP Server (for Claude Code, Cursor, etc.)
-npx -y @feedbacks/mcp-server --api-key fb_live_...
+npm exec --yes --package=https://app.feedbacks.dev/mcp/feedbacks-mcp-server-1.0.0.tgz -- feedbacks-mcp --api-key fb_live_...
 
 # REST API
 curl https://app.feedbacks.dev/api/v1/feedback \

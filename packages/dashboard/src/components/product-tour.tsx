@@ -26,6 +26,9 @@ const SPOTLIGHT_PADDING = 8
 const PANEL_WIDTH = 360
 const SIDEBAR_PANEL_LEFT = 320
 const PANEL_HEIGHT_ESTIMATE = 260
+const MOBILE_BREAKPOINT = 768
+const MOBILE_PANEL_MARGIN = 16
+const MOBILE_PANEL_TOP = 72
 
 const productTourSteps: ProductTourStep[] = [
   {
@@ -194,7 +197,7 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
       measureSpotlight()
     }
 
-    const timer = window.setTimeout(focusTarget, 180)
+    const timer = window.setTimeout(focusTarget, 360)
     window.addEventListener('resize', measureSpotlight)
     window.addEventListener('scroll', measureSpotlight, true)
 
@@ -302,18 +305,26 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
 
   const panelMaxLeft = Math.max(16, viewport.width - PANEL_WIDTH - 16)
   const isSidebarStep = activeStep.target.includes('nav-')
-  const panelTop = spotlight
-    ? isSidebarStep
-      ? clamp(spotlight.top - 18, 24, Math.max(24, viewport.height - PANEL_HEIGHT_ESTIMATE))
-      : spotlight.top + spotlight.height + 14 <= viewport.height - 220
-        ? spotlight.top + spotlight.height + 14
-        : Math.max(16, spotlight.top - 222)
-    : viewport.height / 2 - 120
-  const panelLeft = spotlight
-    ? isSidebarStep
-      ? clamp(SIDEBAR_PANEL_LEFT, 16, panelMaxLeft)
-      : clamp(spotlight.left, 16, panelMaxLeft)
-    : clamp(viewport.width / 2 - PANEL_WIDTH / 2, 16, panelMaxLeft)
+  const isMobile = viewport.width < MOBILE_BREAKPOINT
+  const mobilePanelTop = !spotlight || spotlight.top < viewport.height / 2
+    ? Math.max(MOBILE_PANEL_TOP, viewport.height - PANEL_HEIGHT_ESTIMATE - MOBILE_PANEL_MARGIN)
+    : MOBILE_PANEL_TOP
+  const panelTop = isMobile
+    ? mobilePanelTop
+    : spotlight
+      ? isSidebarStep
+        ? clamp(spotlight.top - 18, 24, Math.max(24, viewport.height - PANEL_HEIGHT_ESTIMATE))
+        : spotlight.top + spotlight.height + 14 <= viewport.height - 220
+          ? spotlight.top + spotlight.height + 14
+          : Math.max(16, spotlight.top - 222)
+      : viewport.height / 2 - 120
+  const panelLeft = isMobile
+    ? MOBILE_PANEL_MARGIN
+    : spotlight
+      ? isSidebarStep
+        ? clamp(SIDEBAR_PANEL_LEFT, 16, panelMaxLeft)
+        : clamp(spotlight.left, 16, panelMaxLeft)
+      : clamp(viewport.width / 2 - PANEL_WIDTH / 2, 16, panelMaxLeft)
   const finalStep = stepIndex === productTourSteps.length - 1
 
   return (
@@ -350,6 +361,7 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="product-tour-title"
+        aria-describedby="product-tour-description"
         className="pointer-events-auto fixed w-[calc(100vw-2rem)] max-w-[360px] rounded-xl border bg-card p-4 shadow-2xl"
         style={{ top: panelTop, left: panelLeft }}
       >
@@ -372,7 +384,9 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{activeStep.body}</p>
+        <p id="product-tour-description" className="mt-2 text-sm leading-6 text-muted-foreground">
+          {activeStep.body}
+        </p>
         {!spotlight && (
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
             Opening the right section now. If the highlight does not appear, use Next to continue.

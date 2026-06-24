@@ -1,5 +1,7 @@
 # Playwright E2E Test Findings — 2026-03-18
 
+> Historical snapshot. Later launch-hardening work superseded this checklist. Current shipped status lives in `docs/product-status.md`.
+
 ## Test Environment
 - URL: https://app.feedbacks.dev
 - User: test@test.com / testtest (created via Supabase Admin API)
@@ -14,7 +16,7 @@
 - [x] Password login toggle works (temporary, for testing)
 - [x] Password login successful -> redirects to /dashboard
 - [x] "Sign in with password instead" / "Use magic link instead" toggles correctly
-- [ ] Minor: favicon.ico returns 404
+- [x] Superseded: current root metadata declares the shipped SVG icon instead of relying on an implicit favicon request.
 
 ## 2. Dashboard (Empty State)
 - [x] Greeting shows "Good evening, test" (uses first name from metadata)
@@ -72,7 +74,7 @@
 - [x] Feedback type filters (Feature Requests, Bugs, praise, question)
 - [x] Allow visitor submissions toggle
 - [x] Save Board Settings button
-- [ ] Note: Console error on initial load (404 for board settings query) — likely first-time setup, not critical
+- [x] Resolved by the later typed public-board settings and empty-state routes.
 
 ### 5e. API Tab
 - [x] API Key display with copy button
@@ -91,7 +93,7 @@
 ## 6. API Feedback Submission
 - [x] POST /api/v1/feedback works with message + type + priority + metadata
 - [x] Returns success: true with feedback ID
-- [ ] Intermittent failures when submitting without `metadata` field — some requests fail with "Failed to save feedback" or "Internal server error"
+- [x] Resolved: feedback metadata is normalized to an empty object and covered by `feedback-submissions.test.ts`.
 - [x] Feedback appears in inbox after submission
 
 ## 7. Feedback Inbox

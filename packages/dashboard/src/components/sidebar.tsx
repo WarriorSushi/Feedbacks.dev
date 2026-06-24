@@ -154,7 +154,12 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
   }, [pathname])
 
   React.useEffect(() => {
-    const expandForTour = () => setCollapsed(false)
+    const expandForTour = () => {
+      setCollapsed(false)
+      if (window.matchMedia('(max-width: 767px)').matches) {
+        setMobileOpen(true)
+      }
+    }
     window.addEventListener('feedbacks:expand-sidebar', expandForTour)
     return () => window.removeEventListener('feedbacks:expand-sidebar', expandForTour)
   }, [])

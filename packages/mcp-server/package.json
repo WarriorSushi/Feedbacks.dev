@@ -2,7 +2,20 @@
   "name": "@feedbacks/mcp-server",
   "version": "1.0.0",
   "description": "MCP server for feedbacks.dev — submit and manage feedback from AI agents",
+  "license": "FSL-1.1-MIT",
   "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WarriorSushi/feedbacks.dev-2026.git",
+    "directory": "packages/mcp-server"
+  },
   "bin": {
     "feedbacks-mcp": "./dist/index.js"
   },

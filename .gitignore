@@ -11,6 +11,7 @@ output/
 *.log
 playwright-report/
 test-results/
+packages/dashboard/public/mcp/*.tgz
 .DS_Store
 Thumbs.db
 .claude/worktrees/

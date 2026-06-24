@@ -90,6 +90,7 @@ Status refresh on 23 June 2026:
 
 - [x] Webhook jobs run every 5 minutes through the GitHub Actions external scheduler. Vercel Hobby deployment keeps a daily fallback because Vercel Hobby rejects sub-daily cron schedules.
 - [x] Notification digest cron runs daily.
+- [x] Notification digest processing also has a daily GitHub Actions fallback at `13:15 UTC`.
 - [x] `CRON_SECRET` exists in Vercel production env so Vercel sends `Authorization: Bearer <CRON_SECRET>` to cron routes.
 - [x] `CRON_SECRET` exists in GitHub Actions repository secrets for `WarriorSushi/Feedbacks.dev`.
 - [x] Manual internal webhook job processing route is not publicly usable without its secret.
@@ -139,6 +140,8 @@ The fast retry path is handled by GitHub Actions while the project remains on Ve
 - [x] Pro plan allows uncapped MCP/API access within product-level operational limits.
 
 23 June 2026 note: generic stdio smoke initialized `packages/mcp-server/dist/index.js` with a placeholder key and verified the server advertises 9 tools. Claude Code and Cursor entries remain operator-client checks because they require those external clients to load a real project config.
+
+24 June 2026 note: production builds now create a versioned MCP package at `/mcp/feedbacks-mcp-server-1.0.0.tgz`. A clean `npm exec --package=<tarball> -- feedbacks-mcp` smoke initialized the packaged server and verified all 9 tools. The package no longer depends on an unpublished npm registry entry.
 
 ## Dodo Payments
 

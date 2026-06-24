@@ -1,6 +1,6 @@
 # feedbacks.dev MCP Setup
 
-This guide shows how to connect AI agents to feedbacks.dev through `@feedbacks/mcp-server`.
+This guide shows how to connect AI agents to feedbacks.dev through the versioned MCP server package hosted by feedbacks.dev.
 
 The MCP server talks to the hosted REST API with a project API key. It does not need direct Supabase access.
 
@@ -37,13 +37,13 @@ Private/internal deployments can replace that URL with their own dashboard, API,
 From a terminal:
 
 ```bash
-npx -y @feedbacks/mcp-server --api-key fb_live_your_key
+npm exec --yes --package=https://app.feedbacks.dev/mcp/feedbacks-mcp-server-1.0.0.tgz -- feedbacks-mcp --api-key fb_live_your_key
 ```
 
 For private/internal deployments:
 
 ```bash
-npx -y @feedbacks/mcp-server --api-key fb_live_your_key --api-url https://your-app-domain.com
+npm exec --yes --package=https://app.feedbacks.dev/mcp/feedbacks-mcp-server-1.0.0.tgz -- feedbacks-mcp --api-key fb_live_your_key --api-url https://your-app-domain.com
 ```
 
 The process is an MCP stdio server, so it waits for a client instead of printing a web page. If the key is missing, it exits with a clear error.
@@ -59,8 +59,8 @@ Recommended project config:
   "mcpServers": {
     "feedbacks": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@feedbacks/mcp-server"],
+      "command": "npm",
+      "args": ["exec", "--yes", "--package=https://app.feedbacks.dev/mcp/feedbacks-mcp-server-1.0.0.tgz", "--", "feedbacks-mcp"],
       "env": {
         "FEEDBACKS_API_KEY": "${FEEDBACKS_API_KEY}",
         "FEEDBACKS_API_URL": "${FEEDBACKS_API_URL:-https://app.feedbacks.dev}"
@@ -79,7 +79,7 @@ Then start Claude Code from the project directory and run:
 If you prefer CLI setup:
 
 ```bash
-claude mcp add --transport stdio feedbacks --env FEEDBACKS_API_KEY=fb_live_your_key -- npx -y @feedbacks/mcp-server
+claude mcp add --transport stdio feedbacks --env FEEDBACKS_API_KEY=fb_live_your_key -- npm exec --yes --package=https://app.feedbacks.dev/mcp/feedbacks-mcp-server-1.0.0.tgz -- feedbacks-mcp
 ```
 
 ## Cursor
@@ -92,8 +92,8 @@ Use this server entry:
 {
   "mcpServers": {
     "feedbacks": {
-      "command": "npx",
-      "args": ["-y", "@feedbacks/mcp-server"],
+      "command": "npm",
+      "args": ["exec", "--yes", "--package=https://app.feedbacks.dev/mcp/feedbacks-mcp-server-1.0.0.tgz", "--", "feedbacks-mcp"],
       "env": {
         "FEEDBACKS_API_KEY": "fb_live_your_key",
         "FEEDBACKS_API_URL": "https://app.feedbacks.dev"
@@ -111,8 +111,8 @@ Any stdio-compatible MCP client can use:
 
 ```json
 {
-  "command": "npx",
-  "args": ["-y", "@feedbacks/mcp-server"],
+  "command": "npm",
+  "args": ["exec", "--yes", "--package=https://app.feedbacks.dev/mcp/feedbacks-mcp-server-1.0.0.tgz", "--", "feedbacks-mcp"],
   "env": {
     "FEEDBACKS_API_KEY": "fb_live_your_key",
     "FEEDBACKS_API_URL": "https://app.feedbacks.dev"

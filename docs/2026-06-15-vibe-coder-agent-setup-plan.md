@@ -2,6 +2,19 @@
 
 Date: 2026-06-15
 
+## Implementation Status
+
+Completed by 24 June 2026:
+
+- project install pages generate copyable agent prompts and short-lived, revocable setup packet links
+- authenticated setup packet routes return canonical Website, React, and Vue snippets
+- MCP exposes project listing, setup packet, install verification, test submission, feedback search/list/update, and project statistics
+- setup packet creation and reads are audited
+- project API keys remain server-only while browser snippets use browser-safe project keys
+- production builds publish a versioned MCP package from the hosted app origin
+
+The MCP server intentionally operates on the existing project attached to its API key. It does not create projects.
+
 ## Purpose
 
 Make feedbacks.dev easy for people who are building with AI agents, not just people who want to manually paste snippets. The product should let a user give their coding agent the right project key, endpoint, install snippet, and verification task so the agent can install feedback collection inside the user's app.
@@ -169,8 +182,8 @@ Setup packet:
 
 ## Open Questions
 
-- Should setup packets be plain JSON, Markdown, or both?
-- Should agent setup be Free, Pro, or rate-limited by plan?
-- Should the MCP server create projects, or only operate on existing projects at first?
-- Should verification require an origin allowlist before production launch?
-- How much state should be written back by the agent versus confirmed by the user?
+- Setup packets use structured JSON plus a copyable natural-language prompt.
+- Agent setup follows the shared Free/Pro API and history limits.
+- MCP operates on existing projects only.
+- Verification reports origin guidance without forcing an allowlist for local setup.
+- Agents may install and submit a test item; the user confirms product-side success in the inbox.

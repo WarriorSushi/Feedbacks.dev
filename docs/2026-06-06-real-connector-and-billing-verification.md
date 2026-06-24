@@ -33,11 +33,13 @@ Verified on 23 June 2026 during authenticated production smoke:
 - Generic webhook digest delivery through the scheduled webhook jobs cron route.
 - Server-side Pro entitlement behavior for connector caps using the disposable smoke account.
 
-Still pending before production billing go-live:
+Verified after this original runbook was written:
 
-- Dodo sandbox or staging checkout.
-- Real Dodo webhook signature verification.
-- Free/Pro entitlement verification driven by real Dodo webhook state.
+- Dodo test checkout returns to the hosted billing page.
+- Dodo Standard Webhooks signature verification accepts valid current events and rejects invalid, stale, and too-far-future events.
+- Free/Pro entitlement behavior is driven by verified webhook state rather than the browser return.
+
+The only remaining billing step is the intentional production go-live decision with production Dodo credentials.
 
 Production connector model:
 
@@ -61,9 +63,9 @@ Because of that, true Step 3 verification is blocked until these credentials are
 
 The app itself does not read the `REAL_*` variables. They are optional local placeholders for the human/operator running this checklist.
 
-## Deferred On 6th June 2026
+## Historical Deferred Status On 6th June 2026
 
-Step 3 is intentionally skipped for now so Step 4 launch hardening can continue without pretending real external verification happened.
+This section records the state on 6 June 2026. The connector and Dodo test-mode checks listed here were completed later in June and are summarized above.
 
 What is skipped:
 
