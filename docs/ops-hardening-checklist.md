@@ -68,6 +68,7 @@ Check for:
 - the stored webhook digest item was `succeeded`
 - all recorded webhook, test, and digest deliveries in the last seven days were successful
 - the Vercel notification digest schedule was present, but its latest heartbeat was still from 22 June; the external GitHub Actions fallback was added so this route no longer depends on one scheduler
+- GitHub Actions workflow run `28090709830` succeeded and recorded a new `notification_digests` heartbeat at `2026-06-24 10:01:50 UTC`
 
 ## Production Smoke Tests
 

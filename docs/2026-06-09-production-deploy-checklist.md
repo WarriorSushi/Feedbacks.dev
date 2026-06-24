@@ -143,6 +143,8 @@ The fast retry path is handled by GitHub Actions while the project remains on Ve
 
 24 June 2026 note: production builds now create a versioned MCP package at `/mcp/feedbacks-mcp-server-1.0.0.tgz`. A clean `npm exec --package=<tarball> -- feedbacks-mcp` smoke initialized the packaged server and verified all 9 tools. The package no longer depends on an unpublished npm registry entry.
 
+24 June 2026 deployment note: `dpl_CEeZgLrUWd7SrpYkGY8Hy88WA7Zm` is Ready on the production aliases. The hosted MCP tarball returned HTTP `200`, initialized all 9 tools directly from `https://app.feedbacks.dev`, and the deployment log scan returned no error-level entries. GitHub Actions notification digest run `28090709830` succeeded and wrote a `notification_digests` heartbeat at `2026-06-24 10:01:50 UTC`.
+
 ## Dodo Payments
 
 - [x] Dodo test checkout returns to `/billing` on `https://app.feedbacks.dev`.
