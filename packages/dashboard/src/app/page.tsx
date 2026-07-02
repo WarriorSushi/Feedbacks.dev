@@ -25,6 +25,7 @@ import {
   PanelTop,
 } from 'lucide-react'
 import { ScrollHeader, WidgetDemo } from './widget-demo-client'
+import { AuthenticatedRedirect } from './authenticated-redirect'
 
 // ─── Code snippets ────────────────────────────────────────────────────────────
 
@@ -63,6 +64,7 @@ export default async function LandingPage() {
   const isLoggedIn = !!user
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <AuthenticatedRedirect appOrigin={appOrigin} />
       {/* ── Nav ─────────────────────────────────────────────────────────────── */}
       <ScrollHeader>
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">

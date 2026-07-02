@@ -573,11 +573,53 @@ class FeedbacksWidget {
     // Hide our overlay before capture
     if (this.overlayEl) this.overlayEl.style.display = 'none';
     try {
-      const canvas = await h2c(document.body, { useCORS: true, logging: false, scale: 1 });
-      return canvas.toDataURL('image/png');
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const canvas = await h2c(document.body, {
+        useCORS: true,
+        logging: false,
+        scale: 1,
+        x: window.scrollX,
+        y: window.scrollY,
+        scrollX: window.scrollX,
+        scrollY: window.scrollY,
+        width: viewportWidth,
+        height: viewportHeight,
+        windowWidth: viewportWidth,
+        windowHeight: viewportHeight,
+      });
+      return this.encodeScreenshot(canvas);
     } finally {
       if (this.overlayEl) this.overlayEl.style.display = '';
     }
+  }
+
+  private encodeScreenshot(source: HTMLCanvasElement): string | null {
+    const maxWidth = 1920;
+    const maxHeight = 1080;
+    const maxBytes = 2.8 * 1024 * 1024;
+    const scale = Math.min(1, maxWidth / source.width, maxHeight / source.height);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(source.width * scale));
+    canvas.height = Math.max(1, Math.round(source.height * scale));
+
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(source, 0, 0, canvas.width, canvas.height);
+
+    for (const quality of [0.82, 0.68, 0.54]) {
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      const separatorIndex = dataUrl.indexOf(',');
+      const estimatedBytes = Math.ceil((dataUrl.length - separatorIndex - 1) * 0.75);
+      if (estimatedBytes <= maxBytes) return dataUrl;
+    }
+
+    const fallback = canvas.toDataURL('image/jpeg', 0.42);
+    const separatorIndex = fallback.indexOf(',');
+    const estimatedBytes = Math.ceil((fallback.length - separatorIndex - 1) * 0.75);
+    return estimatedBytes <= maxBytes ? fallback : null;
   }
 
   // ---- Captcha ----

@@ -1,6 +1,6 @@
 # feedbacks.dev Product Implementation Status
 
-Last updated: 2026-06-24
+Last updated: 2026-07-03
 
 This document tracks the stable product status after the full product audit in `docs/review/2026-06-21-full-product-audit-and-phase-plan.md`. Use it as the short source of truth for what is shipped, what is intentionally deferred, and what should not be promoted as complete yet.
 
@@ -8,6 +8,7 @@ This document tracks the stable product status after the full product audit in `
 
 - Drop-in widget install path with generated snippets, setup packets, hosted verification guidance, and browser-safe project keys.
 - Widget customization for placement, labels, color, optional fields, rating/type controls, screenshot/attachment behavior, and saved install configuration.
+- Widget screenshot capture records the visible viewport at the user's current scroll position, compresses it to JPEG within a 1920x1080 client envelope, and is backed by an image-only 3 MB Supabase Storage limit. Feedback detail shows a compact preview that opens in a keyboard-accessible in-app viewer.
 - Feedback inbox with search, unified filter pills, project/tag filters, bulk status/tag/read actions, source labels, unread filtering, and read/unread state via `feedback.read_at`.
 - Feedback detail view that marks an item read without changing workflow status.
 - Internal notes, tags, priority, public/private board state, and workflow statuses.
@@ -16,6 +17,7 @@ This document tracks the stable product status after the full product audit in `
 - Public boards with submissions, voting, comments/team replies, moderation tab/report queue, reports, announcements, branding, visibility, directory discovery, visible board follow/unfollow, and follower/watcher email fanout for status changes and team replies.
 - Public board request rows and hero hierarchy have been tightened for a calmer, more product-grade scan path.
 - Signed-in public board navigation keeps owners inside the app board directory instead of sending them to the public marketing directory.
+- Signed-in app sessions visiting the marketing homepage are detected through an exact-origin credentialed auth check and redirected to the app dashboard without broadening session cookies to other subdomains.
 - Public board directory categories are normalized through a curated category helper, shown with readable labels/counts, and exposed as suggested owner setup chips.
 - Public board settings include owner-facing guidance for review cadence, status discipline, and privacy expectations before promotion.
 - Integrations for Slack, Discord, GitHub Issues, and generic webhooks with endpoint rules, immediate or daily digest delivery, delivery logs, replay, retry jobs, SSRF checks, optional generic HMAC signing, additive webhook payload versioning, and documented recipes.

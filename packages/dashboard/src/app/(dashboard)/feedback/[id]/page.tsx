@@ -28,6 +28,7 @@ import {
   MessageSquare,
 } from 'lucide-react'
 import { FeedbackActions } from './feedback-actions'
+import { FeedbackScreenshot } from './feedback-screenshot'
 
 const statusDotColor = Object.fromEntries(
   Object.entries(statusConfig).map(([k, v]) => [k, v.dot])
@@ -187,23 +188,7 @@ export default async function FeedbackDetailPage({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <a
-                  href={fb.screenshot_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative block overflow-hidden rounded-lg border"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={fb.screenshot_url}
-                    alt="Feedback screenshot"
-                    className="max-w-full transition-transform duration-300 group-hover:scale-[1.02]"
-                  />
-                  <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5" />
-                </a>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Click to open full size
-                </p>
+                <FeedbackScreenshot src={fb.screenshot_url} />
               </CardContent>
             </Card>
           )}
