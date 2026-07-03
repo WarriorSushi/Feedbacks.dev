@@ -5,6 +5,7 @@ import { getCurrentUserBillingSummary } from '@/lib/billing'
 import { ProjectTabs } from './project-tabs'
 
 export const dynamic = 'force-dynamic'
+export const metadata = { title: 'Project Workspace' }
 
 export default async function ProjectDetailPage({
   params,

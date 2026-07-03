@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { Sidebar } from '@/components/sidebar'
 import { ProductTour } from '@/components/product-tour'
+import { CURRENT_PROJECT_COOKIE } from '@/lib/project-selection'
 
 export default async function DashboardLayout({
   children,
@@ -47,9 +49,11 @@ export default async function DashboardLayout({
 
   // Extract current project ID from URL path
   const headersList = await headers()
+  const cookieStore = await cookies()
   const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
   const projectMatch = pathname.match(/\/projects\/([^/]+)/)
-  const currentProjectId = projectMatch?.[1] || undefined
+  const storedProjectId = cookieStore.get(CURRENT_PROJECT_COOKIE)?.value
+  const currentProjectId = projectMatch?.[1] || projects?.find((project) => project.id === storedProjectId)?.id
 
   // Build project → board slug map
   const boardSlugs: Record<string, string> = {}

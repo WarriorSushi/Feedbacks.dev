@@ -1,5 +1,7 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { ProjectSurfacePicker, type ProjectSurfaceItem } from '@/components/project-surface-picker'
+import { cookies } from 'next/headers'
+import { CURRENT_PROJECT_COOKIE, prioritizeSelectedProject } from '@/lib/project-selection'
 
 export const metadata = {
   title: 'API',
@@ -13,6 +15,8 @@ type ApiProject = {
 }
 
 export default async function ApiDocsIndexPage() {
+  const cookieStore = await cookies()
+  const preferredProjectId = cookieStore.get(CURRENT_PROJECT_COOKIE)?.value
   const supabase = await createServerSupabase()
   const {
     data: { user },
@@ -24,7 +28,9 @@ export default async function ApiDocsIndexPage() {
     .eq('owner_user_id', user!.id)
     .order('created_at', { ascending: false })
 
-  const items: ProjectSurfaceItem[] = ((projects as ApiProject[] | null) || []).map((project) => ({
+  const orderedProjects = prioritizeSelectedProject((projects as ApiProject[] | null) || [], preferredProjectId)
+  const currentProjectId = orderedProjects[0]?.id
+  const items: ProjectSurfaceItem[] = orderedProjects.map((project) => ({
     id: project.id,
     name: project.name,
     domain: project.domain,
@@ -42,6 +48,7 @@ export default async function ApiDocsIndexPage() {
       emptyTitle="No project API yet"
       emptyDescription="Create a project first. Then the API page will show the right key, routes, and examples."
       items={items}
+      preferredProjectId={currentProjectId}
     />
   )
 }

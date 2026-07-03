@@ -4,6 +4,8 @@ import { publicEnv } from '@/lib/public-env'
 import type { Project } from '@/lib/types'
 import { ProjectVerifyClient } from '../project-verify-client'
 
+export const metadata = { title: 'Verify Widget Install' }
+
 export default async function ProjectVerifyPage({
   params,
 }: {

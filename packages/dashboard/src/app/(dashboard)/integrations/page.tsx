@@ -1,6 +1,8 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { ProjectSurfacePicker, type ProjectSurfaceItem } from '@/components/project-surface-picker'
 import type { WebhookConfig } from '@/lib/types'
+import { cookies } from 'next/headers'
+import { CURRENT_PROJECT_COOKIE, prioritizeSelectedProject } from '@/lib/project-selection'
 
 export const metadata = {
   title: 'Integrations',
@@ -29,6 +31,8 @@ function countActiveEndpoints(webhooks: WebhookConfig | null) {
 }
 
 export default async function IntegrationsPage() {
+  const cookieStore = await cookies()
+  const preferredProjectId = cookieStore.get(CURRENT_PROJECT_COOKIE)?.value
   const supabase = await createServerSupabase()
   const {
     data: { user },
@@ -40,7 +44,9 @@ export default async function IntegrationsPage() {
     .eq('owner_user_id', user!.id)
     .order('created_at', { ascending: false })
 
-  const items: ProjectSurfaceItem[] = ((projects as IntegrationProject[] | null) || []).map((project) => {
+  const orderedProjects = prioritizeSelectedProject((projects as IntegrationProject[] | null) || [], preferredProjectId)
+  const currentProjectId = orderedProjects[0]?.id
+  const items: ProjectSurfaceItem[] = orderedProjects.map((project) => {
     const activeEndpoints = countActiveEndpoints(project.webhooks)
     return {
       id: project.id,
@@ -61,6 +67,7 @@ export default async function IntegrationsPage() {
       emptyTitle="No projects to connect yet"
       emptyDescription="Create a project first. Then you can route feedback to Slack, Discord, GitHub, or a webhook."
       items={items}
+      preferredProjectId={currentProjectId}
     />
   )
 }

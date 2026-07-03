@@ -25,6 +25,8 @@ import {
   MessageSquare,
 } from 'lucide-react'
 
+export const metadata = { title: 'Dashboard' }
+
 function getGreeting() {
   const h = new Date().getHours()
   if (h < 12) return 'morning'
@@ -66,6 +68,7 @@ export default async function DashboardPage() {
     { data: recentFeedback },
     { data: typeDist },
     { data: sparkData },
+    { data: primaryProjects },
   ] = await Promise.all([
     (historyCutoff
       ? supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('is_archived', false).gte('created_at', historyCutoff)
@@ -94,6 +97,12 @@ export default async function DashboardPage() {
       .select('created_at')
       .gte('created_at', historyCutoff && historyCutoff > sevenDaysAgoStr ? historyCutoff : sevenDaysAgoStr)
       .eq('is_archived', false),
+    supabase
+      .from('projects')
+      .select('id, name')
+      .eq('owner_user_id', user!.id)
+      .order('created_at', { ascending: false })
+      .limit(1),
   ])
 
   const avgRating =
@@ -124,6 +133,7 @@ export default async function DashboardPage() {
   const unread = unreadCount || 0
   const agents = agentCount || 0
   const projects = projectCount || 0
+  const primaryProject = primaryProjects?.[0]
   const displayName =
     user?.user_metadata?.name || user?.email?.split('@')[0] || 'there'
 
@@ -177,15 +187,6 @@ export default async function DashboardPage() {
     question: 'bg-sky-500',
     other: 'bg-zinc-400',
   }
-
-  const capabilityLinks = [
-    { Icon: Code2, title: 'Install widget', body: 'Copy the snippet, verify it, then customize.', href: '/projects' },
-    { Icon: Inbox, title: 'Triage inbox', body: 'Open unread feedback without changing workflow status.', href: '/feedback?read=unread' },
-    { Icon: Bell, title: 'Route updates', body: 'Send important feedback into existing team channels.', href: '/integrations' },
-    { Icon: MessageSquare, title: 'Public boards', body: 'Collect visible ideas, bugs, votes, and comments.', href: '/dashboard/boards' },
-    { Icon: Bot, title: 'API and MCP', body: 'Let trusted agents submit, search, and update feedback.', href: '/api-docs' },
-    { Icon: ShieldCheck, title: 'Plan and billing', body: 'Check usage, limits, and Pro access in one place.', href: '/billing' },
-  ]
 
   if (projects === 0) {
     return (
@@ -319,25 +320,40 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      <Card data-tour="dashboard-capabilities">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold">What you can do</CardTitle>
-          <CardDescription>
-            Use the product in this order when you are setting up a new project.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-x-5 gap-y-4 pt-0 sm:grid-cols-2 lg:grid-cols-3">
-          {capabilityLinks.map(({ Icon, title, body, href }) => (
-            <Link key={title} href={href} className="group flex gap-3 rounded-md py-1.5">
-              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <span className="min-w-0">
-                <span className="block text-sm font-medium group-hover:text-primary">{title}</span>
-                <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{body}</span>
-              </span>
+      {total === 0 && primaryProject ? (
+        <div data-tour="dashboard-capabilities" className="flex flex-col gap-4 rounded-lg border border-primary/25 bg-primary/[0.05] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="flex min-w-0 gap-3">
+            <Code2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div>
+              <h2 className="text-sm font-semibold">Send the first test for {primaryProject.name}</h2>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                Customize the form, copy the install code, then confirm one submission reaches the inbox.
+              </p>
+            </div>
+          </div>
+          <Button asChild className="min-h-11 shrink-0 sm:min-h-10">
+            <Link href={`/projects/${primaryProject.id}?tab=customize`}>
+              Continue setup <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
-          ))}
-        </CardContent>
-      </Card>
+          </Button>
+        </div>
+      ) : (
+        <div data-tour="dashboard-capabilities" className="flex flex-col gap-3 border-y px-1 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 text-sm">
+            <CircleHelp className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Need a refresher?</span>
+            <span className="hidden text-muted-foreground sm:inline">Use a focused tutorial without leaving your real workspace.</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button asChild size="sm" variant="ghost" className="min-h-11 sm:min-h-9">
+              <Link href="/tutorials">Open tutorials</Link>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="min-h-11 sm:min-h-9">
+              <Link href="/dashboard?tour=1">Navigation tour</Link>
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* ─── Onboarding (shown when no projects) ──────────── */}
       {projects === 0 && (

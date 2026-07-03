@@ -24,6 +24,13 @@ The 3 July follow-up completed the five requested audit priorities:
 - Search and sort controls have accessible names; mobile filter and project-tab rails expose overflow with edge fades and snap points.
 - The redundant sidebar project tree was removed, setup steps were compacted on mobile, and dark surfaces now use a clearer neutral elevation scale.
 
+The final polish follow-up also completed the remaining lower-priority items:
+
+- Dashboard help now adapts to activation: one setup action before first feedback, compact tutorial access afterward.
+- The public directory mobile hero and controls are compressed so search and browsing begin substantially earlier.
+- Project choice persists across routes; Integrations and API provide searchable lists with the current project first.
+- Primary routes have distinct browser titles, and key compact mobile controls now use 40-44px targets while desktop density stays unchanged.
+
 ## Scores
 
 | Area | Score | Summary |

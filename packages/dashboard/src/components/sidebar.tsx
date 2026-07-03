@@ -33,6 +33,7 @@ import type { Project } from '@/lib/types'
 import { createClient } from '@/lib/supabase-browser'
 import { ThemeToggle } from '@/components/theme-toggle'
 import type { BillingStatus, PlanTier } from '@feedbacks/shared'
+import { CURRENT_PROJECT_COOKIE } from '@/lib/project-selection'
 
 type SidebarProject = Pick<Project, 'id' | 'name'>
 
@@ -152,6 +153,14 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
     [currentHref, router],
   )
 
+  const rememberProject = React.useCallback((projectId: string) => {
+    document.cookie = `${CURRENT_PROJECT_COOKIE}=${encodeURIComponent(projectId)}; Path=/; Max-Age=31536000; SameSite=Lax`
+  }, [])
+
+  React.useEffect(() => {
+    if (routeProjectId) rememberProject(routeProjectId)
+  }, [rememberProject, routeProjectId])
+
   const currentProjectColorClass =
     projectColors[visibleProjects.indexOf(currentProject!) % projectColors.length] ?? 'bg-muted-foreground'
 
@@ -199,8 +208,10 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
         <div data-tour="project-switcher" className="shrink-0 border-b p-2.5" ref={dropdownRef}>
           <button
             onClick={() => setProjectOpen(!projectOpen)}
+            aria-expanded={projectOpen}
+            aria-label="Switch project"
             className={cn(
-              'group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-[13px]',
+              'group flex min-h-11 w-full items-center justify-between rounded-lg px-2.5 py-2 text-[13px] md:min-h-0',
               'border border-border/60 bg-background/60',
               'transition-all duration-150 hover:border-border hover:bg-accent',
               projectOpen && 'border-primary/30 bg-accent'
@@ -236,13 +247,14 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
                       href={`/projects/${p.id}`}
                       prefetch={false}
                       onClick={() => {
+                        rememberProject(p.id)
                         beginNavigation(`/projects/${p.id}`)
                         setProjectOpen(false)
                       }}
                       onMouseEnter={() => router.prefetch(`/projects/${p.id}`)}
                       onFocus={() => router.prefetch(`/projects/${p.id}`)}
                       className={cn(
-                        'flex items-center justify-between px-3 py-2 text-[13px]',
+                        'flex min-h-11 items-center justify-between px-3 py-2 text-[13px] md:min-h-0',
                         'transition-[background-color,color,transform] duration-100 hover:bg-accent active:scale-[0.98] active:bg-accent/80',
                         isSelected && 'bg-accent/60'
                       )}
@@ -308,7 +320,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
                 onMouseEnter={() => router.prefetch(item.href)}
                 onFocus={() => router.prefetch(item.href)}
                 className={cn(
-                  'group relative flex items-center gap-3 rounded-lg py-2 text-[13px] font-medium',
+                  'group relative flex min-h-11 items-center gap-3 rounded-lg py-2 text-[13px] font-medium md:min-h-0',
                   'transition-all duration-150 active:scale-[0.98]',
                   collapsed ? 'justify-center px-2' : 'px-3',
                   isActive
@@ -403,7 +415,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
           onMouseEnter={() => router.prefetch('/dashboard?tour=1')}
           onFocus={() => router.prefetch('/dashboard?tour=1')}
           className={cn(
-            'group flex items-center gap-2.5 rounded-lg py-2 text-[12px] font-medium text-muted-foreground',
+            'group flex min-h-11 items-center gap-2.5 rounded-lg py-2 text-[12px] font-medium text-muted-foreground md:min-h-0',
             'transition-[background-color,color,transform] duration-150 hover:bg-accent hover:text-foreground active:scale-[0.98]',
             collapsed ? 'justify-center px-0' : 'px-2.5',
           )}
@@ -447,9 +459,10 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+                className="h-10 w-10 shrink-0 text-muted-foreground hover:text-destructive md:h-7 md:w-7"
                 onClick={handleSignOut}
                 title="Sign out"
+                aria-label="Sign out"
               >
                 <LogOut className="h-3.5 w-3.5" />
               </Button>
@@ -474,7 +487,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9"
+          className="h-11 w-11"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >

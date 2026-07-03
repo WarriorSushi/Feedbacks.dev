@@ -1,5 +1,8 @@
+'use client'
+
+import * as React from 'react'
 import Link from 'next/link'
-import { ArrowRight, FolderOpen, Plus } from 'lucide-react'
+import { ArrowRight, Check, FolderOpen, Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -20,6 +23,7 @@ interface ProjectSurfacePickerProps {
   emptyTitle: string
   emptyDescription: string
   items: ProjectSurfaceItem[]
+  preferredProjectId?: string
 }
 
 export function ProjectSurfacePicker({
@@ -30,7 +34,18 @@ export function ProjectSurfacePicker({
   emptyTitle,
   emptyDescription,
   items,
+  preferredProjectId,
 }: ProjectSurfacePickerProps) {
+  const [query, setQuery] = React.useState('')
+  const normalizedQuery = query.trim().toLowerCase()
+  const filteredItems = normalizedQuery
+    ? items.filter((item) =>
+        [item.name, item.domain, item.status, item.detail]
+          .filter(Boolean)
+          .some((value) => value!.toLowerCase().includes(normalizedQuery)),
+      )
+    : items
+
   return (
     <div data-tour="project-surface" className="space-y-6">
       <div className="max-w-2xl">
@@ -56,8 +71,26 @@ export function ProjectSurfacePicker({
           </div>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-card">
-          {items.map((item) => (
+        <div className="overflow-hidden rounded-lg border bg-card">
+          {items.length > 4 && (
+            <div className="border-b p-3 sm:p-4">
+              <label htmlFor={`${eyebrow.toLowerCase()}-project-search`} className="sr-only">
+                Search projects
+              </label>
+              <div className="relative max-w-md">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  id={`${eyebrow.toLowerCase()}-project-search`}
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search projects..."
+                  className="h-11 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25 sm:h-10"
+                />
+              </div>
+            </div>
+          )}
+          {filteredItems.map((item) => (
             <Link
               key={item.id}
               href={item.href}
@@ -71,6 +104,11 @@ export function ProjectSurfacePicker({
                 <div className="flex min-w-0 items-center gap-2">
                   <FolderOpen className="h-4 w-4 shrink-0 text-primary" />
                   <h2 className="truncate text-base font-semibold">{item.name}</h2>
+                  {item.id === preferredProjectId && (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-md border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                      <Check className="h-3 w-3" /> Current
+                    </span>
+                  )}
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   <span>{item.domain || 'No domain set'}</span>
@@ -86,6 +124,14 @@ export function ProjectSurfacePicker({
               </div>
             </Link>
           ))}
+          {filteredItems.length === 0 && (
+            <div className="px-5 py-10 text-center">
+              <p className="text-sm font-medium">No projects match “{query.trim()}”</p>
+              <button type="button" onClick={() => setQuery('')} className="mt-2 min-h-11 text-sm font-medium text-primary sm:min-h-0">
+                Clear search
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@ import { getCurrentUserBillingSummary } from '@/lib/billing'
 import { BillingClient } from './billing-client'
 
 export const dynamic = 'force-dynamic'
+export const metadata = { title: 'Billing' }
 
 export default async function BillingPage() {
   const summary = await getCurrentUserBillingSummary()

@@ -30,6 +30,8 @@ import {
 import { FeedbackActions } from './feedback-actions'
 import { FeedbackScreenshot } from './feedback-screenshot'
 
+export const metadata = { title: 'Feedback Details' }
+
 const statusDotColor = Object.fromEntries(
   Object.entries(statusConfig).map(([k, v]) => [k, v.dot])
 )

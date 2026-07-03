@@ -146,20 +146,20 @@ export function BoardDirectoryClient({
 
   return (
     <div data-board-directory-ready={ready ? 'true' : 'false'}>
-      <section data-board-directory-controls className="mt-6 scroll-mt-4 rounded-lg border border-border/80 bg-card shadow-sm">
-        <div className="border-b border-border/70 px-5 py-5">
+      <section data-board-directory-controls className="mt-4 scroll-mt-4 rounded-lg border border-border/80 bg-card shadow-sm sm:mt-6">
+        <div className="border-b border-border/70 px-3 py-4 sm:px-5 sm:py-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
+            <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Browse boards
               </p>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="scroll-fade-x -mx-3 mt-3 flex snap-x gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
                 {SORT_OPTIONS.map((option) => (
                   <button
                     key={option.value}
                     onClick={() => setSort(option.value)}
                     className={cn(
-                      'rounded-md border px-3 py-2 text-sm font-medium transition-colors',
+                      'min-h-11 shrink-0 snap-start rounded-md border px-3 py-2 text-sm font-medium transition-colors sm:min-h-10',
                       sort === option.value
                         ? 'border-foreground bg-foreground text-background shadow-sm'
                         : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground',
@@ -171,8 +171,8 @@ export function BoardDirectoryClient({
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="relative min-w-[240px]">
+            <div className="order-first flex flex-col gap-3 sm:flex-row sm:items-center lg:order-none">
+              <div className="relative min-w-0 sm:min-w-[240px]">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
@@ -180,21 +180,21 @@ export function BoardDirectoryClient({
                   onChange={(event) => setSearch(event.target.value)}
                   aria-label="Search public boards"
                   placeholder="Search boards..."
-                  className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground"
+                  className="h-11 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground sm:h-10"
                 />
               </div>
-              <p className="max-w-[220px] text-sm leading-6 text-foreground/68">
+              <p className="hidden max-w-[220px] text-sm leading-6 text-foreground/68 sm:block">
                 {activeSort.description}
               </p>
             </div>
           </div>
 
           {categories.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="scroll-fade-x -mx-3 mt-4 flex snap-x gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
               <button
                 onClick={() => setCategory('')}
                 className={cn(
-                  'rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
+                  'min-h-11 shrink-0 snap-start rounded-md border px-3 py-1.5 text-xs font-medium transition-colors sm:min-h-9',
                   !category
                     ? 'border-foreground bg-foreground text-background'
                     : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground',
@@ -207,7 +207,7 @@ export function BoardDirectoryClient({
                   key={entry.value}
                   onClick={() => setCategory(category === entry.value ? '' : entry.value)}
                   className={cn(
-                    'rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
+                    'min-h-11 shrink-0 snap-start rounded-md border px-3 py-1.5 text-xs font-medium transition-colors sm:min-h-9',
                     category === entry.value
                       ? 'border-foreground bg-foreground text-background'
                       : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground',
@@ -221,7 +221,7 @@ export function BoardDirectoryClient({
           )}
         </div>
 
-        <div className="flex items-center justify-between px-5 py-3 text-sm text-muted-foreground">
+        <div className="flex items-center justify-between px-3 py-3 text-sm text-muted-foreground sm:px-5">
           <span>
             Showing <span className="font-medium text-foreground">{sorted.length}</span> of{' '}
             <span className="font-medium text-foreground">{entries.length}</span> boards
@@ -230,12 +230,12 @@ export function BoardDirectoryClient({
         </div>
       </section>
 
-      <section className="mt-6 grid min-w-0 gap-4 xl:grid-cols-2">
+      <section className="mt-4 grid min-w-0 gap-4 sm:mt-6 xl:grid-cols-2">
         {visibleEntries.map((entry) => (
           <Link
             key={entry.slug}
             href={`/p/${entry.slug}`}
-            className="group min-w-0 rounded-2xl border border-border/80 bg-card p-5 shadow-sm transition-colors hover:border-foreground/20 hover:shadow-md"
+            className="group min-w-0 rounded-lg border border-border/80 bg-card p-4 shadow-sm transition-colors hover:border-foreground/20 hover:shadow-md sm:rounded-2xl sm:p-5"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex items-start gap-3">
@@ -303,7 +303,7 @@ export function BoardDirectoryClient({
             type="button"
             onClick={() => changePage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-45"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-45 sm:min-h-10"
           >
             <ArrowLeft className="h-4 w-4" />
             Previous
@@ -315,7 +315,7 @@ export function BoardDirectoryClient({
             type="button"
             onClick={() => changePage(currentPage + 1)}
             disabled={currentPage === pageCount}
-            className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-45"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-45 sm:min-h-10"
           >
             Next
             <ArrowRight className="h-4 w-4" />

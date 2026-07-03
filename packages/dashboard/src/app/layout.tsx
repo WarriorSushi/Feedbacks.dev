@@ -8,7 +8,10 @@ import { Toaster } from '@/components/toaster'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'feedbacks.dev — Developer-first feedback collection',
+  title: {
+    default: 'feedbacks.dev — Developer-first feedback collection',
+    template: '%s | feedbacks.dev',
+  },
   description: 'Collect meaningful in-product feedback in minutes. Lightweight widget, triage dashboard, workflow integrations.',
   icons: {
     icon: [

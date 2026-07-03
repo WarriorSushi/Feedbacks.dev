@@ -8,6 +8,8 @@ import type { Project } from '@/lib/types'
 import Link from 'next/link'
 import { ArrowRight, Code2, FolderOpen, Inbox, Key, Plus } from 'lucide-react'
 
+export const metadata = { title: 'Projects' }
+
 export default async function ProjectsPage() {
   const supabase = await createServerSupabase()
   const {
