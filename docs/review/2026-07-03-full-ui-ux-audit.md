@@ -14,6 +14,16 @@ Reviewed the deployed product and the local production build with the disposable
 
 No console/page errors or horizontal viewport overflow were found on the tested routes.
 
+## Follow-Up Implemented
+
+The 3 July follow-up completed the five requested audit priorities:
+
+- Public discovery now renders 24 boards per page instead of all 204 at once.
+- The authenticated Public Boards route is a management-first owner view, separate from global discovery.
+- Seven real-surface spotlight tutorials support route changes, progress, resume, retake, and completion without practice-mode replicas.
+- Search and sort controls have accessible names; mobile filter and project-tab rails expose overflow with edge fades and snap points.
+- The redundant sidebar project tree was removed, setup steps were compacted on mobile, and dark surfaces now use a clearer neutral elevation scale.
+
 ## Scores
 
 | Area | Score | Summary |

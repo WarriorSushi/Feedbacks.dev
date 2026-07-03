@@ -547,7 +547,7 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-tour="integration-workspace">
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-2">

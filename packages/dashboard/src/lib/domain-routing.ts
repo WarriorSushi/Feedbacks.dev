@@ -75,6 +75,10 @@ export function getCanonicalHostRedirect(url: URL, authenticated?: boolean) {
   const marketingHost = hostFromOrigin(marketingOrigin)
   const currentHost = url.hostname.toLowerCase()
 
+  if (currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost === '[::1]') {
+    return null
+  }
+
   if (!isKnownProductionHost(currentHost, appHost, marketingHost)) {
     return null
   }

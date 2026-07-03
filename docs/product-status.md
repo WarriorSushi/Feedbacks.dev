@@ -13,11 +13,12 @@ This document tracks the stable product status after the full product audit in `
 - Feedback detail view that marks an item read without changing workflow status.
 - Internal notes, tags, priority, public/private board state, and workflow statuses.
 - Dashboard capability discovery with a guided navigation tour, persisted skip/finish state in `user_settings.preferences`, manual retake entry points in the authenticated sidebar and Settings, focused setup progress, sparse board directory empty states, and verified desktop/mobile sidebar highlighting across all nine tour steps.
-- Tutorial Center with focused beginner lessons that explain the setup order and link users into the real product surfaces.
+- Tutorial Center with seven route-aware spotlight lessons for navigation, project creation, form customization, installation, inbox triage, board publishing, and routing. Lessons run on real product surfaces, support skip/back/next/finish, and keep resumable browser progress without a separate practice mode.
 - Public boards with submissions, voting, comments/team replies, moderation tab/report queue, reports, announcements, branding, visibility, directory discovery, visible board follow/unfollow, and follower/watcher email fanout for status changes and team replies.
 - Public board request rows and hero hierarchy have been tightened for a calmer, more product-grade scan path.
 - Signed-in public board navigation keeps owners inside the app board directory instead of sending them to the public marketing directory.
 - Signed-in app sessions visiting the marketing homepage are detected through an exact-origin credentialed auth check and redirected to the app dashboard without broadening session cookies to other subdomains.
+- Public board discovery renders 24 boards per page with bounded previous/next navigation. The authenticated Public Boards route is a separate owner-management view with per-project publication state, public-request count, preview, and setup/manage actions.
 - Public board directory categories are normalized through a curated category helper, shown with readable labels/counts, and exposed as suggested owner setup chips.
 - Public board settings include owner-facing guidance for review cadence, status discipline, and privacy expectations before promotion.
 - Integrations for Slack, Discord, GitHub Issues, and generic webhooks with endpoint rules, immediate or daily digest delivery, delivery logs, replay, retry jobs, SSRF checks, optional generic HMAC signing, additive webhook payload versioning, and documented recipes.
@@ -33,6 +34,8 @@ This document tracks the stable product status after the full product audit in `
 - GitHub Actions provides external scheduler fallbacks for webhook retries and daily notification digests while the Vercel project remains on Hobby cron limits.
 - Webhook digest delivery stores `webhook_digest_items`, batches daily digest endpoint deliveries through the webhook cron, and records `feedback.digest` delivery logs.
 - HTML escaping for user-supplied feedback content in notification emails.
+- Inbox and public-board search/sort controls have persistent accessible names; mobile inbox and project navigation rails use edge fades, snap points, and compact setup steps to make overflow discoverable without widening the viewport.
+- Project navigation uses the global project switcher plus one project workspace menu; the redundant nested project tree was removed. Dark mode now uses neutral elevated surfaces and reserves brand green for action and state.
 - Production smoke on 23 June 2026 verified the hosted authenticated loop, public board loop, webhook test/replay loop, generic digest loop, REST API list/update loop, hosted verify page, cron audit rows, and mobile density for directory, inbox, integrations, board settings, and billing. Post-push polish smoke on deployment `dpl_H5xCf7tkuX7kWCHhedcYGZvrZh3x` also verified public board, directory, landing, and auth surfaces with no browser console/page errors or mobile horizontal overflow. On 24 June, deployment `dpl_CEeZgLrUWd7SrpYkGY8Hy88WA7Zm` shipped the mobile-safe guided tour, hosted MCP package, and notification digest scheduler fallback; the hosted package initialized all nine MCP tools and the deployment had no error-level runtime logs.
 
 ## Promises To Avoid Until Implemented

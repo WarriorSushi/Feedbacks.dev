@@ -2,10 +2,11 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { ArrowUpRight, FolderOpen, Search } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ArrowUpRight, FolderOpen, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { normalizeBoardCategory, type BoardCategoryOption } from '@/lib/board-categories'
 import type { BoardBranding } from '@/lib/public-board'
+import { BOARD_DIRECTORY_PAGE_SIZE, paginateBoardDirectoryEntries } from '@/lib/board-directory-pagination'
 
 type BoardSortMode = 'trending' | 'active' | 'responsive' | 'shipping' | 'new'
 
@@ -53,6 +54,7 @@ interface BoardDirectoryClientProps {
   categories: BoardCategoryOption[]
   initialSort: BoardSortMode
   initialCategory: string
+  initialPage: number
   variant?: 'public' | 'dashboard'
 }
 
@@ -81,12 +83,15 @@ export function BoardDirectoryClient({
   categories,
   initialSort,
   initialCategory,
+  initialPage,
   variant = 'public',
 }: BoardDirectoryClientProps) {
   const [sort, setSort] = React.useState<BoardSortMode>(initialSort)
   const [category, setCategory] = React.useState(normalizeBoardCategory(initialCategory) || '')
   const [search, setSearch] = React.useState('')
+  const [page, setPage] = React.useState(Math.max(1, Math.floor(initialPage)))
   const [ready, setReady] = React.useState(false)
+  const previousFilters = React.useRef({ category, search, sort })
 
   const activeSort = SORT_OPTIONS.find((option) => option.value === sort) || SORT_OPTIONS[0]
 
@@ -112,10 +117,36 @@ export function BoardDirectoryClient({
   }, [entries, category, search, sort])
   const hasNoBoards = entries.length === 0
   const dashboard = variant === 'dashboard'
+  const pageSize = BOARD_DIRECTORY_PAGE_SIZE
+  const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize))
+  const currentPage = Math.min(page, pageCount)
+  const visibleEntries = paginateBoardDirectoryEntries(sorted, currentPage, pageSize)
+
+  React.useEffect(() => {
+    const previous = previousFilters.current
+    if (previous.category === category && previous.search === search && previous.sort === sort) return
+    previousFilters.current = { category, search, sort }
+    setPage(1)
+    const url = new URL(window.location.href)
+    url.searchParams.delete('page')
+    window.history.replaceState(null, '', url)
+  }, [category, search, sort])
+
+  const changePage = (nextPage: number) => {
+    const safePage = Math.min(pageCount, Math.max(1, nextPage))
+    setPage(safePage)
+    const url = new URL(window.location.href)
+    if (safePage === 1) url.searchParams.delete('page')
+    else url.searchParams.set('page', String(safePage))
+    window.history.replaceState(null, '', url)
+    window.requestAnimationFrame(() => {
+      document.querySelector('[data-board-directory-controls]')?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    })
+  }
 
   return (
     <div data-board-directory-ready={ready ? 'true' : 'false'}>
-      <section className="mt-6 rounded-2xl border border-border/80 bg-card shadow-sm">
+      <section data-board-directory-controls className="mt-6 scroll-mt-4 rounded-lg border border-border/80 bg-card shadow-sm">
         <div className="border-b border-border/70 px-5 py-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
@@ -147,6 +178,7 @@ export function BoardDirectoryClient({
                   type="text"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
+                  aria-label="Search public boards"
                   placeholder="Search boards..."
                   className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground"
                 />
@@ -199,7 +231,7 @@ export function BoardDirectoryClient({
       </section>
 
       <section className="mt-6 grid min-w-0 gap-4 xl:grid-cols-2">
-        {sorted.map((entry) => (
+        {visibleEntries.map((entry) => (
           <Link
             key={entry.slug}
             href={`/p/${entry.slug}`}
@@ -264,6 +296,32 @@ export function BoardDirectoryClient({
           </Link>
         ))}
       </section>
+
+      {sorted.length > pageSize && (
+        <nav className="mt-6 flex items-center justify-between gap-4 border-t pt-5" aria-label="Board directory pages">
+          <button
+            type="button"
+            onClick={() => changePage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Previous
+          </button>
+          <p className="text-sm text-muted-foreground">
+            Page <span className="font-semibold text-foreground">{currentPage}</span> of {pageCount}
+          </p>
+          <button
+            type="button"
+            onClick={() => changePage(currentPage + 1)}
+            disabled={currentPage === pageCount}
+            className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            Next
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </nav>
+      )}
 
       {sorted.length === 0 && (
         <div className="mt-6 rounded-2xl border border-dashed border-border/80 bg-card px-6 py-12 text-center shadow-sm">

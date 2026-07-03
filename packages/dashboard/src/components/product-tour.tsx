@@ -7,13 +7,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
-
-interface ProductTourStep {
-  title: string
-  body: string
-  href: string
-  target: string
-}
+import { GUIDED_TUTORIAL_PROGRESS_KEY, getGuidedTutorial, resolveTutorialHref, type GuidedTutorialId, type GuidedTutorialProgress } from '@/lib/guided-tutorials'
 
 interface SpotlightRect {
   top: number
@@ -29,63 +23,26 @@ const PANEL_HEIGHT_ESTIMATE = 260
 const MOBILE_BREAKPOINT = 768
 const MOBILE_PANEL_MARGIN = 16
 const MOBILE_PANEL_TOP = 72
+const EMPTY_TUTORIAL_PROGRESS: Record<string, GuidedTutorialProgress> = {}
 
-const productTourSteps: ProductTourStep[] = [
-  {
-    title: 'Dashboard',
-    body: 'This is home. Come here when you want the quick summary: unread feedback, recent activity, and the next useful action.',
-    href: '/dashboard',
-    target: '[data-tour="nav-dashboard"]',
-  },
-  {
-    title: 'Feedback',
-    body: 'This is the inbox. New messages from your users land here. Read, filter, tag, and decide what needs action.',
-    href: '/feedback',
-    target: '[data-tour="nav-feedback"]',
-  },
-  {
-    title: 'Projects',
-    body: 'A project is one app or website. Open Projects to customize the form, copy the install snippet, and run a test.',
-    href: '/projects',
-    target: '[data-tour="nav-projects"]',
-  },
-  {
-    title: 'Integrations',
-    body: 'Use this when you want important feedback sent somewhere else, like Slack, Discord, GitHub, or a webhook.',
-    href: '/integrations',
-    target: '[data-tour="nav-integrations"]',
-  },
-  {
-    title: 'Public Boards',
-    body: 'Use this when selected feedback should be public. Users can vote, add requests, and follow updates.',
-    href: '/dashboard/boards',
-    target: '[data-tour="nav-boards"]',
-  },
-  {
-    title: 'API',
-    body: 'Use this when code, scripts, or AI agents need to submit, search, or update feedback for a project.',
-    href: '/api-docs',
-    target: '[data-tour="nav-api"]',
-  },
-  {
-    title: 'Billing',
-    body: 'This is where usage, plan limits, checkout, and the billing portal live.',
-    href: '/billing',
-    target: '[data-tour="nav-billing"]',
-  },
-  {
-    title: 'Tutorials',
-    body: 'Use Tutorials when you want a slower explanation or a direct link to the right product area.',
-    href: '/tutorials',
-    target: '[data-tour="nav-tutorials"]',
-  },
-  {
-    title: 'Settings',
-    body: 'Settings holds your profile, notifications, theme, account actions, and a way to retake this tour.',
-    href: '/settings',
-    target: '[data-tour="nav-settings"]',
-  },
-]
+function readTutorialProgress(id: GuidedTutorialId): GuidedTutorialProgress | null {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(GUIDED_TUTORIAL_PROGRESS_KEY) || '{}') as Record<string, GuidedTutorialProgress>
+    return stored[id] || null
+  } catch {
+    return null
+  }
+}
+
+function writeTutorialProgress(id: GuidedTutorialId, progress: GuidedTutorialProgress) {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(GUIDED_TUTORIAL_PROGRESS_KEY) || '{}') as Record<string, GuidedTutorialProgress>
+    window.localStorage.setItem(GUIDED_TUTORIAL_PROGRESS_KEY, JSON.stringify({ ...stored, [id]: progress }))
+    window.dispatchEvent(new CustomEvent('feedbacks:tutorial-progress'))
+  } catch {
+    // The tutorial still works when browser storage is unavailable.
+  }
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
@@ -132,18 +89,33 @@ function getSpotlightRect(selector: string): SpotlightRect | null {
   return { top, left, width, height }
 }
 
-export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
+export function ProductTour({
+  initialOpen,
+  defaultProjectId,
+  initialTutorialProgress = EMPTY_TUTORIAL_PROGRESS,
+}: {
+  initialOpen: boolean
+  defaultProjectId?: string
+  initialTutorialProgress?: Record<string, GuidedTutorialProgress>
+}) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const supabase = React.useMemo(() => createClient(), [])
   const [open, setOpen] = React.useState(false)
   const [stepIndex, setStepIndex] = React.useState(0)
+  const [tutorialId, setTutorialId] = React.useState<GuidedTutorialId>('navigation')
   const [spotlight, setSpotlight] = React.useState<SpotlightRect | null>(null)
   const [viewport, setViewport] = React.useState({ width: 1024, height: 768 })
   const [saving, setSaving] = React.useState(false)
+  const tutorialSaveQueue = React.useRef(Promise.resolve())
 
-  const activeStep = productTourSteps[stepIndex]
+  const tutorial = getGuidedTutorial(tutorialId) || getGuidedTutorial('navigation')!
+  const steps = React.useMemo(
+    () => tutorial.steps.map((step) => ({ ...step, href: resolveTutorialHref(step.href, defaultProjectId) })),
+    [defaultProjectId, tutorial],
+  )
+  const activeStep = steps[Math.min(stepIndex, steps.length - 1)]
 
   React.useEffect(() => {
     if (initialOpen && pathname === '/dashboard') setOpen(true)
@@ -159,14 +131,22 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
   }, [])
 
   React.useEffect(() => {
-    if (searchParams.get('tour') === '1') {
+    const requestedTutorial = getGuidedTutorial(searchParams.get('tutorial'))
+    if (requestedTutorial) {
+      const saved = readTutorialProgress(requestedTutorial.id) || initialTutorialProgress[requestedTutorial.id]
+      setTutorialId(requestedTutorial.id)
+      setStepIndex(saved?.completedAt ? 0 : Math.min(saved?.stepIndex || 0, requestedTutorial.steps.length - 1))
+      setOpen(true)
+    } else if (searchParams.get('tour') === '1') {
+      setTutorialId('navigation')
       setStepIndex(0)
       setOpen(true)
     }
-  }, [searchParams])
+  }, [initialTutorialProgress, searchParams])
 
   React.useEffect(() => {
     const startTour = () => {
+      setTutorialId('navigation')
       setStepIndex(0)
       setOpen(true)
     }
@@ -251,6 +231,33 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
     }
   }
 
+  const saveTutorialProgress = React.useCallback((id: GuidedTutorialId, progress: GuidedTutorialProgress) => {
+    writeTutorialProgress(id, progress)
+    tutorialSaveQueue.current = tutorialSaveQueue.current.then(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: existing } = await supabase
+        .from('user_settings')
+        .select('preferences')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      const preferences = existing?.preferences && typeof existing.preferences === 'object'
+        ? existing.preferences as Record<string, unknown>
+        : {}
+      const guidedTutorialProgress = preferences.guidedTutorialProgress && typeof preferences.guidedTutorialProgress === 'object'
+        ? preferences.guidedTutorialProgress as Record<string, GuidedTutorialProgress>
+        : {}
+      await supabase.from('user_settings').upsert({
+        user_id: user.id,
+        preferences: {
+          ...preferences,
+          guidedTutorialProgress: { ...guidedTutorialProgress, [id]: progress },
+        },
+        updated_at: new Date().toISOString(),
+      })
+    }).catch(() => undefined)
+  }, [supabase])
+
   const closeTour = React.useCallback((returnToDashboard = false) => {
     setOpen(false)
     setSpotlight(null)
@@ -265,9 +272,10 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
   }, [pathname, router, searchParams])
 
   const goToStep = (nextIndex: number) => {
-    const safeIndex = clamp(nextIndex, 0, productTourSteps.length - 1)
-    const nextStep = productTourSteps[safeIndex]
+    const safeIndex = clamp(nextIndex, 0, steps.length - 1)
+    const nextStep = steps[safeIndex]
     setStepIndex(safeIndex)
+    if (tutorialId !== 'navigation') saveTutorialProgress(tutorialId, { stepIndex: safeIndex })
     if (!isCurrentHref(pathname, searchParams, nextStep.href)) {
       router.push(nextStep.href)
     }
@@ -275,8 +283,9 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
 
   const skipTour = async () => {
     try {
-      await savePreference('productTourDismissedAt')
-      toast({ title: 'Tour hidden for now' })
+      if (tutorialId === 'navigation') await savePreference('productTourDismissedAt')
+      else saveTutorialProgress(tutorialId, { stepIndex, dismissedAt: new Date().toISOString() })
+      toast({ title: tutorialId === 'navigation' ? 'Tour hidden for now' : 'Tutorial saved for later' })
       closeTour()
     } catch (error) {
       toast({
@@ -289,9 +298,17 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
 
   const finishTour = async () => {
     try {
-      await savePreference('productTourCompletedAt')
-      toast({ title: 'Product tour complete' })
-      closeTour(true)
+      if (tutorialId === 'navigation') {
+        await savePreference('productTourCompletedAt')
+        toast({ title: 'Product tour complete' })
+        closeTour(true)
+      } else {
+        saveTutorialProgress(tutorialId, { stepIndex: steps.length - 1, completedAt: new Date().toISOString() })
+        toast({ title: `${tutorial.title} complete` })
+        setOpen(false)
+        setSpotlight(null)
+        router.replace('/tutorials')
+      }
     } catch (error) {
       toast({
         title: 'Could not save tour progress',
@@ -325,7 +342,7 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
         ? clamp(SIDEBAR_PANEL_LEFT, 16, panelMaxLeft)
         : clamp(spotlight.left, 16, panelMaxLeft)
       : clamp(viewport.width / 2 - PANEL_WIDTH / 2, 16, panelMaxLeft)
-  const finalStep = stepIndex === productTourSteps.length - 1
+  const finalStep = stepIndex === steps.length - 1
 
   return (
     <div className="fixed inset-0 z-[90] pointer-events-none">
@@ -368,7 +385,7 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-              Navigation tour · Step {stepIndex + 1} of {productTourSteps.length}
+              {tutorial.title} · Step {stepIndex + 1} of {steps.length}
             </p>
             <h2 id="product-tour-title" className="mt-2 text-base font-semibold">
               {activeStep.title}
@@ -429,9 +446,9 @@ export function ProductTour({ initialOpen }: { initialOpen: boolean }) {
         </div>
         <div
           className="mt-3 grid gap-1"
-          style={{ gridTemplateColumns: `repeat(${productTourSteps.length}, minmax(0, 1fr))` }}
+          style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
         >
-          {productTourSteps.map((step, index) => (
+          {steps.map((step, index) => (
             <span
               key={step.title}
               className={cn(

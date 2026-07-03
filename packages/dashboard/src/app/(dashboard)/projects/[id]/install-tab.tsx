@@ -336,7 +336,7 @@ export function FeedbacksWidgetScript() {
   const selectedTarget = installTargets.find((target) => target.id === activePlatform) || installTargets[0]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tour="install-workspace">
       <Card className="border-primary/25 bg-primary/[0.035]">
         <CardContent className="space-y-5 p-5 sm:p-6">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -406,7 +406,7 @@ export function FeedbacksWidgetScript() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card data-tour="install-snippet">
         <CardHeader>
           <div>
             <CardTitle className="text-lg">Install code</CardTitle>

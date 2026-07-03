@@ -52,7 +52,8 @@ export function ProjectMenu({
   return (
     <nav
       aria-label="Project menu"
-      className="sticky top-0 z-30 -mx-4 -mt-4 overflow-x-auto border-b border-primary/25 bg-primary/[0.09] px-4 py-3 shadow-[0_1px_0_hsl(var(--primary)/0.16),0_14px_28px_-24px_hsl(var(--primary)/0.65)] backdrop-blur dark:border-primary/35 dark:bg-primary/[0.16] md:-mx-6 md:-mt-6 md:px-6"
+      data-tour="project-menu"
+      className="scroll-fade-x sticky top-0 z-30 -mx-4 -mt-4 overflow-x-auto border-b border-primary/25 bg-primary/[0.09] px-4 py-3 pr-10 shadow-[0_1px_0_hsl(var(--primary)/0.16),0_14px_28px_-24px_hsl(var(--primary)/0.65)] backdrop-blur dark:border-primary/35 dark:bg-primary/[0.12] md:-mx-6 md:-mt-6 md:px-6"
     >
       <div className="flex min-h-11 min-w-max items-center gap-2">
         {items.map((item) => (
@@ -145,6 +146,7 @@ export function SetupProgress({
   return (
     <nav
       aria-label="Setup steps"
+      data-tour="setup-progress"
       className="rounded-xl border border-primary/25 bg-card shadow-sm"
     >
       <div className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
@@ -172,25 +174,25 @@ export function SetupProgress({
         </Link>
       </div>
 
-      <ol className="grid border-t bg-muted/20 md:grid-cols-4">
+      <ol className="grid grid-cols-4 border-t bg-muted/20">
         {steps.map((step, index) => {
           const current = activeStep === step.id
           const completed = index < activeIndex
           return (
-            <li key={step.id} className="border-t first:border-t-0 md:border-l md:border-t-0 md:first:border-l-0">
+            <li key={step.id} className="border-l first:border-l-0">
               <Link
                 href={step.href}
                 prefetch={false}
                 onClick={() => beginNavigation(step.href)}
                 onMouseEnter={() => prefetch(step.href)}
                 onFocus={() => prefetch(step.href)}
-                className={`flex min-h-16 gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/45 ${
+                className={`flex min-h-16 flex-col items-center justify-center gap-1 px-1.5 py-2 text-center transition-colors hover:bg-accent/45 md:flex-row md:justify-start md:gap-3 md:px-4 md:py-3 md:text-left ${
                   current ? 'bg-primary/[0.08]' : ''
                 }`}
                 aria-current={current ? 'step' : undefined}
               >
                 <span
-                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${
                     completed
                       ? 'border-primary bg-primary text-primary-foreground'
                       : current
@@ -208,7 +210,7 @@ export function SetupProgress({
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-foreground">{step.label}</span>
-                  <span className="mt-0.5 block text-xs leading-4 text-muted-foreground">{step.body}</span>
+                  <span className="mt-0.5 hidden text-xs leading-4 text-muted-foreground lg:block">{step.body}</span>
                 </span>
               </Link>
             </li>

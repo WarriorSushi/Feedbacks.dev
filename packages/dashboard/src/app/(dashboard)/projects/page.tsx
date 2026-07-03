@@ -46,7 +46,7 @@ export default async function ProjectsPage() {
             </p>
           )}
         </div>
-        <Link href="/projects/new">
+        <Link href="/projects/new" data-tour="new-project">
           <Button>
             <Plus className="mr-2 h-4 w-4" /> New Project
           </Button>

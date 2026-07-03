@@ -48,14 +48,6 @@ const navItems = [
   { href: '/settings',  label: 'Settings',  icon: Settings, tourId: 'nav-settings' },
 ]
 
-const projectSubItems = [
-  { key: 'setup', label: 'Setup', href: (projectId: string) => `/projects/${projectId}?tab=customize` },
-  { key: 'integrations', label: 'Integrations', href: (projectId: string) => `/projects/${projectId}?tab=integrations` },
-  { key: 'board', label: 'Public Board', href: (projectId: string) => `/projects/${projectId}?tab=board` },
-  { key: 'api', label: 'API', href: (projectId: string) => `/projects/${projectId}?tab=api` },
-  { key: 'settings', label: 'Project settings', href: (projectId: string) => `/projects/${projectId}?tab=settings` },
-]
-
 const projectColors = [
   'bg-indigo-500',
   'bg-emerald-500',
@@ -90,20 +82,13 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
   const [pendingHref, setPendingHref] = React.useState<string | null>(null)
   const [projectOpen, setProjectOpen] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
-  const [collapsed, setCollapsed] = React.useState(pathname === '/dashboard/boards')
-  const [expandedProjectId, setExpandedProjectId] = React.useState<string | null>(resolvedCurrentProjectId ?? null)
+  const [collapsed, setCollapsed] = React.useState(false)
   const dropdownRef = React.useRef<HTMLDivElement>(null)
   const supabase = React.useMemo(() => createClient(), [])
 
   React.useEffect(() => {
     setVisibleProjects(projects)
   }, [projects])
-
-  React.useEffect(() => {
-    if (resolvedCurrentProjectId) {
-      setExpandedProjectId(resolvedCurrentProjectId)
-    }
-  }, [resolvedCurrentProjectId])
 
   React.useEffect(() => {
     const removeDeletedProject = (event: Event) => {
@@ -148,12 +133,6 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
   }, [currentHref])
 
   React.useEffect(() => {
-    if (pathname === '/dashboard/boards') {
-      setCollapsed(true)
-    }
-  }, [pathname])
-
-  React.useEffect(() => {
     const expandForTour = () => {
       setCollapsed(false)
       if (window.matchMedia('(max-width: 767px)').matches) {
@@ -172,8 +151,6 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
     },
     [currentHref, router],
   )
-
-  const activeProjectTab = pathname.startsWith('/projects/') ? searchParams.get('tab') || 'customize' : null
 
   const currentProjectColorClass =
     projectColors[visibleProjects.indexOf(currentProject!) % projectColors.length] ?? 'bg-muted-foreground'
@@ -358,73 +335,6 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
                   <span className="truncate">{item.label}</span>
                 )}
               </Link>
-              {item.href === '/projects' && isActive && !collapsed && visibleProjects.length > 0 && (
-                <div className="ml-6 space-y-0.5 border-l py-1 pl-2">
-                  {visibleProjects.map((project, index) => {
-                    const selected = project.id === resolvedCurrentProjectId
-                    const expanded = expandedProjectId === project.id
-                    return (
-                      <div key={project.id} className="space-y-0.5">
-                        <button
-                          type="button"
-                          onClick={() => setExpandedProjectId(expanded ? null : project.id)}
-                          onMouseEnter={() => router.prefetch(`/projects/${project.id}?tab=customize`)}
-                          onFocus={() => router.prefetch(`/projects/${project.id}?tab=customize`)}
-                          className={cn(
-                            'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] transition-[background-color,color,transform] active:scale-[0.98]',
-                            selected
-                              ? 'bg-primary/10 font-medium text-primary'
-                              : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-                          )}
-                          aria-expanded={expanded}
-                        >
-                          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', projectColors[index % projectColors.length])} />
-                          <span className="truncate">{project.name}</span>
-                          <ChevronDown
-                            className={cn(
-                              'ml-auto h-3 w-3 shrink-0 transition-transform',
-                              expanded && 'rotate-180',
-                            )}
-                          />
-                        </button>
-                        {expanded && (
-                          <div className="ml-3 space-y-0.5 border-l pl-2">
-                            {projectSubItems.map((subItem) => {
-                              const href = subItem.href(project.id)
-                              const subActive =
-                                selected &&
-                                (subItem.key === 'setup'
-                                  ? activeProjectTab === 'customize' || activeProjectTab === 'install'
-                                  : activeProjectTab === subItem.key)
-                              return (
-                                <Link
-                                  key={subItem.key}
-                                  href={href}
-                                  prefetch={false}
-                                  onClick={() => beginNavigation(href)}
-                                  onMouseEnter={() => router.prefetch(href)}
-                                  onFocus={() => router.prefetch(href)}
-                                  className={cn(
-                                    'flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] transition-[background-color,color,transform] active:scale-[0.98]',
-                                    subActive
-                                      ? 'bg-background font-medium text-foreground shadow-sm'
-                                      : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-                                  )}
-                                >
-                                  {pendingHref === href && (
-                                    <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
-                                  )}
-                                  <span className="truncate">{subItem.label}</span>
-                                </Link>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
             </React.Fragment>
           )
         })}

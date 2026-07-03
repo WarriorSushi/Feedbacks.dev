@@ -51,3 +51,9 @@ test('preview deployments are left alone', async () => {
 
   assert.equal(redirect, null)
 })
+
+test('localhost surfaces are left alone even when local origins are configured', async () => {
+  const { getCanonicalHostRedirect } = await loadDomainRouting()
+  assert.equal(getCanonicalHostRedirect(new URL('http://localhost:3000/boards')), null)
+  assert.equal(getCanonicalHostRedirect(new URL('http://127.0.0.1:3000/dashboard')), null)
+})

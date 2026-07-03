@@ -7,12 +7,14 @@ import { cn } from '@/lib/utils'
 interface BoardDirectorySurfaceProps {
   sort?: string
   category?: string
+  page?: string
   variant?: 'public' | 'dashboard'
 }
 
 export async function BoardDirectorySurface({
   sort,
   category,
+  page,
   variant = 'public',
 }: BoardDirectorySurfaceProps) {
   const entries = await loadBoardDirectoryEntries()
@@ -79,6 +81,7 @@ export async function BoardDirectorySurface({
         categories={categories}
         initialSort={(sort as BoardSortMode) || 'trending'}
         initialCategory={category?.trim().toLowerCase() || ''}
+        initialPage={Number(page) || 1}
         variant={variant}
       />
     </div>

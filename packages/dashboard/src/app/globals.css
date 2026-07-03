@@ -32,25 +32,25 @@
   }
 
   .dark {
-    /* Deep green-tinted dark surfaces — proper elevation system */
-    --background: 85 22% 5.5%;
-    --foreground: 85 10% 94%;
-    --card: 85 14% 10.5%;
-    --card-foreground: 85 10% 94%;
-    --popover: 85 12% 12.5%;
-    --popover-foreground: 85 10% 94%;
+    /* Neutral dark elevation keeps green reserved for action and state. */
+    --background: 0 0% 5.5%;
+    --foreground: 80 6% 94%;
+    --card: 80 5% 10.5%;
+    --card-foreground: 80 6% 94%;
+    --popover: 80 4% 13%;
+    --popover-foreground: 80 6% 94%;
     --primary: 85 72% 50%;
     --primary-foreground: 85 40% 6%;
-    --secondary: 85 12% 15.5%;
-    --secondary-foreground: 85 8% 88%;
-    --muted: 85 12% 14.5%;
-    --muted-foreground: 85 8% 66%;
-    --accent: 85 12% 18%;
-    --accent-foreground: 85 8% 90%;
+    --secondary: 80 5% 16%;
+    --secondary-foreground: 80 5% 88%;
+    --muted: 80 4% 15%;
+    --muted-foreground: 80 5% 68%;
+    --accent: 80 5% 19%;
+    --accent-foreground: 80 5% 92%;
     --destructive: 0 62% 38%;
     --destructive-foreground: 0 0% 98%;
-    --border: 85 10% 21%;
-    --input: 85 10% 21%;
+    --border: 80 5% 23%;
+    --input: 80 5% 23%;
     --ring: 85 72% 50%;
 
     /* Brand tokens dark */
@@ -178,6 +178,13 @@
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground) / 0.4);
+  }
+
+  @media (max-width: 767px) {
+    .scroll-fade-x {
+      -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 32px), transparent 100%);
+      mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 32px), transparent 100%);
+    }
   }
 
   /* Entrance animations */

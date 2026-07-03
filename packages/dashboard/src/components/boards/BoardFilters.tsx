@@ -64,12 +64,14 @@ export function BoardFilters({
               value={search}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Search requests..."
+              aria-label="Search board requests"
               className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div className="relative min-w-[168px]">
             <ArrowUpDown className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <select
+              aria-label="Sort board requests"
               value={sort}
               onChange={(event) => onSortChange(event.target.value as SortMode)}
               className="h-10 w-full appearance-none rounded-lg border border-border bg-background pl-9 pr-8 text-sm text-foreground"

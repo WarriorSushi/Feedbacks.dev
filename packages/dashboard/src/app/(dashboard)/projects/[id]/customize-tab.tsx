@@ -298,7 +298,7 @@ export function CustomizeTab({
       )}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
-        <Card>
+        <Card data-tour="widget-settings">
           <CardHeader>
             <CardTitle className="text-lg">Widget settings</CardTitle>
             <CardDescription>
@@ -495,7 +495,7 @@ export function CustomizeTab({
           </CardContent>
         </Card>
 
-        <Card className="overflow-hidden xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto">
+        <Card data-tour="widget-preview" className="overflow-hidden xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto">
           <CardHeader className="border-b bg-muted/20">
             <CardTitle className="text-lg">Live form preview</CardTitle>
             <CardDescription>

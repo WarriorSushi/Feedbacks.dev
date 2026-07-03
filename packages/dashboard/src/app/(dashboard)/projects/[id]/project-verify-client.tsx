@@ -63,7 +63,7 @@ export function ProjectVerifyClient({
       : `Click the "${runtimeConfig.buttonText || 'Feedback'}" button in the bottom-right corner. Fill out the form and send one test.`
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6" data-tour="verify-surface">
       <ProjectMenu projectId={projectId} activeSection="setup" />
       <SetupProgress projectId={projectId} activeStep="verify" />
 

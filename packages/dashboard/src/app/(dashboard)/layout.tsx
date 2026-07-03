@@ -60,8 +60,9 @@ export default async function DashboardLayout({
   const preferences =
     userSettings?.preferences && typeof userSettings.preferences === 'object'
       ? (userSettings.preferences as {
-          productTourCompletedAt?: string
-          productTourDismissedAt?: string
+        productTourCompletedAt?: string
+        productTourDismissedAt?: string
+        guidedTutorialProgress?: Record<string, { stepIndex: number; completedAt?: string; dismissedAt?: string }>
         })
       : {}
   const showProductTour =
@@ -84,7 +85,11 @@ export default async function DashboardLayout({
       <main className="min-h-0 flex-1 overflow-y-auto bg-muted/35 pb-[env(safe-area-inset-bottom,0px)] dark:bg-background">
         <div className="mx-auto max-w-7xl px-4 py-4 md:px-6 md:py-6">{children}</div>
       </main>
-      <ProductTour initialOpen={showProductTour} />
+      <ProductTour
+        initialOpen={showProductTour}
+        defaultProjectId={currentProjectId || projects?.[0]?.id}
+        initialTutorialProgress={preferences.guidedTutorialProgress}
+      />
     </div>
   )
 }

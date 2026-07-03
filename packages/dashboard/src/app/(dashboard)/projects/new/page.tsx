@@ -73,7 +73,7 @@ export default function NewProjectPage() {
       </Link>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <Card>
+        <Card data-tour="project-create-form">
           <CardHeader>
             <CardTitle>Create your first project</CardTitle>
             <CardDescription>
@@ -133,7 +133,7 @@ export default function NewProjectPage() {
                 </div>
               </div>
             )}
-            <Button type="submit" size="lg" className="w-full" disabled={loading || !name.trim()}>
+            <Button data-tour="project-create-submit" type="submit" size="lg" className="w-full" disabled={loading || !name.trim()}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create project and customize
             </Button>

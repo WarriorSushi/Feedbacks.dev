@@ -312,12 +312,13 @@ function FeedbackInboxInner() {
 
       {/* ─── Filters ─────────────────────────────────────── */}
       <div className="flex flex-col gap-2.5">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+        <div data-tour="inbox-search" className="flex flex-col gap-2 md:flex-row md:items-center">
           <form onSubmit={handleSearch}>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search feedback…"
+                aria-label="Search feedback"
                 className="h-9 w-full pl-9 text-sm md:w-72"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
@@ -343,6 +344,7 @@ function FeedbackInboxInner() {
               <Tag className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Filter by tag…"
+                aria-label="Filter feedback by tag"
                 className="h-9 w-full pl-9 text-sm md:w-56"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
@@ -365,7 +367,7 @@ function FeedbackInboxInner() {
         </div>
 
         <div data-tour="inbox-filters" className="-mx-4 px-4 md:mx-0 md:px-0">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+          <div className="scroll-fade-x flex snap-x items-center gap-1.5 overflow-x-auto pb-1 pr-8 scrollbar-thin md:pr-0">
           {/* Status group */}
           <FilterPill
             active={!status && read === 'all'}
@@ -451,7 +453,7 @@ function FeedbackInboxInner() {
 
         {projects.length > 0 && (
           <div className="-mx-4 px-4 md:mx-0 md:px-0">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+            <div className="scroll-fade-x flex snap-x items-center gap-1.5 overflow-x-auto pb-1 pr-8 scrollbar-thin md:pr-0">
               <span className="pr-1 text-[11px] font-medium text-muted-foreground">
                 Projects
               </span>
@@ -615,6 +617,7 @@ function FeedbackInboxInner() {
             value={bulkTagInput}
             onChange={(e) => setBulkTagInput(e.target.value)}
             placeholder="tag"
+            aria-label="Tag for selected feedback"
             className="h-8 w-28 shrink-0 rounded-full px-2.5 text-[12px]"
           />
           <Button
@@ -669,7 +672,7 @@ function FilterPill({
       aria-pressed={active}
       className={cn(
         'flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-all',
-        'min-h-11 flex-shrink-0 md:min-h-8',
+        'min-h-11 flex-shrink-0 snap-start md:min-h-8',
         active
           ? 'bg-foreground text-background shadow-sm'
           : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
