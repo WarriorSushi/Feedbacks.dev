@@ -3,10 +3,12 @@ import { ArrowRight, ExternalLink, Globe, Settings2 } from 'lucide-react'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { getMarketingOrigin } from '@/lib/domain-routing'
 
 export const metadata = { title: 'Your Public Boards' }
 
 export default async function DashboardBoardsPage() {
+  const publicBoardsUrl = `${getMarketingOrigin()}/boards`
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -51,10 +53,10 @@ export default async function DashboardBoardsPage() {
           </p>
         </div>
         <Button variant="outline" asChild>
-          <Link href="/boards">
+          <a href={publicBoardsUrl}>
             <Globe className="mr-2 h-4 w-4" />
             Browse all boards
-          </Link>
+          </a>
         </Button>
       </div>
 
