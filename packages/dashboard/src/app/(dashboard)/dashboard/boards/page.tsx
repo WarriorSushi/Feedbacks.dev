@@ -44,7 +44,7 @@ export default async function DashboardBoardsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6" data-tour="owner-boards">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div data-tour="owner-boards-summary" className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Public boards</p>
           <h1 className="mt-2 text-2xl font-bold">Your public boards</h1>
@@ -67,7 +67,7 @@ export default async function DashboardBoardsPage() {
           <Button className="mt-5" asChild><Link href="/projects/new">Create project</Link></Button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border bg-card">
+        <div data-tour="owner-board-list" className="overflow-hidden rounded-lg border bg-card">
           {(projects || []).map((project) => {
             const board = boardByProject.get(project.id)
             const published = Boolean(board?.enabled && board.slug && board.visibility !== 'private')

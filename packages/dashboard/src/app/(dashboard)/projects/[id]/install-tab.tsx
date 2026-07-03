@@ -407,7 +407,7 @@ export function FeedbacksWidgetScript() {
       </Card>
 
       <Card data-tour="install-snippet">
-        <CardHeader>
+        <CardHeader data-tour="install-snippet-header">
           <div>
             <CardTitle className="text-lg">Install code</CardTitle>
             <CardDescription>
@@ -416,7 +416,7 @@ export function FeedbacksWidgetScript() {
           </div>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Install platform">
+          <div data-tour="install-platforms" className="flex flex-wrap gap-2" role="group" aria-label="Install platform">
             {installTargets.map((target) => (
               <button
                 key={target.id}
@@ -453,15 +453,17 @@ export function FeedbacksWidgetScript() {
 
           {projectKey ? (
             selectedTarget.code ? (
-              <CodeSnippet
-                tabs={[
-                  {
-                    label: selectedTarget.label,
-                    code: selectedTarget.code,
-                    language: selectedTarget.language,
-                  },
-                ]}
-              />
+              <div data-tour="install-code">
+                <CodeSnippet
+                  tabs={[
+                    {
+                      label: selectedTarget.label,
+                      code: selectedTarget.code,
+                      language: selectedTarget.language,
+                    },
+                  ]}
+                />
+              </div>
             ) : (
               <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm leading-6 text-muted-foreground">
                 Native mobile apps do not use a browser script tag. Use the API from your backend, or inject the Website snippet only inside WebView content.

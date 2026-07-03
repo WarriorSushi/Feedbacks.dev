@@ -1,33 +1,11 @@
 import { createServerSupabase } from '@/lib/supabase-server'
-import { ProjectSurfacePicker, type ProjectSurfaceItem } from '@/components/project-surface-picker'
-import type { WebhookConfig } from '@/lib/types'
 import { cookies } from 'next/headers'
-import { CURRENT_PROJECT_COOKIE, prioritizeSelectedProject } from '@/lib/project-selection'
+import { redirect } from 'next/navigation'
+import { ProjectRequiredEmpty } from '@/components/project-required-empty'
+import { CURRENT_PROJECT_COOKIE, getSelectedProject } from '@/lib/project-selection'
 
 export const metadata = {
   title: 'Integrations',
-}
-
-type IntegrationProject = {
-  id: string
-  name: string
-  domain: string | null
-  webhooks: WebhookConfig | null
-}
-
-function countActiveEndpoints(webhooks: WebhookConfig | null) {
-  if (!webhooks) return 0
-
-  const simpleGroups = [webhooks.slack, webhooks.discord, webhooks.generic]
-  const simpleCount = simpleGroups.reduce((total, group) => {
-    if (!group) return total
-    const endpoints = group.endpoints?.filter((endpoint) => endpoint.enabled).length ?? 0
-    const legacyEndpoint = group.enabled && group.url ? 1 : 0
-    return total + Math.max(endpoints, legacyEndpoint)
-  }, 0)
-
-  const githubCount = webhooks.github?.endpoints?.filter((endpoint) => endpoint.enabled).length ?? 0
-  return simpleCount + githubCount
 }
 
 export default async function IntegrationsPage() {
@@ -40,34 +18,18 @@ export default async function IntegrationsPage() {
 
   const { data: projects } = await supabase
     .from('projects')
-    .select('id, name, domain, webhooks')
+    .select('id')
     .eq('owner_user_id', user!.id)
     .order('created_at', { ascending: false })
 
-  const orderedProjects = prioritizeSelectedProject((projects as IntegrationProject[] | null) || [], preferredProjectId)
-  const currentProjectId = orderedProjects[0]?.id
-  const items: ProjectSurfaceItem[] = orderedProjects.map((project) => {
-    const activeEndpoints = countActiveEndpoints(project.webhooks)
-    return {
-      id: project.id,
-      name: project.name,
-      domain: project.domain,
-      href: `/projects/${project.id}?tab=integrations`,
-      status: activeEndpoints === 0 ? 'No active endpoints' : `${activeEndpoints} active endpoint${activeEndpoints === 1 ? '' : 's'}`,
-      detail: 'Slack, Discord, GitHub, or webhook routing',
-    }
-  })
+  const project = getSelectedProject(projects || [], preferredProjectId)
+  if (project) redirect(`/projects/${project.id}?tab=integrations`)
 
   return (
-    <ProjectSurfacePicker
+    <ProjectRequiredEmpty
       eyebrow="Integrations"
-      title="Pick a project to connect"
-      description="Each project has its own routing. Choose one, then add or test the endpoint for that product."
-      actionLabel="Open integrations"
-      emptyTitle="No projects to connect yet"
-      emptyDescription="Create a project first. Then you can route feedback to Slack, Discord, GitHub, or a webhook."
-      items={items}
-      preferredProjectId={currentProjectId}
+      title="Connect feedback to your workflow"
+      description="Create a project, then add Slack, Discord, GitHub, or webhook routing from its workspace."
     />
   )
 }

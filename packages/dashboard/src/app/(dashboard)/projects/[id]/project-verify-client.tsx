@@ -67,7 +67,7 @@ export function ProjectVerifyClient({
       <ProjectMenu projectId={projectId} activeSection="setup" />
       <SetupProgress projectId={projectId} activeStep="verify" />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div data-tour="verify-guide" className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Test your saved form</h1>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">

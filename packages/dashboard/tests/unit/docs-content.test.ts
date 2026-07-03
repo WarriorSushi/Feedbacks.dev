@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+import type { DocsPage } from '../../src/lib/docs-content.ts'
+
+async function loadDocsContent() {
+  return import(new URL('../../src/lib/docs-content.ts', import.meta.url).href)
+}
+
+test('documentation has unique routes and useful article structure', async () => {
+  const { DOCS_PAGES } = await loadDocsContent()
+  const pages = DOCS_PAGES as DocsPage[]
+  const slugs = pages.map((page) => page.slug)
+
+  assert.equal(pages.length, 16)
+  assert.equal(new Set(slugs).size, slugs.length)
+  for (const page of pages) {
+    assert.ok(page.title.length > 2)
+    assert.ok(page.description.length > 20)
+    assert.ok(page.blocks.some((block) => block.type === 'heading'))
+  }
+})
+
+test('documentation heading anchors are unique within each page', async () => {
+  const { DOCS_PAGES } = await loadDocsContent()
+  const pages = DOCS_PAGES as DocsPage[]
+
+  for (const page of pages) {
+    const ids = page.blocks.flatMap((block) => block.type === 'heading' ? [block.id] : [])
+    assert.equal(new Set(ids).size, ids.length, `duplicate heading id on ${page.slug}`)
+  }
+})

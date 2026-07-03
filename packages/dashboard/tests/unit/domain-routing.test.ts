@@ -29,6 +29,13 @@ test('marketing surfaces redirect from app host to www host', async () => {
   assert.equal(redirect?.toString(), 'https://www.feedbacks.dev/boards?sort=recent')
 })
 
+test('documentation stays on the canonical marketing host', async () => {
+  const { getCanonicalHostRedirect } = await loadDomainRouting()
+  const redirect = getCanonicalHostRedirect(new URL('https://app.feedbacks.dev/docs/api/rest'))
+
+  assert.equal(redirect?.toString(), 'https://www.feedbacks.dev/docs/api/rest')
+})
+
 test('app root sends anonymous users to auth and signed-in users to dashboard', async () => {
   const { getCanonicalHostRedirect } = await loadDomainRouting()
 

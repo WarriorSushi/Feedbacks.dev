@@ -72,6 +72,9 @@ export default async function LandingPage() {
             <BrandWordmark className="text-lg" priority />
           </Link>
           <div className="flex items-center gap-2">
+            <Link href="/docs" prefetch={false} className="hidden sm:block">
+              <Button variant="ghost" size="sm">Docs</Button>
+            </Link>
             <Link href="/boards" prefetch={false} className="hidden sm:block">
               <Button variant="ghost" size="sm">
                 Boards
@@ -505,6 +508,9 @@ export default async function LandingPage() {
             <BrandWordmark className="text-sm" markClassName="h-5 w-5" />
           </span>
           <div className="flex items-center gap-6 text-xs text-muted-foreground">
+            <Link href="/docs" prefetch={false} className="transition-colors hover:text-foreground">
+              Docs
+            </Link>
             <Link href="/boards" prefetch={false} className="transition-colors hover:text-foreground">
               Boards
             </Link>

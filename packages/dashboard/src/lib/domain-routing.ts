@@ -14,7 +14,7 @@ const APP_SURFACE_PREFIXES = [
 ]
 
 const PROTECTED_APP_PREFIXES = APP_SURFACE_PREFIXES.filter((prefix) => prefix !== '/auth')
-const MARKETING_SURFACE_PREFIXES = ['/', '/boards', '/privacy', '/terms']
+const MARKETING_SURFACE_PREFIXES = ['/', '/boards', '/docs', '/privacy', '/terms']
 
 function normalizeOrigin(value: string | undefined, fallback: string) {
   return (value || fallback).replace(/\/+$/, '')

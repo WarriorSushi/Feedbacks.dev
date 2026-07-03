@@ -28,6 +28,7 @@ import {
   Code2,
   CircleHelp,
   BookOpen,
+  Library,
 } from 'lucide-react'
 import type { Project } from '@/lib/types'
 import { createClient } from '@/lib/supabase-browser'
@@ -41,9 +42,10 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true, tourId: 'nav-dashboard' },
   { href: '/feedback',  label: 'Feedback',  icon: MessageSquare, tourId: 'nav-feedback' },
   { href: '/projects',  label: 'Projects',  icon: FolderOpen, tourId: 'nav-projects' },
-  { href: '/integrations', label: 'Integrations', icon: Webhook, tourId: 'nav-integrations' },
+  { href: '/integrations', label: 'Integrations', icon: Webhook, tourId: 'nav-integrations', projectTab: 'integrations' },
   { href: '/dashboard/boards', label: 'Public Boards', icon: Globe, tourId: 'nav-boards' },
-  { href: '/api-docs', label: 'API', icon: Code2, tourId: 'nav-api' },
+  { href: '/api-docs', label: 'API', icon: Code2, tourId: 'nav-api', projectTab: 'api' },
+  { href: 'https://www.feedbacks.dev/docs', label: 'Docs', icon: Library, tourId: 'nav-docs', external: true },
   { href: '/billing',   label: 'Billing',   icon: CreditCard, tourId: 'nav-billing' },
   { href: '/tutorials', label: 'Tutorials', icon: BookOpen, tourId: 'nav-tutorials' },
   { href: '/settings',  label: 'Settings',  icon: Settings, tourId: 'nav-settings' },
@@ -307,18 +309,32 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
       {/* Nav — scrolls when it overflows, pushes footer to bottom when it doesn't */}
       <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto p-2.5">
         {navItems.map((item) => {
-          const isActive = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(item.href + '/')
+          const projectTab = 'projectTab' in item ? item.projectTab : undefined
+          const external = 'external' in item && item.external
+          const scopedHref = projectTab && currentProject
+            ? `/projects/${currentProject.id}?tab=${projectTab}`
+            : item.href
+          const activeProjectTab = pathname.startsWith('/projects/') ? searchParams.get('tab') : null
+          const isActive = external
+            ? false
+            : projectTab
+            ? activeProjectTab === projectTab
+            : item.href === '/projects' && (activeProjectTab === 'integrations' || activeProjectTab === 'api')
+              ? false
+              : item.exact
+                ? pathname === item.href
+                : pathname === item.href || pathname.startsWith(item.href + '/')
           return (
             <React.Fragment key={item.href}>
               <Link
-                href={item.href}
+                href={scopedHref}
                 data-tour={item.tourId}
                 prefetch={false}
                 title={collapsed ? item.label : undefined}
                 aria-label={collapsed ? item.label : undefined}
-                onClick={() => beginNavigation(item.href)}
-                onMouseEnter={() => router.prefetch(item.href)}
-                onFocus={() => router.prefetch(item.href)}
+                onClick={() => { if (!external) beginNavigation(scopedHref) }}
+                onMouseEnter={() => { if (!external) router.prefetch(scopedHref) }}
+                onFocus={() => { if (!external) router.prefetch(scopedHref) }}
                 className={cn(
                   'group relative flex min-h-11 items-center gap-3 rounded-lg py-2 text-[13px] font-medium md:min-h-0',
                   'transition-all duration-150 active:scale-[0.98]',
@@ -332,7 +348,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
                     : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                 )}
               >
-                {pendingHref === item.href ? (
+                {!external && pendingHref === scopedHref ? (
                   <Loader2 className={cn('h-[17px] w-[17px] shrink-0 animate-spin', isActive && 'text-primary')} />
                 ) : (
                   <item.icon

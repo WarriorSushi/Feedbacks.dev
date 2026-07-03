@@ -7,10 +7,13 @@ import { formatDate } from '@/lib/utils'
 import type { Project } from '@/lib/types'
 import Link from 'next/link'
 import { ArrowRight, Code2, FolderOpen, Inbox, Key, Plus } from 'lucide-react'
+import { cookies } from 'next/headers'
+import { CURRENT_PROJECT_COOKIE, getSelectedProject } from '@/lib/project-selection'
 
 export const metadata = { title: 'Projects' }
 
 export default async function ProjectsPage() {
+  const cookieStore = await cookies()
   const supabase = await createServerSupabase()
   const {
     data: { user },
@@ -33,6 +36,7 @@ export default async function ProjectsPage() {
   counts?.forEach((c) => {
     countMap.set(c.project_id, (countMap.get(c.project_id) || 0) + 1)
   })
+  const currentProjectId = getSelectedProject((projects as Project[] | null) || [], cookieStore.get(CURRENT_PROJECT_COOKIE)?.value)?.id
 
   return (
     <div data-tour="project-surface" className="space-y-6">
@@ -107,6 +111,7 @@ export default async function ProjectsPage() {
                 <div className="flex min-w-0 items-center gap-2">
                   <FolderOpen className="h-4 w-4 shrink-0 text-primary" />
                   <h2 className="truncate text-base font-semibold">{project.name}</h2>
+                  {project.id === currentProjectId && <Badge variant="outline">Current</Badge>}
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   <span>{project.domain || 'No domain set'}</span>

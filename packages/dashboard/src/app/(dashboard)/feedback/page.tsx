@@ -501,12 +501,13 @@ function FeedbackInboxInner() {
               </span>
             </div>
 
-            {feedbacks.map((fb) => (
+            {feedbacks.map((fb, index) => (
               <FeedbackRow
                 key={fb.id}
                 fb={fb}
                 selected={selected.has(fb.id)}
                 onToggle={() => toggleSelect(fb.id)}
+                tourTarget={index === 0}
               />
             ))}
           </div>
@@ -687,16 +688,19 @@ function FeedbackRow({
   fb,
   selected,
   onToggle,
+  tourTarget = false,
 }: {
   fb: Feedback
   selected: boolean
   onToggle: () => void
+  tourTarget?: boolean
 }) {
   const isUnread = isFeedbackUnread(fb)
   const source = getFeedbackSource(fb)
 
   return (
     <div
+      data-tour={tourTarget ? 'inbox-first-item' : undefined}
       className={cn(
         'group relative flex items-start gap-3 border-b px-4 py-3.5 transition-colors last:border-b-0',
         isUnread

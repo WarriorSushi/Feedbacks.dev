@@ -8,21 +8,19 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { GUIDED_TUTORIAL_PROGRESS_KEY, getGuidedTutorial, resolveTutorialHref, type GuidedTutorialId, type GuidedTutorialProgress } from '@/lib/guided-tutorials'
+import { getTourPanelPosition } from '@/lib/tour-position'
 
 interface SpotlightRect {
   top: number
   left: number
   width: number
   height: number
+  radius: number
 }
 
 const SPOTLIGHT_PADDING = 8
 const PANEL_WIDTH = 360
-const SIDEBAR_PANEL_LEFT = 320
-const PANEL_HEIGHT_ESTIMATE = 260
-const MOBILE_BREAKPOINT = 768
-const MOBILE_PANEL_MARGIN = 16
-const MOBILE_PANEL_TOP = 72
+const PANEL_HEIGHT_ESTIMATE = 284
 const EMPTY_TUTORIAL_PROGRESS: Record<string, GuidedTutorialProgress> = {}
 
 function readTutorialProgress(id: GuidedTutorialId): GuidedTutorialProgress | null {
@@ -59,7 +57,7 @@ function isCurrentHref(pathname: string, searchParams: URLSearchParams, href: st
   return true
 }
 
-function getVisibleTourTarget(selector: string): HTMLElement | null {
+function getTourTarget(selector: string): HTMLElement | null {
   const targets = Array.from(document.querySelectorAll<HTMLElement>(selector))
   return targets.find((target) => {
     const rect = target.getBoundingClientRect()
@@ -68,13 +66,21 @@ function getVisibleTourTarget(selector: string): HTMLElement | null {
       style.display !== 'none' &&
       style.visibility !== 'hidden' &&
       rect.width > 0 &&
-      rect.height > 0 &&
+      rect.height > 0
+    )
+  }) || null
+}
+
+function getVisibleTourTarget(selector: string): HTMLElement | null {
+  const target = getTourTarget(selector)
+  if (!target) return null
+  const rect = target.getBoundingClientRect()
+  return (
       rect.bottom > 0 &&
       rect.right > 0 &&
       rect.top < window.innerHeight &&
       rect.left < window.innerWidth
-    )
-  }) || null
+    ) ? target : null
 }
 
 function getSpotlightRect(selector: string): SpotlightRect | null {
@@ -85,8 +91,16 @@ function getSpotlightRect(selector: string): SpotlightRect | null {
   const left = Math.max(SPOTLIGHT_PADDING, rect.left - SPOTLIGHT_PADDING)
   const width = Math.min(window.innerWidth - left - SPOTLIGHT_PADDING, rect.width + SPOTLIGHT_PADDING * 2)
   const height = Math.min(window.innerHeight - top - SPOTLIGHT_PADDING, rect.height + SPOTLIGHT_PADDING * 2)
+  const style = window.getComputedStyle(target)
+  const targetRadius = Math.max(
+    Number.parseFloat(style.borderTopLeftRadius) || 0,
+    Number.parseFloat(style.borderTopRightRadius) || 0,
+    Number.parseFloat(style.borderBottomRightRadius) || 0,
+    Number.parseFloat(style.borderBottomLeftRadius) || 0,
+  )
+  const radius = Math.min(targetRadius + SPOTLIGHT_PADDING, width / 2, height / 2)
 
-  return { top, left, width, height }
+  return { top, left, width, height, radius }
 }
 
 export function ProductTour({
@@ -107,8 +121,11 @@ export function ProductTour({
   const [tutorialId, setTutorialId] = React.useState<GuidedTutorialId>('navigation')
   const [spotlight, setSpotlight] = React.useState<SpotlightRect | null>(null)
   const [viewport, setViewport] = React.useState({ width: 1024, height: 768 })
+  const [panelSize, setPanelSize] = React.useState({ width: PANEL_WIDTH, height: PANEL_HEIGHT_ESTIMATE })
   const [saving, setSaving] = React.useState(false)
   const tutorialSaveQueue = React.useRef(Promise.resolve())
+  const panelRef = React.useRef<HTMLDivElement>(null)
+  const maskId = React.useId().replace(/:/g, '')
 
   const tutorial = getGuidedTutorial(tutorialId) || getGuidedTutorial('navigation')!
   const steps = React.useMemo(
@@ -170,24 +187,47 @@ export function ProductTour({
       })
     }
     const focusTarget = () => {
-      const target = getVisibleTourTarget(activeStep.target)
-      if (target) {
-        target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' })
-      }
+      const target = getTourTarget(activeStep.target)
+      if (!target) return false
+      target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' })
       measureSpotlight()
+      return true
     }
 
-    const timer = window.setTimeout(focusTarget, 360)
+    measureSpotlight()
+    let retryTimer = 0
+    const timer = window.setTimeout(() => {
+      if (focusTarget()) return
+      let attempts = 0
+      retryTimer = window.setInterval(() => {
+        attempts += 1
+        if (focusTarget() || attempts >= 16) window.clearInterval(retryTimer)
+      }, 180)
+    }, 120)
     window.addEventListener('resize', measureSpotlight)
     window.addEventListener('scroll', measureSpotlight, true)
 
     return () => {
       window.clearTimeout(timer)
+      window.clearInterval(retryTimer)
       window.cancelAnimationFrame(frame)
       window.removeEventListener('resize', measureSpotlight)
       window.removeEventListener('scroll', measureSpotlight, true)
     }
   }, [activeStep.target, open, pathname, searchParams])
+
+  React.useLayoutEffect(() => {
+    if (!open || !panelRef.current) return
+    const panel = panelRef.current
+    const measure = () => {
+      const rect = panel.getBoundingClientRect()
+      setPanelSize({ width: rect.width, height: rect.height })
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(panel)
+    return () => observer.disconnect()
+  }, [activeStep.body, activeStep.title, open])
 
   const savePreference = async (key: 'productTourCompletedAt' | 'productTourDismissedAt') => {
     setSaving(true)
@@ -320,67 +360,63 @@ export function ProductTour({
 
   if (!open) return null
 
-  const panelMaxLeft = Math.max(16, viewport.width - PANEL_WIDTH - 16)
   const isSidebarStep = activeStep.target.includes('nav-')
-  const isMobile = viewport.width < MOBILE_BREAKPOINT
-  const mobilePanelTop = !spotlight || spotlight.top < viewport.height / 2
-    ? Math.max(MOBILE_PANEL_TOP, viewport.height - PANEL_HEIGHT_ESTIMATE - MOBILE_PANEL_MARGIN)
-    : MOBILE_PANEL_TOP
-  const panelTop = isMobile
-    ? mobilePanelTop
-    : spotlight
-      ? isSidebarStep
-        ? clamp(spotlight.top - 18, 24, Math.max(24, viewport.height - PANEL_HEIGHT_ESTIMATE))
-        : spotlight.top + spotlight.height + 14 <= viewport.height - 220
-          ? spotlight.top + spotlight.height + 14
-          : Math.max(16, spotlight.top - 222)
-      : viewport.height / 2 - 120
-  const panelLeft = isMobile
-    ? MOBILE_PANEL_MARGIN
-    : spotlight
-      ? isSidebarStep
-        ? clamp(SIDEBAR_PANEL_LEFT, 16, panelMaxLeft)
-        : clamp(spotlight.left, 16, panelMaxLeft)
-      : clamp(viewport.width / 2 - PANEL_WIDTH / 2, 16, panelMaxLeft)
+  const panelPosition = getTourPanelPosition({
+    spotlight,
+    panel: panelSize,
+    viewport,
+    sidebarStep: isSidebarStep,
+  })
   const finalStep = stepIndex === steps.length - 1
 
   return (
     <div className="fixed inset-0 z-[90] pointer-events-none">
       {spotlight ? (
-        <>
-          <div className="pointer-events-auto fixed inset-x-0 top-0 bg-black/60" style={{ height: spotlight.top }} />
-          <div
-            className="pointer-events-auto fixed left-0 bg-black/60"
-            style={{ top: spotlight.top, width: spotlight.left, height: spotlight.height }}
+        <svg
+          aria-hidden="true"
+          className="pointer-events-auto fixed inset-0 h-full w-full"
+          viewBox={`0 0 ${viewport.width} ${viewport.height}`}
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <mask id={maskId} maskUnits="userSpaceOnUse">
+              <rect width={viewport.width} height={viewport.height} fill="white" />
+              <rect
+                x={spotlight.left}
+                y={spotlight.top}
+                width={spotlight.width}
+                height={spotlight.height}
+                rx={spotlight.radius}
+                fill="black"
+              />
+            </mask>
+          </defs>
+          <rect width={viewport.width} height={viewport.height} fill="rgba(0,0,0,0.60)" mask={`url(#${maskId})`} />
+          <rect
+            x={spotlight.left}
+            y={spotlight.top}
+            width={spotlight.width}
+            height={spotlight.height}
+            rx={spotlight.radius}
+            fill="none"
+            stroke="hsl(var(--primary))"
+            strokeWidth="2"
+            vectorEffect="non-scaling-stroke"
+            style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.65))' }}
           />
-          <div
-            className="pointer-events-auto fixed right-0 bg-black/60"
-            style={{
-              top: spotlight.top,
-              left: spotlight.left + spotlight.width,
-              height: spotlight.height,
-            }}
-          />
-          <div
-            className="pointer-events-auto fixed inset-x-0 bottom-0 bg-black/60"
-            style={{ top: spotlight.top + spotlight.height }}
-          />
-          <div
-            className="pointer-events-none fixed rounded-xl border-2 border-primary bg-transparent shadow-[0_0_0_4px_hsl(var(--primary)/0.20),0_0_36px_hsl(var(--primary)/0.38)]"
-            style={spotlight}
-          />
-        </>
+        </svg>
       ) : (
         <div className="pointer-events-auto fixed inset-0 bg-black/60" />
       )}
 
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="product-tour-title"
         aria-describedby="product-tour-description"
         className="pointer-events-auto fixed w-[calc(100vw-2rem)] max-w-[360px] rounded-xl border bg-card p-4 shadow-2xl"
-        style={{ top: panelTop, left: panelLeft }}
+        style={{ top: panelPosition.top, left: panelPosition.left }}
       >
         <div className="flex items-start justify-between gap-3">
           <div>
