@@ -34,7 +34,8 @@ test('renders the live widget and accepts a test submission', async ({ page }) =
   })
   await page.getByRole('button', { name: 'Send Feedback' }).click()
   await feedbackResponse
-  await page.getByRole('link', { name: 'Open project inbox' }).first().click()
-  await expect(page).toHaveURL(new RegExp(`/feedback\\?projectId=${project.id}`), { timeout: 30_000 })
+  await expect(page.getByText('Verification reached the inbox')).toBeVisible()
+  await page.getByRole('link', { name: 'Open verified item' }).click()
+  await expect(page).toHaveURL(/\/feedback\/[^/]+/, { timeout: 30_000 })
   await expect(page.getByText(message)).toBeVisible()
 })

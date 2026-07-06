@@ -42,6 +42,7 @@ const supabase = createClient(url, serviceRoleKey, {
 })
 
 const requiredColumns = {
+  activation_milestones: ['project_id', 'event_name', 'user_id', 'first_seen_at', 'metadata'],
   feedback: [
     'id',
     'project_id',
@@ -77,6 +78,26 @@ const requiredColumns = {
 }
 
 const requiredBuckets = ['feedback_screenshots', 'feedback_attachments']
+const probeProjectId = '00000000-0000-0000-0000-000000000000'
+const requiredReadOnlyFunctions = [
+  {
+    name: 'avg_rating_for_project',
+    args: { p_project_id: probeProjectId },
+  },
+  {
+    name: 'count_by_column',
+    args: { table_name: 'feedback', column_name: 'type', filter_project_id: probeProjectId },
+  },
+  {
+    name: 'dashboard_stats',
+    args: {
+      p_user_id: probeProjectId,
+      p_project_id: null,
+      p_history_cutoff: null,
+      p_trend_start: new Date(0).toISOString(),
+    },
+  },
+]
 
 function fail(message, failures) {
   failures.push(message)
@@ -99,6 +120,15 @@ async function main() {
       fail(`${table} column check failed: ${error.message}`, failures)
     } else {
       pass(`${table} columns present`)
+    }
+  }
+
+  for (const fn of requiredReadOnlyFunctions) {
+    const { error } = await supabase.rpc(fn.name, fn.args)
+    if (error) {
+      fail(`${fn.name} function check failed: ${error.message}`, failures)
+    } else {
+      pass(`${fn.name} function present and service-only probe succeeded`)
     }
   }
 

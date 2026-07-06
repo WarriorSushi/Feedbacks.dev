@@ -9,6 +9,8 @@ import { publicEnv } from '@/lib/public-env'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { enqueueWebhookJobs, processWebhookJobs } from '@/lib/webhook-delivery'
 import type { FeedbackType, FeedbackPriority, Project } from '@/lib/types'
+import { readRequestBodyWithLimit, RequestBodyTooLargeError } from '@/lib/request-body-limit'
+import { recordActivationMilestone } from '@/lib/activation-milestones'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -26,6 +28,7 @@ const VALID_PRIORITIES: FeedbackPriority[] = ['low', 'medium', 'high', 'critical
 const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024
 const MAX_SCREENSHOT_SIZE = 3 * 1024 * 1024
 const MAX_SCREENSHOT_DATA_URL_LENGTH = 4_200_000
+const MAX_REQUEST_BODY_SIZE = 10 * 1024 * 1024
 const ALLOWED_ATTACHMENT_TYPES = ['image/png', 'image/jpeg', 'application/pdf']
 const ALLOWED_SCREENSHOT_TYPES = ['image/png', 'image/jpeg']
 
@@ -90,6 +93,17 @@ export async function POST(request: NextRequest) {
       return jsonError('Too many requests. Please try again later.', 429)
     }
 
+    // Bound the stream before JSON or multipart parsing, including chunked requests.
+    let bodyBytes: Uint8Array
+    try {
+      bodyBytes = await readRequestBodyWithLimit(request, MAX_REQUEST_BODY_SIZE)
+    } catch (error) {
+      if (error instanceof RequestBodyTooLargeError) {
+        return jsonError('Request body too large (max 10MB)', 413)
+      }
+      throw error
+    }
+
     // Parse body (JSON or FormData)
     const contentType = request.headers.get('content-type') ?? ''
     let fields: Record<string, string> = {}
@@ -97,7 +111,15 @@ export async function POST(request: NextRequest) {
     let attachmentFile: File | null = null
 
     if (contentType.includes('multipart/form-data')) {
-      const formData = await request.formData()
+      const boundedRequest = new Request(request.url, {
+        method: 'POST',
+        headers: request.headers,
+        body: bodyBytes.buffer.slice(
+          bodyBytes.byteOffset,
+          bodyBytes.byteOffset + bodyBytes.byteLength,
+        ) as ArrayBuffer,
+      })
+      const formData = await boundedRequest.formData()
       for (const [key, value] of formData.entries()) {
         if (key === 'screenshot' && value instanceof File) {
           screenshotFile = value
@@ -108,7 +130,11 @@ export async function POST(request: NextRequest) {
         }
       }
     } else {
-      fields = await request.json()
+      const parsed = JSON.parse(new TextDecoder().decode(bodyBytes))
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return jsonError('Request body must be a JSON object', 400)
+      }
+      fields = parsed as Record<string, string>
     }
 
     // Honeypot check
@@ -306,6 +332,12 @@ export async function POST(request: NextRequest) {
     }
 
     await incrementFeedbackUsage(project.owner_user_id)
+    await recordActivationMilestone({
+      projectId: project.id,
+      userId: project.owner_user_id,
+      eventName: 'first_feedback_received',
+      admin,
+    })
 
     // Queue webhook delivery so retries survive the request lifecycle.
     if (project.webhooks) {

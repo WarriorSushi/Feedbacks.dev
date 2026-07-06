@@ -14,8 +14,8 @@ import { DEFAULT_PROJECT_ICON, PROJECT_ICONS } from '@/lib/project-icons'
 
 const setupSteps = [
   { Icon: CheckCircle2, title: 'Create project', body: 'Name the place where feedback belongs.' },
-  { Icon: Code2, title: 'Customize first', body: 'Pick the form style before copying code.' },
-  { Icon: Inbox, title: 'Install and test', body: 'Paste code, send one test, then check the inbox.' },
+  { Icon: Code2, title: 'Copy the default install', body: 'The generated snippet works without configuration.' },
+  { Icon: Inbox, title: 'Verify one message', body: 'Send one test, confirm the inbox, then customize if needed.' },
 ]
 
 export default function NewProjectPage() {
@@ -59,7 +59,7 @@ export default function NewProjectPage() {
       if (payload.api_key) {
         rememberProjectApiKey(payload.id, payload.api_key)
       }
-      router.push(`/projects/${payload.id}?created=1&tab=customize`)
+      router.push(`/projects/${payload.id}?created=1&tab=install`)
     } catch {
       setError('Failed to create project')
     } finally {
@@ -81,7 +81,7 @@ export default function NewProjectPage() {
           <CardHeader>
             <CardTitle>Create project</CardTitle>
             <CardDescription>
-              One name is enough. Next you choose the form style, then copy the matching code.
+              One name is enough. The next screen gives you a working install snippet immediately.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -101,42 +101,42 @@ export default function NewProjectPage() {
                 Use the name your team recognizes. You can rename it later.
               </p>
             </div>
-            <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">Project icon</legend>
-              <div className="grid grid-cols-6 gap-2 sm:grid-cols-12">
-                {PROJECT_ICONS.map((option) => {
-                  const selected = icon === option.emoji
-                  return (
-                    <button
-                      key={option.emoji}
-                      type="button"
-                      onClick={() => setIcon(option.emoji)}
-                      className={cn(
-                        'relative flex h-10 items-center justify-center rounded-md border text-lg transition-colors',
-                        'hover:border-primary/40 hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                        selected && 'border-primary/50 bg-primary/[0.09]'
-                      )}
-                      aria-label={`${option.label} icon`}
-                      aria-pressed={selected}
-                      title={option.label}
-                    >
-                      <span aria-hidden="true">{option.emoji}</span>
-                      {selected && (
-                        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                          <Check className="h-2.5 w-2.5" />
-                        </span>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground">Shown in the project switcher so projects are easier to scan.</p>
-            </fieldset>
             <details className="rounded-lg border bg-muted/10">
               <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
-                Add domain later, or set it now
+                Personalize project (optional) · {icon}
               </summary>
-              <div className="border-t px-4 py-3">
+              <div className="space-y-4 border-t px-4 py-3">
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-medium">Project icon</legend>
+                  <div className="grid grid-cols-6 gap-2 sm:grid-cols-12">
+                    {PROJECT_ICONS.map((option) => {
+                      const selected = icon === option.emoji
+                      return (
+                        <button
+                          key={option.emoji}
+                          type="button"
+                          onClick={() => setIcon(option.emoji)}
+                          className={cn(
+                            'relative flex h-10 items-center justify-center rounded-md border text-lg transition-colors',
+                            'hover:border-primary/40 hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            selected && 'border-primary/50 bg-primary/[0.09]'
+                          )}
+                          aria-label={`${option.label} icon`}
+                          aria-pressed={selected}
+                          title={option.label}
+                        >
+                          <span aria-hidden="true">{option.emoji}</span>
+                          {selected && (
+                            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                              <Check className="h-2.5 w-2.5" />
+                            </span>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Shown in the project switcher so projects are easier to scan.</p>
+                </fieldset>
                 <div className="space-y-2">
                   <Label htmlFor="domain">Domain (optional)</Label>
                   <Input
@@ -170,7 +170,7 @@ export default function NewProjectPage() {
             )}
             <Button data-tour="project-create-submit" type="submit" size="lg" className="w-full" disabled={loading || !name.trim()}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create project and customize
+              Create project and get install code
             </Button>
           </form>
           </CardContent>

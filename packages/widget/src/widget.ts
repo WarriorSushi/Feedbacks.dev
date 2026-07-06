@@ -483,6 +483,7 @@ class FeedbacksWidget {
 
       try {
         const captchaToken = container.querySelector<HTMLInputElement>(`#fb-captcha-token-${id}`)?.value || '';
+        let response: FeedbackResponse;
 
         if (file) {
           const fd = new FormData();
@@ -496,7 +497,7 @@ class FeedbacksWidget {
           if (this.screenshotData) fd.append('screenshot', this.screenshotData);
           if (captchaToken) fd.append(this.cfg.captchaProvider === 'hcaptcha' ? 'hcaptchaToken' : 'turnstileToken', captchaToken);
           fd.append('attachment', file);
-          await this.submitData(fd);
+          response = await this.submitData(fd);
         } else {
           const data: FeedbackData = {
             apiKey: this.cfg.projectKey,
@@ -510,9 +511,12 @@ class FeedbacksWidget {
             turnstileToken: this.cfg.captchaProvider === 'turnstile' ? captchaToken || undefined : undefined,
             hcaptchaToken: this.cfg.captchaProvider === 'hcaptcha' ? captchaToken || undefined : undefined,
           };
-          await this.submitData(data);
+          response = await this.submitData(data);
         }
 
+        window.dispatchEvent(new CustomEvent('feedbacks:submitted', {
+          detail: { id: response.id },
+        }));
         this.showSuccess(container, isModal);
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Failed to send feedback. Please try again.';

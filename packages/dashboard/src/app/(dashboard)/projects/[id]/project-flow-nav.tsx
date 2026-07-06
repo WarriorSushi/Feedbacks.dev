@@ -42,7 +42,7 @@ export function ProjectMenu({
 }) {
   const { pendingHref, beginNavigation, prefetch } = usePendingProjectLink()
   const items: Array<{ id: ProjectSection; label: string; href: string }> = [
-    { id: 'setup', label: 'Setup', href: `/projects/${projectId}?tab=customize` },
+    { id: 'setup', label: 'Setup', href: `/projects/${projectId}?tab=install` },
     { id: 'integrations', label: 'Integrations', href: `/projects/${projectId}?tab=integrations` },
     { id: 'board', label: 'Public Board', href: `/projects/${projectId}?tab=board` },
     { id: 'api', label: 'API', href: `/projects/${projectId}?tab=api` },
@@ -90,12 +90,6 @@ export function SetupProgress({
   const { pendingHref, beginNavigation, prefetch } = usePendingProjectLink()
   const steps: Array<{ id: SetupStep; label: string; body: string; href: string }> = [
     {
-      id: 'customize',
-      label: 'Customize',
-      body: 'Confirm the form style.',
-      href: `/projects/${projectId}?tab=customize`,
-    },
-    {
       id: 'install',
       label: 'Install',
       body: 'Copy the matching code.',
@@ -113,12 +107,18 @@ export function SetupProgress({
       body: 'Confirm it arrived.',
       href: `/feedback?projectId=${projectId}`,
     },
+    {
+      id: 'customize',
+      label: 'Customize',
+      body: 'Optional after success.',
+      href: `/projects/${projectId}?tab=customize`,
+    },
   ]
   const activeIndex = Math.max(steps.findIndex((step) => step.id === activeStep), 0)
   const nextActionByStep: Record<SetupStep, { title: string; body: string; href: string; label: string }> = {
     customize: {
-      title: 'Next: confirm the form style',
-      body: 'Use the defaults or adjust placement and labels. Then copy the generated install code.',
+      title: 'Update the install after customization',
+      body: 'Save the form style, then copy the regenerated code if the trigger mode changed.',
       href: `/projects/${projectId}?tab=install`,
       label: 'Continue to install',
     },
@@ -135,10 +135,10 @@ export function SetupProgress({
       label: 'Open project inbox',
     },
     inbox: {
-      title: 'Next: triage the first item',
-      body: 'Open the test item, mark the workflow status intentionally, and keep read state separate.',
-      href: `/feedback?projectId=${projectId}`,
-      label: 'Open project inbox',
+      title: 'Installed: customize only if you need to',
+      body: 'The core loop works. Adjust placement and labels now, or keep the defaults and start collecting feedback.',
+      href: `/projects/${projectId}?tab=customize`,
+      label: 'Customize form',
     },
   }
   const nextAction = nextActionByStep[activeStep]

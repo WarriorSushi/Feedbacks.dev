@@ -46,6 +46,9 @@ For a new internal staging, recovery, or disposable verification project, run th
 22. `sql/022_consolidate_public_board_read_rls.sql` — consolidates public board/announcement/note SELECT policies and splits owner writes
 23. `sql/023_cron_run_audit.sql` — adds service-role cron run audit rows for webhook and notification digest heartbeat checks
 24. `sql/024_webhook_digest_items.sql` — adds the durable webhook digest queue for daily batched endpoint delivery
+25. `sql/025_dashboard_stats.sql` — adds a service-only, owner-scoped aggregate for fast project and all-project dashboards
+26. `sql/026_activation_milestones.sql` — adds privacy-preserving, one-time activation funnel milestones without page-view or visitor tracking
+27. `sql/027_operational_health_indexes.sql` — keeps delivery and installation-health probes indexed as history grows
 
 **How for internal/staging use:** apply the files through the Supabase CLI or copy-paste the contents of each file into the SQL Editor and click "Run".
 

@@ -1174,6 +1174,15 @@ export type Database = {
         }
         Returns: Json
       }
+      dashboard_stats: {
+        Args: {
+          p_history_cutoff?: string | null
+          p_project_id?: string | null
+          p_trend_start?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       generate_api_key: { Args: never; Returns: string }
       increment_usage_counter: {
         Args: {

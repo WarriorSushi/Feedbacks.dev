@@ -16,6 +16,7 @@ const statuses: FeedbackStatus[] = ['new', 'reviewed', 'planned', 'in_progress',
 
 interface FeedbackActionsProps {
   feedbackId: string
+  projectId: string
   currentStatus: FeedbackStatus
   currentTags: string[] | null
 }
@@ -24,7 +25,7 @@ function normalizeTag(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, '-')
 }
 
-export function FeedbackActions({ feedbackId, currentStatus, currentTags }: FeedbackActionsProps) {
+export function FeedbackActions({ feedbackId, projectId, currentStatus, currentTags }: FeedbackActionsProps) {
   const [status, setStatus] = React.useState(currentStatus)
   const [note, setNote] = React.useState('')
   const [tags, setTags] = React.useState<string[]>(currentTags || [])
@@ -55,6 +56,13 @@ export function FeedbackActions({ feedbackId, currentStatus, currentTags }: Feed
       return
     }
     toast({ title: 'Status updated' })
+    if (newStatus !== 'new') {
+      void fetch(`/api/projects/${projectId}/activation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'first_feedback_triaged' }),
+      })
+    }
     router.refresh()
   }
 

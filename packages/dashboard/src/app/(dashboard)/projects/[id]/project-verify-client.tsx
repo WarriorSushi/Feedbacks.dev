@@ -12,7 +12,7 @@ import { readStoredProjectApiKey, rememberProjectApiKey } from '@/lib/project-ap
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ExternalLink, RefreshCw } from 'lucide-react'
+import { CheckCircle2, ExternalLink, RefreshCw } from 'lucide-react'
 import { WidgetPreviewSurface } from './widget-preview-surface'
 import { ProjectMenu, SetupProgress } from './project-flow-nav'
 
@@ -36,6 +36,7 @@ export function ProjectVerifyClient({
   const [status, setStatus] = React.useState<'loading' | 'ready' | 'error'>('loading')
   const [error, setError] = React.useState<string | null>(null)
   const [resolvedProjectKey, setResolvedProjectKey] = React.useState<string | null>(projectKey)
+  const [verifiedFeedbackId, setVerifiedFeedbackId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     if (projectKey) {
@@ -49,6 +50,23 @@ export function ProjectVerifyClient({
       setResolvedProjectKey(storedKey)
     }
   }, [projectId, projectKey])
+
+  React.useEffect(() => {
+    const handleSubmission = (event: Event) => {
+      const feedbackId = (event as CustomEvent<{ id?: string }>).detail?.id
+      if (feedbackId) {
+        setVerifiedFeedbackId(feedbackId)
+        void fetch(`/api/projects/${projectId}/activation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event: 'verification_completed' }),
+        })
+      }
+    }
+
+    window.addEventListener('feedbacks:submitted', handleSubmission)
+    return () => window.removeEventListener('feedbacks:submitted', handleSubmission)
+  }, [projectId])
 
   const runtimeConfig = React.useMemo(
     () => buildRuntimeWidgetConfig(resolvedProjectKey || 'fb_verify_placeholder', savedConfig, { appOrigin }),
@@ -66,6 +84,26 @@ export function ProjectVerifyClient({
     <div className="mx-auto max-w-7xl space-y-6" data-tour="verify-surface">
       <ProjectMenu projectId={projectId} activeSection="setup" />
       <SetupProgress projectId={projectId} activeStep="verify" />
+
+      {verifiedFeedbackId && (
+        <div className="flex flex-col gap-4 rounded-xl border border-primary/35 bg-primary/[0.08] p-5 sm:flex-row sm:items-center sm:justify-between" role="status">
+          <div className="flex min-w-0 gap-3">
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div>
+              <p className="font-semibold text-foreground">Verification reached the inbox</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                The project key, saved configuration, submission endpoint, and inbox path are working.
+              </p>
+            </div>
+          </div>
+          <Button asChild className="shrink-0">
+            <Link href={`/feedback/${verifiedFeedbackId}`}>
+              Open verified item
+              <ExternalLink className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      )}
 
       <div data-tour="verify-guide" className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -104,7 +142,7 @@ export function ProjectVerifyClient({
               2. Type <span className="font-medium text-foreground">Install test for {projectName}</span>.
             </div>
             <div className="rounded-lg border bg-muted/20 p-4">
-              3. Open the inbox. Check that the test is there.
+              3. When it arrives, open the verified item from the success banner.
             </div>
             <div className="rounded-lg border border-dashed bg-muted/10 p-4">
               {!resolvedProjectKey && 'A fresh project key is required before this hosted page can submit live test feedback.'}

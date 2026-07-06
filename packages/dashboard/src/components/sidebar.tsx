@@ -28,7 +28,6 @@ import {
   Webhook,
   Code2,
   CircleHelp,
-  BookOpen,
   Library,
 } from 'lucide-react'
 import type { Project } from '@/lib/types'
@@ -37,6 +36,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import type { BillingStatus, PlanTier } from '@feedbacks/shared'
 import { CURRENT_PROJECT_COOKIE } from '@/lib/project-selection'
 import { DEFAULT_PROJECT_ICON } from '@/lib/project-icons'
+import { getProjectDestination } from '@/lib/project-navigation'
 
 type SidebarProject = Pick<Project, 'id' | 'name'> & { settings?: Project['settings'] | null }
 
@@ -61,7 +61,6 @@ const primaryNavItems: NavItem[] = [
 
 const utilityNavItems: NavItem[] = [
   { href: 'https://www.feedbacks.dev/docs', label: 'Docs', icon: Library, tourId: 'nav-docs', external: true },
-  { href: '/tutorials', label: 'Tutorials', icon: BookOpen, tourId: 'nav-tutorials' },
   { href: '/billing',   label: 'Billing',   icon: CreditCard, tourId: 'nav-billing' },
   { href: '/settings',  label: 'Settings',  icon: Settings, tourId: 'nav-settings' },
 ]
@@ -85,7 +84,8 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
   const currentHref = search ? `${pathname}?${search}` : pathname
   const routeProjectId = pathname.match(/^\/projects\/([^/]+)/)?.[1]
   const boardProjectId = pathname === '/dashboard/boards' ? searchParams.get('project') || undefined : undefined
-  const resolvedCurrentProjectId = routeProjectId || boardProjectId || currentProjectId
+  const dashboardProjectId = pathname === '/dashboard' ? searchParams.get('project') || undefined : undefined
+  const resolvedCurrentProjectId = routeProjectId || boardProjectId || dashboardProjectId || currentProjectId
   const [visibleProjects, setVisibleProjects] = React.useState(projects)
   const [pendingHref, setPendingHref] = React.useState<string | null>(null)
   const [projectOpen, setProjectOpen] = React.useState(false)
@@ -171,9 +171,12 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
   }, [])
 
   const projectDestination = React.useCallback((projectId: string) => {
-    if (pathname === '/dashboard/boards') return `/dashboard/boards?project=${encodeURIComponent(projectId)}`
-    return `/projects/${projectId}`
-  }, [pathname])
+    return getProjectDestination({
+      projectId,
+      pathname,
+      activeProjectTab: routeProjectId ? searchParams.get('tab') : null,
+    })
+  }, [pathname, routeProjectId, searchParams])
 
   React.useEffect(() => {
     if (routeProjectId) rememberProject(routeProjectId)

@@ -69,11 +69,6 @@ export default async function DashboardLayout({
         guidedTutorialProgress?: Record<string, { stepIndex: number; completedAt?: string; dismissedAt?: string }>
         })
       : {}
-  const showProductTour =
-    Boolean(projects?.length) &&
-    !preferences.productTourCompletedAt &&
-    !preferences.productTourDismissedAt
-
   return (
     <div className="flex h-dvh flex-col bg-background md:flex-row">
       <Sidebar
@@ -90,7 +85,7 @@ export default async function DashboardLayout({
         <div className="mx-auto max-w-7xl px-4 py-4 md:px-6 md:py-6">{children}</div>
       </main>
       <ProductTour
-        initialOpen={showProductTour}
+        initialOpen={false}
         defaultProjectId={currentProjectId || projects?.[0]?.id}
         initialTutorialProgress={preferences.guidedTutorialProgress}
       />

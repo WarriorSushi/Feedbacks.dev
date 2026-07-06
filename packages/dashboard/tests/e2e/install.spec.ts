@@ -5,23 +5,15 @@ import { createProjectViaApi, projectInstallPath } from './helpers/project'
 const env = skipE2EIfNeeded()
 test.skip(!env.ready, env.skipReason)
 
-test('creates a project and lands on customization before install', async ({ page }) => {
+test('creates a project and lands on a working install before optional customization', async ({ page }) => {
   await signInWithTestSession(page)
 
   await page.goto('/projects/new')
   await page.getByLabel('Project name').fill(`Playwright Install ${Date.now().toString(36)}`)
-  await page.getByRole('button', { name: 'Create project and customize' }).click()
+  await page.getByRole('button', { name: 'Create project and get install code' }).click()
 
-  await expect(page).toHaveURL(/\/projects\/[^/]+\?created=1&tab=customize/, { timeout: 30_000 })
+  await expect(page).toHaveURL(/\/projects\/[^/]+\?created=1&tab=install/, { timeout: 30_000 })
   await expect(page.getByRole('link', { name: /Setup/ })).toBeVisible()
-  await expect(page.getByText('Pick how the form looks.')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Make the feedback form fit your product' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Live form preview' })).toBeVisible()
-  await expect(page.getByRole('button', { name: /Floating button Adds a feedback button/ })).toBeVisible()
-  await expect(page.getByRole('button', { name: /Custom trigger Connects feedback/ })).toBeVisible()
-  await expect(page.getByRole('button', { name: /Inline form Embeds the full/ })).toBeVisible()
-
-  await page.getByRole('link', { name: /Install Copy code/ }).click()
   await expect(page.getByRole('heading', { name: 'Put the feedback form on your site.' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Copy code' })).toBeVisible()
   await expect(page.getByText('Choose platform')).toBeVisible()
@@ -30,6 +22,10 @@ test('creates a project and lands on customization before install', async ({ pag
   await expect(page.getByRole('button', { name: 'WordPress' })).toBeVisible()
   await page.getByRole('button', { name: 'HTML block' }).click()
   await expect(page.getByText(/Prefer global custom code/i)).toBeVisible()
+
+  await page.getByRole('link', { name: /Customize Optional after success/ }).click()
+  await expect(page.getByRole('heading', { name: 'Make the feedback form fit your product' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Live form preview' })).toBeVisible()
 })
 
 test('copy-paste install guidance stays visible for an existing project', async ({ page }) => {

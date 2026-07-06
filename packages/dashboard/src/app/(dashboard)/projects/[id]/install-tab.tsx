@@ -441,7 +441,19 @@ export function FeedbacksWidgetScript() {
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">{selectedTarget.body}</p>
               </div>
               {selectedTarget.code && (
-                <CopyButton value={selectedTarget.code} label="Copy code" copiedLabel="Copied" size="sm" />
+                <CopyButton
+                  value={selectedTarget.code}
+                  label="Copy code"
+                  copiedLabel="Copied"
+                  size="sm"
+                  onCopied={() => {
+                    void fetch(`/api/projects/${project.id}/activation`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ event: 'install_code_copied' }),
+                    })
+                  }}
+                />
               )}
               {selectedTarget.id === 'mobile' && (
                 <Link href={`/projects/${project.id}?tab=api`}>

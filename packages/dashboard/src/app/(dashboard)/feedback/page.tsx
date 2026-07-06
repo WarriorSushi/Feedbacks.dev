@@ -21,7 +21,8 @@ import {
 import { toast } from '@/hooks/use-toast'
 import type { BillingSummary, Feedback, FeedbackPriority, FeedbackStatus, FeedbackType } from '@/lib/types'
 import { CURRENT_PROJECT_COOKIE, getSelectedProject } from '@/lib/project-selection'
-import { DEFAULT_PROJECT_ICON } from '@/lib/project-icons'
+import { FeedbackProjectScope } from './feedback-project-scope'
+import { SavedInboxViews } from './saved-inbox-views'
 import {
   Search,
   ChevronLeft,
@@ -41,7 +42,6 @@ import {
   Bot,
   ClipboardList,
   EyeOff,
-  Layers3,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -97,6 +97,7 @@ function FeedbackInboxInner() {
   const [total, setTotal] = React.useState(0)
   const [selected, setSelected] = React.useState<Set<string>>(new Set())
   const [bulkLoading, setBulkLoading] = React.useState(false)
+  const [activeRowId, setActiveRowId] = React.useState<string | null>(null)
 
   const page = Number(searchParams.get('page') || '1')
   const status = searchParams.get('status') || ''
@@ -124,11 +125,50 @@ function FeedbackInboxInner() {
   }, [search, tag])
 
   React.useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      if (target?.matches('input, textarea, select, [contenteditable="true"]')) return
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+
+      if (event.key === '/' && !event.shiftKey) {
+        event.preventDefault()
+        document.querySelector<HTMLInputElement>('[aria-label="Search feedback"]')?.focus()
+        return
+      }
+
+      if ((event.key === 'j' || event.key === 'k') && feedbacks.length > 0) {
+        event.preventDefault()
+        const currentIndex = feedbacks.findIndex((feedback) => feedback.id === activeRowId)
+        const nextIndex = event.key === 'j'
+          ? Math.min(feedbacks.length - 1, currentIndex < 0 ? 0 : currentIndex + 1)
+          : Math.max(0, currentIndex < 0 ? feedbacks.length - 1 : currentIndex - 1)
+        const nextId = feedbacks[nextIndex].id
+        setActiveRowId(nextId)
+        requestAnimationFrame(() => {
+          document.querySelector(`[data-feedback-row-id="${nextId}"]`)?.scrollIntoView({ block: 'nearest' })
+        })
+        return
+      }
+
+      if (event.key === 'Enter' && activeRowId) {
+        event.preventDefault()
+        router.push(`/feedback/${activeRowId}`)
+      }
+    }
+
+    window.addEventListener('keydown', handleShortcut)
+    return () => window.removeEventListener('keydown', handleShortcut)
+  }, [activeRowId, feedbacks, router])
+
+  React.useEffect(() => {
+    const controller = new AbortController()
     const fetchProjects = async () => {
       const { data } = await supabase
         .from('projects')
         .select('id, name, settings')
         .order('name', { ascending: true })
+        .abortSignal(controller.signal)
+      if (controller.signal.aborted) return
       const nextProjects = (data as ProjectFilterOption[]) || []
       const savedProjectId = document.cookie
         .split('; ')
@@ -140,15 +180,18 @@ function FeedbackInboxInner() {
       setProjectsLoaded(true)
     }
 
-    fetchProjects()
+    void fetchProjects()
+    return () => controller.abort()
   }, [supabase])
 
   React.useEffect(() => {
+    const controller = new AbortController()
     const fetchBilling = async () => {
       try {
-        const response = await fetch('/api/billing/sync', { cache: 'no-store' })
+        const response = await fetch('/api/billing/sync', { cache: 'no-store', signal: controller.signal })
         if (!response.ok) return
         const data = await response.json()
+        if (controller.signal.aborted) return
         setBillingSummary(data)
       } catch {
         // keep inbox usable even if billing lookup fails
@@ -156,9 +199,10 @@ function FeedbackInboxInner() {
     }
 
     void fetchBilling()
+    return () => controller.abort()
   }, [])
 
-  const fetchFeedback = React.useCallback(async () => {
+  const fetchFeedback = React.useCallback(async (signal?: AbortSignal) => {
     if (!projectsLoaded) return
     setLoading(true)
     let query = supabase
@@ -180,8 +224,15 @@ function FeedbackInboxInner() {
     if (read === 'unread') query = query.is('read_at', null)
     const historyCutoff = billingSummary ? getHistoryWindowStart(billingSummary.entitlements) : null
     if (historyCutoff) query = query.gte('created_at', historyCutoff)
+    if (signal) query = query.abortSignal(signal)
 
-    const { data, count } = await query
+    const { data, count, error } = await query
+    if (signal?.aborted) return
+    if (error) {
+      setLoading(false)
+      toast({ title: 'Could not load feedback', description: error.message, variant: 'destructive' })
+      return
+    }
     setFeedbacks((data as Feedback[]) || [])
     setTotal(count || 0)
     setSelected(new Set())
@@ -189,7 +240,9 @@ function FeedbackInboxInner() {
   }, [supabase, page, projectId, projectsLoaded, status, tag, type, search, agent, publicOnly, priority, read, billingSummary])
 
   React.useEffect(() => {
-    fetchFeedback()
+    const controller = new AbortController()
+    void fetchFeedback(controller.signal)
+    return () => controller.abort()
   }, [fetchFeedback])
 
   const updateParams = (updates: Record<string, string>) => {
@@ -242,6 +295,18 @@ function FeedbackInboxInner() {
       return
     }
     toast({ title: `${selected.size} item${selected.size > 1 ? 's' : ''} updated` })
+    if (newStatus !== 'new') {
+      const projectIds = Array.from(new Set(
+        feedbacks.filter((feedback) => selected.has(feedback.id)).map((feedback) => feedback.project_id),
+      ))
+      projectIds.forEach((selectedProjectId) => {
+        void fetch(`/api/projects/${selectedProjectId}/activation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event: 'first_feedback_triaged' }),
+        })
+      })
+    }
     fetchFeedback()
   }
 
@@ -325,6 +390,9 @@ function FeedbackInboxInner() {
             </p>
           )}
         </div>
+        <p className="hidden text-[11px] text-muted-foreground lg:block" aria-label="Inbox keyboard shortcuts">
+          / search · J/K move · Enter open
+        </p>
       </div>
 
       {/* ─── Filters ─────────────────────────────────────── */}
@@ -468,37 +536,13 @@ function FeedbackInboxInner() {
           </div>
         </div>
 
-        {projects.length > 0 && (
-          <div className="border-y py-2.5">
-            <div className="mb-2 flex items-center justify-between gap-3 px-0.5">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Project view</p>
-                <p className="text-[11px] text-muted-foreground/75">Choose one project or include the whole workspace.</p>
-              </div>
-            </div>
-            <div className="-mx-4 px-4 md:mx-0 md:px-0">
-              <div className="scroll-fade-x flex snap-x items-center gap-2 overflow-x-auto pb-1 pr-8 scrollbar-thin md:pr-0">
-                <ProjectScopeButton
-                  active={showingAllProjects}
-                  onClick={() => updateParams({ projectId: 'all' })}
-                  icon={<Layers3 className="h-3.5 w-3.5" />}
-                >
-                  All projects
-                </ProjectScopeButton>
-                {projects.map((project) => (
-                  <ProjectScopeButton
-                    key={project.id}
-                    active={projectId === project.id}
-                    onClick={() => updateParams({ projectId: project.id })}
-                    icon={<span aria-hidden="true" className="text-sm leading-none">{project.settings?.icon || DEFAULT_PROJECT_ICON}</span>}
-                  >
-                    {project.name}
-                  </ProjectScopeButton>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        <FeedbackProjectScope
+          projects={projects}
+          selectedProjectId={projectId}
+          showingAllProjects={showingAllProjects}
+          onSelect={(nextProjectId) => updateParams({ projectId: nextProjectId })}
+        />
+        <SavedInboxViews currentQuery={searchParams.toString()} />
       </div>
 
       {/* ─── Main List ────────────────────────────────────── */}
@@ -532,11 +576,12 @@ function FeedbackInboxInner() {
             </div>
 
             {feedbacks.map((fb, index) => (
-              <FeedbackRow
-                key={fb.id}
-                fb={fb}
-                selected={selected.has(fb.id)}
-                onToggle={() => toggleSelect(fb.id)}
+                  <FeedbackRow
+                    key={fb.id}
+                    fb={fb}
+                    selected={selected.has(fb.id)}
+                    active={activeRowId === fb.id}
+                    onToggle={() => toggleSelect(fb.id)}
                 tourTarget={index === 0}
               />
             ))}
@@ -714,43 +759,16 @@ function FilterPill({
   )
 }
 
-function ProjectScopeButton({
-  active,
-  onClick,
-  icon,
-  children,
-}: {
-  active: boolean
-  onClick: () => void
-  icon: React.ReactNode
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        'flex min-h-10 flex-shrink-0 snap-start items-center gap-2 rounded-md border px-3 text-xs font-medium transition-colors',
-        active
-          ? 'border-primary/45 bg-primary/[0.1] text-foreground shadow-sm'
-          : 'border-border bg-card text-muted-foreground hover:border-primary/25 hover:bg-accent hover:text-foreground'
-      )}
-    >
-      {icon}
-      <span>{children}</span>
-    </button>
-  )
-}
-
 function FeedbackRow({
   fb,
   selected,
+  active,
   onToggle,
   tourTarget = false,
 }: {
   fb: Feedback
   selected: boolean
+  active: boolean
   onToggle: () => void
   tourTarget?: boolean
 }) {
@@ -760,12 +778,14 @@ function FeedbackRow({
   return (
     <div
       data-tour={tourTarget ? 'inbox-first-item' : undefined}
+      data-feedback-row-id={fb.id}
       className={cn(
         'group relative flex items-start gap-3 border-b px-4 py-3.5 transition-colors last:border-b-0',
         isUnread
           ? 'bg-primary/[0.04] ring-1 ring-inset ring-primary/15 hover:bg-primary/[0.06] dark:bg-primary/[0.07]'
           : 'hover:bg-accent/30',
-        selected && 'bg-accent/50'
+        selected && 'bg-accent/50',
+        active && 'ring-2 ring-inset ring-ring/60',
       )}
     >
       <input

@@ -256,6 +256,7 @@ export default async function FeedbackDetailPage({
               <Separator className="my-4" />
               <FeedbackActions
                 feedbackId={fb.id}
+                projectId={fb.project_id}
                 currentStatus={fb.status}
                 currentTags={fb.tags}
               />

@@ -4,6 +4,7 @@ import { notifyUserOfWebhookFailure } from '@/lib/notifications'
 import { normalizeWebhookConfig, type WebhookKind } from '@/lib/webhook-config'
 import { buildE2ETestWebhookUrl, getE2EBypassSecret, isE2ETestWebhookUrl } from '@/lib/e2e'
 import { buildGenericWebhookSignatureHeaders } from '@/lib/webhook-signing'
+import { postPublicWebhookJson, WEBHOOK_REQUEST_TIMEOUT_MS } from '@/lib/webhook-http'
 import {
   buildDigestPayload,
   buildPayload,
@@ -11,37 +12,6 @@ import {
   type WebhookDeliveryPayload,
   type WebhookPayload,
 } from './webhook-payloads'
-
-/** Blocklist of private/reserved IP ranges for SSRF prevention */
-function isPrivateUrl(urlStr: string): boolean {
-  if (isE2ETestWebhookUrl(urlStr)) {
-    return false
-  }
-
-  try {
-    const parsed = new URL(urlStr)
-    // Only allow https
-    if (parsed.protocol !== 'https:') return true
-
-    const hostname = parsed.hostname
-    // Block IPv6 loopback & private
-    if (hostname === '::1' || hostname.startsWith('fc00:') || hostname.startsWith('fe80:')) return true
-    // Block localhost
-    if (hostname === 'localhost' || hostname === '127.0.0.1') return true
-    // Block private IPv4 ranges
-    const parts = hostname.split('.').map(Number)
-    if (parts.length === 4 && parts.every(p => !isNaN(p))) {
-      if (parts[0] === 10) return true
-      if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true
-      if (parts[0] === 192 && parts[1] === 168) return true
-      if (parts[0] === 169 && parts[1] === 254) return true
-      if (parts[0] === 127) return true
-    }
-    return false
-  } catch {
-    return true
-  }
-}
 
 function buildSlackBody(payload: WebhookDeliveryPayload) {
   if (isDigestPayload(payload)) {
@@ -217,73 +187,56 @@ async function deliverSingle(
   let status: 'success' | 'failed' = 'failed'
   let statusCode: number | null = null
   let responseBody: string | null = null
-  let attempt = 0
-  const maxRetries = 3
+  const attempt = 1
 
-  // SSRF check for non-GitHub endpoints
-  if (type !== 'github' && isPrivateUrl(endpoint.url)) {
-    responseBody = 'URL blocked: private/reserved IP or non-HTTPS'
-    await admin.from('webhook_deliveries').insert({
-      id: deliveryId,
-      project_id: projectId,
-      event: payload.event,
-      kind: type,
-      url: endpoint.url,
-      status: 'failed',
-      status_code: null,
-      response_body: responseBody,
-      attempt: 1,
-      payload: JSON.stringify(payload),
-      created_at: new Date().toISOString(),
-    })
-    return { deliveryId, status: 'failed' as const }
-  }
+  try {
+    if (type === 'github') {
+      const response = await createGitHubIssue(endpoint as GitHubEndpoint, payload)
+      statusCode = response.status
+      responseBody = (await response.text()).slice(0, 1000)
+      status = response.ok ? 'success' : 'failed'
+    } else {
+      const messageBody = type === 'slack'
+        ? buildSlackBody(payload)
+        : type === 'discord'
+          ? buildDiscordBody(payload)
+          : payload
+      const rawBody = JSON.stringify(messageBody)
+      const headers = {
+        ...(type === 'generic'
+          ? buildGenericWebhookSignatureHeaders(rawBody, (endpoint as WebhookEndpoint).signingSecret)
+          : {}),
+        ...(isE2ETestWebhookUrl(endpoint.url) && getE2EBypassSecret()
+          ? { 'x-feedbacks-e2e-bypass': getE2EBypassSecret() as string }
+          : {}),
+      }
 
-  for (let i = 0; i < maxRetries; i++) {
-    attempt++
-    try {
-      let res: Response
-
-      if (type === 'github') {
-        res = await createGitHubIssue(endpoint as GitHubEndpoint, payload)
-      } else {
-        const body = type === 'slack'
-          ? buildSlackBody(payload)
-          : type === 'discord'
-            ? buildDiscordBody(payload)
-            : payload
-        const rawBody = JSON.stringify(body)
-
-        res = await fetch(endpoint.url, {
+      if (isE2ETestWebhookUrl(endpoint.url)) {
+        const response = await fetch(endpoint.url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(type === 'generic'
-              ? buildGenericWebhookSignatureHeaders(rawBody, (endpoint as WebhookEndpoint).signingSecret)
-              : {}),
-            ...(isE2ETestWebhookUrl(endpoint.url) && getE2EBypassSecret()
-              ? { 'x-feedbacks-e2e-bypass': getE2EBypassSecret() as string }
-              : {}),
-          },
+          headers: { 'Content-Type': 'application/json', ...headers },
           body: rawBody,
+          redirect: 'manual',
+          signal: AbortSignal.timeout(WEBHOOK_REQUEST_TIMEOUT_MS),
         })
+        statusCode = response.status
+        responseBody = response.status >= 300 && response.status < 400
+          ? 'Redirect responses are not followed for webhook delivery'
+          : (await response.text()).slice(0, 1000)
+        status = response.ok ? 'success' : 'failed'
+      } else {
+        const response = await postPublicWebhookJson({
+          url: endpoint.url,
+          body: rawBody,
+          headers,
+        })
+        statusCode = response.status
+        responseBody = response.body.slice(0, 1000)
+        status = response.ok ? 'success' : 'failed'
       }
-
-      statusCode = res.status
-      responseBody = (await res.text()).slice(0, 1000)
-
-      if (res.ok) {
-        status = 'success'
-        break
-      }
-    } catch (err) {
-      responseBody = err instanceof Error ? err.message : 'Unknown error'
     }
-
-    // Exponential backoff
-    if (i < maxRetries - 1) {
-      await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)))
-    }
+  } catch (error) {
+    responseBody = error instanceof Error ? error.message : 'Unknown error'
   }
 
   // Log delivery — use correct DB column names

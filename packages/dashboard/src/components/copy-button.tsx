@@ -10,6 +10,7 @@ interface CopyButtonProps extends Omit<ButtonProps, 'onClick'> {
   label?: string
   copiedLabel?: string
   iconOnly?: boolean
+  onCopied?: () => void
 }
 
 export function CopyButton({
@@ -17,6 +18,7 @@ export function CopyButton({
   label = 'Copy',
   copiedLabel = 'Copied',
   iconOnly = false,
+  onCopied,
   className,
   disabled,
   ...props
@@ -32,6 +34,7 @@ export function CopyButton({
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(value)
+    onCopied?.()
     setCopied(true)
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(() => setCopied(false), 1800)

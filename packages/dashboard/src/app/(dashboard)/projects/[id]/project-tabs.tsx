@@ -54,7 +54,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
   const [publicBoardUrl, setPublicBoardUrl] = React.useState<string | null>(null)
   const tabParam = searchParams.get('tab') as TabId | null
   const created = searchParams.get('created') === '1'
-  const activeTab = tabs.includes(tabParam as TabId) ? tabParam! : 'customize'
+  const activeTab = tabs.includes(tabParam as TabId) ? tabParam! : 'install'
   const activeSection: ProjectSection =
     activeTab === 'customize' || activeTab === 'install'
       ? 'setup'
@@ -157,7 +157,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
         <h1 className="mt-2 text-2xl font-bold">{project.name}</h1>
         {created && (
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Start here: choose the widget placement, save it, then copy the matching install code.
+            Your default install is ready. Copy it, send one test, then customize the form if needed.
           </p>
         )}
         <div className="mt-3 flex flex-wrap items-center gap-2">

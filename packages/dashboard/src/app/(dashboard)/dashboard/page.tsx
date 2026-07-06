@@ -1,4 +1,5 @@
 import { createServerSupabase } from '@/lib/supabase-server'
+import { cookies } from 'next/headers'
 import { getCurrentUserBillingSummary, getHistoryCutoff } from '@/lib/billing'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +9,8 @@ import { DashboardRefresher } from '@/components/dashboard-refresher'
 import { isFeedbackUnread } from '@/lib/feedback-read-state'
 import { cn, formatRelativeTime, truncate, getStatusColor } from '@/lib/utils'
 import type { Feedback } from '@/lib/types'
+import { CURRENT_PROJECT_COOKIE, getSelectedProject } from '@/lib/project-selection'
+import { loadDashboardStats } from '@/lib/dashboard-stats'
 import Link from 'next/link'
 import {
   Star,
@@ -49,95 +52,146 @@ function TypeIcon({ type, className }: { type?: string | null; className?: strin
   return <Icon className={cn('h-4 w-4', className)} />
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ project?: string; scope?: string }>
+}) {
   const supabase = await createServerSupabase()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  const billingSummary = await getCurrentUserBillingSummary()
+  const [billingSummary, cookieStore, requestedParams, { data: ownedProjects }] = await Promise.all([
+    getCurrentUserBillingSummary(),
+    cookies(),
+    searchParams,
+    supabase
+      .from('projects')
+      .select('id, name, settings')
+      .eq('owner_user_id', user!.id)
+      .order('created_at', { ascending: false }),
+  ])
   const historyCutoff = billingSummary ? getHistoryCutoff(billingSummary) : null
+  const selectedProject = getSelectedProject(
+    ownedProjects || [],
+    requestedParams.project || cookieStore.get(CURRENT_PROJECT_COOKIE)?.value,
+  )
+  const showingAllProjects = requestedParams.scope === 'all'
+  const scopedProjectId = showingAllProjects ? undefined : selectedProject?.id
+  const feedbackHref = showingAllProjects
+    ? '/feedback?projectId=all'
+    : scopedProjectId
+      ? `/feedback?projectId=${scopedProjectId}`
+      : '/feedback'
 
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
   const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0] + 'T00:00:00'
 
-  const [
-    { count: totalCount },
-    { count: unreadCount },
-    { data: ratingData },
-    { count: projectCount },
-    { count: agentCount },
-    { data: recentFeedback },
-    { data: typeDist },
-    { data: sparkData },
-    { data: primaryProjects },
-  ] = await Promise.all([
-    (historyCutoff
-      ? supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('is_archived', false).gte('created_at', historyCutoff)
-      : supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('is_archived', false)),
-    (historyCutoff
-      ? supabase.from('feedback').select('*', { count: 'exact', head: true }).is('read_at', null).eq('is_archived', false).gte('created_at', historyCutoff)
-      : supabase.from('feedback').select('*', { count: 'exact', head: true }).is('read_at', null).eq('is_archived', false)),
-    (historyCutoff
-      ? supabase.from('feedback').select('rating').not('rating', 'is', null).eq('is_archived', false).gte('created_at', historyCutoff)
-      : supabase.from('feedback').select('rating').not('rating', 'is', null).eq('is_archived', false)),
-    supabase
-      .from('projects')
-      .select('*', { count: 'exact', head: true })
-      .eq('owner_user_id', user!.id),
-    (historyCutoff
-      ? supabase.from('feedback').select('*', { count: 'exact', head: true }).not('agent_name', 'is', null).eq('is_archived', false).gte('created_at', historyCutoff)
-      : supabase.from('feedback').select('*', { count: 'exact', head: true }).not('agent_name', 'is', null).eq('is_archived', false)),
-    (historyCutoff
-      ? supabase.from('feedback').select('*, projects(id, name)').eq('is_archived', false).gte('created_at', historyCutoff).order('created_at', { ascending: false }).limit(8)
-      : supabase.from('feedback').select('*, projects(id, name)').eq('is_archived', false).order('created_at', { ascending: false }).limit(8)),
-    (historyCutoff
-      ? supabase.from('feedback').select('type').eq('is_archived', false).gte('created_at', historyCutoff)
-      : supabase.from('feedback').select('type').eq('is_archived', false)),
-    supabase
-      .from('feedback')
-      .select('created_at')
-      .gte('created_at', historyCutoff && historyCutoff > sevenDaysAgoStr ? historyCutoff : sevenDaysAgoStr)
-      .eq('is_archived', false),
-    supabase
-      .from('projects')
-      .select('id, name')
-      .eq('owner_user_id', user!.id)
-      .order('created_at', { ascending: false })
-      .limit(1),
-  ])
+  let totalQuery = historyCutoff
+    ? supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('is_archived', false).gte('created_at', historyCutoff)
+    : supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('is_archived', false)
+  let unreadQuery = historyCutoff
+    ? supabase.from('feedback').select('*', { count: 'exact', head: true }).is('read_at', null).eq('is_archived', false).gte('created_at', historyCutoff)
+    : supabase.from('feedback').select('*', { count: 'exact', head: true }).is('read_at', null).eq('is_archived', false)
+  let ratingQuery = historyCutoff
+    ? supabase.from('feedback').select('rating').not('rating', 'is', null).eq('is_archived', false).gte('created_at', historyCutoff)
+    : supabase.from('feedback').select('rating').not('rating', 'is', null).eq('is_archived', false)
+  let agentQuery = historyCutoff
+    ? supabase.from('feedback').select('*', { count: 'exact', head: true }).not('agent_name', 'is', null).eq('is_archived', false).gte('created_at', historyCutoff)
+    : supabase.from('feedback').select('*', { count: 'exact', head: true }).not('agent_name', 'is', null).eq('is_archived', false)
+  let recentQuery = historyCutoff
+    ? supabase.from('feedback').select('*, projects(id, name)').eq('is_archived', false).gte('created_at', historyCutoff).order('created_at', { ascending: false }).limit(8)
+    : supabase.from('feedback').select('*, projects(id, name)').eq('is_archived', false).order('created_at', { ascending: false }).limit(8)
+  let typeQuery = historyCutoff
+    ? supabase.from('feedback').select('type').eq('is_archived', false).gte('created_at', historyCutoff)
+    : supabase.from('feedback').select('type').eq('is_archived', false)
+  let sparkQuery = supabase
+    .from('feedback')
+    .select('created_at')
+    .gte('created_at', historyCutoff && historyCutoff > sevenDaysAgoStr ? historyCutoff : sevenDaysAgoStr)
+    .eq('is_archived', false)
 
-  const avgRating =
-    ratingData && ratingData.length > 0
-      ? ratingData.reduce((sum, f) => sum + (f.rating || 0), 0) / ratingData.length
-      : null
+  if (scopedProjectId) {
+    totalQuery = totalQuery.eq('project_id', scopedProjectId)
+    unreadQuery = unreadQuery.eq('project_id', scopedProjectId)
+    ratingQuery = ratingQuery.eq('project_id', scopedProjectId)
+    agentQuery = agentQuery.eq('project_id', scopedProjectId)
+    recentQuery = recentQuery.eq('project_id', scopedProjectId)
+    typeQuery = typeQuery.eq('project_id', scopedProjectId)
+    sparkQuery = sparkQuery.eq('project_id', scopedProjectId)
+  }
 
-  // Build 7-day sparkline counts
   const days7 = Array.from({ length: 7 }, (_, i) => {
     const d = new Date()
     d.setDate(d.getDate() - (6 - i))
     return d.toISOString().split('T')[0]
   })
-  const sparkCounts = days7.map(
-    (day) => sparkData?.filter((f) => f.created_at.startsWith(day)).length || 0
-  )
-  const sparkMax = Math.max(...sparkCounts, 1)
 
-  // Type distribution
+  const [aggregateStats, { data: recentFeedback }] = await Promise.all([
+    loadDashboardStats({
+      userId: user!.id,
+      projectId: scopedProjectId,
+      historyCutoff,
+      trendStart: sevenDaysAgoStr,
+    }),
+    recentQuery,
+  ])
+
+  let total = aggregateStats?.total || 0
+  let unread = aggregateStats?.unread || 0
+  let agents = aggregateStats?.agentCount || 0
+  let avgRating = aggregateStats?.averageRating ?? null
+  let ratingCount = aggregateStats?.ratingCount || 0
   const typeCounts = { bug: 0, idea: 0, praise: 0, question: 0, other: 0 }
-  typeDist?.forEach((f) => {
-    const t = f.type as string
-    if (t in typeCounts) typeCounts[t as keyof typeof typeCounts]++
-    else typeCounts.other++
-  })
+  let sparkCounts = days7.map((day) => aggregateStats?.dailyCounts[day] || 0)
 
-  const total = totalCount || 0
-  const unread = unreadCount || 0
-  const agents = agentCount || 0
-  const projects = projectCount || 0
-  const primaryProject = primaryProjects?.[0]
+  if (aggregateStats) {
+    Object.entries(aggregateStats.typeCounts).forEach(([type, count]) => {
+      if (type in typeCounts) typeCounts[type as keyof typeof typeCounts] = count
+      else typeCounts.other += count
+    })
+  } else {
+    // Compatibility fallback while migration 025 is being applied to an older environment.
+    const [
+      { count: totalCount },
+      { count: unreadCount },
+      { data: ratingData },
+      { count: agentCount },
+      { data: typeDist },
+      { data: sparkData },
+    ] = await Promise.all([totalQuery, unreadQuery, ratingQuery, agentQuery, typeQuery, sparkQuery])
+    total = totalCount || 0
+    unread = unreadCount || 0
+    agents = agentCount || 0
+    ratingCount = ratingData?.length || 0
+    avgRating = ratingCount
+      ? ratingData!.reduce((sum, feedback) => sum + (feedback.rating || 0), 0) / ratingCount
+      : null
+    typeDist?.forEach((feedback) => {
+      const type = feedback.type as string
+      if (type in typeCounts) typeCounts[type as keyof typeof typeCounts]++
+      else typeCounts.other++
+    })
+    sparkCounts = days7.map(
+      (day) => sparkData?.filter((feedback) => feedback.created_at.startsWith(day)).length || 0,
+    )
+  }
+
+  const sparkMax = Math.max(...sparkCounts, 1)
+  const projects = ownedProjects?.length || 0
+  const primaryProject = selectedProject
   const displayName =
-    user?.user_metadata?.name || user?.email?.split('@')[0] || 'there'
+    user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'there'
+
+  const feedbackLink = (params?: Record<string, string>) => {
+    const query = new URLSearchParams()
+    if (showingAllProjects) query.set('projectId', 'all')
+    else if (scopedProjectId) query.set('projectId', scopedProjectId)
+    Object.entries(params || {}).forEach(([key, value]) => query.set(key, value))
+    const suffix = query.toString()
+    return suffix ? `/feedback?${suffix}` : '/feedback'
+  }
 
   const statCards = [
     {
@@ -146,7 +200,7 @@ export default async function DashboardPage() {
       value: total,
       urgent: false,
       sub: `${sparkCounts[sparkCounts.length - 1]} today`,
-      href: '/feedback',
+      href: feedbackHref,
     },
     {
       id: 'unread',
@@ -154,31 +208,31 @@ export default async function DashboardPage() {
       value: unread,
       urgent: unread > 0,
       sub: unread > 0 ? 'needs review' : 'all caught up',
-      href: '/feedback?read=unread',
+      href: feedbackLink({ read: 'unread' }),
     },
     {
       id: 'rating',
       label: 'Avg Rating',
       value: avgRating ? avgRating.toFixed(1) : '—',
       urgent: false,
-      sub: ratingData?.length ? `${ratingData.length} rated` : 'no ratings yet',
-      href: '/feedback',
+      sub: ratingCount ? `${ratingCount} rated` : 'no ratings yet',
+      href: feedbackHref,
     },
-    {
-      id: 'projects',
-      label: 'Projects',
-      value: projects,
-      urgent: false,
-      sub: 'active',
-      href: '/projects',
-    },
+    ...(showingAllProjects ? [{
+        id: 'projects',
+        label: 'Projects',
+        value: projects,
+        urgent: false,
+        sub: 'active',
+        href: '/projects',
+      }] : []),
     {
       id: 'agents',
       label: 'Via Agent',
       value: agents,
       urgent: false,
       sub: agents > 0 ? 'AI submitted' : 'none yet',
-      href: '/feedback?agent=1',
+      href: feedbackLink({ agent: '1' }),
     },
   ]
 
@@ -198,7 +252,7 @@ export default async function DashboardPage() {
             <CardContent className="p-6 sm:p-8">
               <Badge className="bg-primary/90 text-primary-foreground">First run</Badge>
               <h1 className="mt-5 max-w-2xl text-2xl font-semibold tracking-tight sm:text-3xl">
-                Good {getGreeting()}, {displayName}. Create one project, choose the form style, send one test.
+                Good {getGreeting()}, {displayName}. Create one project, copy the install, send one test.
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
                 Start with the basic setup path. Advanced settings, public boards, API access, and integrations can wait until feedback reaches the inbox.
@@ -288,6 +342,32 @@ export default async function DashboardPage() {
               'Customize a project, install the code, then send one test message.'
             )}
           </p>
+          {selectedProject && (
+            <div className="mt-2 inline-flex items-center rounded-md border bg-card p-0.5 text-[11px]" aria-label="Dashboard project scope">
+              <Link
+                href="/dashboard"
+                data-testid="dashboard-current-project-scope"
+                aria-current={!showingAllProjects ? 'page' : undefined}
+                className={cn(
+                  'rounded px-2 py-1 font-medium transition-colors',
+                  !showingAllProjects ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {selectedProject.name}
+              </Link>
+              <Link
+                href="/dashboard?scope=all"
+                data-testid="dashboard-all-projects-scope"
+                aria-current={showingAllProjects ? 'page' : undefined}
+                className={cn(
+                  'rounded px-2 py-1 font-medium transition-colors',
+                  showingAllProjects ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                All projects
+              </Link>
+            </div>
+          )}
         </div>
         <div data-tour="dashboard-actions" className="flex flex-wrap items-center gap-2 lg:justify-center">
           <Link href="/projects/new">
@@ -296,7 +376,7 @@ export default async function DashboardPage() {
               New Project
             </Button>
           </Link>
-          <Link href="/feedback">
+          <Link href={feedbackHref}>
             <Button size="sm" className="h-8 gap-1.5 text-xs font-medium">
               <Inbox className="h-3.5 w-3.5" />
               Inbox
@@ -305,11 +385,6 @@ export default async function DashboardPage() {
                   {unread}
                 </span>
               )}
-            </Button>
-          </Link>
-          <Link href="/dashboard?tour=1">
-            <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs font-medium">
-              Take product tour
             </Button>
           </Link>
         </div>
@@ -337,12 +412,12 @@ export default async function DashboardPage() {
             <div>
               <h2 className="text-sm font-semibold">Send the first test for {primaryProject.name}</h2>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Customize the form, copy the install code, then confirm one submission reaches the inbox.
+                Copy the default install code, send one known test, then confirm it reaches the inbox.
               </p>
             </div>
           </div>
           <Button asChild className="min-h-11 shrink-0 sm:min-h-10">
-            <Link href={`/projects/${primaryProject.id}?tab=customize`}>
+            <Link href={`/projects/${primaryProject.id}?tab=install`}>
               Continue setup <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -463,15 +538,15 @@ export default async function DashboardPage() {
             title="Quick Actions"
             contentClassName="grid grid-cols-2 gap-2 pb-3 pt-0"
           >
-            <Link href="/feedback?read=unread" className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
+            <Link href={feedbackLink({ read: 'unread' })} className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
               <Bell className="h-3.5 w-3.5 text-muted-foreground" />
               Unread
               {unread > 0 && <Badge variant="secondary" className="ml-auto h-5 text-[10px]">{unread}</Badge>}
             </Link>
-            <Link href="/feedback?type=bug" className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
+            <Link href={feedbackLink({ type: 'bug' })} className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
               <Bug className="h-3.5 w-3.5 text-muted-foreground" /> Bugs
             </Link>
-            <Link href="/feedback?type=idea" className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
+            <Link href={feedbackLink({ type: 'idea' })} className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
               <Lightbulb className="h-3.5 w-3.5 text-muted-foreground" /> Ideas
             </Link>
             <Link href="/projects/new" className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
@@ -486,7 +561,7 @@ export default async function DashboardPage() {
           title="Recent Activity"
           contentClassName="p-0"
           action={
-            <Link href="/feedback">
+            <Link href={feedbackHref}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -645,7 +720,7 @@ export default async function DashboardPage() {
             contentClassName="space-y-0.5 pb-3 pt-0"
           >
               <Link
-                href="/feedback?read=unread"
+                href={feedbackLink({ read: 'unread' })}
                 className="flex items-center justify-between rounded-md px-2 py-2 transition-colors hover:bg-accent"
               >
                 <span className="flex items-center gap-2 text-[12px]">
@@ -659,7 +734,7 @@ export default async function DashboardPage() {
                 )}
               </Link>
               <Link
-                href="/feedback?type=bug"
+                href={feedbackLink({ type: 'bug' })}
                 className="flex items-center justify-between rounded-md px-2 py-2 transition-colors hover:bg-accent"
               >
                 <span className="flex items-center gap-2 text-[12px]">
@@ -673,7 +748,7 @@ export default async function DashboardPage() {
                 )}
               </Link>
               <Link
-                href="/feedback?type=idea"
+                href={feedbackLink({ type: 'idea' })}
                 className="flex items-center justify-between rounded-md px-2 py-2 transition-colors hover:bg-accent"
               >
                 <span className="flex items-center gap-2 text-[12px]">
@@ -688,7 +763,7 @@ export default async function DashboardPage() {
               </Link>
               {agents > 0 && (
                 <Link
-                  href="/feedback?agent=1"
+                  href={feedbackLink({ agent: '1' })}
                   className="flex items-center justify-between rounded-md px-2 py-2 transition-colors hover:bg-accent"
                 >
                   <span className="flex items-center gap-2 text-[12px]">

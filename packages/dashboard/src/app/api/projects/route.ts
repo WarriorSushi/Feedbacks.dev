@@ -8,6 +8,7 @@ import {
   hashProjectApiKey,
 } from '@/lib/project-api-keys'
 import { DEFAULT_PROJECT_ICON, isProjectIcon } from '@/lib/project-icons'
+import { recordActivationMilestone } from '@/lib/activation-milestones'
 
 export async function GET() {
   try {
@@ -78,6 +79,13 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await admin.from('projects').insert(project).select().single()
     if (error) return NextResponse.json({ error: 'Failed to create project' }, { status: 500 })
+
+    await recordActivationMilestone({
+      projectId: data.id,
+      userId: user.id,
+      eventName: 'project_created',
+      admin,
+    })
 
     return NextResponse.json({ ...data, api_key: rawApiKey }, { status: 201 })
   } catch {

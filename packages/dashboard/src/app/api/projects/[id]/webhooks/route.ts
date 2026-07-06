@@ -5,6 +5,7 @@ import { hasE2EBypass } from '@/lib/e2e'
 import { resendWebhookDelivery, sendTestWebhook } from '@/lib/webhook-delivery'
 import type { WebhookEndpoint, GitHubEndpoint } from '@/lib/types'
 import { countActiveWebhookEndpoints, normalizeWebhookConfig } from '@/lib/webhook-config'
+import { recordActivationMilestone } from '@/lib/activation-milestones'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -51,7 +52,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { id } = await params
     const result = await getAuthedProject(id, request)
     if ('error' in result && !('admin' in result)) return result.error
-    const { admin, summary } = result as Exclude<typeof result, { error: NextResponse }>
+    const { admin, summary, project } = result as Exclude<typeof result, { error: NextResponse }>
 
     const webhooks = normalizeWebhookConfig(await request.json())
     const endpointLimit = summary?.entitlements.webhookEndpointLimit ?? null
@@ -77,6 +78,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (activeEndpointCount > 0) {
+      await recordActivationMilestone({
+        projectId: id,
+        userId: project.owner_user_id,
+        eventName: 'integration_connected',
+        admin,
+      })
+    }
     return NextResponse.json(data?.webhooks ?? {})
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
