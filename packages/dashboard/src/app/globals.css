@@ -32,30 +32,30 @@
   }
 
   .dark {
-    /* Neutral dark elevation keeps green reserved for action and state. */
-    --background: 0 0% 5.5%;
-    --foreground: 80 6% 94%;
-    --card: 80 5% 10.5%;
-    --card-foreground: 80 6% 94%;
-    --popover: 80 4% 13%;
-    --popover-foreground: 80 6% 94%;
+    /* Clear neutral elevation keeps dark surfaces readable without spending green on decoration. */
+    --background: 80 3% 7.5%;
+    --foreground: 80 6% 95%;
+    --card: 80 5% 15.5%;
+    --card-foreground: 80 6% 95%;
+    --popover: 80 5% 18.5%;
+    --popover-foreground: 80 6% 95%;
     --primary: 85 72% 50%;
     --primary-foreground: 85 40% 6%;
-    --secondary: 80 5% 16%;
-    --secondary-foreground: 80 5% 88%;
-    --muted: 80 4% 15%;
-    --muted-foreground: 80 5% 68%;
-    --accent: 80 5% 19%;
-    --accent-foreground: 80 5% 92%;
+    --secondary: 80 6% 21%;
+    --secondary-foreground: 80 5% 91%;
+    --muted: 80 5% 20%;
+    --muted-foreground: 80 6% 72%;
+    --accent: 80 6% 24.5%;
+    --accent-foreground: 80 5% 95%;
     --destructive: 0 62% 38%;
     --destructive-foreground: 0 0% 98%;
-    --border: 80 5% 23%;
-    --input: 80 5% 23%;
+    --border: 80 5% 34%;
+    --input: 80 6% 38%;
     --ring: 85 72% 50%;
 
     /* Brand tokens dark */
     --brand: 85 72% 50%;
-    --brand-subtle: 85 18% 12%;
+    --brand-subtle: 85 18% 16%;
   }
 }
 
