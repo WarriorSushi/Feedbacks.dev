@@ -20,6 +20,8 @@ import {
 } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import type { BillingSummary, Feedback, FeedbackPriority, FeedbackStatus, FeedbackType } from '@/lib/types'
+import { CURRENT_PROJECT_COOKIE, getSelectedProject } from '@/lib/project-selection'
+import { DEFAULT_PROJECT_ICON } from '@/lib/project-icons'
 import {
   Search,
   ChevronLeft,
@@ -39,6 +41,7 @@ import {
   Bot,
   ClipboardList,
   EyeOff,
+  Layers3,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -65,6 +68,7 @@ function TypeIcon({ type, className }: { type?: FeedbackType | string | null; cl
 interface ProjectFilterOption {
   id: string
   name: string
+  settings?: { icon?: string } | null
 }
 
 function normalizeTag(value: string): string {
@@ -86,6 +90,8 @@ function FeedbackInboxInner() {
 
   const [feedbacks, setFeedbacks] = React.useState<Feedback[]>([])
   const [projects, setProjects] = React.useState<ProjectFilterOption[]>([])
+  const [projectsLoaded, setProjectsLoaded] = React.useState(false)
+  const [defaultProjectId, setDefaultProjectId] = React.useState('')
   const [billingSummary, setBillingSummary] = React.useState<BillingSummary | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [total, setTotal] = React.useState(0)
@@ -101,7 +107,9 @@ function FeedbackInboxInner() {
   const priority = priorities.includes(searchParams.get('priority') as FeedbackPriority)
     ? (searchParams.get('priority') as FeedbackPriority)
     : ''
-  const projectId = searchParams.get('projectId') || ''
+  const requestedProjectId = searchParams.get('projectId')
+  const showingAllProjects = requestedProjectId === 'all'
+  const projectId = showingAllProjects ? '' : requestedProjectId || defaultProjectId
   const tag = searchParams.get('tag') || ''
   const read = parseFeedbackReadStateFilter(searchParams.get('read'))
   const [searchInput, setSearchInput] = React.useState(search)
@@ -119,9 +127,17 @@ function FeedbackInboxInner() {
     const fetchProjects = async () => {
       const { data } = await supabase
         .from('projects')
-        .select('id, name')
+        .select('id, name, settings')
         .order('name', { ascending: true })
-      setProjects((data as ProjectFilterOption[]) || [])
+      const nextProjects = (data as ProjectFilterOption[]) || []
+      const savedProjectId = document.cookie
+        .split('; ')
+        .find((cookie) => cookie.startsWith(`${CURRENT_PROJECT_COOKIE}=`))
+        ?.split('=')[1]
+      const selectedProject = getSelectedProject(nextProjects, savedProjectId ? decodeURIComponent(savedProjectId) : undefined)
+      setProjects(nextProjects)
+      setDefaultProjectId(selectedProject?.id || '')
+      setProjectsLoaded(true)
     }
 
     fetchProjects()
@@ -143,6 +159,7 @@ function FeedbackInboxInner() {
   }, [])
 
   const fetchFeedback = React.useCallback(async () => {
+    if (!projectsLoaded) return
     setLoading(true)
     let query = supabase
       .from('feedback')
@@ -169,7 +186,7 @@ function FeedbackInboxInner() {
     setTotal(count || 0)
     setSelected(new Set())
     setLoading(false)
-  }, [supabase, page, projectId, status, tag, type, search, agent, publicOnly, priority, read, billingSummary])
+  }, [supabase, page, projectId, projectsLoaded, status, tag, type, search, agent, publicOnly, priority, read, billingSummary])
 
   React.useEffect(() => {
     fetchFeedback()
@@ -452,20 +469,33 @@ function FeedbackInboxInner() {
         </div>
 
         {projects.length > 0 && (
-          <div className="-mx-4 px-4 md:mx-0 md:px-0">
-            <div className="scroll-fade-x flex snap-x items-center gap-1.5 overflow-x-auto pb-1 pr-8 scrollbar-thin md:pr-0">
-              <span className="pr-1 text-[11px] font-medium text-muted-foreground">
-                Projects
-              </span>
-              {projects.map((project) => (
-                <FilterPill
-                  key={project.id}
-                  active={projectId === project.id}
-                  onClick={() => updateParams({ projectId: projectId === project.id ? '' : project.id })}
+          <div className="border-y py-2.5">
+            <div className="mb-2 flex items-center justify-between gap-3 px-0.5">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Project view</p>
+                <p className="text-[11px] text-muted-foreground/75">Choose one project or include the whole workspace.</p>
+              </div>
+            </div>
+            <div className="-mx-4 px-4 md:mx-0 md:px-0">
+              <div className="scroll-fade-x flex snap-x items-center gap-2 overflow-x-auto pb-1 pr-8 scrollbar-thin md:pr-0">
+                <ProjectScopeButton
+                  active={showingAllProjects}
+                  onClick={() => updateParams({ projectId: 'all' })}
+                  icon={<Layers3 className="h-3.5 w-3.5" />}
                 >
-                  {project.name}
-                </FilterPill>
-              ))}
+                  All projects
+                </ProjectScopeButton>
+                {projects.map((project) => (
+                  <ProjectScopeButton
+                    key={project.id}
+                    active={projectId === project.id}
+                    onClick={() => updateParams({ projectId: project.id })}
+                    icon={<span aria-hidden="true" className="text-sm leading-none">{project.settings?.icon || DEFAULT_PROJECT_ICON}</span>}
+                  >
+                    {project.name}
+                  </ProjectScopeButton>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -680,6 +710,35 @@ function FilterPill({
       )}
     >
       {children}
+    </button>
+  )
+}
+
+function ProjectScopeButton({
+  active,
+  onClick,
+  icon,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  icon: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'flex min-h-10 flex-shrink-0 snap-start items-center gap-2 rounded-md border px-3 text-xs font-medium transition-colors',
+        active
+          ? 'border-primary/45 bg-primary/[0.1] text-foreground shadow-sm'
+          : 'border-border bg-card text-muted-foreground hover:border-primary/25 hover:bg-accent hover:text-foreground'
+      )}
+    >
+      {icon}
+      <span>{children}</span>
     </button>
   )
 }
