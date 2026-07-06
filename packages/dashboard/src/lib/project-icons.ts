@@ -18,4 +18,3 @@ export const DEFAULT_PROJECT_ICON = PROJECT_ICONS[0].emoji
 export function isProjectIcon(value: unknown): value is (typeof PROJECT_ICONS)[number]['emoji'] {
   return typeof value === 'string' && PROJECT_ICONS.some((icon) => icon.emoji === value)
 }
-

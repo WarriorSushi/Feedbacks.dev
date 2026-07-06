@@ -19,4 +19,3 @@ test('project icon validation rejects arbitrary values', async () => {
   assert.equal(isProjectIcon('not-an-icon'), false)
   assert.equal(isProjectIcon(null), false)
 })
-
