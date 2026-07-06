@@ -7,6 +7,7 @@ import {
   getProjectApiKeyLastFour,
   hashProjectApiKey,
 } from '@/lib/project-api-keys'
+import { DEFAULT_PROJECT_ICON, isProjectIcon } from '@/lib/project-icons'
 
 export async function GET() {
   try {
@@ -51,6 +52,10 @@ export async function POST(request: NextRequest) {
     }
 
     const domain = body.domain?.trim() || null
+    const icon = body.icon === undefined ? DEFAULT_PROJECT_ICON : body.icon
+    if (!isProjectIcon(icon)) {
+      return NextResponse.json({ error: 'Choose a valid project icon' }, { status: 400 })
+    }
 
     const rawApiKey = generateProjectApiKey()
     const apiKeyHash = await hashProjectApiKey(rawApiKey)
@@ -66,7 +71,7 @@ export async function POST(request: NextRequest) {
       api_key_last_four: getProjectApiKeyLastFour(rawApiKey),
       domain,
       webhooks: {},
-      settings: {},
+      settings: { icon },
       created_at: now,
       updated_at: now,
     }

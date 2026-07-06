@@ -22,7 +22,7 @@ export default async function DashboardLayout({
 
   const { data: projects } = await supabase
     .from('projects')
-    .select('id, name')
+    .select('id, name, settings')
     .eq('owner_user_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -81,7 +81,7 @@ export default async function DashboardLayout({
           email: user.email,
           user_metadata: user.user_metadata as { avatar_url?: string; full_name?: string },
         }}
-        projects={(projects as Array<{ id: string; name: string }>) || []}
+        projects={(projects as Array<{ id: string; name: string; settings: { icon?: string } }>) || []}
         currentProjectId={currentProjectId}
         boardSlugs={boardSlugs}
         billingAccount={billingAccount}

@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { CheckCircle2, Code2, Inbox, Loader2, ArrowLeft } from 'lucide-react'
+import { Check, CheckCircle2, Code2, Inbox, Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { DEFAULT_PROJECT_ICON, PROJECT_ICONS } from '@/lib/project-icons'
 
 const setupSteps = [
   { Icon: CheckCircle2, title: 'Create project', body: 'Name the place where feedback belongs.' },
@@ -19,6 +21,7 @@ const setupSteps = [
 export default function NewProjectPage() {
   const [name, setName] = React.useState('')
   const [domain, setDomain] = React.useState('')
+  const [icon, setIcon] = React.useState<string>(DEFAULT_PROJECT_ICON)
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState('')
   const [limitMessage, setLimitMessage] = React.useState('')
@@ -40,6 +43,7 @@ export default function NewProjectPage() {
         body: JSON.stringify({
           name: name.trim(),
           domain: domain.trim() || null,
+          icon,
         }),
       })
 
@@ -75,7 +79,7 @@ export default function NewProjectPage() {
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Card data-tour="project-create-form">
           <CardHeader>
-            <CardTitle>Create your first project</CardTitle>
+            <CardTitle>Create project</CardTitle>
             <CardDescription>
               One name is enough. Next you choose the form style, then copy the matching code.
             </CardDescription>
@@ -97,6 +101,37 @@ export default function NewProjectPage() {
                 Use the name your team recognizes. You can rename it later.
               </p>
             </div>
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium">Project icon</legend>
+              <div className="grid grid-cols-6 gap-2 sm:grid-cols-12">
+                {PROJECT_ICONS.map((option) => {
+                  const selected = icon === option.emoji
+                  return (
+                    <button
+                      key={option.emoji}
+                      type="button"
+                      onClick={() => setIcon(option.emoji)}
+                      className={cn(
+                        'relative flex h-10 items-center justify-center rounded-md border text-lg transition-colors',
+                        'hover:border-primary/40 hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        selected && 'border-primary/50 bg-primary/[0.09]'
+                      )}
+                      aria-label={`${option.label} icon`}
+                      aria-pressed={selected}
+                      title={option.label}
+                    >
+                      <span aria-hidden="true">{option.emoji}</span>
+                      {selected && (
+                        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                          <Check className="h-2.5 w-2.5" />
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">Shown in the project switcher so projects are easier to scan.</p>
+            </fieldset>
             <details className="rounded-lg border bg-muted/10">
               <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
                 Add domain later, or set it now

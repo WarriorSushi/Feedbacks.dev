@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Menu,
   X,
@@ -35,8 +36,9 @@ import { createClient } from '@/lib/supabase-browser'
 import { ThemeToggle } from '@/components/theme-toggle'
 import type { BillingStatus, PlanTier } from '@feedbacks/shared'
 import { CURRENT_PROJECT_COOKIE } from '@/lib/project-selection'
+import { DEFAULT_PROJECT_ICON } from '@/lib/project-icons'
 
-type SidebarProject = Pick<Project, 'id' | 'name'>
+type SidebarProject = Pick<Project, 'id' | 'name'> & { settings?: Project['settings'] | null }
 
 type NavItem = {
   href: string
@@ -64,17 +66,6 @@ const utilityNavItems: NavItem[] = [
   { href: '/settings',  label: 'Settings',  icon: Settings, tourId: 'nav-settings' },
 ]
 
-const projectColors = [
-  'bg-indigo-500',
-  'bg-emerald-500',
-  'bg-violet-500',
-  'bg-amber-500',
-  'bg-rose-500',
-  'bg-cyan-500',
-  'bg-pink-500',
-  'bg-blue-500',
-]
-
 interface SidebarProps {
   user: { email?: string; user_metadata?: { avatar_url?: string; full_name?: string } }
   projects: SidebarProject[]
@@ -100,12 +91,17 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
   const [projectOpen, setProjectOpen] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [collapsed, setCollapsed] = React.useState(false)
+  const [utilityCollapsed, setUtilityCollapsed] = React.useState(false)
   const dropdownRef = React.useRef<HTMLDivElement>(null)
   const supabase = React.useMemo(() => createClient(), [])
 
   React.useEffect(() => {
     setVisibleProjects(projects)
   }, [projects])
+
+  React.useEffect(() => {
+    setUtilityCollapsed(window.localStorage.getItem('feedbacks:sidebar:utility-collapsed') === 'true')
+  }, [])
 
   React.useEffect(() => {
     const removeDeletedProject = (event: Event) => {
@@ -152,6 +148,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
   React.useEffect(() => {
     const expandForTour = () => {
       setCollapsed(false)
+      setUtilityCollapsed(false)
       if (window.matchMedia('(max-width: 767px)').matches) {
         setMobileOpen(true)
       }
@@ -182,8 +179,15 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
     if (routeProjectId) rememberProject(routeProjectId)
   }, [rememberProject, routeProjectId])
 
-  const currentProjectColorClass =
-    projectColors[visibleProjects.indexOf(currentProject!) % projectColors.length] ?? 'bg-muted-foreground'
+  const toggleUtilityMenu = () => {
+    setUtilityCollapsed((current) => {
+      const next = !current
+      window.localStorage.setItem('feedbacks:sidebar:utility-collapsed', String(next))
+      return next
+    })
+  }
+
+  const projectIcon = (project?: SidebarProject) => project?.settings?.icon || DEFAULT_PROJECT_ICON
 
   /* ── Shared sidebar content (used in both mobile drawer & desktop aside) ── */
   const sidebarContent = (
@@ -233,13 +237,15 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
             aria-label="Switch project"
             className={cn(
               'group flex min-h-11 w-full items-center justify-between rounded-lg px-2.5 py-2 text-[13px] md:min-h-0',
-              'border border-border/60 bg-background/60',
-              'transition-all duration-150 hover:border-border hover:bg-accent',
-              projectOpen && 'border-primary/30 bg-accent'
+              'border border-primary/20 bg-primary/[0.045]',
+              'transition-all duration-150 hover:border-primary/35 hover:bg-primary/[0.075]',
+              projectOpen && 'border-primary/40 bg-primary/[0.09]'
             )}
           >
             <span className="flex min-w-0 items-center gap-2">
-              <span className={cn('h-2 w-2 shrink-0 rounded-full', currentProjectColorClass)} />
+              <span aria-hidden="true" className="flex h-5 w-5 shrink-0 items-center justify-center text-sm leading-none">
+                {projectIcon(currentProject)}
+              </span>
               <span className="truncate font-medium">
                 {currentProject?.name ?? 'Select project'}
               </span>
@@ -260,7 +266,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
           >
             <div className="min-h-0">
               <div className="mt-1 overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md shadow-black/5">
-                {visibleProjects.map((p, i) => {
+                {visibleProjects.map((p) => {
                   const isSelected = p.id === resolvedCurrentProjectId
                   const destination = projectDestination(p.id)
                   return (
@@ -282,12 +288,9 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
                       )}
                     >
                       <span className="flex items-center gap-2.5">
-                        <span
-                          className={cn(
-                            'h-2 w-2 shrink-0 rounded-full',
-                            projectColors[i % projectColors.length]
-                          )}
-                        />
+                        <span aria-hidden="true" className="flex h-5 w-5 shrink-0 items-center justify-center text-sm leading-none">
+                          {projectIcon(p)}
+                        </span>
                         <span className={cn('truncate', isSelected && 'font-medium')}>
                           {p.name}
                         </span>
@@ -403,73 +406,65 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
           })()}
         </div>
 
-        <div className="mt-auto space-y-0.5 border-t pt-2">
-          {utilityNavItems.map((item) => {
-            const isActive = !item.external && (pathname === item.href || pathname.startsWith(item.href + '/'))
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                data-tour={item.tourId}
-                prefetch={false}
-                title={collapsed ? item.label : undefined}
-                aria-label={collapsed ? item.label : undefined}
-                aria-current={isActive ? 'page' : undefined}
-                target={item.external ? '_blank' : undefined}
-                rel={item.external ? 'noopener noreferrer' : undefined}
-                onClick={() => { if (!item.external) beginNavigation(item.href) }}
-                onMouseEnter={() => { if (!item.external) router.prefetch(item.href) }}
-                onFocus={() => { if (!item.external) router.prefetch(item.href) }}
-                className={cn(
-                  'group relative flex min-h-11 items-center gap-3 rounded-lg py-2 text-[13px] font-medium md:min-h-0',
-                  'transition-all duration-150 active:scale-[0.98]',
-                  collapsed ? 'justify-center px-2' : 'px-3',
-                  isActive ? 'bg-primary/8 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-                )}
+        <div className="mt-auto border-t pt-1.5">
+          {!collapsed && (
+            <div className="mb-1 flex items-center justify-between px-2.5">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Account & help</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-muted-foreground"
+                onClick={toggleUtilityMenu}
+                aria-expanded={!utilityCollapsed}
+                aria-label={`${utilityCollapsed ? 'Expand' : 'Collapse'} account and help menu`}
               >
-                {!item.external && pendingHref === item.href ? (
-                  <Loader2 className="h-[17px] w-[17px] shrink-0 animate-spin text-primary" />
-                ) : (
-                  <item.icon className={cn('h-[17px] w-[17px] shrink-0', isActive && 'text-primary')} />
-                )}
-                {!collapsed && <span className="truncate">{item.label}</span>}
-                {!collapsed && item.external && <ExternalLink className="ml-auto h-3 w-3 opacity-50" />}
-              </Link>
-            )
-          })}
+                {utilityCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              </Button>
+            </div>
+          )}
+          {!utilityCollapsed && (
+            <div className="space-y-0.5">
+              {utilityNavItems.map((item) => {
+                const isActive = !item.external && (pathname === item.href || pathname.startsWith(item.href + '/'))
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    data-tour={item.tourId}
+                    prefetch={false}
+                    title={collapsed ? item.label : undefined}
+                    aria-label={collapsed ? item.label : undefined}
+                    aria-current={isActive ? 'page' : undefined}
+                    target={item.external ? '_blank' : undefined}
+                    rel={item.external ? 'noopener noreferrer' : undefined}
+                    onClick={() => { if (!item.external) beginNavigation(item.href) }}
+                    onMouseEnter={() => { if (!item.external) router.prefetch(item.href) }}
+                    onFocus={() => { if (!item.external) router.prefetch(item.href) }}
+                    className={cn(
+                      'group relative flex min-h-11 items-center gap-3 rounded-lg py-2 text-[13px] font-medium md:min-h-0',
+                      'transition-all duration-150 active:scale-[0.98]',
+                      collapsed ? 'justify-center px-2' : 'px-3',
+                      isActive ? 'bg-primary/8 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                    )}
+                  >
+                    {!item.external && pendingHref === item.href ? (
+                      <Loader2 className="h-[17px] w-[17px] shrink-0 animate-spin text-primary" />
+                    ) : (
+                      <item.icon className={cn('h-[17px] w-[17px] shrink-0', isActive && 'text-primary')} />
+                    )}
+                    {!collapsed && <span className="truncate">{item.label}</span>}
+                    {!collapsed && item.external && <ExternalLink className="ml-auto h-3 w-3 opacity-50" />}
+                  </Link>
+                )
+              })}
+            </div>
+          )}
         </div>
       </nav>
 
       {/* Footer — always visible at bottom */}
       <div className="shrink-0 space-y-1 border-t p-2.5">
-        <Link
-          href="/dashboard?tour=1"
-          prefetch={false}
-          title={collapsed ? 'Take product tour' : undefined}
-          aria-label={collapsed ? 'Take product tour' : undefined}
-          data-tour="take-product-tour"
-          onClick={() => {
-            if (pathname === '/dashboard') {
-              window.dispatchEvent(new CustomEvent('feedbacks:start-product-tour'))
-            }
-            beginNavigation('/dashboard?tour=1')
-          }}
-          onMouseEnter={() => router.prefetch('/dashboard?tour=1')}
-          onFocus={() => router.prefetch('/dashboard?tour=1')}
-          className={cn(
-            'group flex min-h-11 items-center gap-2.5 rounded-lg py-2 text-[12px] font-medium text-muted-foreground md:min-h-0',
-            'transition-[background-color,color,transform] duration-150 hover:bg-accent hover:text-foreground active:scale-[0.98]',
-            collapsed ? 'justify-center px-0' : 'px-2.5',
-          )}
-        >
-          {pendingHref === '/dashboard?tour=1' ? (
-            <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
-          ) : (
-            <CircleHelp className="h-3.5 w-3.5 shrink-0 transition-transform duration-150 group-hover:scale-[1.08]" />
-          )}
-          {!collapsed && <span className="truncate">Take product tour</span>}
-        </Link>
-
         {/* Theme toggle */}
         <ThemeToggle collapsed={collapsed} />
 
@@ -511,6 +506,34 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
             </>
           )}
         </div>
+
+        <Link
+          href="/dashboard?tour=1"
+          prefetch={false}
+          title={collapsed ? 'Take product tour' : undefined}
+          aria-label={collapsed ? 'Take product tour' : undefined}
+          data-tour="take-product-tour"
+          onClick={() => {
+            if (pathname === '/dashboard') {
+              window.dispatchEvent(new CustomEvent('feedbacks:start-product-tour'))
+            }
+            beginNavigation('/dashboard?tour=1')
+          }}
+          onMouseEnter={() => router.prefetch('/dashboard?tour=1')}
+          onFocus={() => router.prefetch('/dashboard?tour=1')}
+          className={cn(
+            'group flex min-h-11 items-center gap-2.5 rounded-lg py-2 text-[12px] font-medium text-muted-foreground md:min-h-0',
+            'transition-[background-color,color,transform] duration-150 hover:bg-accent hover:text-foreground active:scale-[0.98]',
+            collapsed ? 'justify-center px-0' : 'px-2.5',
+          )}
+        >
+          {pendingHref === '/dashboard?tour=1' ? (
+            <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
+          ) : (
+            <CircleHelp className="h-3.5 w-3.5 shrink-0 transition-transform duration-150 group-hover:scale-[1.08]" />
+          )}
+          {!collapsed && <span className="truncate">Take product tour</span>}
+        </Link>
       </div>
     </>
   )

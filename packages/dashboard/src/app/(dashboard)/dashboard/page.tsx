@@ -3,6 +3,8 @@ import { getCurrentUserBillingSummary, getHistoryCutoff } from '@/lib/billing'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { CollapsibleDashboardSection } from '@/components/collapsible-dashboard-section'
+import { DashboardRefresher } from '@/components/dashboard-refresher'
 import { isFeedbackUnread } from '@/lib/feedback-read-state'
 import { cn, formatRelativeTime, truncate, getStatusColor } from '@/lib/utils'
 import type { Feedback } from '@/lib/types'
@@ -266,28 +268,30 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="animate-fade-in space-y-7">
+    <div className="animate-fade-in space-y-5">
       {/* ─── Header ───────────────────────────────────────── */}
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-tight">
-          Good {getGreeting()},{' '}
-          <span className="font-normal text-muted-foreground">{displayName}</span>
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {unread > 0 ? (
-            <>
-              <span className="font-semibold text-foreground">{unread}</span> unread{' '}
-              {unread === 1 ? 'item' : 'items'} waiting in your inbox.
-            </>
-          ) : total > 0 ? (
-            'All caught up. Here is your overview.'
-          ) : (
-            'Customize a project, install the code, then send one test message.'
-          )}
-        </p>
-        <div data-tour="dashboard-actions" className="flex items-center gap-2 pt-1">
+      <div className="grid gap-3 border-b pb-4 lg:grid-cols-[minmax(260px,1fr)_auto_minmax(220px,auto)] lg:items-center">
+        <div className="min-w-0">
+          <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">
+            Good {getGreeting()},{' '}
+            <span className="font-normal text-muted-foreground">{displayName}</span>
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {unread > 0 ? (
+              <>
+                <span className="font-semibold text-foreground">{unread}</span> unread{' '}
+                {unread === 1 ? 'item' : 'items'} waiting in your inbox.
+              </>
+            ) : total > 0 ? (
+              'All caught up. Here is your overview.'
+            ) : (
+              'Customize a project, install the code, then send one test message.'
+            )}
+          </p>
+        </div>
+        <div data-tour="dashboard-actions" className="flex flex-wrap items-center gap-2 lg:justify-center">
           <Link href="/projects/new">
-            <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs font-medium">
+            <Button size="sm" variant="outline" className="h-8 gap-1.5 px-2.5 text-xs font-medium">
               <Plus className="h-3.5 w-3.5" />
               New Project
             </Button>
@@ -304,19 +308,25 @@ export default async function DashboardPage() {
             </Button>
           </Link>
           <Link href="/dashboard?tour=1">
-            <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs font-medium">
+            <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs font-medium">
               Take product tour
             </Button>
           </Link>
         </div>
         {billingSummary && (
-          <p className="text-xs text-muted-foreground">
-            Plan: {billingSummary.entitlements.label} · {billingSummary.entitlements.feedbackMonthlyLimit
-              ? `${billingSummary.usage.feedbackThisMonth}/${billingSummary.entitlements.feedbackMonthlyLimit} feedback this month`
-              : 'unlimited feedback'}{billingSummary.entitlements.historyDays
-              ? ` · last ${billingSummary.entitlements.historyDays} days visible`
-              : ' · full history visible'}
-          </p>
+          <div className="min-w-0 rounded-md border bg-card px-3 py-2 lg:justify-self-end">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Plan</p>
+            <p className="mt-0.5 truncate text-xs font-medium">
+              {billingSummary.entitlements.label} · {billingSummary.entitlements.feedbackMonthlyLimit
+                ? `${billingSummary.usage.feedbackThisMonth}/${billingSummary.entitlements.feedbackMonthlyLimit} feedback`
+                : 'Unlimited feedback'}
+            </p>
+            <p className="truncate text-[11px] text-muted-foreground">
+              {billingSummary.entitlements.historyDays
+                ? `Last ${billingSummary.entitlements.historyDays} days visible`
+                : 'Full history visible'}
+            </p>
+          </div>
         )}
       </div>
 
@@ -337,23 +347,7 @@ export default async function DashboardPage() {
             </Link>
           </Button>
         </div>
-      ) : (
-        <div data-tour="dashboard-capabilities" className="flex flex-col gap-3 border-y px-1 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2 text-sm">
-            <CircleHelp className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Need a refresher?</span>
-            <span className="hidden text-muted-foreground sm:inline">Use a focused tutorial without leaving your real workspace.</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button asChild size="sm" variant="ghost" className="min-h-11 sm:min-h-9">
-              <Link href="/tutorials">Open tutorials</Link>
-            </Button>
-            <Button asChild size="sm" variant="outline" className="min-h-11 sm:min-h-9">
-              <Link href="/dashboard?tour=1">Navigation tour</Link>
-            </Button>
-          </div>
-        </div>
-      )}
+      ) : <DashboardRefresher />}
 
       {/* ─── Onboarding (shown when no projects) ──────────── */}
       {projects === 0 && (
@@ -432,100 +426,66 @@ export default async function DashboardPage() {
       )}
 
       {/* ─── Stat Cards ───────────────────────────────────── */}
-      <div className="-mx-4 px-4 md:mx-0 md:px-0">
-        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin md:grid md:grid-cols-5 md:overflow-visible">
-          {statCards.map((stat) => (
-            <Link key={stat.id} href={stat.href} className="block">
-              <Card
-                className={cn(
-                  'min-w-[140px] flex-shrink-0 overflow-hidden transition-all hover:shadow-md hover:border-primary/30 cursor-pointer md:min-w-0',
-                  stat.urgent && 'border-amber-300 bg-amber-50/50 dark:border-amber-700/70 dark:bg-amber-950/20'
-                )}
-              >
-            <CardContent className="p-4 pb-3">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                {stat.label}
-              </p>
-              <p
-                className={cn(
-                  'mt-1.5 text-[1.625rem] font-bold leading-none tabular-nums',
-                  stat.urgent && 'text-amber-600 dark:text-amber-400'
-                )}
-              >
-                {stat.value}
-              </p>
-              <p className="mt-1 text-[11px] text-muted-foreground/60">{stat.sub}</p>
-              {/* CSS-only 7-bar sparkline */}
-              <div className="mt-3 flex items-end gap-[2px]" style={{ height: 18 }}>
-                {sparkCounts.map((count, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      'flex-1 rounded-[1px] transition-all duration-500',
-                      stat.urgent
-                        ? 'bg-amber-400/50 dark:bg-amber-500/40'
-                        : i === sparkCounts.length - 1
-                          ? 'bg-primary/65'
-                          : 'bg-primary/22 dark:bg-primary/18'
-                    )}
-                    style={{ height: `${Math.max((count / sparkMax) * 100, 10)}%` }}
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-            </Link>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-2.5">
+        {statCards.map((stat) => (
+          <Link key={stat.id} href={stat.href} className="block">
+            <Card
+              className={cn(
+                'h-full overflow-hidden transition-colors hover:border-primary/30 hover:bg-accent/20',
+                stat.urgent && 'border-amber-300 bg-amber-50/50 dark:border-amber-700/70 dark:bg-amber-950/20'
+              )}
+            >
+              <CardContent className="p-3.5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  {stat.label}
+                </p>
+                <p
+                  className={cn(
+                    'mt-1 text-2xl font-bold leading-none tabular-nums',
+                    stat.urgent && 'text-amber-600 dark:text-amber-400'
+                  )}
+                >
+                  {stat.value}
+                </p>
+                <p className="mt-1.5 text-[11px] text-muted-foreground">{stat.sub}</p>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
-        </div>
       </div>
 
       {/* ─── Activity + Sidebar ───────────────────────────── */}
       <div className="grid gap-5 lg:grid-cols-[1fr_272px]">
-        {/* On mobile, show quick actions first as a horizontal scroll */}
-        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin lg:hidden">
-          <Link
-            href="/feedback?read=unread"
-            className="flex min-w-[120px] flex-shrink-0 items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-xs font-medium transition-colors hover:bg-accent"
+        {/* Mobile quick actions stay readable without horizontal scrolling. */}
+        <div className="lg:hidden">
+          <CollapsibleDashboardSection
+            storageId="quick-actions-mobile"
+            title="Quick Actions"
+            contentClassName="grid grid-cols-2 gap-2 pb-3 pt-0"
           >
-            <Bell className="h-3.5 w-3.5 text-muted-foreground" />
-            Unread
-            {unread > 0 && (
-              <Badge variant="secondary" className="ml-auto h-5 text-[10px]">{unread}</Badge>
-            )}
-          </Link>
-          <Link
-            href="/feedback?type=bug"
-            className="flex min-w-[100px] flex-shrink-0 items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-xs font-medium transition-colors hover:bg-accent"
-          >
-            <Bug className="h-3.5 w-3.5 text-muted-foreground" />
-            Bugs
-            {typeCounts.bug > 0 && (
-              <Badge variant="secondary" className="ml-auto h-5 text-[10px]">{typeCounts.bug}</Badge>
-            )}
-          </Link>
-          <Link
-            href="/feedback?type=idea"
-            className="flex min-w-[100px] flex-shrink-0 items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-xs font-medium transition-colors hover:bg-accent"
-          >
-            <Lightbulb className="h-3.5 w-3.5 text-muted-foreground" />
-            Ideas
-            {typeCounts.idea > 0 && (
-              <Badge variant="secondary" className="ml-auto h-5 text-[10px]">{typeCounts.idea}</Badge>
-            )}
-          </Link>
-          <Link
-            href="/projects/new"
-            className="flex min-w-[100px] flex-shrink-0 items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            New project
-          </Link>
+            <Link href="/feedback?read=unread" className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
+              <Bell className="h-3.5 w-3.5 text-muted-foreground" />
+              Unread
+              {unread > 0 && <Badge variant="secondary" className="ml-auto h-5 text-[10px]">{unread}</Badge>}
+            </Link>
+            <Link href="/feedback?type=bug" className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
+              <Bug className="h-3.5 w-3.5 text-muted-foreground" /> Bugs
+            </Link>
+            <Link href="/feedback?type=idea" className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
+              <Lightbulb className="h-3.5 w-3.5 text-muted-foreground" /> Ideas
+            </Link>
+            <Link href="/projects/new" className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
+              <Plus className="h-3.5 w-3.5 text-muted-foreground" /> New project
+            </Link>
+          </CollapsibleDashboardSection>
         </div>
 
         {/* Recent Activity Feed */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-3 pt-4">
-            <CardTitle className="text-sm font-semibold">Recent Activity</CardTitle>
+        <CollapsibleDashboardSection
+          storageId="recent-activity"
+          title="Recent Activity"
+          contentClassName="p-0"
+          action={
             <Link href="/feedback">
               <Button
                 variant="ghost"
@@ -536,8 +496,8 @@ export default async function DashboardPage() {
                 <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
-          </CardHeader>
-          <CardContent className="p-0">
+          }
+        >
             {!recentFeedback || recentFeedback.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <Inbox className="h-10 w-10 text-muted-foreground/40" />
@@ -625,17 +585,16 @@ export default async function DashboardPage() {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+        </CollapsibleDashboardSection>
 
         {/* Sidebar — hidden on mobile, quick actions shown above instead */}
         <div className="hidden flex-col gap-4 lg:flex">
           {/* Type Breakdown */}
-          <Card>
-            <CardHeader className="pb-3 pt-4">
-              <CardTitle className="text-sm font-semibold">By Type</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 pb-4 pt-0">
+          <CollapsibleDashboardSection
+            storageId="by-type"
+            title="By Type"
+            contentClassName="space-y-3 pb-4 pt-0"
+          >
               {total === 0 ? (
                 <div className="py-6 text-center">
                   <BarChart3 className="mx-auto h-8 w-8 text-muted-foreground/40" />
@@ -677,15 +636,14 @@ export default async function DashboardPage() {
                     )
                   })
               )}
-            </CardContent>
-          </Card>
+          </CollapsibleDashboardSection>
 
           {/* Quick Actions */}
-          <Card>
-            <CardHeader className="pb-3 pt-4">
-              <CardTitle className="text-sm font-semibold">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-0.5 pb-3 pt-0">
+          <CollapsibleDashboardSection
+            storageId="quick-actions"
+            title="Quick Actions"
+            contentClassName="space-y-0.5 pb-3 pt-0"
+          >
               <Link
                 href="/feedback?read=unread"
                 className="flex items-center justify-between rounded-md px-2 py-2 transition-colors hover:bg-accent"
@@ -749,8 +707,7 @@ export default async function DashboardPage() {
                 <Plus className="h-3.5 w-3.5" />
                 New project
               </Link>
-            </CardContent>
-          </Card>
+          </CollapsibleDashboardSection>
         </div>
       </div>
 

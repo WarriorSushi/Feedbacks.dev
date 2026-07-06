@@ -39,7 +39,7 @@ async function PublicBoardShell({
       await Promise.all([
         supabase
           .from('projects')
-          .select('id, name')
+          .select('id, name, settings')
           .eq('owner_user_id', user.id)
           .order('created_at', { ascending: false }),
         supabase
@@ -54,7 +54,7 @@ async function PublicBoardShell({
           .maybeSingle(),
       ])
 
-    const ownedProjects = (projects as Array<{ id: string; name: string }>) || []
+    const ownedProjects = (projects as Array<{ id: string; name: string; settings: { icon?: string } }>) || []
     const ownsCurrentProject = ownedProjects.some((project) => project.id === currentBoard?.project_id)
     const boardSlugs: Record<string, string> = {}
     boardSettings?.forEach((board: { project_id: string; slug: string }) => {
