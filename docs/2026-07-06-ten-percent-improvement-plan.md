@@ -48,9 +48,9 @@ This is the working checklist for the product audit completed on 6 July 2026. Wo
 
 ## Deployment handoff
 
-- Apply migrations `025`, `026`, and `027` in order before relying on aggregate dashboard stats or activation health in production.
+- Migrations `025`, `026`, and `027` were applied to the hosted `feedbacks.dev` Supabase project and verified on 6 July 2026.
 - The app retains a compatibility fallback for dashboard stats, and activation writes fail safely until migration `026` is present.
-- Local authenticated Playwright execution requires `E2E_AUTH_BYPASS_SECRET`; CI now fails closed for same-repository branches when that environment is incomplete.
+- Local authenticated Playwright execution uses an ephemeral `E2E_AUTH_BYPASS_SECRET`; operators do not need to provide or persist one. CI fails closed when its configured environment is incomplete.
 
 ## Success measures
 

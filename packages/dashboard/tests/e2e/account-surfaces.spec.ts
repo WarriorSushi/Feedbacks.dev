@@ -12,7 +12,7 @@ test('protected routes require authentication and billing state loads after sign
 
   await signInWithTestSession(page)
   await page.goto('/billing')
-  await expect(page.getByRole('heading', { name: 'Billing' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Billing', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Billing and plan' })).toBeVisible()
 
   const billingResponse = await page.request.get('/api/billing/sync')

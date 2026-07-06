@@ -27,7 +27,7 @@ as $$
     select
       count(*)::integer as total,
       count(*) filter (where read_at is null)::integer as unread,
-      round(avg(rating)::numeric, 2) filter (where rating is not null) as average_rating,
+      round(avg(rating)::numeric, 2) as average_rating,
       count(rating)::integer as rating_count,
       count(*) filter (where agent_name is not null)::integer as agent_count
     from scoped
@@ -66,4 +66,3 @@ revoke execute on function public.dashboard_stats(uuid, uuid, timestamptz, times
   from public, anon, authenticated;
 grant execute on function public.dashboard_stats(uuid, uuid, timestamptz, timestamptz)
   to service_role;
-

@@ -50,6 +50,8 @@ For a new internal staging, recovery, or disposable verification project, run th
 26. `sql/026_activation_milestones.sql` — adds privacy-preserving, one-time activation funnel milestones without page-view or visitor tracking
 27. `sql/027_operational_health_indexes.sql` — keeps delivery and installation-health probes indexed as history grows
 
+Hosted schema note, 6 July 2026: migrations `025`, `026`, and `027` are applied and verified. The dashboard aggregate runs, activation RLS is enabled, the operational indexes exist, and `dashboard_stats` execution is restricted to `service_role`.
+
 **How for internal/staging use:** apply the files through the Supabase CLI or copy-paste the contents of each file into the SQL Editor and click "Run".
 
 The hosted live project has older branch-style migration history plus the launch hardening migrations; see `docs/2026-06-09-migration-history-reconciliation.md` before touching its migration ledger.

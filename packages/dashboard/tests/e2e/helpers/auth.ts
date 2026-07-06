@@ -36,5 +36,11 @@ export async function signInWithTestSession(page: Page) {
     throw new Error(`Unable to create test session (${response.status}): ${JSON.stringify(response.payload)}`)
   }
 
-  await page.goto(env.baseURL, { waitUntil: 'domcontentloaded' })
+  try {
+    await page.goto(`${env.baseURL}/dashboard`, { waitUntil: 'domcontentloaded' })
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes('net::ERR_ABORTED')) throw error
+  }
+  await page.waitForURL(/\/dashboard(?:\?|$)/)
+  await page.locator('main').waitFor({ state: 'visible' })
 }
