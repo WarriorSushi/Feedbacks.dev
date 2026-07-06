@@ -39,7 +39,7 @@ export function CollapsibleDashboardSection({
   }
 
   return (
-    <Card className={className}>
+    <Card className={cn(collapsed && 'w-full self-start', className)}>
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3 pt-3.5">
         <CardTitle className="text-sm font-semibold">{title}</CardTitle>
         <div className="flex items-center gap-1">
