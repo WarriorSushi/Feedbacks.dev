@@ -39,7 +39,7 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
       { title: 'Feedback', body: 'New messages land here. Search, filter, tag, and decide what needs action.', href: '/feedback', target: '[data-tour="nav-feedback"]' },
       { title: 'Projects', body: 'Each app or website gets one project. This is where setup and customization begin.', href: '/projects', target: '[data-tour="nav-projects"]' },
       { title: 'Integrations', body: 'This opens routing for the project selected at the top of the sidebar.', href: '/projects/{projectId}?tab=integrations', target: '[data-tour="nav-integrations"]' },
-      { title: 'Public Boards', body: 'Manage the boards attached to your projects and preview what users see.', href: '/dashboard/boards', target: '[data-tour="nav-boards"]' },
+      { title: 'Public Boards', body: 'Manage the board for the project selected at the top of the sidebar.', href: '/dashboard/boards?project={projectId}', target: '[data-tour="nav-boards"]' },
       { title: 'API', body: 'This opens REST and MCP tools for the project selected at the top of the sidebar.', href: '/projects/{projectId}?tab=api', target: '[data-tour="nav-api"]' },
       { title: 'Billing', body: 'Check usage, plan access, and billing management.', href: '/billing', target: '[data-tour="nav-billing"]' },
       { title: 'Tutorials', body: 'Return here for a guided lesson about one specific job.', href: '/tutorials', target: '[data-tour="nav-tutorials"]' },
@@ -94,9 +94,9 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
     title: 'Publish a public board',
     description: 'Configure, publish, preview, and manage a project board.',
     steps: [
-      { title: 'Your boards', body: 'This page shows one board state per project. Draft boards stay private until you publish them.', href: '/dashboard/boards', target: '[data-tour="owner-boards-summary"]' },
+      { title: 'Selected project board', body: 'This page follows the project selected in the sidebar. Draft boards stay private until you publish them.', href: '/dashboard/boards?project={projectId}', target: '[data-tour="owner-boards-summary"]' },
       { title: 'Board settings', body: 'Open a project board to set its name, visibility, categories, submissions, and directory listing.', href: '/projects/{projectId}?tab=board', target: '[data-tour="project-menu"]' },
-      { title: 'Preview before sharing', body: 'After publishing, use Preview beside the project to inspect the public experience.', href: '/dashboard/boards', target: '[data-tour="owner-board-list"]' },
+      { title: 'Preview before sharing', body: 'After publishing, use Preview to inspect the selected project’s public experience.', href: '/dashboard/boards?project={projectId}', target: '[data-tour="owner-board-list"]' },
     ],
   },
   {

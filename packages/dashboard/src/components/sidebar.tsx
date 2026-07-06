@@ -38,16 +38,29 @@ import { CURRENT_PROJECT_COOKIE } from '@/lib/project-selection'
 
 type SidebarProject = Pick<Project, 'id' | 'name'>
 
-const navItems = [
+type NavItem = {
+  href: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  tourId: string
+  exact?: boolean
+  projectTab?: string
+  external?: boolean
+}
+
+const primaryNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true, tourId: 'nav-dashboard' },
   { href: '/feedback',  label: 'Feedback',  icon: MessageSquare, tourId: 'nav-feedback' },
   { href: '/projects',  label: 'Projects',  icon: FolderOpen, tourId: 'nav-projects' },
   { href: '/integrations', label: 'Integrations', icon: Webhook, tourId: 'nav-integrations', projectTab: 'integrations' },
   { href: '/dashboard/boards', label: 'Public Boards', icon: Globe, tourId: 'nav-boards' },
   { href: '/api-docs', label: 'API', icon: Code2, tourId: 'nav-api', projectTab: 'api' },
+]
+
+const utilityNavItems: NavItem[] = [
   { href: 'https://www.feedbacks.dev/docs', label: 'Docs', icon: Library, tourId: 'nav-docs', external: true },
-  { href: '/billing',   label: 'Billing',   icon: CreditCard, tourId: 'nav-billing' },
   { href: '/tutorials', label: 'Tutorials', icon: BookOpen, tourId: 'nav-tutorials' },
+  { href: '/billing',   label: 'Billing',   icon: CreditCard, tourId: 'nav-billing' },
   { href: '/settings',  label: 'Settings',  icon: Settings, tourId: 'nav-settings' },
 ]
 
@@ -80,7 +93,8 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
   const search = searchParams.toString()
   const currentHref = search ? `${pathname}?${search}` : pathname
   const routeProjectId = pathname.match(/^\/projects\/([^/]+)/)?.[1]
-  const resolvedCurrentProjectId = currentProjectId || routeProjectId
+  const boardProjectId = pathname === '/dashboard/boards' ? searchParams.get('project') || undefined : undefined
+  const resolvedCurrentProjectId = routeProjectId || boardProjectId || currentProjectId
   const [visibleProjects, setVisibleProjects] = React.useState(projects)
   const [pendingHref, setPendingHref] = React.useState<string | null>(null)
   const [projectOpen, setProjectOpen] = React.useState(false)
@@ -158,6 +172,11 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
   const rememberProject = React.useCallback((projectId: string) => {
     document.cookie = `${CURRENT_PROJECT_COOKIE}=${encodeURIComponent(projectId)}; Path=/; Max-Age=31536000; SameSite=Lax`
   }, [])
+
+  const projectDestination = React.useCallback((projectId: string) => {
+    if (pathname === '/dashboard/boards') return `/dashboard/boards?project=${encodeURIComponent(projectId)}`
+    return `/projects/${projectId}`
+  }, [pathname])
 
   React.useEffect(() => {
     if (routeProjectId) rememberProject(routeProjectId)
@@ -243,18 +262,19 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
               <div className="mt-1 overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md shadow-black/5">
                 {visibleProjects.map((p, i) => {
                   const isSelected = p.id === resolvedCurrentProjectId
+                  const destination = projectDestination(p.id)
                   return (
                     <Link
                       key={p.id}
-                      href={`/projects/${p.id}`}
+                      href={destination}
                       prefetch={false}
                       onClick={() => {
                         rememberProject(p.id)
-                        beginNavigation(`/projects/${p.id}`)
+                        beginNavigation(destination)
                         setProjectOpen(false)
                       }}
-                      onMouseEnter={() => router.prefetch(`/projects/${p.id}`)}
-                      onFocus={() => router.prefetch(`/projects/${p.id}`)}
+                      onMouseEnter={() => router.prefetch(destination)}
+                      onFocus={() => router.prefetch(destination)}
                       className={cn(
                         'flex min-h-11 items-center justify-between px-3 py-2 text-[13px] md:min-h-0',
                         'transition-[background-color,color,transform] duration-100 hover:bg-accent active:scale-[0.98] active:bg-accent/80',
@@ -272,7 +292,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
                           {p.name}
                         </span>
                       </span>
-                      {pendingHref === `/projects/${p.id}` ? (
+                      {pendingHref === destination ? (
                         <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
                       ) : isSelected && (
                         <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
@@ -307,34 +327,35 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
       )}
 
       {/* Nav — scrolls when it overflows, pushes footer to bottom when it doesn't */}
-      <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto p-2.5">
-        {navItems.map((item) => {
-          const projectTab = 'projectTab' in item ? item.projectTab : undefined
-          const external = 'external' in item && item.external
-          const scopedHref = projectTab && currentProject
-            ? `/projects/${currentProject.id}?tab=${projectTab}`
-            : item.href
-          const activeProjectTab = pathname.startsWith('/projects/') ? searchParams.get('tab') : null
-          const isActive = external
-            ? false
-            : projectTab
-            ? activeProjectTab === projectTab
-            : item.href === '/projects' && (activeProjectTab === 'integrations' || activeProjectTab === 'api')
-              ? false
-              : item.exact
-                ? pathname === item.href
-                : pathname === item.href || pathname.startsWith(item.href + '/')
-          return (
-            <React.Fragment key={item.href}>
+      <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2.5">
+        <div className="space-y-0.5">
+          {primaryNavItems.map((item) => {
+            const projectTab = item.projectTab
+            const scopedHref = item.href === '/dashboard/boards' && currentProject
+              ? `/dashboard/boards?project=${encodeURIComponent(currentProject.id)}`
+              : projectTab && currentProject
+                ? `/projects/${currentProject.id}?tab=${projectTab}`
+                : item.href
+            const activeProjectTab = pathname.startsWith('/projects/') ? searchParams.get('tab') : null
+            const isActive = projectTab
+              ? activeProjectTab === projectTab
+              : item.href === '/projects' && (activeProjectTab === 'integrations' || activeProjectTab === 'api')
+                ? false
+                : item.exact
+                  ? pathname === item.href
+                  : pathname === item.href || pathname.startsWith(item.href + '/')
+            return (
               <Link
+                key={item.href}
                 href={scopedHref}
                 data-tour={item.tourId}
                 prefetch={false}
                 title={collapsed ? item.label : undefined}
                 aria-label={collapsed ? item.label : undefined}
-                onClick={() => { if (!external) beginNavigation(scopedHref) }}
-                onMouseEnter={() => { if (!external) router.prefetch(scopedHref) }}
-                onFocus={() => { if (!external) router.prefetch(scopedHref) }}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => beginNavigation(scopedHref)}
+                onMouseEnter={() => router.prefetch(scopedHref)}
+                onFocus={() => router.prefetch(scopedHref)}
                 className={cn(
                   'group relative flex min-h-11 items-center gap-3 rounded-lg py-2 text-[13px] font-medium md:min-h-0',
                   'transition-all duration-150 active:scale-[0.98]',
@@ -348,7 +369,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
                     : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                 )}
               >
-                {!external && pendingHref === scopedHref ? (
+                {pendingHref === scopedHref ? (
                   <Loader2 className={cn('h-[17px] w-[17px] shrink-0 animate-spin', isActive && 'text-primary')} />
                 ) : (
                   <item.icon
@@ -359,59 +380,64 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
                     )}
                   />
                 )}
-                {!collapsed && (
-                  <span className="truncate">{item.label}</span>
-                )}
+                {!collapsed && <span className="truncate">{item.label}</span>}
               </Link>
-            </React.Fragment>
-          )
-        })}
+            )
+          })}
 
-        {/* Public Board links — inside the scrollable nav area */}
-        {(() => {
-          const projectsWithBoards = visibleProjects.filter((p) => boardSlugs[p.id])
-          if (projectsWithBoards.length === 0 || collapsed) return null
-
-          if (projectsWithBoards.length === 1) {
-            const slug = boardSlugs[projectsWithBoards[0].id]
+          {/* The preview link follows the selected project instead of listing every project. */}
+          {(() => {
+            const slug = currentProject ? boardSlugs[currentProject.id] : undefined
+            if (!slug || collapsed) return null
             return (
               <a
                 href={`/p/${slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-muted-foreground transition-all duration-150 hover:bg-accent hover:text-foreground"
+                className="group ml-7 flex items-center gap-2 rounded-md px-3 py-1.5 text-[12px] text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground"
               >
-                <Globe className="h-[17px] w-[17px] shrink-0 transition-transform duration-150 group-hover:scale-[1.08]" />
-                <span className="truncate">Public Board</span>
-                <ExternalLink className="ml-auto h-3 w-3 opacity-0 transition-opacity group-hover:opacity-60" />
+                <span className="truncate">View live board</span>
+                <ExternalLink className="ml-auto h-3 w-3 opacity-60" />
               </a>
             )
-          }
+          })()}
+        </div>
 
-          return (
-            <div className="pt-2">
-              <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-                Public Boards
-              </p>
-              {projectsWithBoards.map((p) => {
-                const slug = boardSlugs[p.id]
-                return (
-                  <a
-                    key={p.id}
-                    href={`/p/${slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] text-muted-foreground transition-all duration-150 hover:bg-accent hover:text-foreground"
-                  >
-                    <Globe className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{p.name}</span>
-                    <ExternalLink className="ml-auto h-3 w-3 opacity-0 transition-opacity group-hover:opacity-60" />
-                  </a>
-                )
-              })}
-            </div>
-          )
-        })()}
+        <div className="mt-auto space-y-0.5 border-t pt-2">
+          {utilityNavItems.map((item) => {
+            const isActive = !item.external && (pathname === item.href || pathname.startsWith(item.href + '/'))
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                data-tour={item.tourId}
+                prefetch={false}
+                title={collapsed ? item.label : undefined}
+                aria-label={collapsed ? item.label : undefined}
+                aria-current={isActive ? 'page' : undefined}
+                target={item.external ? '_blank' : undefined}
+                rel={item.external ? 'noopener noreferrer' : undefined}
+                onClick={() => { if (!item.external) beginNavigation(item.href) }}
+                onMouseEnter={() => { if (!item.external) router.prefetch(item.href) }}
+                onFocus={() => { if (!item.external) router.prefetch(item.href) }}
+                className={cn(
+                  'group relative flex min-h-11 items-center gap-3 rounded-lg py-2 text-[13px] font-medium md:min-h-0',
+                  'transition-all duration-150 active:scale-[0.98]',
+                  collapsed ? 'justify-center px-2' : 'px-3',
+                  isActive ? 'bg-primary/8 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                )}
+              >
+                {!item.external && pendingHref === item.href ? (
+                  <Loader2 className="h-[17px] w-[17px] shrink-0 animate-spin text-primary" />
+                ) : (
+                  <item.icon className={cn('h-[17px] w-[17px] shrink-0', isActive && 'text-primary')} />
+                )}
+                {!collapsed && <span className="truncate">{item.label}</span>}
+                {!collapsed && item.external && <ExternalLink className="ml-auto h-3 w-3 opacity-50" />}
+              </Link>
+            )
+          })}
+        </div>
       </nav>
 
       {/* Footer — always visible at bottom */}

@@ -1,14 +1,22 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { ArrowRight, ExternalLink, Globe, Settings2 } from 'lucide-react'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getMarketingOrigin } from '@/lib/domain-routing'
+import { CURRENT_PROJECT_COOKIE } from '@/lib/project-selection'
 
 export const metadata = { title: 'Your Public Boards' }
 
-export default async function DashboardBoardsPage() {
+export default async function DashboardBoardsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ project?: string }>
+}) {
   const publicBoardsUrl = `${getMarketingOrigin()}/boards`
+  const requestedProjectId = (await searchParams).project
+  const storedProjectId = (await cookies()).get(CURRENT_PROJECT_COOKIE)?.value
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -20,36 +28,34 @@ export default async function DashboardBoardsPage() {
         .order('created_at', { ascending: false })
     : { data: [] }
 
-  const projectIds = (projects || []).map((project) => project.id)
-  const { data: boards } = projectIds.length
+  const selectedProject = (projects || []).find((project) => project.id === (requestedProjectId || storedProjectId)) || projects?.[0]
+  const { data: board } = selectedProject
     ? await supabase
         .from('public_board_settings')
         .select('project_id, enabled, slug, visibility, directory_opt_in, updated_at')
-        .in('project_id', projectIds)
-    : { data: [] }
-  const { data: publicFeedback } = projectIds.length
+        .eq('project_id', selectedProject.id)
+        .maybeSingle()
+    : { data: null }
+  const { count: publicRequestCount } = selectedProject
     ? await supabase
         .from('feedback')
-        .select('project_id')
-        .in('project_id', projectIds)
+        .select('id', { count: 'exact', head: true })
+        .eq('project_id', selectedProject.id)
         .eq('is_public', true)
         .eq('is_archived', false)
-    : { data: [] }
+    : { count: 0 }
 
-  const boardByProject = new Map((boards || []).map((board) => [board.project_id, board]))
-  const requestCounts = new Map<string, number>()
-  for (const row of publicFeedback || []) {
-    requestCounts.set(row.project_id, (requestCounts.get(row.project_id) || 0) + 1)
-  }
+  const published = Boolean(board?.enabled && board.slug && board.visibility !== 'private')
+  const state = published ? 'Published' : board ? 'Draft' : 'Not configured'
 
   return (
     <div className="mx-auto max-w-6xl space-y-6" data-tour="owner-boards">
       <div data-tour="owner-boards-summary" className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Public boards</p>
-          <h1 className="mt-2 text-2xl font-bold">Your public boards</h1>
+          <h1 className="mt-2 text-2xl font-bold">{selectedProject ? `${selectedProject.name} board` : 'Public board'}</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Publish, preview, and manage the board attached to each project.
+            Publish, preview, and manage the public board for the project selected in the sidebar.
           </p>
         </div>
         <Button variant="outline" asChild>
@@ -60,7 +66,7 @@ export default async function DashboardBoardsPage() {
         </Button>
       </div>
 
-      {(projects || []).length === 0 ? (
+      {!selectedProject ? (
         <div className="border-y py-12 text-center">
           <h2 className="text-lg font-semibold">Create a project first</h2>
           <p className="mt-2 text-sm text-muted-foreground">Every public board belongs to one project.</p>
@@ -68,40 +74,33 @@ export default async function DashboardBoardsPage() {
         </div>
       ) : (
         <div data-tour="owner-board-list" className="overflow-hidden rounded-lg border bg-card">
-          {(projects || []).map((project) => {
-            const board = boardByProject.get(project.id)
-            const published = Boolean(board?.enabled && board.slug && board.visibility !== 'private')
-            const state = published ? 'Published' : board ? 'Draft' : 'Not configured'
-            return (
-              <div key={project.id} className="flex flex-col gap-4 border-b p-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="truncate font-semibold">{project.name}</h2>
-                    <Badge variant={published ? 'default' : 'secondary'}>{state}</Badge>
-                    {board?.directory_opt_in && published && <Badge variant="outline">Listed</Badge>}
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {project.domain || 'No domain set'} · {requestCounts.get(project.id) || 0} public requests
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-wrap items-center gap-2">
-                  {published && (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={`/p/${board!.slug}`} target="_blank" rel="noopener noreferrer">
-                        Preview <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
-                      </a>
-                    </Button>
-                  )}
-                  <Button size="sm" asChild>
-                    <Link href={`/projects/${project.id}?tab=board`}>
-                      <Settings2 className="mr-1.5 h-3.5 w-3.5" />
-                      {board ? 'Manage board' : 'Set up board'}
-                    </Link>
-                  </Button>
-                </div>
+          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="truncate font-semibold">{selectedProject.name}</h2>
+                <Badge variant={published ? 'default' : 'secondary'}>{state}</Badge>
+                {board?.directory_opt_in && published && <Badge variant="outline">Listed</Badge>}
               </div>
-            )
-          })}
+              <p className="mt-1 text-sm text-muted-foreground">
+                {selectedProject.domain || 'No domain set'} · {publicRequestCount || 0} public requests
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {published && (
+                <Button variant="outline" size="sm" asChild>
+                  <a href={`/p/${board!.slug}`} target="_blank" rel="noopener noreferrer">
+                    Preview <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+                  </a>
+                </Button>
+              )}
+              <Button size="sm" asChild>
+                <Link href={`/projects/${selectedProject.id}?tab=board`}>
+                  <Settings2 className="mr-1.5 h-3.5 w-3.5" />
+                  {board ? 'Manage board' : 'Set up board'}
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
