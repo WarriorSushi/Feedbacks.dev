@@ -1,5 +1,6 @@
 import styles from './styles.css';
 import type { WidgetConfig, FeedbackData, FeedbackResponse, CategoryType } from './types';
+import { ProductUpdatesController } from './product-updates';
 
 // ---- Helpers ----
 
@@ -66,6 +67,7 @@ class FeedbacksWidget {
   private maxRetries = 3;
   private boundKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private themeVars: Record<string, string> = {};
+  private updatesController: ProductUpdatesController | null = null;
 
   constructor(config: WidgetConfig) {
     this.cfg = { position: 'bottom-right', embedMode: 'modal', ...config };
@@ -87,6 +89,7 @@ class FeedbacksWidget {
   private setup(): void {
     this.injectStyles();
     this.applyTheme();
+    if (this.cfg.enableUpdates) this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen);
 
     if (this.cfg.embedMode === 'inline') {
       this.renderInline();
@@ -211,6 +214,7 @@ class FeedbacksWidget {
   // ---- Modal ----
 
   open(): void {
+    if (this.updatesController?.isOpen()) this.updatesController.closeUpdates();
     if (this.isOpen) return;
     this.isOpen = true;
     this.lastFocus = document.activeElement as HTMLElement;
@@ -730,6 +734,8 @@ class FeedbacksWidget {
   }
 
   destroy(): void {
+    this.updatesController?.destroy();
+    this.updatesController = null;
     this.launcher?.remove();
     this.overlayEl?.remove();
     this.styleEl?.remove();
@@ -739,6 +745,11 @@ class FeedbacksWidget {
     }
     document.body.style.overflow = '';
   }
+
+  openUpdates(): Promise<boolean> { return this.updatesController?.openUpdates() || Promise.resolve(false); }
+  closeUpdates(): void { this.updatesController?.closeUpdates(); }
+  getUnreadUpdateCount(): number { return this.updatesController?.getUnreadUpdateCount() || 0; }
+  refreshUpdates(): Promise<void> { return this.updatesController?.refreshUpdates() || Promise.resolve(); }
 }
 
 export default FeedbacksWidget;

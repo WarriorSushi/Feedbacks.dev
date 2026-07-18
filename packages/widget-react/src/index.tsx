@@ -108,6 +108,9 @@ export function FeedbacksWidget(props: FeedbacksWidgetProps) {
     scale,
     modalWidth,
     apiUrl,
+    enableUpdates,
+    updatesApiUrl,
+    updatesEventsApiUrl,
     debug,
     requireEmail,
     enableType,
@@ -147,6 +150,9 @@ export function FeedbacksWidget(props: FeedbacksWidgetProps) {
     ?? (renderedTargetId ? `#${renderedTargetId}` : undefined)
   const savedConfig: SavedWidgetConfig = {
     apiUrl,
+    enableUpdates,
+    updatesApiUrl,
+    updatesEventsApiUrl,
     embedMode,
     position,
     target: resolvedTarget,

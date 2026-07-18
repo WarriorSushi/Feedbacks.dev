@@ -21,15 +21,16 @@ import { InstallTab } from './install-tab'
 import { CustomizeTab } from './customize-tab'
 import { IntegrationsTab } from './integrations-tab'
 import { ProjectMenu, SetupProgress, type ProjectSection, type SetupStep } from './project-flow-nav'
+import { ProductUpdatesTab } from '@/components/product-updates/ProductUpdatesTab'
 
 interface ProjectTabsProps {
   project: Project
   billingSummary: BillingSummary | null
 }
 
-type TabId = 'install' | 'customize' | 'integrations' | 'board' | 'api' | 'settings'
+type TabId = 'install' | 'customize' | 'integrations' | 'board' | 'updates' | 'api' | 'settings'
 
-const tabs: TabId[] = ['install', 'customize', 'integrations', 'board', 'api', 'settings']
+const tabs: TabId[] = ['install', 'customize', 'integrations', 'board', 'updates', 'api', 'settings']
 
 export function ProjectTabs({ project, billingSummary }: ProjectTabsProps) {
   return (
@@ -62,6 +63,8 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
         ? 'integrations'
         : activeTab === 'board'
           ? 'board'
+          : activeTab === 'updates'
+            ? 'updates'
           : activeTab === 'api'
             ? 'api'
             : 'settings'
@@ -206,6 +209,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
       )}
       {activeTab === 'integrations' && <IntegrationsTab project={project} initialBillingSummary={billingSummary} />}
       {activeTab === 'board' && <BoardSettingsTab project={project} />}
+      {activeTab === 'updates' && <ProductUpdatesTab projectId={project.id} />}
       {activeTab === 'api' && (
         <ApiDocs
           project={project}

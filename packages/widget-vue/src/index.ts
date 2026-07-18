@@ -127,6 +127,9 @@ export const FeedbacksWidget = defineComponent({
     scale: { type: Number, default: undefined },
     modalWidth: { type: Number, default: undefined },
     apiUrl: { type: String, default: undefined },
+    enableUpdates: { type: Boolean, default: undefined },
+    updatesApiUrl: { type: String, default: undefined },
+    updatesEventsApiUrl: { type: String, default: undefined },
     debug: { type: Boolean, default: undefined },
     requireEmail: { type: Boolean, default: undefined },
     enableType: { type: Boolean, default: undefined },
@@ -166,6 +169,9 @@ export const FeedbacksWidget = defineComponent({
     const runtimeConfig = computed(() => {
       const savedConfig: SavedWidgetConfig = {
         apiUrl: props.apiUrl,
+        enableUpdates: props.enableUpdates,
+        updatesApiUrl: props.updatesApiUrl,
+        updatesEventsApiUrl: props.updatesEventsApiUrl,
         embedMode: props.embedMode,
         position: props.position,
         target: sanitizeTargetSelector(props.target)
