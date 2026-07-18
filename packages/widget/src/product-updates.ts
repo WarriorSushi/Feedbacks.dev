@@ -26,10 +26,11 @@ export class ProductUpdatesController {
   }
 
   private async start() {
-    await this.refreshUpdates()
     document.addEventListener('click', this.onManualTrigger, { signal: this.abort.signal })
     window.addEventListener('popstate', () => this.maybeAutoShow(), { signal: this.abort.signal })
+    document.addEventListener('visibilitychange', () => this.maybeAutoShow(), { signal: this.abort.signal })
     window.addEventListener('feedbacks:updates:refresh', () => { void this.refreshUpdates() }, { signal: this.abort.signal })
+    await this.refreshUpdates()
   }
 
   async refreshUpdates(): Promise<void> {
@@ -99,7 +100,9 @@ export class ProductUpdatesController {
 
     if (this.autoTimer) clearTimeout(this.autoTimer)
     this.autoTimer = window.setTimeout(() => {
-      if (!this.isFeedbackOpen() && !this.dialog) this.open(update, false)
+      if (!this.isFeedbackOpen() && !this.dialog && this.response && isProductUpdatePathEligible(location.pathname, this.response.settings)) {
+        this.open(update, false)
+      }
     }, this.response.settings.displayDelayMs)
   }
 
