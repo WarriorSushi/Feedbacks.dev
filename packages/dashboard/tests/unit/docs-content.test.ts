@@ -11,7 +11,8 @@ test('documentation has unique routes and useful article structure', async () =>
   const pages = DOCS_PAGES as DocsPage[]
   const slugs = pages.map((page) => page.slug)
 
-  assert.equal(pages.length, 16)
+  assert.equal(pages.length, 17)
+  assert.ok(slugs.includes('install/product-updates'))
   assert.equal(new Set(slugs).size, slugs.length)
   for (const page of pages) {
     assert.ok(page.title.length > 2)
