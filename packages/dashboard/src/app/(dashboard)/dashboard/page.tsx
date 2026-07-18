@@ -832,7 +832,7 @@ export default async function DashboardPage({
                     <span
                       className={cn(
                         'text-[11px] font-medium uppercase',
-                        isToday ? 'text-primary' : 'text-muted-foreground/55'
+                        isToday ? 'text-primary' : 'text-muted-foreground'
                       )}
                     >
                       {new Date(day + 'T12:00:00').toLocaleDateString('en', {
