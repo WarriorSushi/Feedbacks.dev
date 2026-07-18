@@ -2,6 +2,22 @@ export type ProductUpdateStatus = 'draft' | 'published' | 'archived'
 export type ProductUpdateTheme = 'auto' | 'light' | 'dark'
 export type ProductUpdateMetricType = 'impression' | 'dismissal' | 'cta_click'
 
+// These owner-side activation events are intentionally declarative in Phase 0.
+// Later phases may emit them through a privacy-preserving aggregate pipeline.
+export const PRODUCT_UPDATE_ACTIVATION_EVENTS = [
+  'updates_nav_opened',
+  'updates_setup_started',
+  'updates_install_method_selected',
+  'updates_embed_verified',
+  'updates_activated',
+  'updates_first_draft_created',
+  'updates_private_test_opened',
+  'updates_first_published',
+  'updates_first_impression_received',
+] as const
+
+export type ProductUpdateActivationEvent = typeof PRODUCT_UPDATE_ACTIVATION_EVENTS[number]
+
 export const PRODUCT_UPDATE_LIMITS = {
   versionLabel: 32,
   title: 120,

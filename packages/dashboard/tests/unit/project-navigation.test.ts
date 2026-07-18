@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { LEGACY_PROJECT_ROUTE_MAPPINGS } from './fixtures/project-route-mapping.fixture.ts'
 
 async function loadProjectNavigation() {
   return import(new URL('../../src/lib/project-navigation.ts', import.meta.url).href)
@@ -33,5 +34,37 @@ test('project switching preserves the active project workspace section', async (
       activeProjectTab: 'integrations',
     }),
     '/projects/next-project?tab=integrations',
+  )
+})
+
+test('project switching preserves every legacy project tab URL during the route migration', async () => {
+  const { getProjectDestination } = await loadProjectNavigation()
+
+  for (const { tab } of LEGACY_PROJECT_ROUTE_MAPPINGS) {
+    assert.equal(
+      getProjectDestination({
+        projectId: 'next project',
+        pathname: '/projects/current-project',
+        activeProjectTab: tab,
+      }),
+      `/projects/next%20project?tab=${tab}`,
+    )
+  }
+})
+
+test('legacy project tab fixture covers the approved stable route map', () => {
+  const expectedFuturePaths = {
+    install: '/projects/{projectId}/install',
+    customize: '/projects/{projectId}/install',
+    integrations: '/projects/{projectId}/integrations',
+    board: '/projects/{projectId}/board',
+    updates: '/projects/{projectId}/updates',
+    api: '/projects/{projectId}/api',
+    settings: '/projects/{projectId}/settings',
+  }
+
+  assert.deepEqual(
+    Object.fromEntries(LEGACY_PROJECT_ROUTE_MAPPINGS.map(({ tab, futurePath }) => [tab, futurePath])),
+    expectedFuturePaths,
   )
 })
