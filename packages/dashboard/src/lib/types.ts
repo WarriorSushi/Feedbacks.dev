@@ -37,7 +37,7 @@ export interface Project {
 
 export interface ProjectSettings {
   icon?: string
-  widget_config?: WidgetConfig
+  widget_config?: WidgetConfig & { feedbackEnabled?: boolean }
   notifications?: NotificationSettings
   widget_origin_restriction?: WidgetOriginRestriction
 }

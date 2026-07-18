@@ -63,6 +63,17 @@ export interface ProductUpdatesPublicResponse {
   updates: ProductUpdateContent[]
 }
 
+export interface WidgetBootstrapModules {
+  feedback: boolean
+  updates: boolean
+}
+
+export interface WidgetBootstrapResponse {
+  configVersion: 2
+  modules: WidgetBootstrapModules
+  updates?: ProductUpdatesPublicResponse
+}
+
 export interface ProductUpdateInput {
   versionLabel?: string
   title?: string

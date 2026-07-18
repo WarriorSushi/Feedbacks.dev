@@ -78,6 +78,7 @@ const requiredColumns = {
   product_update_settings: ['project_id', 'enabled', 'auto_show', 'display_delay_ms', 'theme', 'accent_color', 'include_paths', 'exclude_paths', 'show_powered_by'],
   product_updates: ['id', 'project_id', 'created_by', 'status', 'title', 'summary', 'highlights', 'image_path', 'cta_label', 'cta_url', 'published_at', 'expires_at'],
   product_update_metrics: ['project_id', 'update_id', 'metric_date', 'event_type', 'count'],
+  project_embed_installations: ['project_id', 'last_seen_at', 'runtime_version', 'feedback_enabled', 'updates_enabled'],
 }
 
 const requiredBuckets = ['feedback_screenshots', 'feedback_attachments', 'product_update_images']
