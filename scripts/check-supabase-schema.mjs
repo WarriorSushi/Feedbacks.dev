@@ -75,9 +75,12 @@ const requiredColumns = {
   webhook_digest_items: ['id', 'project_id', 'kind', 'endpoint_url', 'payload', 'digest_date', 'status', 'next_attempt_at'],
   webhook_jobs: ['id', 'project_id', 'kind', 'endpoint_url', 'payload', 'status', 'next_attempt_at'],
   webhook_deliveries: ['id', 'project_id', 'event', 'kind', 'url', 'status', 'payload', 'created_at'],
+  product_update_settings: ['project_id', 'enabled', 'auto_show', 'display_delay_ms', 'theme', 'accent_color', 'include_paths', 'exclude_paths', 'show_powered_by'],
+  product_updates: ['id', 'project_id', 'created_by', 'status', 'title', 'summary', 'highlights', 'image_path', 'cta_label', 'cta_url', 'published_at', 'expires_at'],
+  product_update_metrics: ['project_id', 'update_id', 'metric_date', 'event_type', 'count'],
 }
 
-const requiredBuckets = ['feedback_screenshots', 'feedback_attachments']
+const requiredBuckets = ['feedback_screenshots', 'feedback_attachments', 'product_update_images']
 const probeProjectId = '00000000-0000-0000-0000-000000000000'
 const requiredReadOnlyFunctions = [
   {
