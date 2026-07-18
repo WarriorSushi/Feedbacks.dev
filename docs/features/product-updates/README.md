@@ -1,6 +1,6 @@
 # Product Updates / What's New
 
-Status: planned, not implemented
+Status: implementation committed; non-production Supabase migration and browser end-to-end verification still required before rollout.
 
 This folder is the implementation handoff for an in-app changelog popup in the `feedbacks.dev` ecosystem.
 

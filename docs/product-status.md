@@ -28,6 +28,7 @@ This document tracks the stable product status after the full product audit in `
 - Dodo Payments billing state with checkout, portal, verified webhooks, usage limits, and entitlement checks. Dodo remains in test mode until final production launch.
 - Project-scoped REST API and MCP server for trusted backend/agent workflows. Production builds package the MCP server as a versioned tarball at `/mcp/feedbacks-mcp-server-1.0.0.tgz`, and the documented `npm exec` command was verified to initialize and advertise all nine tools.
 - Generated Supabase database types and a repeatable `pnpm supabase:check` schema/bucket verification command.
+- Product Updates / What’s New implementation is present behind its explicit per-project and widget runtime opt-in. Its ordered migration is `sql/028_product_updates.sql`; do not enable or promote it until the non-production database/RLS, browser, and rollout gates in `docs/features/product-updates/test-and-rollout-plan.md` are completed.
 - Supabase RLS policy optimization for agent setup audit/token reads via `sql/020_optimize_agent_setup_rls.sql`, applied and verified on the live project.
 - Supabase RLS cleanup for `usage_counters` write-deny policies via `sql/021_split_usage_counter_write_rls.sql`, applied and verified on the live project.
 - Supabase RLS cleanup for public board, announcement, and public note SELECT policies via `sql/022_consolidate_public_board_read_rls.sql`, applied and verified on the live project.
