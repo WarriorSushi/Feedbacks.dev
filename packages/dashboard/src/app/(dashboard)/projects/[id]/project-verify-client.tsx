@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle2, ExternalLink, RefreshCw } from 'lucide-react'
 import { WidgetPreviewSurface } from './widget-preview-surface'
-import { ProjectMenu, SetupProgress } from './project-flow-nav'
+import { SetupProgress } from './project-flow-nav'
 
 interface ProjectVerifyClientProps {
   appOrigin: string
@@ -82,7 +82,6 @@ export function ProjectVerifyClient({
 
   return (
     <div className="mx-auto max-w-7xl space-y-6" data-tour="verify-surface">
-      <ProjectMenu projectId={projectId} activeSection="setup" />
       <SetupProgress projectId={projectId} activeStep="verify" />
 
       {verifiedFeedbackId && (
@@ -116,7 +115,7 @@ export function ProjectVerifyClient({
           <Link href={`/feedback?projectId=${projectId}`}>
             <Button variant="outline">Open project inbox</Button>
           </Link>
-          <Link href={`/projects/${projectId}?tab=customize`}>
+          <Link href={`/projects/${projectId}/install?view=customize`}>
             <Button variant="outline">Customize widget</Button>
           </Link>
         </div>

@@ -59,7 +59,7 @@ export default function NewProjectPage() {
       if (payload.api_key) {
         rememberProjectApiKey(payload.id, payload.api_key)
       }
-      router.push(`/projects/${payload.id}?created=1&tab=install`)
+      router.push(`/projects/${payload.id}/install?created=1`)
     } catch {
       setError('Failed to create project')
     } finally {

@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, Check, Loader2 } from 'lucide-react'
 
-export type ProjectSection = 'setup' | 'integrations' | 'board' | 'updates' | 'api' | 'settings'
 export type SetupStep = 'customize' | 'install' | 'verify' | 'inbox'
 
 function usePendingProjectLink() {
@@ -33,54 +32,6 @@ function usePendingProjectLink() {
   return { pendingHref, beginNavigation, prefetch }
 }
 
-export function ProjectMenu({
-  projectId,
-  activeSection,
-}: {
-  projectId: string
-  activeSection: ProjectSection
-}) {
-  const { pendingHref, beginNavigation, prefetch } = usePendingProjectLink()
-  const items: Array<{ id: ProjectSection; label: string; href: string }> = [
-    { id: 'setup', label: 'Setup', href: `/projects/${projectId}?tab=install` },
-    { id: 'integrations', label: 'Integrations', href: `/projects/${projectId}?tab=integrations` },
-    { id: 'board', label: 'Public Board', href: `/projects/${projectId}?tab=board` },
-    { id: 'updates', label: 'Updates', href: `/projects/${projectId}?tab=updates` },
-    { id: 'api', label: 'API', href: `/projects/${projectId}?tab=api` },
-    { id: 'settings', label: 'Settings', href: `/projects/${projectId}?tab=settings` },
-  ]
-
-  return (
-    <nav
-      aria-label="Project menu"
-      data-tour="project-menu"
-      className="scroll-fade-x sticky top-0 z-30 -mx-4 -mt-4 overflow-x-auto border-b border-primary/25 bg-primary/[0.09] px-4 py-3 pr-10 shadow-[0_1px_0_hsl(var(--primary)/0.16),0_14px_28px_-24px_hsl(var(--primary)/0.65)] backdrop-blur dark:border-primary/35 dark:bg-primary/[0.12] md:-mx-6 md:-mt-6 md:px-6"
-    >
-      <div className="flex min-h-11 min-w-max items-center gap-2">
-        {items.map((item) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            prefetch={false}
-            aria-current={activeSection === item.id ? 'page' : undefined}
-            onClick={() => beginNavigation(item.href)}
-            onMouseEnter={() => prefetch(item.href)}
-            onFocus={() => prefetch(item.href)}
-            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-[background-color,color,box-shadow,transform] active:scale-[0.98] ${
-              activeSection === item.id
-                ? 'bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/30'
-                : 'text-foreground/75 hover:bg-background/70 hover:text-foreground dark:text-foreground/80 dark:hover:bg-background/35'
-            }`}
-          >
-            {pendingHref === item.href && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" />}
-            {item.label}
-          </Link>
-        ))}
-      </div>
-    </nav>
-  )
-}
-
 export function SetupProgress({
   projectId,
   activeStep,
@@ -94,7 +45,7 @@ export function SetupProgress({
       id: 'install',
       label: 'Install',
       body: 'Copy the matching code.',
-      href: `/projects/${projectId}?tab=install`,
+      href: `/projects/${projectId}/install`,
     },
     {
       id: 'verify',
@@ -112,7 +63,7 @@ export function SetupProgress({
       id: 'customize',
       label: 'Customize',
       body: 'Optional after success.',
-      href: `/projects/${projectId}?tab=customize`,
+      href: `/projects/${projectId}/install?view=customize`,
     },
   ]
   const activeIndex = Math.max(steps.findIndex((step) => step.id === activeStep), 0)
@@ -120,7 +71,7 @@ export function SetupProgress({
     customize: {
       title: 'Update the install after customization',
       body: 'Save the form style, then copy the regenerated code if the trigger mode changed.',
-      href: `/projects/${projectId}?tab=install`,
+      href: `/projects/${projectId}/install`,
       label: 'Continue to install',
     },
     install: {
@@ -138,7 +89,7 @@ export function SetupProgress({
     inbox: {
       title: 'Installed: customize only if you need to',
       body: 'The core loop works. Adjust placement and labels now, or keep the defaults and start collecting feedback.',
-      href: `/projects/${projectId}?tab=customize`,
+      href: `/projects/${projectId}/install?view=customize`,
       label: 'Customize form',
     },
   }

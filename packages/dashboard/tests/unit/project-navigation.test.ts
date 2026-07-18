@@ -33,21 +33,21 @@ test('project switching preserves the active project workspace section', async (
       pathname: '/projects/current-project',
       activeProjectTab: 'integrations',
     }),
-    '/projects/next-project?tab=integrations',
+    '/projects/next-project/integrations',
   )
 })
 
-test('project switching preserves every legacy project tab URL during the route migration', async () => {
+test('project switching preserves every project surface while moving to stable routes', async () => {
   const { getProjectDestination } = await loadProjectNavigation()
 
-  for (const { tab } of LEGACY_PROJECT_ROUTE_MAPPINGS) {
+  for (const { tab, futurePath } of LEGACY_PROJECT_ROUTE_MAPPINGS) {
     assert.equal(
       getProjectDestination({
         projectId: 'next project',
         pathname: '/projects/current-project',
         activeProjectTab: tab,
       }),
-      `/projects/next%20project?tab=${tab}`,
+      futurePath.replace('{projectId}', 'next%20project'),
     )
   }
 })
@@ -55,7 +55,7 @@ test('project switching preserves every legacy project tab URL during the route 
 test('legacy project tab fixture covers the approved stable route map', () => {
   const expectedFuturePaths = {
     install: '/projects/{projectId}/install',
-    customize: '/projects/{projectId}/install',
+    customize: '/projects/{projectId}/install?view=customize',
     integrations: '/projects/{projectId}/integrations',
     board: '/projects/{projectId}/board',
     updates: '/projects/{projectId}/updates',

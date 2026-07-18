@@ -1,6 +1,6 @@
 export const LEGACY_PROJECT_ROUTE_MAPPINGS = [
   { tab: 'install', futurePath: '/projects/{projectId}/install' },
-  { tab: 'customize', futurePath: '/projects/{projectId}/install' },
+  { tab: 'customize', futurePath: '/projects/{projectId}/install?view=customize' },
   { tab: 'integrations', futurePath: '/projects/{projectId}/integrations' },
   { tab: 'board', futurePath: '/projects/{projectId}/board' },
   { tab: 'updates', futurePath: '/projects/{projectId}/updates' },
