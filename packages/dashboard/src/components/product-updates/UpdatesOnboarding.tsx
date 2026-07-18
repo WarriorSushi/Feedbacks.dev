@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import { generateInstallSnippets } from '@feedbacks/shared'
 import { Bot, CheckCircle2, Code2, Copy, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -38,6 +39,7 @@ export function UpdatesOnboarding({
   embedState: EmbedState
   onRefresh: () => Promise<void>
 }) {
+  const router = useRouter()
   const [choice, setChoice] = React.useState<Choice>(() => {
     if (typeof window === 'undefined') return choiceFromModules(modules)
     const saved = window.localStorage.getItem(storageKey(projectId)) as Choice | null
@@ -51,6 +53,9 @@ export function UpdatesOnboarding({
 
   React.useEffect(() => { record('updates_setup_started') }, [record])
   React.useEffect(() => { if (embedState === 'connected') record('updates_embed_verified') }, [embedState, record])
+  React.useEffect(() => {
+    if (embedState === 'connected' && modules.updates) router.replace(`/projects/${projectId}/updates/new`)
+  }, [embedState, modules.updates, projectId, router])
 
   React.useEffect(() => {
     window.localStorage.setItem(storageKey(projectId), choice)
