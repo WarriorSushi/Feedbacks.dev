@@ -20,7 +20,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (!body || typeof body !== 'object' || ['status', 'projectId', 'project_id', 'publishedAt', 'published_at', 'expiresAt', 'expires_at'].some((key) => key in body)) return NextResponse.json({ error: 'Lifecycle fields require their explicit action.' }, { status: 400, headers })
   const { data: existing, error: existingError } = await auth.admin.from('product_updates').select('*').eq('project_id', id).eq('id', updateId).maybeSingle()
   if (existingError || !existing) return NextResponse.json({ error: 'Update not found.' }, { status: 404, headers })
-  const parsed = sanitizeProductUpdateInput({ ...existing, ...body }, { requirePublishFields: true }); if (Object.keys(parsed.errors).length) return NextResponse.json({ errors: parsed.errors }, { status: 400, headers })
+  const parsed = sanitizeProductUpdateInput({
+    versionLabel: existing.version_label,
+    title: existing.title,
+    summary: existing.summary,
+    highlights: existing.highlights,
+    ctaLabel: existing.cta_label,
+    ctaUrl: existing.cta_url,
+    publishedAt: existing.published_at,
+    expiresAt: existing.expires_at,
+    ...body,
+  }, { requirePublishFields: true }); if (Object.keys(parsed.errors).length) return NextResponse.json({ errors: parsed.errors }, { status: 400, headers })
   const { data, error } = await auth.admin.from('product_updates').update({
     version_label: parsed.data.versionLabel || null, title: parsed.data.title, summary: parsed.data.summary,
     highlights: parsed.data.highlights, cta_label: parsed.data.ctaLabel || null, cta_url: parsed.data.ctaUrl || null,

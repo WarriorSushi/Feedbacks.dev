@@ -114,6 +114,10 @@ export class ProductUpdatesController {
     overlay.className = 'fb-update-overlay'
     const modal = document.createElement('section')
     modal.className = 'fb-update-modal'
+    const configuredTheme = this.response?.settings.theme || 'auto'
+    if (configuredTheme === 'dark' || (configuredTheme === 'auto' && window.matchMedia?.('(prefers-color-scheme: dark)').matches)) {
+      modal.classList.add('fb-update-theme-dark')
+    }
     modal.tabIndex = -1
     modal.setAttribute('role', 'dialog')
     modal.setAttribute('aria-modal', 'true')
