@@ -1,5 +1,3 @@
-import './load-env'
-
 export interface E2EEnvironment {
   ready: boolean
   skipReason: string
