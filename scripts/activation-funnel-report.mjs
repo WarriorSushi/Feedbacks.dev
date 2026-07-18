@@ -25,6 +25,13 @@ const events = [
   ['first_feedback_received', 'First feedback received'],
   ['first_feedback_triaged', 'First feedback triaged'],
   ['integration_connected', 'Integration connected'],
+  ['updates_nav_opened', 'Updates opened'],
+  ['updates_setup_started', 'Updates setup started'],
+  ['updates_embed_verified', 'Updates embed verified'],
+  ['updates_activated', 'Updates activated'],
+  ['updates_first_draft_created', 'First update draft'],
+  ['updates_first_published', 'First update published'],
+  ['updates_first_impression_received', 'First update impression'],
 ]
 
 const client = createClient(url, serviceRoleKey, {

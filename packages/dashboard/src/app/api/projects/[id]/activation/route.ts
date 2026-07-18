@@ -6,6 +6,12 @@ const CLIENT_MILESTONES = new Set<ActivationMilestone>([
   'install_code_copied',
   'verification_completed',
   'first_feedback_triaged',
+  'updates_nav_opened',
+  'updates_setup_started',
+  'updates_install_method_selected',
+  'updates_embed_verified',
+  'updates_activated',
+  'updates_private_test_opened',
 ])
 
 export async function POST(

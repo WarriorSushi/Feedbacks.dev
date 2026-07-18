@@ -10,8 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { parseAllowedOrigins } from '@/lib/origin-allowlist'
-import { ArrowLeft, Loader2, Trash2 } from 'lucide-react'
-import Link from 'next/link'
+import { Loader2, Trash2 } from 'lucide-react'
 import { BoardSettingsTab } from './board-settings'
 import { ApiDocs } from './api-docs'
 import { toast } from '@/hooks/use-toast'
@@ -26,6 +25,8 @@ interface ProjectTabsProps {
   project: Project
   billingSummary: BillingSummary | null
   initialTab?: TabId
+  updatesView?: 'overview' | 'composer'
+  updateId?: string
 }
 
 export type ProjectTab = 'install' | 'customize' | 'integrations' | 'board' | 'updates' | 'api' | 'settings'
@@ -33,7 +34,7 @@ type TabId = ProjectTab
 
 const tabs: TabId[] = ['install', 'customize', 'integrations', 'board', 'updates', 'api', 'settings']
 
-export function ProjectTabs({ project, billingSummary, initialTab }: ProjectTabsProps) {
+export function ProjectTabs({ project, billingSummary, initialTab, updatesView, updateId }: ProjectTabsProps) {
   return (
     <Suspense
       fallback={
@@ -42,19 +43,18 @@ export function ProjectTabs({ project, billingSummary, initialTab }: ProjectTabs
         </div>
       }
     >
-      <ProjectTabsInner project={project} billingSummary={billingSummary} initialTab={initialTab} />
+      <ProjectTabsInner project={project} billingSummary={billingSummary} initialTab={initialTab} updatesView={updatesView} updateId={updateId} />
     </Suspense>
   )
 }
 
-function ProjectTabsInner({ project, billingSummary, initialTab }: ProjectTabsProps) {
+function ProjectTabsInner({ project, billingSummary, initialTab, updatesView, updateId }: ProjectTabsProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [isInteractive, setIsInteractive] = React.useState(false)
   const [apiKey, setApiKey] = React.useState<string | null>(project.api_key)
   const [rotatingApiKey, setRotatingApiKey] = React.useState(false)
   const tabParam = searchParams.get('tab') as TabId | null
-  const created = searchParams.get('created') === '1'
   const activeTab = initialTab || (tabs.includes(tabParam as TabId) ? tabParam! : 'install')
   const activeSetupStep: SetupStep = activeTab === 'install' ? 'install' : 'customize'
   const apiKeyLastFour = React.useMemo(
@@ -110,21 +110,6 @@ function ProjectTabsInner({ project, billingSummary, initialTab }: ProjectTabsPr
 
   return (
     <div className="space-y-6" data-project-tabs-ready={isInteractive ? 'true' : 'false'}>
-      <div>
-        <Link
-          href="/projects"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" /> Projects
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold">{project.name}</h1>
-        {created && (
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Your default install is ready. Copy it, send one test, then customize the form if needed.
-          </p>
-        )}
-      </div>
-
       {(activeTab === 'install' || activeTab === 'customize') && <SetupProgress projectId={project.id} activeStep={activeSetupStep} />}
 
       {activeTab === 'install' && (
@@ -147,7 +132,7 @@ function ProjectTabsInner({ project, billingSummary, initialTab }: ProjectTabsPr
       )}
       {activeTab === 'integrations' && <IntegrationsTab project={project} initialBillingSummary={billingSummary} />}
       {activeTab === 'board' && <BoardSettingsTab project={project} />}
-      {activeTab === 'updates' && <ProductUpdatesTab projectId={project.id} />}
+      {activeTab === 'updates' && <ProductUpdatesTab projectId={project.id} projectKey={apiKey} view={updatesView} updateId={updateId} />}
       {activeTab === 'api' && (
         <ApiDocs
           project={project}

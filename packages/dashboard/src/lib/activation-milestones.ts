@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { PRODUCT_UPDATE_ACTIVATION_EVENTS } from '@feedbacks/shared'
 import { createAdminSupabase } from '@/lib/supabase-server'
 
 export const ACTIVATION_MILESTONES = [
@@ -8,6 +9,7 @@ export const ACTIVATION_MILESTONES = [
   'first_feedback_received',
   'first_feedback_triaged',
   'integration_connected',
+  ...PRODUCT_UPDATE_ACTIVATION_EVENTS,
 ] as const
 
 export type ActivationMilestone = typeof ACTIVATION_MILESTONES[number]
@@ -37,4 +39,3 @@ export async function recordActivationMilestone({
     // Product measurement must never change the product action's result.
   }
 }
-
