@@ -1,10 +1,18 @@
 # Product Updates / What's New
 
-Status: implementation committed; non-production Supabase migration and browser end-to-end verification still required before rollout.
+Status: MVP shipped to production on 2026-07-18. A post-MVP navigation, onboarding, and modular embed redesign is planned.
 
 This folder is the implementation handoff for an in-app changelog popup in the `feedbacks.dev` ecosystem.
 
 The dashboard feature is named **Product Updates**. The end-user surface is named **What's New**.
+
+## Post-MVP redesign
+
+The dated implementation plan for making Updates a first-class sidebar product, supporting Updates-only installation, and simplifying onboarding is:
+
+- `ux-navigation-redesign-implementation-plan-2026-07-18.md`
+
+This later plan supersedes the MVP's one-time `data-enable-updates` activation requirement only after the new server-resolved module bootstrap is implemented and verified. The MVP security, privacy, content, metrics, and widget-size guardrails remain authoritative.
 
 ## Goal
 
