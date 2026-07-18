@@ -74,6 +74,21 @@ export interface WidgetBootstrapResponse {
   updates?: ProductUpdatesPublicResponse
 }
 
+/**
+ * Keep the widget's public bootstrap parsing deliberately small and defensive.
+ * An invalid bootstrap response must behave exactly like an unavailable one so
+ * that an embed never loses its existing feedback launcher because of a bad
+ * response at the edge.
+ */
+export function isWidgetBootstrapResponse(value: unknown): value is WidgetBootstrapResponse {
+  if (!value || typeof value !== 'object') return false
+  const response = value as Partial<WidgetBootstrapResponse>
+  if (response.configVersion !== 2 || !response.modules) return false
+  if (typeof response.modules.feedback !== 'boolean' || typeof response.modules.updates !== 'boolean') return false
+  if (response.modules.updates && (!response.updates || !Array.isArray(response.updates.updates))) return false
+  return true
+}
+
 export interface ProductUpdateInput {
   versionLabel?: string
   title?: string

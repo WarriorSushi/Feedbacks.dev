@@ -13,6 +13,7 @@ create table if not exists public.project_embed_installations (
 alter table public.project_embed_installations enable row level security;
 revoke all on table public.project_embed_installations from public, anon, authenticated;
 grant select, insert, update, delete on table public.project_embed_installations to service_role;
+grant select on table public.project_embed_installations to authenticated;
 
 create policy "project_embed_installations_select_own" on public.project_embed_installations for select to authenticated
   using (exists (select 1 from public.projects p where p.id = project_id and p.owner_user_id = (select auth.uid())));

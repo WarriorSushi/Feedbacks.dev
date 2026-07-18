@@ -1,5 +1,6 @@
 import styles from './styles.css';
 import type { WidgetConfig, FeedbackData, FeedbackResponse, CategoryType } from './types';
+import { isWidgetBootstrapResponse, type WidgetBootstrapResponse } from '@feedbacks/shared';
 import { ProductUpdatesController } from './product-updates';
 
 // ---- Helpers ----
@@ -68,6 +69,8 @@ class FeedbacksWidget {
   private boundKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private themeVars: Record<string, string> = {};
   private updatesController: ProductUpdatesController | null = null;
+  private feedbackEnabled = true;
+  private inlineContainer: HTMLElement | null = null;
 
   constructor(config: WidgetConfig) {
     this.cfg = { position: 'bottom-right', embedMode: 'modal', ...config };
@@ -89,8 +92,6 @@ class FeedbacksWidget {
   private setup(): void {
     this.injectStyles();
     this.applyTheme();
-    if (this.cfg.enableUpdates) this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen);
-
     if (this.cfg.embedMode === 'inline') {
       this.renderInline();
     } else if (this.cfg.embedMode === 'trigger') {
@@ -121,6 +122,58 @@ class FeedbacksWidget {
     }
 
     this.log('Widget initialized');
+    void this.loadBootstrap();
+  }
+
+  /**
+   * The bootstrap is additive: failure deliberately leaves the historical
+   * feedback behaviour in place. This is the safety property that permits a
+   * gradual migration away from the legacy updates endpoint.
+   */
+  private async loadBootstrap(): Promise<void> {
+    const endpoint = this.bootstrapUrl();
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 4_000);
+    try {
+      const response = await fetch(endpoint, { signal: controller.signal });
+      if (!response.ok) throw new Error(`Bootstrap request failed: ${response.status}`);
+      const payload: unknown = await response.json();
+      if (!isWidgetBootstrapResponse(payload)) throw new Error('Invalid bootstrap response');
+      this.applyBootstrap(payload);
+    } catch {
+      // Old embeds with a legacy update attribute still retain their existing
+      // Product Updates behaviour when the new endpoint is unavailable.
+      if (this.cfg.enableUpdates && !this.updatesController) {
+        this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen);
+      }
+      this.log('Bootstrap unavailable; retaining compatibility mode');
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  private bootstrapUrl(): string {
+    const feedbackUrl = this.cfg.apiUrl || 'https://app.feedbacks.dev/api/feedback';
+    const url = new URL('/api/widget/bootstrap', feedbackUrl);
+    url.searchParams.set('projectKey', this.cfg.projectKey);
+    url.searchParams.set('runtimeVersion', '2.0.0');
+    return url.toString();
+  }
+
+  private applyBootstrap(bootstrap: WidgetBootstrapResponse): void {
+    if (!bootstrap.modules.feedback) this.disableFeedback();
+    if (!bootstrap.modules.updates) return;
+    this.updatesController?.destroy();
+    this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen, bootstrap.updates);
+  }
+
+  private disableFeedback(): void {
+    this.feedbackEnabled = false;
+    this.close();
+    this.launcher?.remove();
+    this.launcher = null;
+    this.inlineContainer?.remove();
+    this.inlineContainer = null;
   }
 
   // ---- Styles & Theme ----
@@ -193,7 +246,7 @@ class FeedbacksWidget {
   private attachTriggers(): void {
     const sel = this.cfg.target || '[data-feedbacks-trigger]';
     const els = document.querySelectorAll(sel);
-    els.forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); this.open(); }));
+    els.forEach(el => el.addEventListener('click', (e) => { if (!this.feedbackEnabled) return; e.preventDefault(); this.open(); }));
     this.log(`Attached to ${els.length} trigger(s)`);
   }
 
@@ -203,6 +256,7 @@ class FeedbacksWidget {
     const target = this.cfg.target ? document.querySelector(this.cfg.target) : null;
     if (!target) { this.log('Inline target not found'); return; }
     const container = document.createElement('div');
+    this.inlineContainer = container;
     container.className = 'fb-inline';
     container.innerHTML = this.buildFormHTML(false);
     this.applyThemeToElement(container);
@@ -214,6 +268,7 @@ class FeedbacksWidget {
   // ---- Modal ----
 
   open(): void {
+    if (!this.feedbackEnabled) return;
     if (this.updatesController?.isOpen()) this.updatesController.closeUpdates();
     if (this.isOpen) return;
     this.isOpen = true;

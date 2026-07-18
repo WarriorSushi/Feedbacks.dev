@@ -20,16 +20,21 @@ export class ProductUpdatesController {
   constructor(
     private readonly cfg: WidgetConfig,
     private readonly isFeedbackOpen: () => boolean,
+    initialResponse?: ProductUpdatesPublicResponse,
   ) {
     this.storage = createProductUpdateStorage(cfg.projectKey)
-    if (cfg.enableUpdates) void this.start()
+    void this.start(initialResponse)
   }
 
-  private async start() {
+  private async start(initialResponse?: ProductUpdatesPublicResponse) {
     document.addEventListener('click', this.onManualTrigger, { signal: this.abort.signal })
     window.addEventListener('popstate', () => this.maybeAutoShow(), { signal: this.abort.signal })
     document.addEventListener('visibilitychange', () => this.maybeAutoShow(), { signal: this.abort.signal })
     window.addEventListener('feedbacks:updates:refresh', () => { void this.refreshUpdates() }, { signal: this.abort.signal })
+    if (initialResponse) {
+      this.setResponse(initialResponse)
+      return
+    }
     await this.refreshUpdates()
   }
 
@@ -42,12 +47,16 @@ export class ProductUpdatesController {
       if (!result.ok) return
       const response = await result.json() as ProductUpdatesPublicResponse
       if (!response || !Array.isArray(response.updates)) return
-      this.response = response
-      this.dispatch('feedbacks:updates:ready')
-      this.maybeAutoShow()
+      this.setResponse(response)
     } catch {
       this.log('Unable to load updates')
     }
+  }
+
+  private setResponse(response: ProductUpdatesPublicResponse) {
+    this.response = response
+    this.dispatch('feedbacks:updates:ready')
+    this.maybeAutoShow()
   }
 
   async openUpdates(): Promise<boolean> {
