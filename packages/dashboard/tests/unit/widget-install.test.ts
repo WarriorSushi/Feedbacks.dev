@@ -82,3 +82,13 @@ test('widget expectation reflects non-default trigger and modal positioning', as
     'Look for the floating "Share feedback" launcher near the upper-left corner.',
   )
 })
+
+test('updates installation is opt-in and includes canonical endpoints when enabled', async () => {
+  const { buildRuntimeWidgetConfig, generateInstallSnippets } = await loadWidgetInstall()
+  const config = buildRuntimeWidgetConfig('fb_live_demo', { enableUpdates: true }, { appOrigin: 'https://feedbacks.dev' })
+  assert.equal(config.updatesApiUrl, 'https://feedbacks.dev/api/widget/updates')
+  const websiteSnippet = generateInstallSnippets({ projectKey: 'fb_live_demo', savedConfig: config, appOrigin: 'https://feedbacks.dev' })
+    .find((snippet: { label: string }) => snippet.label === 'Website')?.code
+  assert.match(websiteSnippet || '', /data-enable-updates="true"/)
+  assert.match(websiteSnippet || '', /data-updates-api-url="https:\/\/feedbacks\.dev\/api\/widget\/updates"/)
+})

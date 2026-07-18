@@ -6,6 +6,9 @@ export const WIDGET_CONFIG_VERSION = 1
 export interface SavedWidgetConfig {
   configVersion?: number
   apiUrl?: string
+  enableUpdates?: boolean
+  updatesApiUrl?: string
+  updatesEventsApiUrl?: string
   embedMode?: EmbedMode
   position?: WidgetPosition
   target?: string
@@ -61,6 +64,9 @@ export interface WidgetDataAttributesInput {
   scale?: string
   modalWidth?: string
   apiUrl?: string
+  enableUpdates?: string
+  updatesApiUrl?: string
+  updatesEventsApiUrl?: string
   debug?: string
   requireEmail?: string
   requireCaptcha?: string
@@ -234,6 +240,9 @@ export function sanitizeSavedWidgetConfig(
   const sanitized: SavedWidgetConfig = {
     configVersion: WIDGET_CONFIG_VERSION,
     apiUrl: sanitizeUrl(input.apiUrl),
+    enableUpdates: sanitizeBoolean(input.enableUpdates),
+    updatesApiUrl: sanitizeUrl(input.updatesApiUrl),
+    updatesEventsApiUrl: sanitizeUrl(input.updatesEventsApiUrl),
     embedMode,
     position: normalizePosition(input.position) || DEFAULT_MODAL_POSITION,
     target,
@@ -300,6 +309,14 @@ export function buildFeedbackApiUrl(appOrigin?: string): string {
   return `${normalizeAppOrigin(appOrigin)}/api/feedback`
 }
 
+function buildDefaultProductUpdatesApiUrl(appOrigin?: string): string {
+  return `${normalizeAppOrigin(appOrigin)}/api/widget/updates`
+}
+
+function buildDefaultProductUpdateMetricsApiUrl(appOrigin?: string): string {
+  return `${normalizeAppOrigin(appOrigin)}/api/widget/updates/events`
+}
+
 export function normalizeWidgetTarget(target: string | undefined, fallback: string): string {
   const trimmed = target?.trim()
   if (!trimmed || trimmed === '#') return fallback
@@ -335,6 +352,8 @@ export function buildRuntimeWidgetConfig(
     position: sanitizedConfig.position || DEFAULT_MODAL_POSITION,
     target: nextTarget,
     apiUrl: options.apiUrl || sanitizedConfig.apiUrl || buildFeedbackApiUrl(options.appOrigin),
+    updatesApiUrl: sanitizedConfig.updatesApiUrl || buildDefaultProductUpdatesApiUrl(options.appOrigin),
+    updatesEventsApiUrl: sanitizedConfig.updatesEventsApiUrl || buildDefaultProductUpdateMetricsApiUrl(options.appOrigin),
   }
 }
 
@@ -426,6 +445,9 @@ export function parseWidgetDataAttributes(
       scale: readNumber(input.scale),
       modalWidth: readNumber(input.modalWidth),
       apiUrl: input.apiUrl || undefined,
+      enableUpdates: isPresent(input.enableUpdates),
+      updatesApiUrl: input.updatesApiUrl || undefined,
+      updatesEventsApiUrl: input.updatesEventsApiUrl || undefined,
       debug: isPresent(input.debug, presence.debug),
       requireEmail: isPresent(input.requireEmail, presence.requireEmail),
       requireCaptcha: isPresent(input.requireCaptcha, presence.requireCaptcha),
@@ -485,6 +507,9 @@ export function getWidgetScriptAttributes(config: WidgetConfig): WidgetScriptAtt
   if (typeof config.scale === 'number') attributes.push({ name: 'data-scale', value: String(config.scale) })
   if (typeof config.modalWidth === 'number') attributes.push({ name: 'data-modal-width', value: String(config.modalWidth) })
   if (config.debug) attributes.push({ name: 'data-debug', value: 'true' })
+  if (config.enableUpdates) attributes.push({ name: 'data-enable-updates', value: 'true' })
+  if (config.enableUpdates && config.updatesApiUrl) attributes.push({ name: 'data-updates-api-url', value: config.updatesApiUrl })
+  if (config.enableUpdates && config.updatesEventsApiUrl) attributes.push({ name: 'data-updates-events-api-url', value: config.updatesEventsApiUrl })
   if (config.requireEmail) attributes.push({ name: 'data-require-email', value: 'true' })
   if (config.requireCaptcha) attributes.push({ name: 'data-require-captcha', value: 'true' })
   if (config.captchaProvider) attributes.push({ name: 'data-captcha-provider', value: config.captchaProvider })
@@ -579,6 +604,9 @@ function getWrapperPropEntries(config: WidgetConfig, appOrigin?: string): Array<
   if (typeof config.scale === 'number') entries.push(['scale', config.scale])
   if (typeof config.modalWidth === 'number') entries.push(['modalWidth', config.modalWidth])
   if (config.debug) entries.push(['debug', true])
+  if (config.enableUpdates) entries.push(['enableUpdates', true])
+  if (config.enableUpdates && config.updatesApiUrl) entries.push(['updatesApiUrl', config.updatesApiUrl])
+  if (config.enableUpdates && config.updatesEventsApiUrl) entries.push(['updatesEventsApiUrl', config.updatesEventsApiUrl])
   if (config.requireEmail) entries.push(['requireEmail', true])
   if (config.enableType === false) entries.push(['enableType', false])
   if (config.enableRating === false) entries.push(['enableRating', false])
