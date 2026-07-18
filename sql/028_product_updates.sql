@@ -131,7 +131,11 @@ begin
   publication_time := coalesce(p_published_at, now());
   if publication_time > now() and not p_allow_scheduling then raise exception 'product update scheduling is not available'; end if;
   if p_expires_at is not null and p_expires_at <= publication_time then raise exception 'expiry must be later than publication'; end if;
-  if publication_time <= now() and p_active_limit is not null and target.status <> 'published' then
+  if publication_time <= now() and p_active_limit is not null and not (
+    target.status = 'published'
+    and target.published_at <= now()
+    and (target.expires_at is null or target.expires_at > now())
+  ) then
     select count(*) into live_count from public.product_updates u
       where u.project_id = p_project_id and u.id <> p_update_id and u.status = 'published'
       and u.published_at <= now() and (u.expires_at is null or u.expires_at > now());

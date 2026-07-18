@@ -30,3 +30,12 @@ test('product update paths and lifecycle state follow the published rules', asyn
   assert.equal(deriveProductUpdateState({ status: 'published', publishedAt: '2026-07-19T00:00:00.000Z' }, new Date('2026-07-18T00:00:00.000Z')), 'Scheduled')
   assert.equal(deriveProductUpdateState({ status: 'published', publishedAt: '2026-07-17T00:00:00.000Z', expiresAt: '2026-07-18T00:00:00.000Z' }, new Date('2026-07-18T00:00:00.000Z')), 'Expired')
 })
+
+test('settings validation keeps partial patches separate from invalid path data', async () => {
+  const { sanitizeProductUpdateSettings } = await loadProductUpdates()
+  const partial = sanitizeProductUpdateSettings({ autoShow: false })
+  assert.deepEqual(partial.errors, {})
+  assert.deepEqual(partial.data, { autoShow: false })
+  const invalid = sanitizeProductUpdateSettings({ includePaths: ['https://example.com'] })
+  assert.ok(invalid.errors.includePaths)
+})

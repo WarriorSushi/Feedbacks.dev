@@ -2,21 +2,273 @@ import type { ProductUpdateContent, ProductUpdatesPublicResponse, WidgetConfig }
 import { isProductUpdatePathEligible } from '@feedbacks/shared'
 import { createProductUpdateStorage } from './product-update-storage'
 
+type MetricType = 'impression' | 'dismissal' | 'cta_click'
+
 export class ProductUpdatesController {
-  private updates: ProductUpdateContent[] = []; private response: ProductUpdatesPublicResponse | null = null; private dialog: HTMLElement | null = null; private lastFocus: HTMLElement | null = null; private shown = false; private abort = new AbortController(); private storage; private timer: number | null = null; private bodyOverflow = ''
-  constructor(private cfg: WidgetConfig, private feedbackOpen: () => boolean) { this.storage = createProductUpdateStorage(cfg.projectKey); this.start() }
-  private log(message: string) { if (this.cfg.debug) console.debug('[Feedbacks updates]', message) }
-  private async start() { if (!this.cfg.enableUpdates) return; await this.refreshUpdates(); document.addEventListener('click', this.onTrigger, { signal: this.abort.signal }); window.addEventListener('popstate', () => this.maybeAutoShow(), { signal: this.abort.signal }); window.addEventListener('feedbacks:updates:refresh', () => { void this.refreshUpdates() }, { signal: this.abort.signal }); }
-  async refreshUpdates() { if (!this.cfg.enableUpdates) return; try { const url = new URL(this.cfg.updatesApiUrl || '', location.href); url.searchParams.set('projectKey', this.cfg.projectKey); const response = await fetch(url, { signal: this.abort.signal }); if (!response.ok) return; const data = await response.json() as ProductUpdatesPublicResponse; if (!data || !Array.isArray(data.updates)) return; this.response = data; this.updates = data.updates; window.dispatchEvent(new CustomEvent('feedbacks:updates:ready', { detail: { projectKeySuffix: this.cfg.projectKey.slice(-4) } })); this.maybeAutoShow(); } catch { this.log('Unable to load updates') } }
-  private maybeAutoShow() { if (this.shown || !this.response?.settings.autoShow || document.visibilityState !== 'visible' || this.feedbackOpen()) return; const state = this.storage.read(); const update = this.updates.find((item) => !state.seen[item.id] && isProductUpdatePathEligible(location.pathname, this.response!.settings)); if (!update) return; this.timer && clearTimeout(this.timer); this.timer = window.setTimeout(() => { if (!this.feedbackOpen()) this.open(update, false) }, this.response.settings.displayDelayMs); }
-  private onTrigger = (event: Event) => { const target = (event.target as Element | null)?.closest?.('[data-feedbacks-updates-trigger]'); if (!target) return; event.preventDefault(); void this.openUpdates() }
-  async openUpdates(): Promise<boolean> { if (this.feedbackOpen()) return false; const update = this.updates.find(() => !this.response || isProductUpdatePathEligible(location.pathname, this.response.settings)); if (!update) return false; this.open(update, true); return true }
-  closeUpdates() { this.close(false) }
-  getUnreadUpdateCount() { const state = this.storage.read(); return this.updates.filter((item) => !state.seen[item.id]).length }
-  isOpen() { return Boolean(this.dialog) }
-  private text(tag: string, value: string, className?: string) { const el = document.createElement(tag); if (className) el.className = className; el.textContent = value; return el }
-  private open(update: ProductUpdateContent, manual: boolean) { if (this.dialog || this.feedbackOpen()) return; this.shown = this.shown || !manual; this.lastFocus = document.activeElement as HTMLElement; const overlay = document.createElement('div'); overlay.className = 'fb-update-overlay'; const modal = document.createElement('section'); modal.className = 'fb-update-modal'; modal.tabIndex = -1; modal.setAttribute('role', 'dialog'); modal.setAttribute('aria-modal', 'true'); const titleId = `fb-update-title-${update.id}`; const descriptionId = `fb-update-description-${update.id}`; modal.setAttribute('aria-labelledby', titleId); modal.setAttribute('aria-describedby', descriptionId); const close = document.createElement('button'); close.className = 'fb-update-close'; close.type = 'button'; close.setAttribute('aria-label', 'Close What’s New'); close.textContent = '×'; close.onclick = () => this.close(true); modal.append(close); if (update.imageUrl) { const image = document.createElement('img'); image.className = 'fb-update-image'; image.src = update.imageUrl; image.alt = ''; image.loading = 'lazy'; image.onerror = () => image.remove(); modal.append(image) } modal.append(this.text('p', update.versionLabel || 'What’s New', 'fb-update-eyebrow')); const title = this.text('h2', update.title, 'fb-update-title'); title.id = titleId; modal.append(title); const summary = this.text('p', update.summary, 'fb-update-summary'); summary.id = descriptionId; modal.append(summary); if (update.highlights.length) { const list = document.createElement('ul'); list.className = 'fb-update-list'; update.highlights.forEach((item) => list.append(this.text('li', item))); modal.append(list) } if (update.ctaLabel && update.ctaUrl) { const cta = document.createElement('a'); cta.className = 'fb-update-cta'; cta.textContent = update.ctaLabel; const url = new URL(update.ctaUrl, location.href); cta.href = url.href; if (url.origin !== location.origin) { cta.target = '_blank'; cta.rel = 'noopener noreferrer' } cta.onclick = () => { this.storage.markSeen(update.id); this.metric(update.id, 'cta_click'); window.dispatchEvent(new CustomEvent('feedbacks:updates:cta-clicked', { detail: { projectKeySuffix: this.cfg.projectKey.slice(-4), updateId: update.id, manual } })) }; modal.append(cta) } if (this.response?.settings.showPoweredBy) modal.append(this.text('p', 'Powered by feedbacks.dev', 'fb-update-powered')); overlay.append(modal); overlay.onclick = (event) => { if (event.target === overlay) this.close(true) }; this.dialog = overlay; this.bodyOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; document.body.append(overlay); close.focus(); const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') this.close(true); if (event.key === 'Tab') { const focusable = modal.querySelectorAll<HTMLElement>('button,a,[tabindex]:not([tabindex="-1"])'); const first = focusable[0], last = focusable[focusable.length - 1]; if (!first || !last) return; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() } } }; document.addEventListener('keydown', onKey, { signal: this.abort.signal }); window.setTimeout(() => { if (this.dialog) { this.storage.markSeen(update.id); this.metric(update.id, 'impression') } }, 750); window.dispatchEvent(new CustomEvent('feedbacks:updates:shown', { detail: { projectKeySuffix: this.cfg.projectKey.slice(-4), updateId: update.id, manual } })); }
-  private close(dismissed: boolean) { if (!this.dialog) return; const updateId = this.updates.find((item) => this.dialog?.getAttribute('data-update-id') === item.id)?.id; if (dismissed && updateId) { this.storage.markDismissed(updateId); this.metric(updateId, 'dismissal') } this.dialog.remove(); this.dialog = null; document.body.style.overflow = this.bodyOverflow; this.lastFocus?.focus?.(); if (dismissed && updateId) window.dispatchEvent(new CustomEvent('feedbacks:updates:dismissed', { detail: { projectKeySuffix: this.cfg.projectKey.slice(-4), updateId } })); }
-  private metric(updateId: string, type: 'impression' | 'dismissal' | 'cta_click') { const body = JSON.stringify({ projectKey: this.cfg.projectKey, events: [{ updateId, type }] }); try { fetch(this.cfg.updatesEventsApiUrl || '', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {}) } catch {} }
-  destroy() { this.timer && clearTimeout(this.timer); this.abort.abort(); this.closeUpdates() }
+  private response: ProductUpdatesPublicResponse | null = null
+  private dialog: HTMLElement | null = null
+  private currentUpdate: ProductUpdateContent | null = null
+  private autoShown = false
+  private lastFocus: HTMLElement | null = null
+  private priorBodyOverflow = ''
+  private autoTimer: number | null = null
+  private seenTimer: number | null = null
+  private readonly abort = new AbortController()
+  private dialogAbort: AbortController | null = null
+  private readonly storage
+
+  constructor(
+    private readonly cfg: WidgetConfig,
+    private readonly isFeedbackOpen: () => boolean,
+  ) {
+    this.storage = createProductUpdateStorage(cfg.projectKey)
+    if (cfg.enableUpdates) void this.start()
+  }
+
+  private async start() {
+    await this.refreshUpdates()
+    document.addEventListener('click', this.onManualTrigger, { signal: this.abort.signal })
+    window.addEventListener('popstate', () => this.maybeAutoShow(), { signal: this.abort.signal })
+    window.addEventListener('feedbacks:updates:refresh', () => { void this.refreshUpdates() }, { signal: this.abort.signal })
+  }
+
+  async refreshUpdates(): Promise<void> {
+    if (!this.cfg.enableUpdates) return
+    try {
+      const url = new URL(this.cfg.updatesApiUrl || '', location.href)
+      url.searchParams.set('projectKey', this.cfg.projectKey)
+      const result = await fetch(url, { signal: this.abort.signal })
+      if (!result.ok) return
+      const response = await result.json() as ProductUpdatesPublicResponse
+      if (!response || !Array.isArray(response.updates)) return
+      this.response = response
+      this.dispatch('feedbacks:updates:ready')
+      this.maybeAutoShow()
+    } catch {
+      this.log('Unable to load updates')
+    }
+  }
+
+  async openUpdates(): Promise<boolean> {
+    if (this.isFeedbackOpen()) return false
+    const update = this.latestPathEligibleUpdate()
+    if (!update) return false
+    this.open(update, true)
+    return true
+  }
+
+  closeUpdates(): void {
+    this.close(false)
+  }
+
+  getUnreadUpdateCount(): number {
+    const seen = this.storage.read().seen
+    return (this.response?.updates || []).filter((update) => !seen[update.id]).length
+  }
+
+  isOpen(): boolean {
+    return Boolean(this.dialog)
+  }
+
+  private onManualTrigger = (event: Event) => {
+    const trigger = (event.target as Element | null)?.closest?.('[data-feedbacks-updates-trigger]')
+    if (!trigger) return
+    event.preventDefault()
+    void this.openUpdates()
+  }
+
+  private latestPathEligibleUpdate() {
+    if (!this.response || !isProductUpdatePathEligible(location.pathname, this.response.settings)) return undefined
+    return this.response.updates[0]
+  }
+
+  private maybeAutoShow() {
+    if (
+      this.autoShown ||
+      this.dialog ||
+      this.isFeedbackOpen() ||
+      document.visibilityState !== 'visible' ||
+      !this.response?.settings.autoShow
+    ) return
+
+    const seen = this.storage.read().seen
+    const update = this.response.updates.find((item) =>
+      !seen[item.id] && isProductUpdatePathEligible(location.pathname, this.response!.settings),
+    )
+    if (!update) return
+
+    if (this.autoTimer) clearTimeout(this.autoTimer)
+    this.autoTimer = window.setTimeout(() => {
+      if (!this.isFeedbackOpen() && !this.dialog) this.open(update, false)
+    }, this.response.settings.displayDelayMs)
+  }
+
+  private open(update: ProductUpdateContent, manual: boolean) {
+    if (this.dialog || this.isFeedbackOpen()) return
+    if (!manual) this.autoShown = true
+    this.currentUpdate = update
+    this.lastFocus = document.activeElement as HTMLElement | null
+    this.priorBodyOverflow = document.body.style.overflow
+
+    const overlay = document.createElement('div')
+    overlay.className = 'fb-update-overlay'
+    const modal = document.createElement('section')
+    modal.className = 'fb-update-modal'
+    modal.tabIndex = -1
+    modal.setAttribute('role', 'dialog')
+    modal.setAttribute('aria-modal', 'true')
+    const titleId = `fb-update-title-${update.id}`
+    const summaryId = `fb-update-summary-${update.id}`
+    modal.setAttribute('aria-labelledby', titleId)
+    modal.setAttribute('aria-describedby', summaryId)
+
+    const close = document.createElement('button')
+    close.className = 'fb-update-close'
+    close.type = 'button'
+    close.setAttribute('aria-label', 'Close What’s New')
+    close.textContent = '×'
+    modal.append(close)
+
+    if (update.imageUrl) {
+      const image = document.createElement('img')
+      image.className = 'fb-update-image'
+      image.src = update.imageUrl
+      image.alt = ''
+      image.loading = 'lazy'
+      image.onerror = () => image.remove()
+      modal.append(image)
+    }
+
+    modal.append(this.text('p', update.versionLabel || 'What’s New', 'fb-update-eyebrow'))
+    const title = this.text('h2', update.title, 'fb-update-title')
+    title.id = titleId
+    modal.append(title)
+    const summary = this.text('p', update.summary, 'fb-update-summary')
+    summary.id = summaryId
+    modal.append(summary)
+
+    if (update.highlights.length) {
+      const list = document.createElement('ul')
+      list.className = 'fb-update-list'
+      update.highlights.forEach((highlight) => list.append(this.text('li', highlight)))
+      modal.append(list)
+    }
+
+    if (update.ctaLabel && update.ctaUrl) modal.append(this.createCta(update, manual))
+    if (this.response?.settings.showPoweredBy) modal.append(this.text('p', 'Powered by feedbacks.dev', 'fb-update-powered'))
+
+    overlay.append(modal)
+    this.dialog = overlay
+    document.body.style.overflow = 'hidden'
+    document.body.append(overlay)
+    this.dialogAbort = new AbortController()
+    close.addEventListener('click', () => this.close(true), { signal: this.dialogAbort.signal })
+    overlay.addEventListener('click', (event) => { if (event.target === overlay) this.close(true) }, { signal: this.dialogAbort.signal })
+    document.addEventListener('keydown', (event) => this.handleKeydown(event, modal), { signal: this.dialogAbort.signal })
+    close.focus()
+
+    this.seenTimer = window.setTimeout(() => {
+      if (this.dialog && this.currentUpdate?.id === update.id) {
+        this.storage.markSeen(update.id)
+        this.recordMetric(update.id, 'impression')
+      }
+    }, 750)
+    this.dispatch('feedbacks:updates:shown', update.id, manual)
+  }
+
+  private createCta(update: ProductUpdateContent, manual: boolean) {
+    const cta = document.createElement('a')
+    cta.className = 'fb-update-cta'
+    cta.textContent = update.ctaLabel!
+    try {
+      const url = new URL(update.ctaUrl!, location.href)
+      cta.href = url.href
+      if (url.origin !== location.origin) {
+        cta.target = '_blank'
+        cta.rel = 'noopener noreferrer'
+      }
+    } catch {
+      cta.removeAttribute('href')
+    }
+    cta.addEventListener('click', () => {
+      this.storage.markSeen(update.id)
+      this.recordMetric(update.id, 'cta_click')
+      this.dispatch('feedbacks:updates:cta-clicked', update.id, manual)
+    })
+    return cta
+  }
+
+  private handleKeydown(event: KeyboardEvent, modal: HTMLElement) {
+    if (event.key === 'Escape') {
+      this.close(true)
+      return
+    }
+    if (event.key !== 'Tab') return
+    const focusable = modal.querySelectorAll<HTMLElement>('button,a[href],[tabindex]:not([tabindex="-1"])')
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (!first || !last) return
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
+
+  private close(dismissed: boolean) {
+    if (!this.dialog) return
+    const update = this.currentUpdate
+    if (this.seenTimer) clearTimeout(this.seenTimer)
+    this.seenTimer = null
+    this.dialogAbort?.abort()
+    this.dialogAbort = null
+    this.dialog.remove()
+    this.dialog = null
+    this.currentUpdate = null
+    document.body.style.overflow = this.priorBodyOverflow
+    this.lastFocus?.focus?.()
+    if (dismissed && update) {
+      this.storage.markDismissed(update.id)
+      this.recordMetric(update.id, 'dismissal')
+      this.dispatch('feedbacks:updates:dismissed', update.id)
+    }
+  }
+
+  private recordMetric(updateId: string, type: MetricType) {
+    const url = this.cfg.updatesEventsApiUrl
+    if (!url) return
+    const body = JSON.stringify({ projectKey: this.cfg.projectKey, events: [{ updateId, type }] })
+    try {
+      void fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true })
+    } catch {
+      this.log('Unable to record update metric')
+    }
+  }
+
+  private dispatch(name: string, updateId?: string, manual?: boolean) {
+    window.dispatchEvent(new CustomEvent(name, { detail: {
+      projectKeySuffix: this.cfg.projectKey.slice(-4),
+      ...(updateId ? { updateId } : {}),
+      ...(manual === undefined ? {} : { manual }),
+    } }))
+  }
+
+  private text(tag: string, value: string, className?: string) {
+    const element = document.createElement(tag)
+    if (className) element.className = className
+    element.textContent = value
+    return element
+  }
+
+  private log(message: string) {
+    if (this.cfg.debug) console.debug(`[Feedbacks updates] ${message}`)
+  }
+
+  destroy() {
+    if (this.autoTimer) clearTimeout(this.autoTimer)
+    this.abort.abort()
+    this.closeUpdates()
+  }
 }
