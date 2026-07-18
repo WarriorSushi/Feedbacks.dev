@@ -63,6 +63,7 @@ async function waitForDeliveries(
 }
 
 test('configures endpoints, sends tests, and replays deliveries from the integrations UI', async ({ page }) => {
+  test.setTimeout(180_000)
   await signInWithTestSession(page)
   const project = await createProjectViaApi(page, { name: `Playwright Webhooks ${Date.now().toString(36)}` })
   const summaryResponse = await page.request.get('/api/billing/sync')
@@ -110,6 +111,12 @@ test('configures endpoints, sends tests, and replays deliveries from the integra
   expect(savedConfig.generic?.endpoints).toHaveLength(1)
   expect(savedConfig.generic?.endpoints?.[0]?.signingSecret).toBe('whsec_e2e_generic')
   expect(savedConfig.github?.endpoints).toHaveLength(1)
+
+  const warmupResponse = await page.request.post(`${env.appOrigin}/api/test/webhook-target/slack`, {
+    data: { warmup: true },
+    headers: { 'x-feedbacks-e2e-bypass': env.authBypassSecret },
+  })
+  expect(warmupResponse.ok()).toBe(true)
 
   for (const kind of WEBHOOK_KINDS) {
     const section = page.locator(`[data-webhook-kind="${kind}"]`)

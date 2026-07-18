@@ -10,6 +10,7 @@
     "widget:build": "pnpm --filter @feedbacks/widget build",
     "widget:check-size": "node scripts/check-widget-gzip.mjs",
     "supabase:check": "node scripts/check-supabase-schema.mjs",
+    "activation:report": "node scripts/activation-funnel-report.mjs",
     "supabase:types": "supabase gen types typescript --project-id xiiaugllydxxmjbtzfux --schema public > packages/dashboard/src/lib/database.types.ts",
     "widget:copy": "node -e \"const fs=require('fs');const p='packages/dashboard/public/widget';fs.mkdirSync(p,{recursive:true});fs.copyFileSync('packages/widget/dist/widget.js',p+'/latest.js');fs.copyFileSync('packages/widget/dist/widget.js',p+'/v2.js');console.log('Widget copied to public/widget/')\"",
     "mcp:pack": "node scripts/pack-mcp-server.mjs",
@@ -28,6 +29,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
     "@playwright/test": "^1.55.0",
+    "@supabase/supabase-js": "2.110.0",
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
   }

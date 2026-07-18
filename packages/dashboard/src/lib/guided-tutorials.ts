@@ -42,7 +42,6 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
       { title: 'Public Boards', body: 'Manage the board for the project selected at the top of the sidebar.', href: '/dashboard/boards?project={projectId}', target: '[data-tour="nav-boards"]' },
       { title: 'API', body: 'This opens REST and MCP tools for the project selected at the top of the sidebar.', href: '/projects/{projectId}?tab=api', target: '[data-tour="nav-api"]' },
       { title: 'Billing', body: 'Check usage, plan access, and billing management.', href: '/billing', target: '[data-tour="nav-billing"]' },
-      { title: 'Tutorials', body: 'Return here for a guided lesson about one specific job.', href: '/tutorials', target: '[data-tour="nav-tutorials"]' },
       { title: 'Settings', body: 'Manage your profile, notifications, theme, account, and tutorial progress.', href: '/settings', target: '[data-tour="nav-settings"]' },
     ],
   },

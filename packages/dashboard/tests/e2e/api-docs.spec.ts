@@ -16,6 +16,6 @@ test('API docs are visible on Free and start with quick submit guidance', async 
   await expect(page.getByRole('heading', { name: 'Connection details' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Quick start: submit feedback' })).toBeVisible()
   await expect(page.getByText(/Do not expose this key in public browser code/i)).toBeVisible()
-  await expect(page.getByText('/api/v1/projects')).toBeVisible()
+  await expect(page.getByText('/api/v1/projects', { exact: true })).toHaveCount(1)
   await expect(page.getByText(/API and MCP access are part of Pro/i)).toHaveCount(0)
 })

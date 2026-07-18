@@ -54,6 +54,8 @@ This is the working checklist for the product audit completed on 6 July 2026. Wo
 
 ## Success measures
 
+Run `pnpm activation:report` for privacy-safe seven-day and lifetime funnel counts. The report contains aggregate project counts only.
+
 - Median time from signup to first verified submission.
 - Percentage of accounts receiving and triaging real feedback within 24 hours.
 - Submission and webhook delivery success rates.

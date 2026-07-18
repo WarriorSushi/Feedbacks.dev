@@ -119,6 +119,7 @@ export function ProductTour({
   const [open, setOpen] = React.useState(false)
   const [stepIndex, setStepIndex] = React.useState(0)
   const [tutorialId, setTutorialId] = React.useState<GuidedTutorialId>('navigation')
+  const [pendingStepIndex, setPendingStepIndex] = React.useState<number | null>(null)
   const [spotlight, setSpotlight] = React.useState<SpotlightRect | null>(null)
   const [viewport, setViewport] = React.useState({ width: 1024, height: 768 })
   const [panelSize, setPanelSize] = React.useState({ width: PANEL_WIDTH, height: PANEL_HEIGHT_ESTIMATE })
@@ -133,6 +134,8 @@ export function ProductTour({
     [defaultProjectId, tutorial],
   )
   const activeStep = steps[Math.min(stepIndex, steps.length - 1)]
+  const requestedTutorialId = searchParams.get('tutorial')
+  const navigationTourRequested = searchParams.get('tour') === '1'
 
   React.useEffect(() => {
     if (initialOpen && pathname === '/dashboard') setOpen(true)
@@ -148,18 +151,18 @@ export function ProductTour({
   }, [])
 
   React.useEffect(() => {
-    const requestedTutorial = getGuidedTutorial(searchParams.get('tutorial'))
+    const requestedTutorial = getGuidedTutorial(requestedTutorialId)
     if (requestedTutorial) {
       const saved = readTutorialProgress(requestedTutorial.id) || initialTutorialProgress[requestedTutorial.id]
       setTutorialId(requestedTutorial.id)
       setStepIndex(saved?.completedAt ? 0 : Math.min(saved?.stepIndex || 0, requestedTutorial.steps.length - 1))
       setOpen(true)
-    } else if (searchParams.get('tour') === '1') {
+    } else if (navigationTourRequested) {
       setTutorialId('navigation')
       setStepIndex(0)
       setOpen(true)
     }
-  }, [initialTutorialProgress, searchParams])
+  }, [initialTutorialProgress, navigationTourRequested, requestedTutorialId])
 
   React.useEffect(() => {
     const startTour = () => {
@@ -172,9 +175,18 @@ export function ProductTour({
   }, [])
 
   React.useEffect(() => {
-    if (!open || isCurrentHref(pathname, searchParams, activeStep.href)) return
-    router.push(activeStep.href)
-  }, [activeStep.href, open, pathname, router, searchParams])
+    if (!open) return
+    const targetHref = pendingStepIndex === null ? activeStep.href : steps[pendingStepIndex].href
+    if (isCurrentHref(pathname, searchParams, targetHref)) return
+    router.push(targetHref)
+    const retry = window.setTimeout(() => {
+      const currentSearch = new URLSearchParams(window.location.search)
+      if (!isCurrentHref(window.location.pathname, currentSearch, targetHref)) {
+        router.push(targetHref)
+      }
+    }, 500)
+    return () => window.clearTimeout(retry)
+  }, [activeStep.href, open, pathname, pendingStepIndex, router, searchParams, steps])
 
   React.useEffect(() => {
     if (!open) return
@@ -298,6 +310,16 @@ export function ProductTour({
     }).catch(() => undefined)
   }, [supabase])
 
+  React.useEffect(() => {
+    if (pendingStepIndex === null) return
+    const pendingStep = steps[pendingStepIndex]
+    if (!isCurrentHref(pathname, searchParams, pendingStep.href)) return
+
+    setStepIndex(pendingStepIndex)
+    if (tutorialId !== 'navigation') saveTutorialProgress(tutorialId, { stepIndex: pendingStepIndex })
+    setPendingStepIndex(null)
+  }, [pathname, pendingStepIndex, saveTutorialProgress, searchParams, steps, tutorialId])
+
   const closeTour = React.useCallback((returnToDashboard = false) => {
     setOpen(false)
     setSpotlight(null)
@@ -314,11 +336,13 @@ export function ProductTour({
   const goToStep = (nextIndex: number) => {
     const safeIndex = clamp(nextIndex, 0, steps.length - 1)
     const nextStep = steps[safeIndex]
+    if (!isCurrentHref(pathname, searchParams, nextStep.href)) {
+      setPendingStepIndex(safeIndex)
+      router.push(nextStep.href)
+      return
+    }
     setStepIndex(safeIndex)
     if (tutorialId !== 'navigation') saveTutorialProgress(tutorialId, { stepIndex: safeIndex })
-    if (!isCurrentHref(pathname, searchParams, nextStep.href)) {
-      router.push(nextStep.href)
-    }
   }
 
   const skipTour = async () => {
@@ -451,13 +475,13 @@ export function ProductTour({
             size="sm"
             className="h-8 gap-1.5"
             onClick={() => goToStep(stepIndex - 1)}
-            disabled={stepIndex === 0 || saving}
+            disabled={stepIndex === 0 || saving || pendingStepIndex !== null}
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Back
           </Button>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="h-8" onClick={() => void skipTour()} disabled={saving}>
+            <Button variant="outline" size="sm" className="h-8" onClick={() => void skipTour()} disabled={saving || pendingStepIndex !== null}>
               Skip
             </Button>
             <Button
@@ -467,7 +491,7 @@ export function ProductTour({
                 if (finalStep) void finishTour()
                 else goToStep(stepIndex + 1)
               }}
-              disabled={saving}
+              disabled={saving || pendingStepIndex !== null}
             >
               {saving ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

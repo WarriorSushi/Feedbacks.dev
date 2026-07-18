@@ -5,15 +5,14 @@ const env = skipE2EIfNeeded()
 test.skip(!env.ready, env.skipReason)
 
 const tourSteps = [
-  { title: 'Dashboard', path: '/dashboard', target: 'nav-dashboard' },
-  { title: 'Feedback', path: '/feedback', target: 'nav-feedback' },
-  { title: 'Projects', path: '/projects', target: 'nav-projects' },
-  { title: 'Integrations', path: '/integrations', target: 'nav-integrations' },
-  { title: 'Public Boards', path: '/dashboard/boards', target: 'nav-boards' },
-  { title: 'API', path: '/api-docs', target: 'nav-api' },
-  { title: 'Billing', path: '/billing', target: 'nav-billing' },
-  { title: 'Tutorials', path: '/tutorials', target: 'nav-tutorials' },
-  { title: 'Settings', path: '/settings', target: 'nav-settings' },
+  { title: 'Dashboard', path: /\/dashboard(?:\?.*)?$/, target: 'nav-dashboard' },
+  { title: 'Feedback', path: /\/feedback(?:\?.*)?$/, target: 'nav-feedback' },
+  { title: 'Projects', path: /\/projects(?:\?.*)?$/, target: 'nav-projects' },
+  { title: 'Integrations', path: /\/projects\/[^/?]+\?tab=integrations(?:&.*)?$/, target: 'nav-integrations' },
+  { title: 'Public Boards', path: /\/dashboard\/boards\?project=[^&]+(?:&.*)?$/, target: 'nav-boards' },
+  { title: 'API', path: /\/projects\/[^/?]+\?tab=api(?:&.*)?$/, target: 'nav-api' },
+  { title: 'Billing', path: /\/billing(?:\?.*)?$/, target: 'nav-billing' },
+  { title: 'Settings', path: /\/settings(?:\?.*)?$/, target: 'nav-settings' },
 ]
 
 test.describe('product tour', () => {
@@ -25,8 +24,8 @@ test.describe('product tour', () => {
     await expect(dialog).toBeVisible()
 
     for (const [index, step] of tourSteps.entries()) {
-      await expect(page).toHaveURL(new RegExp(`${step.path.replace('/', '\\/')}(?:\\?.*)?$`))
       await expect(dialog.getByRole('heading', { name: step.title, exact: true })).toBeVisible()
+      await expect(page).toHaveURL(step.path)
 
       const visibleTarget = page.locator(`[data-tour="${step.target}"]:visible`)
       await expect(visibleTarget).toBeVisible()
@@ -51,8 +50,8 @@ test.describe('product tour', () => {
     await expect(dialog).toBeVisible()
 
     for (const [index, step] of tourSteps.entries()) {
-      await expect(page).toHaveURL(new RegExp(`${step.path.replace('/', '\\/')}(?:\\?.*)?$`))
       await expect(dialog.getByRole('heading', { name: step.title, exact: true })).toBeVisible()
+      await expect(page).toHaveURL(step.path)
 
       const target = page.locator(`[data-tour="${step.target}"]:visible`)
       await expect(target).toBeVisible()

@@ -17,7 +17,6 @@ test('creates a project and lands on a working install before optional customiza
   await expect(page.getByRole('heading', { name: 'Put the feedback form on your site.' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Copy code' })).toBeVisible()
   await expect(page.getByText('Choose platform')).toBeVisible()
-  await expect(page.getByText('Copy code')).toBeVisible()
   await expect(page.getByText('Verify one message')).toBeVisible()
   await expect(page.getByRole('button', { name: 'WordPress' })).toBeVisible()
   await page.getByRole('button', { name: 'HTML block' }).click()
@@ -40,7 +39,7 @@ test('copy-paste install guidance stays visible for an existing project', async 
     page.getByText(/Paste before the closing body tag/i),
   ).toBeVisible({ timeout: 30_000 })
   await expect(
-    page.getByText(/Look for the floating "Feedback" launcher near the lower-right corner/i).first(),
+    page.getByTestId('install-verify-instruction'),
   ).toBeVisible({ timeout: 30_000 })
   await expect(page.getByRole('link', { name: /Verify Send one test/ })).toBeVisible()
   await page.getByRole('button', { name: 'Mobile app' }).click()

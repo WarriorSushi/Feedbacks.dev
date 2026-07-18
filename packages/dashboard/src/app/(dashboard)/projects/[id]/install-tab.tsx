@@ -494,7 +494,9 @@ export function FeedbacksWidgetScript() {
             </div>
             <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
               <p className="text-sm font-medium text-foreground">What appears</p>
-              <p className="text-sm leading-6 text-muted-foreground">{verifyInstruction}</p>
+              <p data-testid="install-verify-instruction" className="text-sm leading-6 text-muted-foreground">
+                {verifyInstruction}
+              </p>
             </div>
             <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
               <p className="text-sm font-medium text-foreground">Check it worked</p>
