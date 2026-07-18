@@ -39,3 +39,10 @@ test('settings validation keeps partial patches separate from invalid path data'
   const invalid = sanitizeProductUpdateSettings({ includePaths: ['https://example.com'] })
   assert.ok(invalid.errors.includePaths)
 })
+
+test('product update validation permits clearing an optional version label', async () => {
+  const { sanitizeProductUpdateInput } = await loadProductUpdates()
+  const result = sanitizeProductUpdateInput({ versionLabel: '', title: 'Title', summary: 'Summary' }, { requirePublishFields: true })
+  assert.deepEqual(result.errors, {})
+  assert.equal(result.data.versionLabel, undefined)
+})

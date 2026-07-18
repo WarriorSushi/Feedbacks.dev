@@ -115,7 +115,7 @@ export function sanitizeProductUpdateInput(
   const title = optionalText(source.title, PRODUCT_UPDATE_LIMITS.title)
   const summary = optionalText(source.summary, PRODUCT_UPDATE_LIMITS.summary)
 
-  if (source.versionLabel !== undefined && !versionLabel) errors.versionLabel = 'Version label must be 1–32 characters.'
+  if (typeof source.versionLabel === 'string' && source.versionLabel.trim() && !versionLabel) errors.versionLabel = 'Version label must be 1–32 characters.'
   if ((options.requirePublishFields || source.title !== undefined) && !title) errors.title = 'Title must be 1–120 characters.'
   if ((options.requirePublishFields || source.summary !== undefined) && !summary) errors.summary = 'Summary must be 1–280 characters.'
 
