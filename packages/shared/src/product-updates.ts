@@ -1,0 +1,242 @@
+export type ProductUpdateStatus = 'draft' | 'published' | 'archived'
+export type ProductUpdateTheme = 'auto' | 'light' | 'dark'
+export type ProductUpdateMetricType = 'impression' | 'dismissal' | 'cta_click'
+
+export const PRODUCT_UPDATE_LIMITS = {
+  versionLabel: 32,
+  title: 120,
+  summary: 280,
+  highlights: 8,
+  highlight: 160,
+  ctaLabel: 40,
+  ctaUrl: 2048,
+  paths: 10,
+  path: 120,
+  displayDelayMin: 0,
+  displayDelayMax: 30_000,
+  publicUpdates: 20,
+  metricEvents: 10,
+  metricBodyBytes: 8 * 1024,
+} as const
+
+export interface ProductUpdateContent {
+  id: string
+  versionLabel?: string
+  title: string
+  summary: string
+  highlights: string[]
+  imageUrl?: string
+  ctaLabel?: string
+  ctaUrl?: string
+  publishedAt: string
+  expiresAt?: string
+}
+
+export interface ProductUpdatePublicSettings {
+  autoShow: boolean
+  displayDelayMs: number
+  theme: ProductUpdateTheme
+  accentColor: string
+  includePaths: string[]
+  excludePaths: string[]
+  showPoweredBy: boolean
+}
+
+export interface ProductUpdatesPublicResponse {
+  settings: ProductUpdatePublicSettings
+  updates: ProductUpdateContent[]
+}
+
+export interface ProductUpdateInput {
+  versionLabel?: string
+  title?: string
+  summary?: string
+  highlights?: string[]
+  ctaLabel?: string
+  ctaUrl?: string
+  publishedAt?: string
+  expiresAt?: string
+}
+
+export interface ProductUpdateSettingsInput {
+  enabled?: boolean
+  autoShow?: boolean
+  displayDelayMs?: number
+  theme?: ProductUpdateTheme
+  accentColor?: string
+  includePaths?: string[]
+  excludePaths?: string[]
+  showPoweredBy?: boolean
+}
+
+export interface ProductUpdateValidationResult<T> {
+  data: T
+  errors: Record<string, string>
+}
+
+const HEX_COLOR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
+const PATH_RE = /^\/[A-Za-z0-9._~!$&'()*+,;=:@%\-/]*$/
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+function optionalText(value: unknown, limit: number): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  if (!trimmed || trimmed.length > limit) return undefined
+  return trimmed
+}
+
+function parseIso(value: unknown): string | undefined {
+  if (typeof value !== 'string' || !value.trim()) return undefined
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
+}
+
+export function sanitizeProductUpdateCta(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  if (!trimmed || trimmed.length > PRODUCT_UPDATE_LIMITS.ctaUrl) return undefined
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//')) return trimmed
+  try {
+    const parsed = new URL(trimmed)
+    if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) return undefined
+    return parsed.toString()
+  } catch {
+    return undefined
+  }
+}
+
+export function sanitizeProductUpdateInput(
+  input: unknown,
+  options: { requirePublishFields?: boolean } = {},
+): ProductUpdateValidationResult<ProductUpdateInput> {
+  const source = input && typeof input === 'object' ? input as Record<string, unknown> : {}
+  const errors: Record<string, string> = {}
+  const versionLabel = optionalText(source.versionLabel, PRODUCT_UPDATE_LIMITS.versionLabel)
+  const title = optionalText(source.title, PRODUCT_UPDATE_LIMITS.title)
+  const summary = optionalText(source.summary, PRODUCT_UPDATE_LIMITS.summary)
+
+  if (typeof source.versionLabel === 'string' && source.versionLabel.trim() && !versionLabel) errors.versionLabel = 'Version label must be 1–32 characters.'
+  if ((options.requirePublishFields || source.title !== undefined) && !title) errors.title = 'Title must be 1–120 characters.'
+  if ((options.requirePublishFields || source.summary !== undefined) && !summary) errors.summary = 'Summary must be 1–280 characters.'
+
+  const rawHighlights = source.highlights
+  const highlights = Array.isArray(rawHighlights)
+    ? rawHighlights.filter((item): item is string => typeof item === 'string').map((item) => item.trim())
+    : []
+  if (rawHighlights !== undefined && (!Array.isArray(rawHighlights) || highlights.length > PRODUCT_UPDATE_LIMITS.highlights || highlights.some((item) => !item || item.length > PRODUCT_UPDATE_LIMITS.highlight))) {
+    errors.highlights = `Use up to ${PRODUCT_UPDATE_LIMITS.highlights} highlights of up to ${PRODUCT_UPDATE_LIMITS.highlight} characters.`
+  }
+
+  const ctaLabel = optionalText(source.ctaLabel, PRODUCT_UPDATE_LIMITS.ctaLabel)
+  const ctaUrl = sanitizeProductUpdateCta(source.ctaUrl)
+  const rawCtaLabel = typeof source.ctaLabel === 'string' && source.ctaLabel.trim()
+  const rawCtaUrl = typeof source.ctaUrl === 'string' && source.ctaUrl.trim()
+  if ((rawCtaLabel && !ctaLabel) || (rawCtaUrl && !ctaUrl) || Boolean(ctaLabel) !== Boolean(ctaUrl)) {
+    errors.cta = 'CTA label and a safe relative or HTTP(S) URL are both required.'
+  }
+
+  const publishedAt = parseIso(source.publishedAt)
+  const expiresAt = parseIso(source.expiresAt)
+  if (source.publishedAt !== undefined && !publishedAt) errors.publishedAt = 'Publish time must be a valid ISO timestamp.'
+  if (source.expiresAt !== undefined && !expiresAt) errors.expiresAt = 'Expiry time must be a valid ISO timestamp.'
+  if (publishedAt && expiresAt && new Date(expiresAt) <= new Date(publishedAt)) errors.expiresAt = 'Expiry must be later than publication.'
+
+  return {
+    data: {
+      ...(versionLabel ? { versionLabel } : {}),
+      ...(title ? { title } : {}),
+      ...(summary ? { summary } : {}),
+      highlights: errors.highlights ? [] : highlights,
+      ...(ctaLabel && ctaUrl ? { ctaLabel, ctaUrl } : {}),
+      ...(publishedAt ? { publishedAt } : {}),
+      ...(expiresAt ? { expiresAt } : {}),
+    },
+    errors,
+  }
+}
+
+export function sanitizeProductUpdatePath(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const path = value.trim()
+  if (!path || path.length > PRODUCT_UPDATE_LIMITS.path || !PATH_RE.test(path) || path.includes('?') || path.includes('#') || path.includes('//')) return undefined
+  return path.length > 1 ? path.replace(/\/+$/, '') : path
+}
+
+function sanitizePaths(value: unknown, field: string, errors: Record<string, string>): string[] {
+  if (!Array.isArray(value) || value.length > PRODUCT_UPDATE_LIMITS.paths) {
+    errors[field] = `Use up to ${PRODUCT_UPDATE_LIMITS.paths} path prefixes.`
+    return []
+  }
+  const paths = value.map(sanitizeProductUpdatePath)
+  if (paths.some((path) => !path)) {
+    errors[field] = 'Each path must be a pathname prefix beginning with /.'
+    return []
+  }
+  return [...new Set(paths as string[])]
+}
+
+export function sanitizeProductUpdateSettings(input: unknown): ProductUpdateValidationResult<ProductUpdateSettingsInput> {
+  const source = input && typeof input === 'object' ? input as Record<string, unknown> : {}
+  const errors: Record<string, string> = {}
+  const displayDelayMs = typeof source.displayDelayMs === 'number' && Number.isInteger(source.displayDelayMs)
+    && source.displayDelayMs >= PRODUCT_UPDATE_LIMITS.displayDelayMin && source.displayDelayMs <= PRODUCT_UPDATE_LIMITS.displayDelayMax
+    ? source.displayDelayMs
+    : undefined
+  if (source.displayDelayMs !== undefined && displayDelayMs === undefined) errors.displayDelayMs = 'Delay must be between 0 and 30000 milliseconds.'
+  const theme = ['auto', 'light', 'dark'].includes(source.theme as string) ? source.theme as ProductUpdateTheme : undefined
+  if (source.theme !== undefined && !theme) errors.theme = 'Theme must be auto, light, or dark.'
+  const accentColor = typeof source.accentColor === 'string' && HEX_COLOR_RE.test(source.accentColor.trim()) ? source.accentColor.trim() : undefined
+  if (source.accentColor !== undefined && !accentColor) errors.accentColor = 'Accent color must be a 3 or 6 digit hex color.'
+
+  return {
+    data: {
+      ...(typeof source.enabled === 'boolean' ? { enabled: source.enabled } : {}),
+      ...(typeof source.autoShow === 'boolean' ? { autoShow: source.autoShow } : {}),
+      ...(displayDelayMs !== undefined ? { displayDelayMs } : {}),
+      ...(theme ? { theme } : {}),
+      ...(accentColor ? { accentColor } : {}),
+      ...(source.includePaths !== undefined ? { includePaths: sanitizePaths(source.includePaths, 'includePaths', errors) } : {}),
+      ...(source.excludePaths !== undefined ? { excludePaths: sanitizePaths(source.excludePaths, 'excludePaths', errors) } : {}),
+      ...(typeof source.showPoweredBy === 'boolean' ? { showPoweredBy: source.showPoweredBy } : {}),
+    },
+    errors,
+  }
+}
+
+export function deriveProductUpdateState(update: Pick<ProductUpdateContent, 'publishedAt' | 'expiresAt'> & { status: ProductUpdateStatus }, now = new Date()): 'Draft' | 'Scheduled' | 'Live' | 'Expired' | 'Archived' {
+  if (update.status === 'archived') return 'Archived'
+  if (update.status !== 'published') return 'Draft'
+  if (update.expiresAt && new Date(update.expiresAt) <= now) return 'Expired'
+  if (new Date(update.publishedAt) > now) return 'Scheduled'
+  return 'Live'
+}
+
+export function isProductUpdateLive(update: Pick<ProductUpdateContent, 'publishedAt' | 'expiresAt'> & { status: ProductUpdateStatus }, now = new Date()): boolean {
+  return deriveProductUpdateState(update, now) === 'Live'
+}
+
+function prefixMatches(pathname: string, prefix: string): boolean {
+  return prefix === '/' || pathname === prefix || pathname.startsWith(`${prefix}/`)
+}
+
+export function isProductUpdatePathEligible(pathname: string, settings: Pick<ProductUpdatePublicSettings, 'includePaths' | 'excludePaths'>): boolean {
+  const path = pathname.startsWith('/') ? pathname : `/${pathname}`
+  if (settings.excludePaths.some((prefix) => prefixMatches(path, prefix))) return false
+  return settings.includePaths.length === 0 || settings.includePaths.some((prefix) => prefixMatches(path, prefix))
+}
+
+export function isProductUpdateId(value: string): boolean {
+  return UUID_RE.test(value)
+}
+
+function normalizeOrigin(origin?: string): string {
+  return (origin || 'https://app.feedbacks.dev').trim().replace(/\/+$/, '')
+}
+
+export function buildProductUpdatesApiUrl(origin?: string): string {
+  return `${normalizeOrigin(origin)}/api/widget/updates`
+}
+
+export function buildProductUpdateMetricsApiUrl(origin?: string): string {
+  return `${normalizeOrigin(origin)}/api/widget/updates/events`
+}

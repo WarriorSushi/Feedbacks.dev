@@ -149,6 +149,24 @@ export const DOCS_PAGES: DocsPage[] = [
     ],
   },
   {
+    slug: 'install/product-updates', category: 'Install', title: 'Product Updates',
+    description: 'Publish an in-app What’s New modal through the widget you already installed.',
+    blocks: [
+      { type: 'heading', id: 'enable-once', title: 'Enable the runtime once' },
+      { type: 'paragraph', text: 'Open your project Customize tab, enable Product Updates, save, and copy the regenerated snippet. This adds data-enable-updates="true". Later updates are published remotely from the Updates tab and do not need another application deployment.' },
+      { type: 'code', label: 'Manual What’s New trigger', language: 'html', code: `<button data-feedbacks-updates-trigger type="button">What’s new</button>` },
+      { type: 'heading', id: 'publish', title: 'Create and publish' },
+      { type: 'steps', items: [
+        { title: 'Save a draft', body: 'Write a version label, title, summary, optional highlights, image, and CTA. Drafts are never returned to the public widget API.' },
+        { title: 'Preview the modal', body: 'Use desktop or mobile and light or dark preview before publishing. Content is structured plain text, not HTML or Markdown.' },
+        { title: 'Publish or schedule', body: 'Free plans publish immediately. Pro plans can schedule a future publication. Public visibility can take up to one minute because the widget endpoint is cached.' },
+      ] },
+      { type: 'heading', id: 'display-rules', title: 'Display rules and privacy' },
+      { type: 'list', items: ['The widget automatically shows only the newest unseen eligible update.', 'Seen and dismissed state stays in localStorage, without cookies, account IDs, page URLs, or server-side viewer events.', 'Manual triggers can reopen the newest live update.', 'Included and excluded pathname prefixes control where updates can appear. Exclusions win.', 'Metrics are approximate daily aggregates for impressions, dismissals, and CTA clicks.'] },
+      { type: 'callout', tone: 'note', title: 'Keep it concise', body: 'Product Updates is for useful release communication, not a marketing carousel. One centered modal is shown at a time and it never overlaps the feedback form.' },
+    ],
+  },
+  {
     slug: 'install/verify', category: 'Install', title: 'Verify an installation',
     description: 'Separate project configuration problems from host-page placement problems.',
     blocks: [

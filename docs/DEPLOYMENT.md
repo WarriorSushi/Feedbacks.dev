@@ -49,6 +49,7 @@ For a new internal staging, recovery, or disposable verification project, run th
 25. `sql/025_dashboard_stats.sql` — adds a service-only, owner-scoped aggregate for fast project and all-project dashboards
 26. `sql/026_activation_milestones.sql` — adds privacy-preserving, one-time activation funnel milestones without page-view or visitor tracking
 27. `sql/027_operational_health_indexes.sql` — keeps delivery and installation-health probes indexed as history grows
+28. `sql/028_product_updates.sql` — Product Updates settings, owner-authored releases, daily aggregate metrics, RLS, service-only RPCs, and the `product_update_images` bucket
 
 Hosted schema note, 6 July 2026: migrations `025`, `026`, and `027` are applied and verified. The dashboard aggregate runs, activation RLS is enabled, the operational indexes exist, and `dashboard_stats` execution is restricted to `service_role`.
 
@@ -97,6 +98,8 @@ Use staging app origins for staging projects. Do not point production Auth redir
 4. Recommended bucket limits:
    - `feedback_screenshots`: `image/png`, `image/jpeg`, max `3 MB`
    - `feedback_attachments`: `image/png`, `image/jpeg`, `application/pdf`
+
+`sql/028_product_updates.sql` also creates the public `product_update_images` bucket. It accepts JPEG, PNG, and WebP only, with a 2 MB limit. Do not create browser upload policies for this bucket: dashboard owner routes upload and remove files through the server-side admin client.
 
 The widget API enforces the same screenshot MIME policy and 3 MB screenshot limit. Attachments are capped at 5 MB by the API.
 

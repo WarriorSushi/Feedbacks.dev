@@ -12,6 +12,7 @@ export type FeedbackStoragePaths = {
 
 const SCREENSHOT_BUCKET = 'feedback_screenshots'
 const ATTACHMENT_BUCKET = 'feedback_attachments'
+const PRODUCT_UPDATE_BUCKET = 'product_update_images'
 const REMOVE_BATCH_SIZE = 100
 
 function unique(values: string[]) {
@@ -77,7 +78,7 @@ async function removeBucketObjects(admin: SupabaseClient, bucket: string, paths:
 
 export async function cleanupFeedbackStorageForProjectIds(admin: SupabaseClient, projectIds: string[]) {
   const ids = unique(projectIds)
-  if (ids.length === 0) return { screenshots: 0, attachments: 0 }
+  if (ids.length === 0) return { screenshots: 0, attachments: 0, productUpdateImages: 0 }
 
   const { data, error } = await admin
     .from('feedback')
@@ -87,13 +88,21 @@ export async function cleanupFeedbackStorageForProjectIds(admin: SupabaseClient,
   if (error) throw error
 
   const paths = collectFeedbackStoragePaths((data ?? []) as FeedbackStorageRow[])
+  const { data: updateRows, error: updatesError } = await admin
+    .from('product_updates')
+    .select('image_path')
+    .in('project_id', ids)
+  if (updatesError) throw updatesError
+  const updatePaths = unique((updateRows ?? []).map((row) => typeof row.image_path === 'string' ? row.image_path : ''))
 
   await removeBucketObjects(admin, SCREENSHOT_BUCKET, paths.screenshots)
   await removeBucketObjects(admin, ATTACHMENT_BUCKET, paths.attachments)
+  await removeBucketObjects(admin, PRODUCT_UPDATE_BUCKET, updatePaths)
 
   return {
     screenshots: paths.screenshots.length,
     attachments: paths.attachments.length,
+    productUpdateImages: updatePaths.length,
   }
 }
 

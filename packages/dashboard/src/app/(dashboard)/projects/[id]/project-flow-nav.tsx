@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, Check, Loader2 } from 'lucide-react'
 
-export type ProjectSection = 'setup' | 'integrations' | 'board' | 'api' | 'settings'
+export type ProjectSection = 'setup' | 'integrations' | 'board' | 'updates' | 'api' | 'settings'
 export type SetupStep = 'customize' | 'install' | 'verify' | 'inbox'
 
 function usePendingProjectLink() {
@@ -45,6 +45,7 @@ export function ProjectMenu({
     { id: 'setup', label: 'Setup', href: `/projects/${projectId}?tab=install` },
     { id: 'integrations', label: 'Integrations', href: `/projects/${projectId}?tab=integrations` },
     { id: 'board', label: 'Public Board', href: `/projects/${projectId}?tab=board` },
+    { id: 'updates', label: 'Updates', href: `/projects/${projectId}?tab=updates` },
     { id: 'api', label: 'API', href: `/projects/${projectId}?tab=api` },
     { id: 'settings', label: 'Settings', href: `/projects/${projectId}?tab=settings` },
   ]
