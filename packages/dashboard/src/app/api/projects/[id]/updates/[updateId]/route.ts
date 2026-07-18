@@ -27,8 +27,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     highlights: existing.highlights,
     ctaLabel: existing.cta_label,
     ctaUrl: existing.cta_url,
-    publishedAt: existing.published_at,
-    expiresAt: existing.expires_at,
+    ...(typeof existing.published_at === 'string' ? { publishedAt: existing.published_at } : {}),
+    ...(typeof existing.expires_at === 'string' ? { expiresAt: existing.expires_at } : {}),
     ...body,
   }, { requirePublishFields: true }); if (Object.keys(parsed.errors).length) return NextResponse.json({ errors: parsed.errors }, { status: 400, headers })
   const { data, error } = await auth.admin.from('product_updates').update({
