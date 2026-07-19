@@ -1,6 +1,6 @@
 # feedbacks.dev Product Implementation Status
 
-Last updated: 2026-07-03
+Last updated: 2026-07-19
 
 This document tracks the stable product status after the full product audit in `docs/review/2026-06-21-full-product-audit-and-phase-plan.md`. Use it as the short source of truth for what is shipped, what is intentionally deferred, and what should not be promoted as complete yet.
 
@@ -28,7 +28,7 @@ This document tracks the stable product status after the full product audit in `
 - Dodo Payments billing state with checkout, portal, verified webhooks, usage limits, and entitlement checks. Dodo remains in test mode until final production launch.
 - Project-scoped REST API and MCP server for trusted backend/agent workflows. Production builds package the MCP server as a versioned tarball at `/mcp/feedbacks-mcp-server-1.0.0.tgz`, and the documented `npm exec` command was verified to initialize and advertise all nine tools.
 - Generated Supabase database types and a repeatable `pnpm supabase:check` schema/bucket verification command.
-- Product Updates / What’s New implementation is present behind its explicit per-project and widget runtime opt-in. Its ordered migration is `sql/028_product_updates.sql`; do not enable or promote it until the non-production database/RLS, browser, and rollout gates in `docs/features/product-updates/test-and-rollout-plan.md` are completed.
+- Updates / What’s New is a first-class project product with Updates-only, Feedback-only, and combined module choices; stable sidebar routes; state-driven setup; remote activation for current embeds; list-first authoring; private previews; lifecycle actions; aggregate analytics; and plain-language settings. The live schema includes `sql/028_product_updates.sql` through `sql/031_atomic_project_modules.sql`. RLS/grants, generated types, the 15,333-byte gzip widget, and the 24-test required browser gate were verified on 19 July 2026.
 - Supabase RLS policy optimization for agent setup audit/token reads via `sql/020_optimize_agent_setup_rls.sql`, applied and verified on the live project.
 - Supabase RLS cleanup for `usage_counters` write-deny policies via `sql/021_split_usage_counter_write_rls.sql`, applied and verified on the live project.
 - Supabase RLS cleanup for public board, announcement, and public note SELECT policies via `sql/022_consolidate_public_board_read_rls.sql`, applied and verified on the live project.
@@ -60,6 +60,7 @@ Use this language:
 - "Slack, Discord, GitHub Issues, and generic webhooks"
 - "Immediate or daily digest webhook delivery"
 - "REST API and MCP for trusted agents"
+- "In-app Updates / What’s New"
 - "Webhook-backed billing truth"
 
 Avoid this language for now:

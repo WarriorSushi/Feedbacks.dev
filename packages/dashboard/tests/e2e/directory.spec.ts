@@ -18,7 +18,15 @@ test('shows the public directory and category filters with realistic board activ
   const secondBoardLink = page.locator(`a[href="/p/${boards.secondBoard.slug}"]`)
   await expect(analyticsFilter).toBeVisible()
   await expect(firstBoardLink).toBeVisible()
+
+  // The directory contains long-lived shared-environment data, so find the
+  // newly seeded board by its unique project name instead of assuming it will
+  // rank onto the first page.
+  const search = page.getByLabel('Search public boards')
+  await search.fill(boards.secondBoard.projectName)
   await expect(secondBoardLink).toBeVisible()
+  await expect(firstBoardLink).toHaveCount(0)
+  await search.clear()
 
   await analyticsFilter.click()
   await expect(firstBoardLink).toBeVisible()

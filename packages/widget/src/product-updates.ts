@@ -1,6 +1,7 @@
 import type { ProductUpdateContent, ProductUpdatesPublicResponse, WidgetConfig } from '@feedbacks/shared'
 import { isProductUpdatePathEligible } from '@feedbacks/shared'
 import { createProductUpdateStorage } from './product-update-storage'
+import { acquireOverlay, claimUpdatesOwner, hasActiveOverlay, onOverlayAvailable, releaseOverlay, releaseUpdatesOwner } from './overlay-coordinator'
 
 type MetricType = 'impression' | 'dismissal' | 'cta_click'
 
@@ -16,6 +17,8 @@ export class ProductUpdatesController {
   private readonly abort = new AbortController()
   private dialogAbort: AbortController | null = null
   private readonly storage
+  private readonly ownsUpdates
+  private releaseOverlayListener: (() => void) | null = null
 
   constructor(
     private readonly cfg: WidgetConfig,
@@ -23,10 +26,12 @@ export class ProductUpdatesController {
     initialResponse?: ProductUpdatesPublicResponse,
   ) {
     this.storage = createProductUpdateStorage(cfg.projectKey)
-    void this.start(initialResponse)
+    this.ownsUpdates = claimUpdatesOwner(cfg.projectKey, this)
+    if (this.ownsUpdates) void this.start(initialResponse)
   }
 
   private async start(initialResponse?: ProductUpdatesPublicResponse) {
+    this.releaseOverlayListener = onOverlayAvailable(() => this.maybeAutoShow())
     document.addEventListener('click', this.onManualTrigger, { signal: this.abort.signal })
     window.addEventListener('popstate', () => this.maybeAutoShow(), { signal: this.abort.signal })
     document.addEventListener('visibilitychange', () => this.maybeAutoShow(), { signal: this.abort.signal })
@@ -60,7 +65,7 @@ export class ProductUpdatesController {
   }
 
   async openUpdates(): Promise<boolean> {
-    if (this.isFeedbackOpen()) return false
+    if (!this.ownsUpdates || this.isFeedbackOpen() || hasActiveOverlay()) return false
     const update = this.latestPathEligibleUpdate()
     if (!update) return false
     this.open(update, true)
@@ -97,6 +102,7 @@ export class ProductUpdatesController {
       this.autoShown ||
       this.dialog ||
       this.isFeedbackOpen() ||
+      hasActiveOverlay() ||
       document.visibilityState !== 'visible' ||
       !this.response?.settings.autoShow
     ) return
@@ -109,14 +115,14 @@ export class ProductUpdatesController {
 
     if (this.autoTimer) clearTimeout(this.autoTimer)
     this.autoTimer = window.setTimeout(() => {
-      if (!this.isFeedbackOpen() && !this.dialog && this.response && isProductUpdatePathEligible(location.pathname, this.response.settings)) {
+      if (!this.isFeedbackOpen() && !hasActiveOverlay() && !this.dialog && this.response && isProductUpdatePathEligible(location.pathname, this.response.settings)) {
         this.open(update, false)
       }
     }, this.response.settings.displayDelayMs)
   }
 
   private open(update: ProductUpdateContent, manual: boolean) {
-    if (this.dialog || this.isFeedbackOpen()) return
+    if (this.dialog || this.isFeedbackOpen() || hasActiveOverlay()) return
     if (!manual) this.autoShown = true
     this.currentUpdate = update
     this.lastFocus = document.activeElement as HTMLElement | null
@@ -175,6 +181,7 @@ export class ProductUpdatesController {
 
     overlay.append(modal)
     this.dialog = overlay
+    acquireOverlay(this, 'updates', () => this.close(false))
     document.body.style.overflow = 'hidden'
     document.body.append(overlay)
     this.dialogAbort = new AbortController()
@@ -234,6 +241,7 @@ export class ProductUpdatesController {
   }
 
   private close(dismissed: boolean) {
+    releaseOverlay(this)
     if (!this.dialog) return
     const update = this.currentUpdate
     if (this.seenTimer) clearTimeout(this.seenTimer)
@@ -285,6 +293,9 @@ export class ProductUpdatesController {
   destroy() {
     if (this.autoTimer) clearTimeout(this.autoTimer)
     this.abort.abort()
+    this.releaseOverlayListener?.()
+    this.releaseOverlayListener = null
     this.closeUpdates()
+    if (this.ownsUpdates) releaseUpdatesOwner(this.cfg.projectKey, this)
   }
 }

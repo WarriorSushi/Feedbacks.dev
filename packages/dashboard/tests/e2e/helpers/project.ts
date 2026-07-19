@@ -45,11 +45,11 @@ export async function createProjectViaApi(
 }
 
 export function projectInstallPath(projectId: string): string {
-  return `/projects/${projectId}?tab=install`
+  return `/projects/${projectId}/install`
 }
 
 export function projectCustomizePath(projectId: string): string {
-  return `/projects/${projectId}?tab=customize`
+  return `/projects/${projectId}/install?view=customize`
 }
 
 export function projectVerifyPath(projectId: string): string {

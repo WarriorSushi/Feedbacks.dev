@@ -25,7 +25,7 @@ interface ProjectTabsProps {
   project: Project
   billingSummary: BillingSummary | null
   initialTab?: TabId
-  updatesView?: 'overview' | 'composer'
+  updatesView?: 'overview' | 'composer' | 'settings'
   updateId?: string
 }
 

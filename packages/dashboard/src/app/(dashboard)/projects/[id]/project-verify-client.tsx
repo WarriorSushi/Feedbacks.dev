@@ -189,7 +189,7 @@ export function ProjectVerifyClient({
                       feedbacks.dev only reveals project keys once. Generate a fresh key from the install tab to run hosted verification again{apiKeyLastFour ? ` for the key ending in ${apiKeyLastFour}` : ''}.
                     </p>
                     <div className="mt-3">
-                      <Link href={`/projects/${projectId}?tab=install`}>
+                      <Link href={`/projects/${projectId}/install`}>
                         <Button variant="outline" size="sm">
                           <RefreshCw className="mr-2 h-4 w-4" />
                           Open install and rotate key
@@ -212,7 +212,7 @@ export function ProjectVerifyClient({
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link href={`/projects/${projectId}?tab=install`}>
+              <Link href={`/projects/${projectId}/install`}>
                 <Button variant="outline">Return to install instructions</Button>
               </Link>
             </div>

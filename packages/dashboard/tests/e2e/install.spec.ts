@@ -12,8 +12,8 @@ test('creates a project and lands on a working install before optional customiza
   await page.getByLabel('Project name').fill(`Playwright Install ${Date.now().toString(36)}`)
   await page.getByRole('button', { name: 'Create project and get install code' }).click()
 
-  await expect(page).toHaveURL(/\/projects\/[^/]+\?created=1&tab=install/, { timeout: 30_000 })
-  await expect(page.getByRole('link', { name: /Setup/ })).toBeVisible()
+  await expect(page).toHaveURL(/\/projects\/[^/]+\/install\?created=1/, { timeout: 30_000 })
+  await expect(page.getByRole('navigation', { name: 'Setup steps' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Put the feedback form on your site.' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Copy code' })).toBeVisible()
   await expect(page.getByText('Choose platform')).toBeVisible()

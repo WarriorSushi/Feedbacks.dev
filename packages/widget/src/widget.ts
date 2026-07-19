@@ -2,6 +2,7 @@ import styles from './styles.css';
 import type { WidgetConfig, FeedbackData, FeedbackResponse, CategoryType } from './types';
 import { isWidgetBootstrapResponse, type WidgetBootstrapResponse } from '@feedbacks/shared';
 import { ProductUpdatesController } from './product-updates';
+import { acquireOverlay, releaseOverlay } from './overlay-coordinator';
 
 // ---- Helpers ----
 
@@ -69,8 +70,11 @@ class FeedbacksWidget {
   private boundKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private themeVars: Record<string, string> = {};
   private updatesController: ProductUpdatesController | null = null;
-  private feedbackEnabled = true;
+  private feedbackEnabled = false;
   private inlineContainer: HTMLElement | null = null;
+  private bootstrapController: AbortController | null = null;
+  private autoOpenTimer: number | null = null;
+  private destroyed = false;
 
   constructor(config: WidgetConfig) {
     this.cfg = { position: 'bottom-right', embedMode: 'modal', ...config };
@@ -90,8 +94,31 @@ class FeedbacksWidget {
   }
 
   private setup(): void {
+    if (this.destroyed) return;
     this.injectStyles();
     this.applyTheme();
+    void this.initializeModules();
+  }
+
+  private async initializeModules(): Promise<void> {
+    const bootstrap = await this.loadBootstrap();
+    if (this.destroyed) return;
+
+    this.feedbackEnabled = bootstrap?.modules.feedback ?? true;
+    if (this.feedbackEnabled) this.setupFeedbackPresentation();
+
+    if (bootstrap?.modules.updates) {
+      this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen, bootstrap.updates);
+    } else if (!bootstrap && this.cfg.enableUpdates) {
+      // Compatibility for legacy embeds while the bootstrap endpoint is
+      // unavailable. A successful bootstrap remains authoritative.
+      this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen);
+    }
+
+    this.log('Widget initialized');
+  }
+
+  private setupFeedbackPresentation(): void {
     if (this.cfg.embedMode === 'inline') {
       this.renderInline();
     } else if (this.cfg.embedMode === 'trigger') {
@@ -118,11 +145,11 @@ class FeedbacksWidget {
 
     // Auto-open
     if (this.cfg.openAfterMs && this.cfg.openAfterMs > 0) {
-      setTimeout(() => { if (!this.isOpen) this.open(); }, this.cfg.openAfterMs);
+      this.autoOpenTimer = window.setTimeout(() => {
+        this.autoOpenTimer = null;
+        if (!this.isOpen && !this.destroyed) this.open();
+      }, this.cfg.openAfterMs);
     }
-
-    this.log('Widget initialized');
-    void this.loadBootstrap();
   }
 
   /**
@@ -130,25 +157,23 @@ class FeedbacksWidget {
    * feedback behaviour in place. This is the safety property that permits a
    * gradual migration away from the legacy updates endpoint.
    */
-  private async loadBootstrap(): Promise<void> {
+  private async loadBootstrap(): Promise<WidgetBootstrapResponse | null> {
     const endpoint = this.bootstrapUrl();
     const controller = new AbortController();
+    this.bootstrapController = controller;
     const timeout = window.setTimeout(() => controller.abort(), 4_000);
     try {
       const response = await fetch(endpoint, { signal: controller.signal });
       if (!response.ok) throw new Error(`Bootstrap request failed: ${response.status}`);
       const payload: unknown = await response.json();
       if (!isWidgetBootstrapResponse(payload)) throw new Error('Invalid bootstrap response');
-      this.applyBootstrap(payload);
+      return payload;
     } catch {
-      // Old embeds with a legacy update attribute still retain their existing
-      // Product Updates behaviour when the new endpoint is unavailable.
-      if (this.cfg.enableUpdates && !this.updatesController) {
-        this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen);
-      }
       this.log('Bootstrap unavailable; retaining compatibility mode');
+      return null;
     } finally {
       clearTimeout(timeout);
+      if (this.bootstrapController === controller) this.bootstrapController = null;
     }
   }
 
@@ -158,22 +183,6 @@ class FeedbacksWidget {
     url.searchParams.set('projectKey', this.cfg.projectKey);
     url.searchParams.set('runtimeVersion', '2.0.0');
     return url.toString();
-  }
-
-  private applyBootstrap(bootstrap: WidgetBootstrapResponse): void {
-    if (!bootstrap.modules.feedback) this.disableFeedback();
-    if (!bootstrap.modules.updates) return;
-    this.updatesController?.destroy();
-    this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen, bootstrap.updates);
-  }
-
-  private disableFeedback(): void {
-    this.feedbackEnabled = false;
-    this.close();
-    this.launcher?.remove();
-    this.launcher = null;
-    this.inlineContainer?.remove();
-    this.inlineContainer = null;
   }
 
   // ---- Styles & Theme ----
@@ -271,6 +280,7 @@ class FeedbacksWidget {
     if (!this.feedbackEnabled) return;
     if (this.updatesController?.isOpen()) this.updatesController.closeUpdates();
     if (this.isOpen) return;
+    acquireOverlay(this, 'feedback', () => this.close());
     this.isOpen = true;
     this.lastFocus = document.activeElement as HTMLElement;
 
@@ -315,6 +325,7 @@ class FeedbacksWidget {
   }
 
   close(): void {
+    releaseOverlay(this);
     if (!this.isOpen || !this.overlayEl) return;
     this.isOpen = false;
     this.overlayEl.classList.remove('fb-visible');
@@ -789,9 +800,19 @@ class FeedbacksWidget {
   }
 
   destroy(): void {
+    this.destroyed = true;
+    this.bootstrapController?.abort();
+    this.bootstrapController = null;
+    if (this.autoOpenTimer !== null) {
+      window.clearTimeout(this.autoOpenTimer);
+      this.autoOpenTimer = null;
+    }
     this.updatesController?.destroy();
     this.updatesController = null;
+    releaseOverlay(this);
     this.launcher?.remove();
+    this.inlineContainer?.remove();
+    this.inlineContainer = null;
     this.overlayEl?.remove();
     this.styleEl?.remove();
     if (this.boundKeydownHandler) {

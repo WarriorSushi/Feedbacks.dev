@@ -8,5 +8,8 @@ test('widget bootstrap public contract keeps modules independent', async () => {
   assert.equal(isWidgetBootstrapResponse(feedbackOnly), true)
   assert.equal(isWidgetBootstrapResponse(updatesOnly), true)
   assert.equal(isWidgetBootstrapResponse({ configVersion: 2, modules: { feedback: false, updates: true } }), false)
+  assert.equal(isWidgetBootstrapResponse({ configVersion: 2, modules: { feedback: true, updates: false }, updates: updatesOnly.updates }), false)
+  assert.equal(isWidgetBootstrapResponse({ configVersion: 2, modules: { feedback: false, updates: true }, updates: { settings: {}, updates: [] } }), false)
+  assert.equal(isWidgetBootstrapResponse({ ...updatesOnly, updates: { ...updatesOnly.updates, settings: { ...updatesOnly.updates.settings, displayDelayMs: 31_000 } } }), false)
   assert.equal(isWidgetBootstrapResponse({ configVersion: 1, modules: { feedback: true, updates: false } }), false)
 })

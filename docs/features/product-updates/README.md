@@ -1,24 +1,24 @@
 # Product Updates / What's New
 
-Status: MVP shipped to production on 2026-07-18. A post-MVP navigation, onboarding, and modular embed redesign is planned.
+Status: MVP and the modular navigation/onboarding redesign were completed and release-verified on 2026-07-19.
 
 This folder is the implementation handoff for an in-app changelog popup in the `feedbacks.dev` ecosystem.
 
-The dashboard feature is named **Product Updates**. The end-user surface is named **What's New**.
+The dashboard product is labeled **Updates**. The end-user surface is named **What's New**.
 
-## Post-MVP redesign
+## Modular redesign
 
 The dated implementation plan for making Updates a first-class sidebar product, supporting Updates-only installation, and simplifying onboarding is:
 
 - `ux-navigation-redesign-implementation-plan-2026-07-18.md`
 
-This later plan supersedes the MVP's one-time `data-enable-updates` activation requirement only after the new server-resolved module bootstrap is implemented and verified. The MVP security, privacy, content, metrics, and widget-size guardrails remain authoritative.
+The server-resolved module bootstrap now supersedes the MVP's one-time `data-enable-updates` activation requirement. Existing current-runtime Feedback installs can activate Updates remotely, while bootstrap failure preserves legacy Feedback behavior. The MVP security, privacy, content, metrics, and widget-size guardrails remain authoritative.
 
 ## Goal
 
 Allow a developer to publish a polished product update from the `feedbacks.dev` dashboard and show it inside their own SaaS application through the existing feedback widget installation.
 
-After the feature has been enabled once in the install configuration, publishing later updates must not require another code deployment in the customer's application.
+After the shared embed is installed, activating or publishing later updates must not require another code deployment in the customer's application.
 
 ## Required reading order
 
@@ -57,7 +57,7 @@ An end user can:
 These decisions are already made. Do not reopen them while implementing the MVP.
 
 1. Extend the existing widget and wrappers. Do not create a second customer-facing script or package.
-2. Require `enableUpdates` / `data-enable-updates="true"` once. After that, dashboard publications are remote and need no snippet change.
+2. Resolve Feedback and Updates modules from the server bootstrap. Keep legacy `enableUpdates` / `data-enable-updates="true"` only as an outage fallback for older explicit installations; do not emit it in current snippets.
 3. Store Product Updates separately from `board_announcements`. Their lifecycle, audience, presentation, and metrics are different.
 4. Use structured plain text. Do not accept arbitrary HTML, Markdown, JavaScript, iframes, or custom CSS.
 5. Render text with DOM `textContent`, never `innerHTML` with customer content.

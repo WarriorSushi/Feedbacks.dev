@@ -15,6 +15,7 @@ export interface BoardAnnouncement {
 export interface SeededBoard {
   id: string
   projectId: string
+  projectName: string
   slug: string
   title: string | null
   description: string | null
@@ -93,6 +94,7 @@ export async function saveBoardSettings(
   return {
     id: payload.board.id,
     projectId: payload.board.project_id,
+    projectName: project.name,
     slug: payload.board.slug,
     title: payload.board.title,
     description: payload.board.description,

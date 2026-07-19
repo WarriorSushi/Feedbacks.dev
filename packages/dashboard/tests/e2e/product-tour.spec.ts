@@ -1,23 +1,27 @@
 import { expect, test, skipE2EIfNeeded } from './fixtures'
 import { signInWithTestSession } from './helpers/auth'
+import { createProjectViaApi } from './helpers/project'
 
 const env = skipE2EIfNeeded()
 test.skip(!env.ready, env.skipReason)
 
 const tourSteps = [
-  { title: 'Dashboard', path: /\/dashboard(?:\?.*)?$/, target: 'nav-dashboard' },
-  { title: 'Feedback', path: /\/feedback(?:\?.*)?$/, target: 'nav-feedback' },
-  { title: 'Projects', path: /\/projects(?:\?.*)?$/, target: 'nav-projects' },
-  { title: 'Integrations', path: /\/projects\/[^/?]+\?tab=integrations(?:&.*)?$/, target: 'nav-integrations' },
-  { title: 'Public Boards', path: /\/dashboard\/boards\?project=[^&]+(?:&.*)?$/, target: 'nav-boards' },
-  { title: 'API', path: /\/projects\/[^/?]+\?tab=api(?:&.*)?$/, target: 'nav-api' },
+  { title: 'Overview', path: /\/dashboard(?:\?.*)?$/, target: 'nav-dashboard' },
+  { title: 'Feedback inbox', path: /\/feedback(?:\?.*)?$/, target: 'nav-feedback' },
+  { title: 'Updates', path: /\/projects\/[^/]+\/updates$/, target: 'nav-updates' },
+  { title: 'Public board', path: /\/projects\/[^/]+\/board$/, target: 'nav-boards' },
+  { title: 'Install & verify', path: /\/projects\/[^/]+\/install$/, target: 'nav-install' },
+  { title: 'Integrations', path: /\/projects\/[^/]+\/integrations$/, target: 'nav-integrations' },
+  { title: 'API & MCP', path: /\/projects\/[^/]+\/api$/, target: 'nav-api' },
   { title: 'Billing', path: /\/billing(?:\?.*)?$/, target: 'nav-billing' },
   { title: 'Settings', path: /\/settings(?:\?.*)?$/, target: 'nav-settings' },
 ]
 
 test.describe('product tour', () => {
   test('walks every navigation step and finishes on the dashboard', async ({ page }) => {
+    test.setTimeout(180_000)
     await signInWithTestSession(page)
+    await createProjectViaApi(page, { name: `Playwright Tour Desktop ${Date.now().toString(36)}` })
     await page.goto('/dashboard?tour=1')
 
     const dialog = page.getByRole('dialog')
@@ -42,7 +46,9 @@ test.describe('product tour', () => {
   })
 
   test('walks every mobile step without covering the highlighted menu item', async ({ page }) => {
+    test.setTimeout(180_000)
     await signInWithTestSession(page)
+    await createProjectViaApi(page, { name: `Playwright Tour Mobile ${Date.now().toString(36)}` })
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/dashboard?tour=1')
 

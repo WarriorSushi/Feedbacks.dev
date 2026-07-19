@@ -40,42 +40,68 @@ export function UpdatesOnboarding({
   onRefresh: () => Promise<void>
 }) {
   const router = useRouter()
-  const [choice, setChoice] = React.useState<Choice>(() => {
-    if (typeof window === 'undefined') return choiceFromModules(modules)
-    const saved = window.localStorage.getItem(storageKey(projectId)) as Choice | null
-    return saved && saved in choiceModules ? saved : choiceFromModules(modules)
-  })
+  const [choice, setChoice] = React.useState<Choice>(() => choiceFromModules(modules))
   const [method, setMethod] = React.useState<Method>('AI assistant')
   const [saving, setSaving] = React.useState(false)
   const [polling, setPolling] = React.useState(false)
+  const [currentEmbedState, setCurrentEmbedState] = React.useState(embedState)
 
-  const record = React.useCallback((event: string) => void fetch(`/api/projects/${projectId}/activation`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event }) }), [projectId])
+  const record = React.useCallback((event: string) => {
+    void fetch(`/api/projects/${projectId}/activation`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event }),
+    }).catch(() => undefined)
+  }, [projectId])
 
   React.useEffect(() => { record('updates_setup_started') }, [record])
-  React.useEffect(() => { if (embedState === 'connected') record('updates_embed_verified') }, [embedState, record])
+  React.useEffect(() => { setCurrentEmbedState(embedState) }, [embedState])
   React.useEffect(() => {
-    if (embedState === 'connected' && modules.updates) router.replace(`/projects/${projectId}/updates/new`)
-  }, [embedState, modules.updates, projectId, router])
+    const saved = window.localStorage.getItem(storageKey(projectId)) as Choice | null
+    if (saved && saved in choiceModules) setChoice(saved)
+  }, [projectId])
+  React.useEffect(() => { if (currentEmbedState === 'connected') record('updates_embed_verified') }, [currentEmbedState, record])
+  React.useEffect(() => {
+    if (currentEmbedState === 'connected' && modules.updates) router.replace(`/projects/${projectId}/updates/new`)
+  }, [currentEmbedState, modules.updates, projectId, router])
 
   React.useEffect(() => {
     window.localStorage.setItem(storageKey(projectId), choice)
   }, [choice, projectId])
 
+  const checkConnection = React.useCallback(async () => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}/embed-status`, { cache: 'no-store' })
+      const data = await response.json().catch(() => null)
+      if (!response.ok) throw new Error(data?.error || 'Unable to check the embed connection.')
+      const nextState = data?.state as EmbedState
+      if (['not_detected', 'connected', 'stale'].includes(nextState)) setCurrentEmbedState(nextState)
+      return nextState === 'connected'
+    } catch (error) {
+      toast({ title: 'Could not check the connection', description: error instanceof Error ? error.message : 'Try again.', variant: 'destructive' })
+      return false
+    }
+  }, [projectId])
+
   React.useEffect(() => {
-    if (!modules.updates || embedState === 'connected') return
+    if (!modules.updates || currentEmbedState === 'connected') return
     let attempts = 0
     let cancelled = false
+    let timer: number | null = null
     const poll = async () => {
       if (cancelled || attempts >= 6) { setPolling(false); return }
       attempts += 1
       setPolling(true)
-      await onRefresh()
-      if (!cancelled && attempts < 6) window.setTimeout(poll, 10_000)
+      const connected = await checkConnection()
+      if (!cancelled && !connected && attempts < 6) timer = window.setTimeout(poll, 10_000)
       else if (!cancelled) setPolling(false)
     }
-    const timer = window.setTimeout(poll, 10_000)
-    return () => { cancelled = true; window.clearTimeout(timer) }
-  }, [embedState, modules.updates, onRefresh])
+    timer = window.setTimeout(poll, 10_000)
+    return () => {
+      cancelled = true
+      if (timer !== null) window.clearTimeout(timer)
+    }
+  }, [checkConnection, currentEmbedState, modules.updates])
 
   const saveModules = async (next: ModuleState): Promise<boolean> => {
     setSaving(true)
@@ -94,13 +120,16 @@ export function UpdatesOnboarding({
   }
 
   const activate = async () => { if (await saveModules({ ...modules, updates: true })) record('updates_activated') }
-  const startSetup = () => void saveModules(choiceModules[choice])
+  const startSetup = async () => {
+    if (!await saveModules(choiceModules[choice])) return
+    if (choice === 'feedback') router.push(`/projects/${projectId}/install`)
+  }
 
-  if (embedState === 'connected' && !modules.updates) {
+  if (currentEmbedState === 'connected' && !modules.updates) {
     return <ConnectionState title="Your feedbacks.dev embed is connected" description="Turn on Updates remotely. Your existing installation does not need a code change." action="Activate Updates" onAction={activate} busy={saving} />
   }
 
-  if (modules.updates && embedState === 'connected') return null
+  if (modules.updates && currentEmbedState === 'connected') return null
 
   return <div className="mx-auto max-w-3xl space-y-6">
     <section className="space-y-3">
@@ -116,14 +145,14 @@ export function UpdatesOnboarding({
         <ChoiceButton active={choice === 'feedback'} title="Feedback only" description="Collect feedback without release announcements." onClick={() => setChoice('feedback')} />
         <ChoiceButton active={choice === 'both'} title="Feedback + Updates" description="Use one embed for both experiences." onClick={() => setChoice('both')} />
       </div>
-      <Button onClick={startSetup} disabled={saving}>{saving ? 'Saving…' : 'Set up Updates'}</Button>
+      <Button onClick={() => void startSetup()} disabled={saving}>{saving ? 'Saving…' : choice === 'feedback' ? 'Continue to install' : 'Set up Updates'}</Button>
     </CardContent></Card>
 
     {modules.updates && <Card><CardContent className="space-y-5 p-5">
       <Step title="2. Install the embed" />
       <div className="flex flex-wrap gap-2">{(['AI assistant', 'Script tag', 'React', 'Vue'] as Method[]).map((item) => <Button key={item} variant={method === item ? 'secondary' : 'outline'} size="sm" onClick={() => { setMethod(item); record('updates_install_method_selected') }}>{item === 'AI assistant' && <Bot className="mr-1.5 h-3.5 w-3.5" />}{item}</Button>)}</div>
       {projectKey ? <InstallInstructions method={method} projectKey={projectKey} choice={choice} /> : <p className="rounded-md bg-muted/60 p-3 text-sm text-muted-foreground">Your browser-safe project key is hidden. Generate a fresh key in <a className="underline" href={`/projects/${projectId}/install`}>Install & verify</a>, then return here to copy the exact instructions.</p>}
-      <div className="border-t pt-5"><Step title="3. Verify connection" /><p className="mt-2 text-sm text-muted-foreground">{polling ? 'Checking for your embed for up to one minute…' : embedState === 'stale' ? 'The last connection is stale. Load the page with the embed again, then check.' : 'Add the embed to your app and load that page once. We will detect it automatically.'}</p><Button className="mt-3" variant="outline" onClick={() => void onRefresh()}><RefreshCw className="mr-2 h-4 w-4" />Check connection</Button></div>
+      <div className="border-t pt-5"><Step title="3. Verify connection" /><p className="mt-2 text-sm text-muted-foreground">{polling ? 'Checking for your embed for up to one minute…' : currentEmbedState === 'stale' ? 'The last connection is stale. Load the page with the embed again, then check.' : 'Add the embed to your app and load that page once. We will detect it automatically.'}</p><Button className="mt-3" variant="outline" onClick={() => void checkConnection()}><RefreshCw className="mr-2 h-4 w-4" />Check connection</Button></div>
     </CardContent></Card>}
   </div>
 }
@@ -139,8 +168,9 @@ function InstallInstructions({ method, projectKey, choice }: { method: Method; p
   const origin = typeof window === 'undefined' ? undefined : window.location.origin
   const snippets = generateInstallSnippets({ projectKey, appOrigin: origin })
   const snippet = method === 'Script tag' ? snippets.find((item) => item.label === 'Website') : snippets.find((item) => item.label === method)
+  const websiteSnippet = snippets.find((item) => item.label === 'Website')?.code || ''
   const productLabel = choice === 'both' ? 'Feedback and Updates' : choice === 'updates' ? 'Updates only' : 'Feedback only'
-  const prompt = `Install the feedbacks.dev embed in this app. Use the browser-safe project key ${projectKey}. Enable ${productLabel}. Place the embed in the app shell so it loads once, preserve the existing design and dependencies, and do not add any private server key. After installing, load a page and confirm the embed is detected in feedbacks.dev.`
+  const prompt = `Install the feedbacks.dev embed in this app. Use the browser-safe project key ${projectKey}. Enable ${productLabel}. Place the embed in the app shell so it loads once, preserve the existing design and dependencies, and do not add any private server key. Use this verified browser embed as the source of truth:\n\n${websiteSnippet}\n\nAfter installing, load a page and confirm the embed is detected in feedbacks.dev.`
   const content = method === 'AI assistant' ? prompt : snippet?.code || ''
   return <CodeSample title={method === 'AI assistant' ? 'Give this to your AI coding assistant' : `${method} instructions`} content={content} />
 }

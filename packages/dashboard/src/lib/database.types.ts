@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      activation_milestones: {
+        Row: {
+          event_name: string
+          first_seen_at: string
+          metadata: Json
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          event_name: string
+          first_seen_at?: string
+          metadata?: Json
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          event_name?: string
+          first_seen_at?: string
+          metadata?: Json
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_setup_audit: {
         Row: {
           created_at: string
@@ -587,6 +619,201 @@ export type Database = {
           window_start?: string
         }
         Relationships: []
+      }
+      product_update_metrics: {
+        Row: {
+          count: number
+          created_at: string
+          event_type: string
+          metric_date: string
+          project_id: string
+          update_id: string
+          updated_at: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          event_type: string
+          metric_date?: string
+          project_id: string
+          update_id: string
+          updated_at?: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          event_type?: string
+          metric_date?: string
+          project_id?: string
+          update_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_update_metrics_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_update_metrics_project_id_update_id_fkey"
+            columns: ["project_id", "update_id"]
+            isOneToOne: false
+            referencedRelation: "product_updates"
+            referencedColumns: ["project_id", "id"]
+          },
+        ]
+      }
+      product_update_settings: {
+        Row: {
+          accent_color: string | null
+          auto_show: boolean
+          created_at: string
+          display_delay_ms: number
+          enabled: boolean
+          exclude_paths: string[]
+          include_paths: string[]
+          project_id: string
+          show_powered_by: boolean
+          theme: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          auto_show?: boolean
+          created_at?: string
+          display_delay_ms?: number
+          enabled?: boolean
+          exclude_paths?: string[]
+          include_paths?: string[]
+          project_id: string
+          show_powered_by?: boolean
+          theme?: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          auto_show?: boolean
+          created_at?: string
+          display_delay_ms?: number
+          enabled?: boolean
+          exclude_paths?: string[]
+          include_paths?: string[]
+          project_id?: string
+          show_powered_by?: boolean
+          theme?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_update_settings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_updates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          cta_label: string | null
+          cta_url: string | null
+          expires_at: string | null
+          highlights: string[]
+          id: string
+          image_path: string | null
+          project_id: string
+          published_at: string | null
+          status: string
+          summary: string
+          title: string
+          updated_at: string
+          version_label: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          expires_at?: string | null
+          highlights?: string[]
+          id?: string
+          image_path?: string | null
+          project_id: string
+          published_at?: string | null
+          status?: string
+          summary: string
+          title: string
+          updated_at?: string
+          version_label?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          expires_at?: string | null
+          highlights?: string[]
+          id?: string
+          image_path?: string | null
+          project_id?: string
+          published_at?: string | null
+          status?: string
+          summary?: string
+          title?: string
+          updated_at?: string
+          version_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_updates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_embed_installations: {
+        Row: {
+          created_at: string
+          feedback_enabled: boolean
+          last_seen_at: string
+          project_id: string
+          runtime_version: string | null
+          updated_at: string
+          updates_enabled: boolean
+        }
+        Insert: {
+          created_at?: string
+          feedback_enabled?: boolean
+          last_seen_at?: string
+          project_id: string
+          runtime_version?: string | null
+          updated_at?: string
+          updates_enabled?: boolean
+        }
+        Update: {
+          created_at?: string
+          feedback_enabled?: boolean
+          last_seen_at?: string
+          project_id?: string
+          runtime_version?: string | null
+          updated_at?: string
+          updates_enabled?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_embed_installations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
@@ -1176,14 +1403,23 @@ export type Database = {
       }
       dashboard_stats: {
         Args: {
-          p_history_cutoff?: string | null
-          p_project_id?: string | null
+          p_history_cutoff?: string
+          p_project_id?: string
           p_trend_start?: string
           p_user_id: string
         }
         Returns: Json
       }
       generate_api_key: { Args: never; Returns: string }
+      increment_product_update_metric: {
+        Args: {
+          p_event_type: string
+          p_metric_date?: string
+          p_project_id: string
+          p_update_id: string
+        }
+        Returns: number
+      }
       increment_usage_counter: {
         Args: {
           p_amount?: number
@@ -1192,6 +1428,46 @@ export type Database = {
           p_user_id: string
         }
         Returns: number
+      }
+      publish_product_update: {
+        Args: {
+          p_active_limit: number
+          p_allow_scheduling: boolean
+          p_expires_at: string
+          p_project_id: string
+          p_published_at: string
+          p_update_id: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          cta_label: string | null
+          cta_url: string | null
+          expires_at: string | null
+          highlights: string[]
+          id: string
+          image_path: string | null
+          project_id: string
+          published_at: string | null
+          status: string
+          summary: string
+          title: string
+          updated_at: string
+          version_label: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "product_updates"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      set_project_modules: {
+        Args: { p_feedback: boolean; p_project_id: string; p_updates: boolean }
+        Returns: {
+          feedback: boolean
+          updates: boolean
+        }[]
       }
     }
     Enums: {

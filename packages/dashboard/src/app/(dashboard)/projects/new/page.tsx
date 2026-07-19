@@ -28,6 +28,13 @@ export default function NewProjectPage() {
   const [limitMessage, setLimitMessage] = React.useState('')
   const router = useRouter()
 
+  React.useEffect(() => {
+    const requestedGoal = new URLSearchParams(window.location.search).get('goal')
+    if (requestedGoal === 'updates' || requestedGoal === 'feedback' || requestedGoal === 'both') {
+      setGoal(requestedGoal)
+    }
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) return
@@ -60,9 +67,21 @@ export default function NewProjectPage() {
       if (payload.api_key) {
         rememberProjectApiKey(payload.id, payload.api_key)
       }
+      const modulesResponse = await fetch(`/api/projects/${payload.id}/modules`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feedback: goal !== 'updates',
+          updates: goal !== 'feedback',
+        }),
+      })
+      if (!modulesResponse.ok) {
+        const modulePayload = await modulesResponse.json().catch(() => null)
+        throw new Error(modulePayload?.error || 'Project created, but the product choice could not be saved.')
+      }
       router.push(goal === 'feedback' ? `/projects/${payload.id}/install?created=1` : `/projects/${payload.id}/updates`)
-    } catch {
-      setError('Failed to create project')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Failed to create project')
     } finally {
       setLoading(false)
     }
@@ -182,7 +201,7 @@ export default function NewProjectPage() {
             )}
             <Button data-tour="project-create-submit" type="submit" size="lg" className="w-full" disabled={loading || !name.trim()}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create project and get install code
+              {goal === 'updates' ? 'Create project and set up Updates' : goal === 'both' ? 'Create project and set up both' : 'Create project and get install code'}
             </Button>
           </form>
           </CardContent>

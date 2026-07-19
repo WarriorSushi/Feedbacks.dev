@@ -29,7 +29,7 @@ test('guided tutorials have unique ids and usable steps', async () => {
 test('project tutorial routes resolve to the selected project', async () => {
   const { resolveTutorialHref } = await loadTutorials()
   assert.equal(
-    resolveTutorialHref('/projects/{projectId}?tab=install', 'project-123'),
-    '/projects/project-123?tab=install',
+    resolveTutorialHref('/projects/{projectId}/install', 'project-123'),
+    '/projects/project-123/install',
   )
 })

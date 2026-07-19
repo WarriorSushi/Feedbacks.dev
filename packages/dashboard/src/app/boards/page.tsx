@@ -10,6 +10,9 @@ export const metadata = {
   description: 'Browse public boards from teams that collect feedback in private and share priorities in public.',
 }
 
+// Directory membership and activity change continuously after deployment.
+export const dynamic = 'force-dynamic'
+
 export default async function BoardsPage({
   searchParams,
 }: {
