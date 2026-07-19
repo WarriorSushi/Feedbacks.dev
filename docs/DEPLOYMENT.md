@@ -50,8 +50,11 @@ For a new internal staging, recovery, or disposable verification project, run th
 26. `sql/026_activation_milestones.sql` — adds privacy-preserving, one-time activation funnel milestones without page-view or visitor tracking
 27. `sql/027_operational_health_indexes.sql` — keeps delivery and installation-health probes indexed as history grows
 28. `sql/028_product_updates.sql` — Product Updates settings, owner-authored releases, daily aggregate metrics, RLS, service-only RPCs, and the `product_update_images` bucket
+29. `sql/029_project_embed_installations.sql` — privacy-preserving current-embed heartbeat and module detection
+30. `sql/030_product_update_activation_events.sql` — aggregate Updates activation milestones
+31. `sql/031_atomic_project_modules.sql` — atomically saves Feedback and Updates module choices through a service-only RPC
 
-Hosted schema note, 6 July 2026: migrations `025`, `026`, and `027` are applied and verified. The dashboard aggregate runs, activation RLS is enabled, the operational indexes exist, and `dashboard_stats` execution is restricted to `service_role`.
+Hosted schema note, 19 July 2026: migrations `020` through `031` are applied and verified on the live project. Product Updates tables and storage exist with RLS enabled, embed heartbeats are service-managed, module choices are atomic, generated types are current, and `pnpm supabase:check` passes.
 
 **How for internal/staging use:** apply the files through the Supabase CLI or copy-paste the contents of each file into the SQL Editor and click "Run".
 

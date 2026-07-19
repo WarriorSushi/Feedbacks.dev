@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+widget_changed=false
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [[ "$remote_sha" =~ ^0+$ ]]; then
+    range="$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+
+  if git diff --name-only "$range" -- packages/widget packages/shared scripts/check-widget-gzip.mjs | grep -q .; then
+    widget_changed=true
+  fi
+done
+
+if [[ "$widget_changed" != true ]]; then
+  echo "Widget source unchanged; skipping widget pre-push checks."
+  exit 0
+fi
+
+echo "Widget source changed; rebuilding and validating hosted assets..."
+pnpm widget:build
+pnpm widget:check-size
+pnpm widget:copy
+
+if ! git diff --quiet -- packages/dashboard/public/widget/latest.js packages/dashboard/public/widget/v2.js; then
+  echo "Generated widget assets changed. Commit packages/dashboard/public/widget before pushing."
+  exit 1
+fi
+
+echo "Widget pre-push checks passed."

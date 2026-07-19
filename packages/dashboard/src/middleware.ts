@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getAppOrigin, getCanonicalHostRedirect, isProtectedAppPath } from '@/lib/domain-routing'
+import { getLegacyProjectTabRedirect } from '@/lib/project-routes'
 
 function createNonce(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(16))
@@ -37,6 +38,11 @@ export async function middleware(request: NextRequest) {
   const earlyCanonicalRedirect = getCanonicalHostRedirect(request.nextUrl)
   if (earlyCanonicalRedirect && !(request.nextUrl.hostname === new URL(getAppOrigin()).hostname && request.nextUrl.pathname === '/')) {
     return NextResponse.redirect(earlyCanonicalRedirect)
+  }
+
+  const legacyProjectTabRedirect = getLegacyProjectTabRedirect(request.nextUrl)
+  if (legacyProjectTabRedirect) {
+    return NextResponse.redirect(new URL(legacyProjectTabRedirect, request.url))
   }
 
   const requestHeaders = new Headers(request.headers)

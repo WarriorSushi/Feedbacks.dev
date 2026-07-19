@@ -22,10 +22,18 @@ export default function NewProjectPage() {
   const [name, setName] = React.useState('')
   const [domain, setDomain] = React.useState('')
   const [icon, setIcon] = React.useState<string>(DEFAULT_PROJECT_ICON)
+  const [goal, setGoal] = React.useState<'updates' | 'feedback' | 'both'>('feedback')
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState('')
   const [limitMessage, setLimitMessage] = React.useState('')
   const router = useRouter()
+
+  React.useEffect(() => {
+    const requestedGoal = new URLSearchParams(window.location.search).get('goal')
+    if (requestedGoal === 'updates' || requestedGoal === 'feedback' || requestedGoal === 'both') {
+      setGoal(requestedGoal)
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,9 +67,21 @@ export default function NewProjectPage() {
       if (payload.api_key) {
         rememberProjectApiKey(payload.id, payload.api_key)
       }
-      router.push(`/projects/${payload.id}?created=1&tab=install`)
-    } catch {
-      setError('Failed to create project')
+      const modulesResponse = await fetch(`/api/projects/${payload.id}/modules`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feedback: goal !== 'updates',
+          updates: goal !== 'feedback',
+        }),
+      })
+      if (!modulesResponse.ok) {
+        const modulePayload = await modulesResponse.json().catch(() => null)
+        throw new Error(modulePayload?.error || 'Project created, but the product choice could not be saved.')
+      }
+      router.push(goal === 'feedback' ? `/projects/${payload.id}/install?created=1` : `/projects/${payload.id}/updates`)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Failed to create project')
     } finally {
       setLoading(false)
     }
@@ -101,6 +121,17 @@ export default function NewProjectPage() {
                 Use the name your team recognizes. You can rename it later.
               </p>
             </div>
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium">What do you want to do first?</legend>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {([
+                  ['updates', 'Announce updates'],
+                  ['feedback', 'Collect feedback'],
+                  ['both', 'Both'],
+                ] as const).map(([value, label]) => <button key={value} type="button" onClick={() => setGoal(value)} className={cn('min-h-11 rounded-md border px-3 text-left text-sm font-medium', goal === value ? 'border-primary bg-primary/5 text-primary' : 'hover:bg-muted/50')} aria-pressed={goal === value}>{label}</button>)}
+              </div>
+              <p className="text-xs text-muted-foreground">You can turn either product on or off later without changing the shared embed.</p>
+            </fieldset>
             <details className="rounded-lg border bg-muted/10">
               <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
                 Personalize project (optional) · {icon}
@@ -170,7 +201,7 @@ export default function NewProjectPage() {
             )}
             <Button data-tour="project-create-submit" type="submit" size="lg" className="w-full" disabled={loading || !name.trim()}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create project and get install code
+              {goal === 'updates' ? 'Create project and set up Updates' : goal === 'both' ? 'Create project and set up both' : 'Create project and get install code'}
             </Button>
           </form>
           </CardContent>

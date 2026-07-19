@@ -2,6 +2,22 @@ export type ProductUpdateStatus = 'draft' | 'published' | 'archived'
 export type ProductUpdateTheme = 'auto' | 'light' | 'dark'
 export type ProductUpdateMetricType = 'impression' | 'dismissal' | 'cta_click'
 
+// These owner-side activation events are intentionally declarative in Phase 0.
+// Later phases may emit them through a privacy-preserving aggregate pipeline.
+export const PRODUCT_UPDATE_ACTIVATION_EVENTS = [
+  'updates_nav_opened',
+  'updates_setup_started',
+  'updates_install_method_selected',
+  'updates_embed_verified',
+  'updates_activated',
+  'updates_first_draft_created',
+  'updates_private_test_opened',
+  'updates_first_published',
+  'updates_first_impression_received',
+] as const
+
+export type ProductUpdateActivationEvent = typeof PRODUCT_UPDATE_ACTIVATION_EVENTS[number]
+
 export const PRODUCT_UPDATE_LIMITS = {
   versionLabel: 32,
   title: 120,
@@ -45,6 +61,66 @@ export interface ProductUpdatePublicSettings {
 export interface ProductUpdatesPublicResponse {
   settings: ProductUpdatePublicSettings
   updates: ProductUpdateContent[]
+}
+
+export interface WidgetBootstrapModules {
+  feedback: boolean
+  updates: boolean
+}
+
+export interface WidgetBootstrapResponse {
+  configVersion: 2
+  modules: WidgetBootstrapModules
+  updates?: ProductUpdatesPublicResponse
+}
+
+/**
+ * Keep the widget's public bootstrap parsing deliberately small and defensive.
+ * An invalid bootstrap response must behave exactly like an unavailable one so
+ * that an embed never loses its existing feedback launcher because of a bad
+ * response at the edge.
+ */
+export function isWidgetBootstrapResponse(value: unknown): value is WidgetBootstrapResponse {
+  if (!value || typeof value !== 'object') return false
+  const response = value as Partial<WidgetBootstrapResponse>
+  if (response.configVersion !== 2 || !response.modules) return false
+  if (typeof response.modules.feedback !== 'boolean' || typeof response.modules.updates !== 'boolean') return false
+  if (!response.modules.updates) return response.updates === undefined
+  if (!response.updates || !isProductUpdatesPublicResponse(response.updates)) return false
+  return true
+}
+
+function isProductUpdatesPublicResponse(value: unknown): value is ProductUpdatesPublicResponse {
+  if (!value || typeof value !== 'object') return false
+  const payload = value as Partial<ProductUpdatesPublicResponse>
+  const settings = payload.settings
+  if (!settings || typeof settings !== 'object' || !Array.isArray(payload.updates)) return false
+  if (typeof settings.autoShow !== 'boolean'
+    || typeof settings.displayDelayMs !== 'number'
+    || !Number.isInteger(settings.displayDelayMs)
+    || settings.displayDelayMs < PRODUCT_UPDATE_LIMITS.displayDelayMin
+    || settings.displayDelayMs > PRODUCT_UPDATE_LIMITS.displayDelayMax
+    || !['auto', 'light', 'dark'].includes(settings.theme)
+    || typeof settings.accentColor !== 'string'
+    || !HEX_COLOR_RE.test(settings.accentColor)
+    || !Array.isArray(settings.includePaths)
+    || !Array.isArray(settings.excludePaths)
+    || typeof settings.showPoweredBy !== 'boolean') return false
+
+  if (settings.includePaths.some((path) => !sanitizeProductUpdatePath(path))
+    || settings.excludePaths.some((path) => !sanitizeProductUpdatePath(path))) return false
+
+  return payload.updates.every((update) => {
+    if (!update || typeof update !== 'object') return false
+    const item = update as Partial<ProductUpdateContent>
+    return typeof item.id === 'string'
+      && typeof item.title === 'string'
+      && typeof item.summary === 'string'
+      && Array.isArray(item.highlights)
+      && item.highlights.every((highlight) => typeof highlight === 'string')
+      && typeof item.publishedAt === 'string'
+      && !Number.isNaN(new Date(item.publishedAt).getTime())
+  })
 }
 
 export interface ProductUpdateInput {

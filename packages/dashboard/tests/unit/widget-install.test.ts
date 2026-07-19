@@ -92,3 +92,18 @@ test('updates installation is opt-in and includes canonical endpoints when enabl
   assert.match(websiteSnippet || '', /data-enable-updates="true"/)
   assert.match(websiteSnippet || '', /data-updates-api-url="https:\/\/feedbacks\.dev\/api\/widget\/updates"/)
 })
+
+test('server module preference survives customization without leaking into install markup', async () => {
+  const { sanitizeSavedWidgetConfig, generateInstallSnippets } = await loadWidgetInstall()
+  const saved = sanitizeSavedWidgetConfig({ feedbackEnabled: false, buttonText: 'Contact us' })
+  assert.equal(saved.feedbackEnabled, false)
+
+  const websiteSnippet = generateInstallSnippets({
+    projectKey: 'fb_live_demo',
+    savedConfig: saved,
+    appOrigin: 'https://feedbacks.dev',
+  }).find((snippet: { label: string }) => snippet.label === 'Website')?.code
+
+  assert.ok(websiteSnippet)
+  assert.doesNotMatch(websiteSnippet, /feedback-enabled/i)
+})

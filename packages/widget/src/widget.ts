@@ -1,6 +1,8 @@
 import styles from './styles.css';
 import type { WidgetConfig, FeedbackData, FeedbackResponse, CategoryType } from './types';
+import { isWidgetBootstrapResponse, type WidgetBootstrapResponse } from '@feedbacks/shared';
 import { ProductUpdatesController } from './product-updates';
+import { acquireOverlay, releaseOverlay } from './overlay-coordinator';
 
 // ---- Helpers ----
 
@@ -68,6 +70,11 @@ class FeedbacksWidget {
   private boundKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private themeVars: Record<string, string> = {};
   private updatesController: ProductUpdatesController | null = null;
+  private feedbackEnabled = false;
+  private inlineContainer: HTMLElement | null = null;
+  private bootstrapController: AbortController | null = null;
+  private autoOpenTimer: number | null = null;
+  private destroyed = false;
 
   constructor(config: WidgetConfig) {
     this.cfg = { position: 'bottom-right', embedMode: 'modal', ...config };
@@ -87,10 +94,31 @@ class FeedbacksWidget {
   }
 
   private setup(): void {
+    if (this.destroyed) return;
     this.injectStyles();
     this.applyTheme();
-    if (this.cfg.enableUpdates) this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen);
+    void this.initializeModules();
+  }
 
+  private async initializeModules(): Promise<void> {
+    const bootstrap = await this.loadBootstrap();
+    if (this.destroyed) return;
+
+    this.feedbackEnabled = bootstrap?.modules.feedback ?? true;
+    if (this.feedbackEnabled) this.setupFeedbackPresentation();
+
+    if (bootstrap?.modules.updates) {
+      this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen, bootstrap.updates);
+    } else if (!bootstrap && this.cfg.enableUpdates) {
+      // Compatibility for legacy embeds while the bootstrap endpoint is
+      // unavailable. A successful bootstrap remains authoritative.
+      this.updatesController = new ProductUpdatesController(this.cfg, () => this.isOpen);
+    }
+
+    this.log('Widget initialized');
+  }
+
+  private setupFeedbackPresentation(): void {
     if (this.cfg.embedMode === 'inline') {
       this.renderInline();
     } else if (this.cfg.embedMode === 'trigger') {
@@ -117,10 +145,44 @@ class FeedbacksWidget {
 
     // Auto-open
     if (this.cfg.openAfterMs && this.cfg.openAfterMs > 0) {
-      setTimeout(() => { if (!this.isOpen) this.open(); }, this.cfg.openAfterMs);
+      this.autoOpenTimer = window.setTimeout(() => {
+        this.autoOpenTimer = null;
+        if (!this.isOpen && !this.destroyed) this.open();
+      }, this.cfg.openAfterMs);
     }
+  }
 
-    this.log('Widget initialized');
+  /**
+   * The bootstrap is additive: failure deliberately leaves the historical
+   * feedback behaviour in place. This is the safety property that permits a
+   * gradual migration away from the legacy updates endpoint.
+   */
+  private async loadBootstrap(): Promise<WidgetBootstrapResponse | null> {
+    const endpoint = this.bootstrapUrl();
+    const controller = new AbortController();
+    this.bootstrapController = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 4_000);
+    try {
+      const response = await fetch(endpoint, { signal: controller.signal });
+      if (!response.ok) throw new Error(`Bootstrap request failed: ${response.status}`);
+      const payload: unknown = await response.json();
+      if (!isWidgetBootstrapResponse(payload)) throw new Error('Invalid bootstrap response');
+      return payload;
+    } catch {
+      this.log('Bootstrap unavailable; retaining compatibility mode');
+      return null;
+    } finally {
+      clearTimeout(timeout);
+      if (this.bootstrapController === controller) this.bootstrapController = null;
+    }
+  }
+
+  private bootstrapUrl(): string {
+    const feedbackUrl = this.cfg.apiUrl || 'https://app.feedbacks.dev/api/feedback';
+    const url = new URL('/api/widget/bootstrap', feedbackUrl);
+    url.searchParams.set('projectKey', this.cfg.projectKey);
+    url.searchParams.set('runtimeVersion', '2.0.0');
+    return url.toString();
   }
 
   // ---- Styles & Theme ----
@@ -193,7 +255,7 @@ class FeedbacksWidget {
   private attachTriggers(): void {
     const sel = this.cfg.target || '[data-feedbacks-trigger]';
     const els = document.querySelectorAll(sel);
-    els.forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); this.open(); }));
+    els.forEach(el => el.addEventListener('click', (e) => { if (!this.feedbackEnabled) return; e.preventDefault(); this.open(); }));
     this.log(`Attached to ${els.length} trigger(s)`);
   }
 
@@ -203,6 +265,7 @@ class FeedbacksWidget {
     const target = this.cfg.target ? document.querySelector(this.cfg.target) : null;
     if (!target) { this.log('Inline target not found'); return; }
     const container = document.createElement('div');
+    this.inlineContainer = container;
     container.className = 'fb-inline';
     container.innerHTML = this.buildFormHTML(false);
     this.applyThemeToElement(container);
@@ -214,8 +277,10 @@ class FeedbacksWidget {
   // ---- Modal ----
 
   open(): void {
+    if (!this.feedbackEnabled) return;
     if (this.updatesController?.isOpen()) this.updatesController.closeUpdates();
     if (this.isOpen) return;
+    acquireOverlay(this, 'feedback', () => this.close());
     this.isOpen = true;
     this.lastFocus = document.activeElement as HTMLElement;
 
@@ -260,6 +325,7 @@ class FeedbacksWidget {
   }
 
   close(): void {
+    releaseOverlay(this);
     if (!this.isOpen || !this.overlayEl) return;
     this.isOpen = false;
     this.overlayEl.classList.remove('fb-visible');
@@ -734,9 +800,19 @@ class FeedbacksWidget {
   }
 
   destroy(): void {
+    this.destroyed = true;
+    this.bootstrapController?.abort();
+    this.bootstrapController = null;
+    if (this.autoOpenTimer !== null) {
+      window.clearTimeout(this.autoOpenTimer);
+      this.autoOpenTimer = null;
+    }
     this.updatesController?.destroy();
     this.updatesController = null;
+    releaseOverlay(this);
     this.launcher?.remove();
+    this.inlineContainer?.remove();
+    this.inlineContainer = null;
     this.overlayEl?.remove();
     this.styleEl?.remove();
     if (this.boundKeydownHandler) {

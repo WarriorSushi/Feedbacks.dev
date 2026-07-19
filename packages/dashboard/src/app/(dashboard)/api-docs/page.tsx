@@ -23,7 +23,7 @@ export default async function ApiDocsIndexPage() {
     .order('created_at', { ascending: false })
 
   const project = getSelectedProject(projects || [], preferredProjectId)
-  if (project) redirect(`/projects/${project.id}?tab=api`)
+  if (project) redirect(`/projects/${project.id}/api`)
 
   return (
     <ProjectRequiredEmpty

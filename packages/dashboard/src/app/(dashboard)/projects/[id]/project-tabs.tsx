@@ -8,11 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { parseAllowedOrigins } from '@/lib/origin-allowlist'
-import { ArrowLeft, Copy, Check, Loader2, Trash2, Download, RefreshCw, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
+import { Loader2, Trash2 } from 'lucide-react'
 import { BoardSettingsTab } from './board-settings'
 import { ApiDocs } from './api-docs'
 import { toast } from '@/hooks/use-toast'
@@ -20,19 +18,23 @@ import { Suspense } from 'react'
 import { InstallTab } from './install-tab'
 import { CustomizeTab } from './customize-tab'
 import { IntegrationsTab } from './integrations-tab'
-import { ProjectMenu, SetupProgress, type ProjectSection, type SetupStep } from './project-flow-nav'
+import { SetupProgress, type SetupStep } from './project-flow-nav'
 import { ProductUpdatesTab } from '@/components/product-updates/ProductUpdatesTab'
 
 interface ProjectTabsProps {
   project: Project
   billingSummary: BillingSummary | null
+  initialTab?: TabId
+  updatesView?: 'overview' | 'composer' | 'settings'
+  updateId?: string
 }
 
-type TabId = 'install' | 'customize' | 'integrations' | 'board' | 'updates' | 'api' | 'settings'
+export type ProjectTab = 'install' | 'customize' | 'integrations' | 'board' | 'updates' | 'api' | 'settings'
+type TabId = ProjectTab
 
 const tabs: TabId[] = ['install', 'customize', 'integrations', 'board', 'updates', 'api', 'settings']
 
-export function ProjectTabs({ project, billingSummary }: ProjectTabsProps) {
+export function ProjectTabs({ project, billingSummary, initialTab, updatesView, updateId }: ProjectTabsProps) {
   return (
     <Suspense
       fallback={
@@ -41,33 +43,19 @@ export function ProjectTabs({ project, billingSummary }: ProjectTabsProps) {
         </div>
       }
     >
-      <ProjectTabsInner project={project} billingSummary={billingSummary} />
+      <ProjectTabsInner project={project} billingSummary={billingSummary} initialTab={initialTab} updatesView={updatesView} updateId={updateId} />
     </Suspense>
   )
 }
 
-function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
+function ProjectTabsInner({ project, billingSummary, initialTab, updatesView, updateId }: ProjectTabsProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [isInteractive, setIsInteractive] = React.useState(false)
   const [apiKey, setApiKey] = React.useState<string | null>(project.api_key)
   const [rotatingApiKey, setRotatingApiKey] = React.useState(false)
-  const [publicBoardUrl, setPublicBoardUrl] = React.useState<string | null>(null)
   const tabParam = searchParams.get('tab') as TabId | null
-  const created = searchParams.get('created') === '1'
-  const activeTab = tabs.includes(tabParam as TabId) ? tabParam! : 'install'
-  const activeSection: ProjectSection =
-    activeTab === 'customize' || activeTab === 'install'
-      ? 'setup'
-      : activeTab === 'integrations'
-        ? 'integrations'
-        : activeTab === 'board'
-          ? 'board'
-          : activeTab === 'updates'
-            ? 'updates'
-          : activeTab === 'api'
-            ? 'api'
-            : 'settings'
+  const activeTab = initialTab || (tabs.includes(tabParam as TabId) ? tabParam! : 'install')
   const activeSetupStep: SetupStep = activeTab === 'install' ? 'install' : 'customize'
   const apiKeyLastFour = React.useMemo(
     () => apiKey?.slice(-4) || project.api_key_last_four || null,
@@ -90,32 +78,6 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
       setApiKey(storedKey)
     }
   }, [project.api_key, project.id])
-
-  React.useEffect(() => {
-    let cancelled = false
-
-    async function loadPublicBoardUrl() {
-      try {
-        const response = await fetch(`/api/projects/${project.id}/board`, { cache: 'no-store' })
-        const data = await response.json().catch(() => null)
-        const board = data?.board
-        const visibility = board?.profile?.visibility || 'public'
-        const isVisible = Boolean(board?.enabled && board?.slug && visibility !== 'private')
-
-        if (!cancelled) {
-          setPublicBoardUrl(isVisible ? `/p/${board.slug}` : null)
-        }
-      } catch {
-        if (!cancelled) setPublicBoardUrl(null)
-      }
-    }
-
-    void loadPublicBoardUrl()
-
-    return () => {
-      cancelled = true
-    }
-  }, [project.id, activeTab])
 
   const handleRotateApiKey = async () => {
     setRotatingApiKey(true)
@@ -148,46 +110,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
 
   return (
     <div className="space-y-6" data-project-tabs-ready={isInteractive ? 'true' : 'false'}>
-      <ProjectMenu projectId={project.id} activeSection={activeSection} />
-
-      <div>
-        <Link
-          href="/projects"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" /> Projects
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold">{project.name}</h1>
-        {created && (
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Your default install is ready. Copy it, send one test, then customize the form if needed.
-          </p>
-        )}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <ApiKeyBadge
-            apiKey={apiKey}
-            lastFour={apiKeyLastFour}
-            rotating={rotatingApiKey}
-            onRotate={handleRotateApiKey}
-          />
-          <a href={`/api/projects/${project.id}/feedback.csv`} download>
-            <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs font-medium">
-              <Download className="h-3 w-3" />
-              Export CSV
-            </Button>
-          </a>
-          {publicBoardUrl && (
-            <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs font-medium" asChild>
-              <a href={publicBoardUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-3 w-3" />
-                Public page
-              </a>
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {activeSection === 'setup' && <SetupProgress projectId={project.id} activeStep={activeSetupStep} />}
+      {(activeTab === 'install' || activeTab === 'customize') && <SetupProgress projectId={project.id} activeStep={activeSetupStep} />}
 
       {activeTab === 'install' && (
         <InstallTab
@@ -209,7 +132,7 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
       )}
       {activeTab === 'integrations' && <IntegrationsTab project={project} initialBillingSummary={billingSummary} />}
       {activeTab === 'board' && <BoardSettingsTab project={project} />}
-      {activeTab === 'updates' && <ProductUpdatesTab projectId={project.id} />}
+      {activeTab === 'updates' && <ProductUpdatesTab projectId={project.id} projectKey={apiKey} view={updatesView} updateId={updateId} />}
       {activeTab === 'api' && (
         <ApiDocs
           project={project}
@@ -220,46 +143,6 @@ function ProjectTabsInner({ project, billingSummary }: ProjectTabsProps) {
         />
       )}
       {activeTab === 'settings' && <SettingsTab project={project} />}
-    </div>
-  )
-}
-
-function ApiKeyBadge({
-  apiKey,
-  lastFour,
-  rotating,
-  onRotate,
-}: {
-  apiKey: string | null
-  lastFour: string | null
-  rotating: boolean
-  onRotate: () => Promise<void>
-}) {
-  const [copied, setCopied] = React.useState(false)
-  const copy = async () => {
-    if (!apiKey) return
-    await navigator.clipboard.writeText(apiKey)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {apiKey ? (
-        <button onClick={copy} className="flex items-center gap-1.5" aria-label="Copy API key">
-          <Badge variant="outline" className="font-mono text-xs">
-            {copied ? 'Copied key' : 'Key visible'} · ••••{lastFour || apiKey.slice(-4)}
-          </Badge>
-          {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
-        </button>
-      ) : (
-        <Badge variant="outline" className="font-mono text-xs">
-          Key hidden{lastFour ? ` · ••••${lastFour}` : ''}
-        </Badge>
-      )}
-      <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs font-medium" onClick={() => void onRotate()} disabled={rotating}>
-        {rotating ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
-        Rotate API key
-      </Button>
     </div>
   )
 }

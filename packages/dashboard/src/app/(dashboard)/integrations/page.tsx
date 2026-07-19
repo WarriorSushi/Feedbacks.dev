@@ -23,7 +23,7 @@ export default async function IntegrationsPage() {
     .order('created_at', { ascending: false })
 
   const project = getSelectedProject(projects || [], preferredProjectId)
-  if (project) redirect(`/projects/${project.id}?tab=integrations`)
+  if (project) redirect(`/projects/${project.id}/integrations`)
 
   return (
     <ProjectRequiredEmpty

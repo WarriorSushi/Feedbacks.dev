@@ -5,6 +5,22 @@ async function loadProductUpdates() {
   return import(new URL('../../../shared/src/product-updates.ts', import.meta.url).href)
 }
 
+test('product update activation event names are reserved in the shared contract', async () => {
+  const { PRODUCT_UPDATE_ACTIVATION_EVENTS } = await loadProductUpdates()
+
+  assert.deepEqual(PRODUCT_UPDATE_ACTIVATION_EVENTS, [
+    'updates_nav_opened',
+    'updates_setup_started',
+    'updates_install_method_selected',
+    'updates_embed_verified',
+    'updates_activated',
+    'updates_first_draft_created',
+    'updates_private_test_opened',
+    'updates_first_published',
+    'updates_first_impression_received',
+  ])
+})
+
 test('product update validation accepts safe content and rejects unsafe CTAs', async () => {
   const { sanitizeProductUpdateInput } = await loadProductUpdates()
   const valid = sanitizeProductUpdateInput({

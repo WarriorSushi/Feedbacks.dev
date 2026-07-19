@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { sanitizeProductUpdateInput } from '@feedbacks/shared'
 import { getAuthedUserAndProject } from '@/lib/api-auth'
 import { getProductUpdateEntitlements } from '@/lib/product-update-entitlements'
+import { recordActivationMilestone } from '@/lib/activation-milestones'
 
 const headers = { 'Cache-Control': 'no-store' }
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string; updateId: string }> }) {
@@ -17,5 +18,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     p_active_limit: entitlements.productUpdateActiveLimit, p_allow_scheduling: entitlements.productUpdateScheduling,
   })
   if (error || !data) return NextResponse.json({ error: error?.message?.includes('limit') ? 'Live update limit reached.' : 'Unable to publish update.' }, { status: 403, headers })
+  void recordActivationMilestone({ projectId: id, userId: auth.user.id, eventName: 'updates_first_published', admin: auth.admin })
   return NextResponse.json({ update: data }, { headers })
 }

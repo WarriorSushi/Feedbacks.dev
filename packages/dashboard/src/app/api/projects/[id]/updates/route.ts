@@ -3,6 +3,7 @@ import { sanitizeProductUpdateInput } from '@feedbacks/shared'
 import { getAuthedUserAndProject } from '@/lib/api-auth'
 import { getProductUpdateEntitlements, getProductUpdateMetricsCutoff } from '@/lib/product-update-entitlements'
 import { mapProductUpdateSettings, publicImageUrl } from '@/lib/product-update-service'
+import { recordActivationMilestone } from '@/lib/activation-milestones'
 
 const headers = { 'Cache-Control': 'no-store' }
 
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     cta_label: dataValue(parsed.data.ctaLabel), cta_url: dataValue(parsed.data.ctaUrl),
   }).select('*').single()
   if (error || !data) return NextResponse.json({ error: 'Unable to save draft.' }, { status: 500, headers })
+  void recordActivationMilestone({ projectId: id, userId: auth.user.id, eventName: 'updates_first_draft_created', admin: auth.admin })
   return NextResponse.json({ update: data }, { status: 201, headers })
 }
 

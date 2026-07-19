@@ -5,6 +5,8 @@ export const WIDGET_CONFIG_VERSION = 1
 
 export interface SavedWidgetConfig {
   configVersion?: number
+  /** Server-controlled module preference. Never emitted as a public script attribute. */
+  feedbackEnabled?: boolean
   apiUrl?: string
   enableUpdates?: boolean
   updatesApiUrl?: string
@@ -239,6 +241,7 @@ export function sanitizeSavedWidgetConfig(
       )
   const sanitized: SavedWidgetConfig = {
     configVersion: WIDGET_CONFIG_VERSION,
+    feedbackEnabled: sanitizeBoolean(input.feedbackEnabled),
     apiUrl: sanitizeUrl(input.apiUrl),
     enableUpdates: sanitizeBoolean(input.enableUpdates),
     updatesApiUrl: sanitizeUrl(input.updatesApiUrl),

@@ -177,15 +177,19 @@ export function ProductTour({
   React.useEffect(() => {
     if (!open) return
     const targetHref = pendingStepIndex === null ? activeStep.href : steps[pendingStepIndex].href
-    if (isCurrentHref(pathname, searchParams, targetHref)) return
-    router.push(targetHref)
-    const retry = window.setTimeout(() => {
+    let attempts = 0
+    const navigate = () => {
       const currentSearch = new URLSearchParams(window.location.search)
-      if (!isCurrentHref(window.location.pathname, currentSearch, targetHref)) {
-        router.push(targetHref)
-      }
-    }, 500)
-    return () => window.clearTimeout(retry)
+      if (isCurrentHref(window.location.pathname, currentSearch, targetHref)) return true
+      attempts += 1
+      router.push(targetHref)
+      return false
+    }
+    if (navigate()) return
+    const retry = window.setInterval(() => {
+      if (navigate() || attempts >= 12) window.clearInterval(retry)
+    }, 1_500)
+    return () => window.clearInterval(retry)
   }, [activeStep.href, open, pathname, pendingStepIndex, router, searchParams, steps])
 
   React.useEffect(() => {
