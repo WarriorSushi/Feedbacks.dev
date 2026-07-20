@@ -13,10 +13,9 @@ test('renders the live widget and accepts a test submission', async ({ page }) =
   const widgetRuntimeResponse = await page.request.fetch('/widget/latest.js')
 
   await expect(page.getByRole('navigation', { name: 'Setup steps' })).toBeVisible()
-  await expect(page.getByText('Send one test. Then check the inbox.', { exact: true })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Test your saved form' })).toBeVisible()
-  await expect(page.getByText('Do this')).toBeVisible()
-  await expect(page.getByText('Test area')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Send one test. Know the connection works.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Three quick checks' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Send one test message.' })).toBeVisible()
   expect(widgetRuntimeResponse.ok()).toBeTruthy()
   await expect(page.getByText(/Ready/i)).toBeVisible({ timeout: 30_000 })
   const launcher = page.locator('.fb-launcher')

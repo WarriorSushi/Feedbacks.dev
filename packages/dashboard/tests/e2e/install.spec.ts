@@ -14,7 +14,7 @@ test('creates a project and lands on a stable one-time embed installation', asyn
 
   await expect(page).toHaveURL(/\/projects\/[^/]+\/install\?created=1/, { timeout: 30_000 })
   await expect(page.getByRole('navigation', { name: 'Setup steps' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Add feedbacks.dev to your product once.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Install once. Keep the code unchanged.' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Copy code' })).toBeVisible()
   await expect(page.getByText('Choose platform')).toBeVisible()
   await expect(page.getByText('Verify one message')).toBeVisible()
@@ -33,15 +33,15 @@ test('copy-paste install guidance stays visible for an existing project', async 
 
   await page.goto(projectInstallPath(project.id), { waitUntil: 'domcontentloaded' })
 
-  await expect(page.getByRole('heading', { name: 'Add feedbacks.dev to your product once.' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Install code' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Install once. Keep the code unchanged.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Choose where you are installing' })).toBeVisible()
   await expect(
     page.getByText(/Paste before the closing body tag/i),
   ).toBeVisible({ timeout: 30_000 })
   await expect(
     page.getByTestId('install-verify-instruction'),
   ).toBeVisible({ timeout: 30_000 })
-  await expect(page.getByRole('link', { name: /Verify Send one test/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Open verification' })).toBeVisible()
   await page.getByRole('button', { name: 'Mobile app' }).click()
   await expect(page.getByText(/browser script does not run inside native/i)).toBeVisible()
   await expect(page.getByRole('link', { name: 'Open API docs' })).toBeVisible()

@@ -27,13 +27,13 @@ async function bootstrap(page: Page, projectKey: string) {
   }
 }
 
-test('new Release-notes-only user verifies the embed, tests a draft, and publishes', async ({ page }) => {
+test('new Updates-only user verifies the embed, tests a draft, and publishes', async ({ page }) => {
   await signInWithTestSession(page)
 
   await page.goto('/projects/new?goal=updates')
   await page.getByLabel('Project name').fill(`Playwright Updates ${Date.now().toString(36)}`)
-  await expect(page.getByRole('button', { name: 'Release notes', exact: true })).toHaveAttribute('aria-pressed', 'true')
-  await page.getByRole('button', { name: 'Create project and set up release notes' }).click()
+  await expect(page.getByRole('button', { name: 'Updates for users', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: 'Create project and set up user updates' }).click()
   await expect(page).toHaveURL(/\/projects\/([^/]+)\/release-notes$/, { timeout: 30_000 })
 
   const projectId = page.url().match(/\/projects\/([^/]+)\/release-notes$/)?.[1]
@@ -45,7 +45,7 @@ test('new Release-notes-only user verifies the embed, tests a draft, and publish
   expect(initialBootstrap.modules).toEqual({ feedback: false, updates: true })
 
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'Create first release note' }).click()
+  await page.getByRole('button', { name: 'Create first update' }).click()
   await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/release-notes/new$`))
 
   const title = `Shipped ${Date.now().toString(36)}`
@@ -71,7 +71,7 @@ test('new Release-notes-only user verifies the embed, tests a draft, and publish
   expect(publishedBootstrap.updates?.updates.some((update) => update.title === title)).toBeTruthy()
 })
 
-test('an existing Feedback installation activates Release notes without a snippet change', async ({ page }) => {
+test('an existing Feedback installation activates updates for users without a snippet change', async ({ page }) => {
   await signInWithTestSession(page)
   const project = await createProjectViaApi(page, { name: `Playwright Remote Activation ${Date.now().toString(36)}` })
 
@@ -81,8 +81,8 @@ test('an existing Feedback installation activates Release notes without a snippe
   await page.goto(`/projects/${project.id}/release-notes`, { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: 'Your shared embed is connected' })).toBeVisible()
   await expect(page.getByText('Your existing installation does not need a code change.')).toBeVisible()
-  await page.getByRole('button', { name: 'Activate release notes' }).click()
-  await expect(page.getByRole('button', { name: 'Create first release note' })).toBeVisible()
+  await page.getByRole('button', { name: 'Activate updates for users' }).click()
+  await expect(page.getByRole('button', { name: 'Create first update' })).toBeVisible()
 
   const after = await bootstrap(page, project.apiKey)
   expect(after.modules).toEqual({ feedback: true, updates: true })

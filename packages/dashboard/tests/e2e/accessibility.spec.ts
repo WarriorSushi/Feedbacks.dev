@@ -66,7 +66,7 @@ test('Updates setup is accessible and fits a mobile viewport', async ({ page }) 
   const project = await createProjectViaApi(page, { name: `Playwright Accessible Updates ${Date.now().toString(36)}` })
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(`/projects/${project.id}/release-notes`, { waitUntil: 'domcontentloaded' })
-  await expect(page.getByRole('heading', { name: 'Show “What’s new” inside your product' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Show what changed inside your product' })).toBeVisible()
 
   const result = await new AxeBuilder({ page })
     .include('main')

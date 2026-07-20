@@ -15,9 +15,9 @@ export function LandingProductLoop() {
         <div className="flex items-center gap-2.5">
           <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-300 text-[10px] font-black text-zinc-950">N</span>
           <span className="text-xs font-semibold text-zinc-100">Northstar</span>
-          <span className="hidden text-[11px] text-zinc-500 sm:inline">/ Analytics</span>
+          <span className="hidden text-[11px] text-zinc-400 sm:inline">/ Analytics</span>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-zinc-500">
+        <div className="flex items-center gap-2 text-[10px] text-zinc-400">
           <span className="hidden sm:inline">Live product preview</span>
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgb(110_231_183/0.08)]" />
         </div>
@@ -28,7 +28,7 @@ export function LandingProductLoop() {
           <div className="mx-auto h-7 w-7 rounded-md bg-white/[0.07] sm:mx-1" />
           <div className="mt-6 space-y-1.5">
             {['Overview', 'Reports', 'Customers'].map((item, index) => (
-              <div key={item} className={cn('flex h-8 items-center gap-2 rounded-md px-2 text-[11px]', index === 0 ? 'bg-white/[0.07] text-zinc-200' : 'text-zinc-600')}>
+              <div key={item} className={cn('flex h-8 items-center gap-2 rounded-md px-2 text-[11px]', index === 0 ? 'bg-white/[0.07] text-zinc-200' : 'text-zinc-400')}>
                 <span className="h-3 w-3 rounded-sm border border-current opacity-60" />
                 <span className="hidden sm:inline">{item}</span>
               </div>
@@ -39,15 +39,15 @@ export function LandingProductLoop() {
         <div className="relative min-w-0 overflow-hidden bg-[linear-gradient(180deg,rgb(24_24_27),rgb(19_19_22))] p-4 sm:p-6">
           <div className="flex items-end justify-between border-b border-white/[0.07] pb-5">
             <div>
-              <p className="text-[10px] text-zinc-600">PRODUCT HEALTH</p>
+              <p className="text-[10px] text-zinc-400">PRODUCT HEALTH</p>
               <p className="mt-1 text-lg font-semibold tracking-tight text-zinc-100">Weekly overview</p>
             </div>
-            <span className="text-[10px] text-zinc-600">Jul 14 – Jul 20</span>
+            <span className="text-[10px] text-zinc-400">Jul 14 – Jul 20</span>
           </div>
           <div className="mt-5 grid grid-cols-3 gap-3">
             {['Active users', 'Activation', 'Retention'].map((label, index) => (
               <div key={label} className="border-t border-white/10 pt-3">
-                <p className="text-[9px] text-zinc-600 sm:text-[10px]">{label}</p>
+                <p className="text-[9px] text-zinc-400 sm:text-[10px]">{label}</p>
                 <p className="mt-1 text-sm font-medium text-zinc-300 sm:text-base">{['8,412', '64.8%', '72.1%'][index]}</p>
               </div>
             ))}
@@ -82,17 +82,17 @@ export function LandingProductLoop() {
               {view === 'feedback' ? (
                 <div className="animate-fade-in">
                   <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3">
-                    <div><p className="text-xs font-semibold text-zinc-100">Send feedback</p><p className="mt-0.5 text-[10px] text-zinc-500">We include technical context automatically.</p></div>
-                    <span className="text-[10px] text-zinc-600">ESC</span>
+                    <div><p className="text-xs font-semibold text-zinc-100">Send feedback</p><p className="mt-0.5 text-[10px] text-zinc-400">We include technical context automatically.</p></div>
+                    <span className="text-[10px] text-zinc-400">ESC</span>
                   </div>
                   <div className="p-4">
                     <div className="flex gap-1.5">
                       <span className="inline-flex items-center gap-1 rounded-md bg-rose-400/10 px-2 py-1 text-[10px] text-rose-300"><Bug className="h-3 w-3" /> Bug</span>
-                      <span className="rounded-md bg-white/[0.05] px-2 py-1 text-[10px] text-zinc-500">Idea</span>
+                      <span className="rounded-md bg-white/[0.05] px-2 py-1 text-[10px] text-zinc-400">Idea</span>
                     </div>
                     <div className="mt-3 min-h-14 rounded-md border border-white/10 bg-zinc-950/60 p-2.5 text-[11px] leading-4 text-zinc-300">Export gets stuck at 80% on large reports.</div>
                     <div className="mt-3 flex items-center justify-between">
-                      <span className="text-[9px] text-zinc-600">URL · browser · screenshot</span>
+                      <span className="text-[9px] text-zinc-400">URL · browser · screenshot</span>
                       <span className="inline-flex items-center gap-1 rounded-md bg-emerald-300 px-2.5 py-1.5 text-[10px] font-semibold text-zinc-950">Send <ChevronRight className="h-3 w-3" /></span>
                     </div>
                   </div>
@@ -121,11 +121,11 @@ export function LandingProductLoop() {
       <div className="grid border-t border-white/10 sm:grid-cols-2">
         <button type="button" onClick={() => setView('feedback')} className={cn('group flex items-center gap-3 px-4 py-3 text-left transition-colors sm:px-5', view === 'feedback' ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]')}>
           <span className={cn('h-1.5 w-1.5 rounded-full', view === 'feedback' ? 'bg-emerald-300' : 'bg-zinc-700')} />
-          <span><span className="block text-[11px] font-medium text-zinc-200">Collect product feedback</span><span className="mt-0.5 block text-[10px] text-zinc-600">Users send signal to your team</span></span>
+          <span><span className="block text-[11px] font-medium text-zinc-200">Collect product feedback</span><span className="mt-0.5 block text-[10px] text-zinc-400">Users send signal to your team</span></span>
         </button>
         <button type="button" onClick={() => setView('updates')} className={cn('group flex items-center gap-3 border-t border-white/10 px-4 py-3 text-left transition-colors sm:border-l sm:border-t-0 sm:px-5', view === 'updates' ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]')}>
           <span className={cn('h-1.5 w-1.5 rounded-full', view === 'updates' ? 'bg-emerald-300' : 'bg-zinc-700')} />
-          <span><span className="block text-[11px] font-medium text-zinc-200">Show product updates</span><span className="mt-0.5 block text-[10px] text-zinc-600">Your team closes the loop with users</span></span>
+          <span><span className="block text-[11px] font-medium text-zinc-200">Show product updates</span><span className="mt-0.5 block text-[10px] text-zinc-400">Your team closes the loop with users</span></span>
         </button>
       </div>
     </div>
