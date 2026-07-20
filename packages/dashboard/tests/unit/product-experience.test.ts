@@ -62,13 +62,41 @@ test('first-run and public feedback screens keep optional work out of the main p
   assert.match(publicForm, /className="sr-only"/)
 })
 
+test('project creation checks plan limits before writing a project', () => {
+  const route = read('../../src/app/api/projects/route.ts')
+  const billing = read('../../src/lib/billing.ts')
+  const plans = read('../../../shared/src/plans.ts')
+
+  assert.match(plans, /projectLimit: 2/)
+  assert.match(route, /assertCanCreateProject/)
+  assert.ok(route.indexOf('assertCanCreateProject') < route.indexOf("from('projects').insert"))
+  assert.match(route, /status: 403/)
+  assert.match(billing, /project_limit_reached/)
+})
+
 test('navigation gives product updates user context instead of an ambiguous release-notes label', () => {
   const sidebar = read('../../src/components/sidebar.tsx')
   const projectHome = read('../../src/app/(dashboard)/projects/[id]/project-home.tsx')
+  const updatesOnboarding = read('../../src/components/product-updates/UpdatesOnboarding.tsx')
 
   assert.match(sidebar, /Updates for users/)
   assert.match(projectHome, /Show product updates to users/)
+  assert.match(updatesOnboarding, /useState<Choice>\('updates'\)/)
+  assert.doesNotMatch(updatesOnboarding, /localStorage/)
   assert.doesNotMatch(sidebar, /label: 'Release notes'/)
+})
+
+test('dense dashboard forms use clear tonal sections instead of one flat canvas', () => {
+  const section = read('../../src/components/ui/workspace-section.tsx')
+  const boardIdentity = read('../../src/components/board-settings/BoardIdentitySection.tsx')
+  const boardVisibility = read('../../src/components/board-settings/BoardVisibilitySection.tsx')
+  const inbox = read('../../src/app/(dashboard)/feedback/page.tsx')
+
+  assert.match(section, /rounded-xl border bg-card/)
+  assert.match(section, /border-b bg-muted\/25/)
+  assert.match(boardIdentity, /WorkspaceSection/)
+  assert.match(boardVisibility, /WorkspaceSection/)
+  assert.match(inbox, /rounded-xl border bg-card/)
 })
 
 test('sidebar exposes a stable Home destination and groups project work by user intent', () => {

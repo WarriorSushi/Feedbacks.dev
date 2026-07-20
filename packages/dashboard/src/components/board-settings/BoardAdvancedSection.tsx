@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { WorkspaceSection } from '@/components/ui/workspace-section'
 import { Loader2 } from 'lucide-react'
 import type { BoardReport } from '@/lib/types'
 
@@ -36,9 +37,9 @@ export function BoardAdvancedSection({
 }: BoardAdvancedSectionProps) {
   return (
     <div className="space-y-6">
-      <details className="border-b pb-6">
-        <summary className="cursor-pointer text-base font-semibold">Custom CSS <span className="text-sm font-normal text-muted-foreground">· optional</span></summary>
-        <div className="mt-4 space-y-3">
+      <details className="overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
+        <summary className="cursor-pointer border-b bg-muted/25 px-5 py-4 text-base font-semibold">Custom CSS <span className="text-sm font-normal text-muted-foreground">· optional</span></summary>
+        <div className="space-y-3 p-5 sm:p-6">
           <textarea
             value={settings.custom_css}
             onChange={(e) => onSettingsChange({ custom_css: e.target.value.slice(0, 6000) })}
@@ -52,8 +53,7 @@ export function BoardAdvancedSection({
         </div>
       </details>
 
-      <section className="space-y-3 border-b pb-7">
-        <div><h3 className="text-base font-semibold">Reports</h3><p className="mt-1 text-sm text-muted-foreground">Check posts that visitors flag.</p></div>
+      <WorkspaceSection title="Reports" description="Check posts that visitors flag.">
           {reports.length === 0 ? (
             <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
               No reports yet. When someone flags the board or a post, it will show up here.
@@ -113,7 +113,7 @@ export function BoardAdvancedSection({
               </div>
             ))
           )}
-      </section>
+      </WorkspaceSection>
     </div>
   )
 }

@@ -3,6 +3,7 @@
 import type React from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { WorkspaceSection } from '@/components/ui/workspace-section'
 import type { BoardBranding } from '@/lib/public-board'
 
 interface BoardSettingsSlice {
@@ -45,8 +46,7 @@ export function BoardIdentitySection({
   }
 
   return (
-    <section className="space-y-5 border-b pb-7">
-      <div><h3 className="text-base font-semibold">Name and look</h3><p className="mt-1 text-sm text-muted-foreground">Set the name, link, mark, and color users will see.</p></div>
+    <WorkspaceSection title="Name and look" description="Set the name, link, mark, and color users will see.">
         <div className="space-y-2">
           <Label htmlFor="board-display-name">Display name</Label>
           <Input
@@ -115,6 +115,6 @@ export function BoardIdentitySection({
             placeholder="https://example.com"
           />
         </div>
-    </section>
+    </WorkspaceSection>
   )
 }
