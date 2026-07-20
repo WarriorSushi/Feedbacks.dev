@@ -30,7 +30,7 @@ export default async function RootLayout({
 }) {
   // A nonce-based CSP only works when Next renders per request and can attach
   // the middleware nonce to framework and hydration scripts.
-  await headers()
+  const nonce = (await headers()).get('x-nonce') || undefined
 
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
@@ -40,6 +40,7 @@ export default async function RootLayout({
           defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
+          nonce={nonce}
         >
           {children}
           <Toaster />
