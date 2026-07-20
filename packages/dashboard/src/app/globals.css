@@ -303,13 +303,9 @@
   animation: landing-progress linear both;
 }
 
-.landing-carousel-progress { animation-duration: 6.4s; }
+.landing-carousel-progress { animation-duration: 6s; }
 .landing-story-progress { animation-duration: 4.2s; }
 .landing-install-progress { animation-duration: 4.4s; }
-
-.landing-product-loop:hover .landing-carousel-progress {
-  animation-play-state: paused;
-}
 
 .landing-stage-grid {
   background-image:

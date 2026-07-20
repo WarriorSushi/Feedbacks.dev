@@ -1,6 +1,5 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { CURATED_BOARD_CATEGORIES, getBoardCategoryLabel, normalizeBoardCategories } from '@/lib/board-categories'
@@ -34,12 +33,8 @@ export function BoardVisibilitySection({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Visibility</CardTitle>
-        <CardDescription>Control whether the board is public, unlisted, or kept private while you set it up.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-5">
+    <section className="space-y-5 border-b pb-7">
+      <div><h3 className="text-base font-semibold">Who can see it</h3><p className="mt-1 text-sm text-muted-foreground">Make the page public, share it by link, or keep it private.</p></div>
         <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-muted/10 px-3 py-3 text-sm">
           <input
             type="checkbox"
@@ -48,9 +43,9 @@ export function BoardVisibilitySection({
             className="mt-0.5 h-4 w-4 rounded border"
           />
           <span>
-            <span className="block font-medium text-foreground">Enable the board route</span>
+            <span className="block font-medium text-foreground">Publish this page</span>
             <span className="text-muted-foreground">
-              The board can open when visibility allows it. Keep this off while drafting copy and moderation rules.
+              Turn this on when the page is ready for visitors.
             </span>
           </span>
         </label>
@@ -69,7 +64,7 @@ export function BoardVisibilitySection({
               <option value="private">Private</option>
             </select>
             <p className="text-xs text-muted-foreground">
-              Public boards appear in discovery. Unlisted boards work via direct URL only. Private hides the board route until you are ready.
+              Public pages can appear in the directory. Unlisted pages only work with the link. Private pages stay closed.
             </p>
           </div>
 
@@ -86,7 +81,7 @@ export function BoardVisibilitySection({
               placeholder="saas, developer-tools, analytics"
             />
             <p className="text-xs text-muted-foreground">
-              Use two to four stable categories so sparse directories stay scannable.
+              Pick a few topics that help people find your page.
             </p>
           </div>
         </div>
@@ -129,7 +124,6 @@ export function BoardVisibilitySection({
             </span>
           </label>
         )}
-      </CardContent>
-    </Card>
+    </section>
   )
 }

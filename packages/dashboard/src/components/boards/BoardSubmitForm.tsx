@@ -15,13 +15,15 @@ interface BoardSubmitFormProps {
 }
 
 export function BoardSubmitForm({ slug, showTypes, onClose, onSubmitted }: BoardSubmitFormProps) {
-  const [message, setMessage] = React.useState('')
+  const [title, setTitle] = React.useState('')
+  const [details, setDetails] = React.useState('')
   const [type, setType] = React.useState(showTypes[0] || 'idea')
   const [email, setEmail] = React.useState('')
   const [hp, setHp] = React.useState('')
   const [submitting, setSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [suggestions, setSuggestions] = React.useState<BoardSuggestion[]>([])
+  const message = [title.trim(), details.trim()].filter(Boolean).join('\n')
   const deferredMessage = React.useDeferredValue(message)
 
   React.useEffect(() => {
@@ -83,22 +85,17 @@ export function BoardSubmitForm({ slug, showTypes, onClose, onSubmitted }: Board
         role="dialog"
         aria-modal="true"
         aria-labelledby="board-submit-modal-title"
-        className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-border/80 bg-card shadow-2xl"
+        className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-border/80 bg-card shadow-2xl"
       >
         <div className="flex items-start justify-between gap-4 border-b border-border/70 px-5 py-5">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              New feedback
-            </p>
             <h2
               id="board-submit-modal-title"
-              className="mt-2 text-xl font-semibold text-foreground"
+              className="text-xl font-semibold text-foreground"
             >
-              Post a request or bug report
+              Share an idea or bug
             </h2>
-            <p className="mt-2 text-sm leading-7 text-foreground/68">
-              Use the first line as a clear title, then add the context the team needs below it.
-            </p>
+            <p className="mt-2 text-sm leading-6 text-foreground/68">Say what you need and why it would help.</p>
           </div>
           <button
             onClick={onClose}
@@ -111,10 +108,8 @@ export function BoardSubmitForm({ slug, showTypes, onClose, onSubmitted }: Board
 
         <form onSubmit={handleSubmit} className="space-y-5 p-5">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Request type
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <p className="text-sm font-medium text-foreground">Is this an idea or a bug?</p>
+            <div className="mt-2 flex flex-wrap gap-2">
               {showTypes.map((entry) => (
                 <button
                   key={entry}
@@ -133,41 +128,49 @@ export function BoardSubmitForm({ slug, showTypes, onClose, onSubmitted }: Board
             </div>
           </div>
 
-          <textarea
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-            aria-label="Your feedback"
-            rows={6}
-            className="min-h-[160px] w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary"
-            placeholder={'Faster screenshot capture in onboarding\nThe first screenshot step feels slower than the rest of the flow...'}
-            required
-            minLength={5}
-            maxLength={2000}
-          />
+          <div className="space-y-2">
+            <label htmlFor="board-post-title" className="text-sm font-medium text-foreground">What do you need?</label>
+            <input id="board-post-title" value={title} onChange={(event) => setTitle(event.target.value)} className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary" placeholder="For example: Let me sort by date" required minLength={5} maxLength={140}/>
+          </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <label htmlFor="board-post-details" className="text-sm font-medium text-foreground">Why would this help? <span className="font-normal text-muted-foreground">Optional</span></label>
+            <textarea
+            id="board-post-details"
+            value={details}
+            onChange={(event) => setDetails(event.target.value)}
+            rows={4}
+            className="min-h-[112px] w-full rounded-lg border border-border bg-background px-3 py-3 text-sm text-foreground outline-none transition focus:border-primary"
+            placeholder="Add a short example or tell the team where you got stuck."
+            maxLength={1850}
+          />
+          </div>
+
+          <div>
+            <label htmlFor="board-post-email" className="mb-2 block text-sm font-medium text-foreground">Email <span className="font-normal text-muted-foreground">Optional</span></label>
             <input
+              id="board-post-email"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              aria-label="Email (optional)"
-              placeholder="Email (optional)"
-              className="h-11 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+              placeholder="you@example.com"
+              className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground"
             />
-            <input
-              value={hp}
-              onChange={(event) => setHp(event.target.value)}
-              aria-label="Leave this empty"
-              tabIndex={-1}
-              autoComplete="off"
-              placeholder="Leave this empty"
-              className="h-11 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
-            />
+            <p className="mt-1.5 text-xs text-muted-foreground">The team can use this to ask a question. It is not shown on the board.</p>
           </div>
+
+          <input
+            value={hp}
+            onChange={(event) => setHp(event.target.value)}
+            aria-hidden="true"
+            tabIndex={-1}
+            autoComplete="off"
+            className="sr-only"
+          />
 
           {suggestions.length > 0 && (
             <div className="rounded-xl border border-border/70 bg-background px-4 py-4">
-              <p className="text-sm font-semibold text-foreground">Possibly related requests</p>
+              <p className="text-sm font-semibold text-foreground">This may already be on the board</p>
               <div className="mt-3 space-y-2">
                 {suggestions.map((suggestion) => (
                   <Link
@@ -197,10 +200,10 @@ export function BoardSubmitForm({ slug, showTypes, onClose, onSubmitted }: Board
           <div className="flex flex-wrap items-center gap-3">
             <Button
               type="submit"
-              disabled={submitting || message.trim().length < 5}
+              disabled={submitting || title.trim().length < 5}
               className="px-4 font-semibold"
             >
-              {submitting ? 'Submitting...' : 'Submit feedback'}
+              {submitting ? 'Posting...' : 'Post to board'}
             </Button>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel

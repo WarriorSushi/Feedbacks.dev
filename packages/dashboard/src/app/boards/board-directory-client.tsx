@@ -146,7 +146,7 @@ export function BoardDirectoryClient({
 
   return (
     <div data-board-directory-ready={ready ? 'true' : 'false'}>
-      <section data-board-directory-controls className="mt-4 scroll-mt-4 rounded-lg border border-border/80 bg-card shadow-sm sm:mt-6">
+      <section data-board-directory-controls className="mt-4 scroll-mt-4 border-y border-border/80 sm:mt-6">
         <div className="border-b border-border/70 px-3 py-4 sm:px-5 sm:py-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
@@ -159,10 +159,10 @@ export function BoardDirectoryClient({
                     key={option.value}
                     onClick={() => setSort(option.value)}
                     className={cn(
-                      'min-h-11 shrink-0 snap-start rounded-md border px-3 py-2 text-sm font-medium transition-colors sm:min-h-10',
+                      'min-h-11 shrink-0 snap-start rounded-full px-3 py-2 text-sm font-medium transition-colors sm:min-h-10',
                       sort === option.value
-                        ? 'border-foreground bg-foreground text-background shadow-sm'
-                        : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground',
+                        ? 'bg-foreground text-background'
+                        : 'bg-muted text-muted-foreground hover:text-foreground',
                     )}
                   >
                     {option.label}
@@ -194,10 +194,10 @@ export function BoardDirectoryClient({
               <button
                 onClick={() => setCategory('')}
                 className={cn(
-                  'min-h-11 shrink-0 snap-start rounded-md border px-3 py-1.5 text-xs font-medium transition-colors sm:min-h-9',
+                  'min-h-11 shrink-0 snap-start rounded-full px-3 py-1.5 text-xs font-medium transition-colors sm:min-h-9',
                   !category
-                    ? 'border-foreground bg-foreground text-background'
-                    : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground',
+                    ? 'bg-foreground text-background'
+                    : 'bg-muted text-muted-foreground hover:text-foreground',
                 )}
               >
                 All categories
@@ -207,10 +207,10 @@ export function BoardDirectoryClient({
                   key={entry.value}
                   onClick={() => setCategory(category === entry.value ? '' : entry.value)}
                   className={cn(
-                    'min-h-11 shrink-0 snap-start rounded-md border px-3 py-1.5 text-xs font-medium transition-colors sm:min-h-9',
+                    'min-h-11 shrink-0 snap-start rounded-full px-3 py-1.5 text-xs font-medium transition-colors sm:min-h-9',
                     category === entry.value
-                      ? 'border-foreground bg-foreground text-background'
-                      : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground',
+                      ? 'bg-foreground text-background'
+                      : 'bg-muted text-muted-foreground hover:text-foreground',
                   )}
                 >
                   {entry.label}

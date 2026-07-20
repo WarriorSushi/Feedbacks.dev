@@ -1,6 +1,5 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -49,12 +48,8 @@ export function BoardContentSection({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Hero and copy</CardTitle>
-          <CardDescription>The text visitors see when they land on your board.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
+      <section className="space-y-5 border-b pb-7">
+        <div><h3 className="text-base font-semibold">Top of the page</h3><p className="mt-1 text-sm text-muted-foreground">Write the first thing visitors will read.</p></div>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="board-hero-eyebrow">Hero eyebrow</Label>
@@ -118,15 +113,10 @@ export function BoardContentSection({
               />
             </div>
           </div>
-        </CardContent>
-      </Card>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Participation</CardTitle>
-          <CardDescription>Decide what kinds of posts appear and whether visitors can submit feedback.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
+      <section className="space-y-5 border-b pb-7">
+        <div><h3 className="text-base font-semibold">What visitors can post</h3><p className="mt-1 text-sm text-muted-foreground">Pick the choices shown in the post form.</p></div>
           <div className="space-y-2">
             <Label>Feedback types to show</Label>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -156,28 +146,23 @@ export function BoardContentSection({
               <span className="text-muted-foreground">Visitors can post new requests directly on the board.</span>
             </span>
           </label>
-        </CardContent>
-      </Card>
+      </section>
 
-      <Card>
-        <CardHeader>
+      <section className="space-y-5 border-b pb-7">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-base">Announcements</CardTitle>
-              <CardDescription>
-                Lightweight changelog items that appear on the public board.
-              </CardDescription>
+              <h3 className="text-base font-semibold">News for visitors</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Share a short note when you ship something.</p>
             </div>
             <Button variant="outline" size="sm" onClick={onAnnouncementAdd}>
               <Plus className="mr-2 h-4 w-4" />
               Add
             </Button>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
+        <div className="space-y-3">
           {settings.announcements.length === 0 ? (
             <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
-              No announcements yet. Add one when you ship something meaningful or need to set expectations publicly.
+              No news yet. Add a note when you ship something users asked for.
             </div>
           ) : (
             settings.announcements.map((announcement, index) => (
@@ -215,8 +200,8 @@ export function BoardContentSection({
               </div>
             ))
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }

@@ -289,7 +289,7 @@ export function PublicBoard({
   return (
     <div
       data-public-board-ready={ready ? 'true' : 'false'}
-      className="min-h-screen bg-[linear-gradient(180deg,_oklch(var(--background))_0%,_oklch(var(--muted))_100%)]"
+      className="min-h-screen bg-background"
     >
       {board.customCss ? <style>{board.customCss}</style> : null}
       {viewerSignedIn && (
@@ -337,15 +337,14 @@ export function PublicBoard({
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
         {justSubmitted && (
           <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            Your feedback was submitted. It now enters the same public flow as the rest of the
-            board.
+            Thanks. Your post is now on the board.
           </div>
         )}
 
         <div className="space-y-6">
           <BoardAnnouncements announcements={initialAnnouncements} />
 
-          <main aria-label="Public feedback requests" className="rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
+          <main aria-label="Public feedback requests" className="border-y py-4 sm:py-5">
             <BoardFilters
               showTypes={board.show_types}
               filter={filter}
@@ -359,28 +358,6 @@ export function PublicBoard({
             {voteError && (
               <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
                 {voteError}
-              </div>
-            )}
-
-            {board.allow_submissions && (
-              <div className="grid gap-3 border-b border-border/70 py-5 sm:grid-cols-[42px_minmax(0,1fr)_auto] sm:items-center">
-                <div className="hidden h-10 w-10 items-center justify-center rounded-xl border border-border bg-background text-sm font-bold text-foreground sm:flex">
-                  {(board.displayName || board.title || 'F').slice(0, 1).toUpperCase()}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowSubmit(true)}
-                  className="min-h-11 rounded-xl border border-border bg-background px-4 text-left text-sm text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
-                >
-                  What should the team improve?
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowSubmit(true)}
-                  className="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                >
-                  Post
-                </button>
               </div>
             )}
 
@@ -425,13 +402,11 @@ export function PublicBoard({
             </BoardFeedbackList>
           </main>
 
-          <section className="rounded-2xl border bg-card p-5 shadow-sm">
+          <section className="border-t pt-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Other boards
-                </p>
-                <h2 className="mt-2 text-lg font-semibold text-foreground">Explore related feedback loops</h2>
+                <p className="text-xs font-semibold text-muted-foreground">Other public boards</p>
+                <h2 className="mt-2 text-lg font-semibold text-foreground">See what other teams are building</h2>
               </div>
               {uniqueRecommendations.length > 3 && (
                 <button
@@ -451,7 +426,7 @@ export function PublicBoard({
                   <Link
                     key={entry.slug}
                     href={`/p/${entry.slug}`}
-                    className="rounded-xl border bg-background p-4 transition-colors hover:border-primary/30"
+                    className="border-t py-4 transition-colors hover:text-primary"
                   >
                     <span className="block font-semibold text-foreground">
                       {entry.displayName || entry.title}
@@ -464,7 +439,7 @@ export function PublicBoard({
               )}
               {uniqueRecommendations.length === 0 && (
                 <p className="text-sm leading-6 text-foreground/70">
-                  Related public boards will appear here as more teams publish boards.
+                  More public boards will show here as teams publish them.
                 </p>
               )}
             </div>

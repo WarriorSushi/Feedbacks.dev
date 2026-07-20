@@ -6,22 +6,15 @@ import { rememberProjectApiKey } from '@/lib/project-api-keys'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Check, CheckCircle2, Code2, Inbox, Loader2, ArrowLeft } from 'lucide-react'
+import { Check, Loader2, ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { DEFAULT_PROJECT_ICON, PROJECT_ICONS } from '@/lib/project-icons'
 
-const setupSteps = [
-  { Icon: CheckCircle2, title: 'Create this project', body: 'Choose the first product. You can enable the other later.' },
-  { Icon: Code2, title: 'Install one shared embed', body: 'Paste the generated Website snippet into your app shell.' },
-  { Icon: Inbox, title: 'Verify the connection', body: 'Send one test and confirm it reached the project inbox.' },
-]
-
 const productChoices = [
-  { value: 'feedback', label: 'Feedback form', body: 'Collect bugs, ideas, questions, ratings, and screenshots.' },
-  { value: 'updates', label: 'Updates for users', body: 'Publish in-product “What’s new” announcements.' },
-  { value: 'both', label: 'Both products', body: 'Collect user signal and communicate what shipped.' },
+  { value: 'feedback', label: 'Feedback form', body: 'Let users send bugs and ideas.' },
+  { value: 'updates', label: 'Messages for users', body: 'Show users what you shipped.' },
+  { value: 'both', label: 'Both', body: 'Collect feedback and show fixes.' },
 ] as const
 
 export default function NewProjectPage() {
@@ -98,7 +91,7 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-7 animate-fade-in">
+    <div className="mx-auto max-w-xl animate-fade-in">
       <Link
         href="/projects"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -106,54 +99,52 @@ export default function NewProjectPage() {
         <ArrowLeft className="h-4 w-4" /> Back to projects
       </Link>
 
-      <header className="max-w-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">New project</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.035em]">What are you adding to your product?</h1>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">A project is one app or website. Start with the product you need now, then install the shared embed once.</p>
+      <header className="mt-8">
+        <p className="text-xs font-semibold text-primary">New project</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em]">Name your app or website</h1>
+        <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">That is all we need to start. You will make the feedback form on the next screen.</p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
-        <Card data-tour="project-create-form" className="border-0 bg-transparent shadow-none">
-          <CardHeader className="border-b border-foreground/10 px-0 pt-0">
-            <CardTitle className="text-lg">Project details</CardTitle>
-            <CardDescription>
-              One name is enough. The next screen gives you a working install snippet immediately.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="px-0 pt-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
+      <form data-tour="project-create-form" onSubmit={handleSubmit} className="mt-8 space-y-5 border-t pt-7">
             <div className="space-y-2">
-              <Label htmlFor="name">Project name</Label>
+              <Label htmlFor="name">App or website name</Label>
               <Input
                 id="name"
-                placeholder="Acme Web App"
+                placeholder="For example: Acme"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
                 autoFocus
                 maxLength={80}
+                className="h-12 text-base"
               />
               <p className="text-xs text-muted-foreground">
-                Use the name your team recognizes. You can rename it later.
+                Use the name your users know. You can change it later.
               </p>
             </div>
-            <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">What do you want to do first?</legend>
-              <div className="grid gap-2">
-                {productChoices.map(({ value, label, body }) => (
-                  <button key={value} type="button" onClick={() => setGoal(value)} className={cn('grid min-h-16 grid-cols-[18px_1fr] gap-3 border-y px-4 py-3 text-left transition-colors', goal === value ? 'border-primary bg-primary/[0.055]' : 'border-foreground/10 hover:bg-muted/30')} aria-label={label} aria-pressed={goal === value}>
-                    <span className={cn('mt-0.5 flex h-4 w-4 items-center justify-center rounded-full border', goal === value ? 'border-primary bg-primary' : 'border-input')}>{goal === value && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}</span>
-                    <span><span className={cn('block text-sm font-semibold', goal === value && 'text-primary')}>{label}</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">{body}</span></span>
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">You can turn either product on or off later without changing the shared embed.</p>
-            </fieldset>
-            <details className="rounded-lg border bg-muted/10">
-              <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
-                Personalize project (optional) · {icon}
+
+            <details className="border-y">
+              <summary className="cursor-pointer py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
+                Start with something else <span className="font-normal">· {productChoices.find((choice) => choice.value === goal)?.label}</span>
               </summary>
-              <div className="space-y-4 border-t px-4 py-3">
+              <fieldset className="space-y-2 border-t py-4">
+                <legend className="sr-only">First tool</legend>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {productChoices.map(({ value, label, body }) => (
+                    <button key={value} type="button" onClick={() => setGoal(value)} className={cn('min-h-20 rounded-lg border px-3 py-3 text-left transition-colors', goal === value ? 'border-primary bg-primary/[0.055]' : 'border-border hover:bg-muted/30')} aria-label={label} aria-pressed={goal === value}>
+                      <span className={cn('block text-sm font-semibold', goal === value && 'text-primary')}>{label}</span>
+                      <span className="mt-1 block text-xs leading-5 text-muted-foreground">{body}</span>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            </details>
+
+            <details className="border-b">
+              <summary className="cursor-pointer py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
+                Add an icon or domain <span className="font-normal">· optional</span>
+              </summary>
+              <div className="space-y-5 border-t py-4">
                 <fieldset className="space-y-2">
                   <legend className="text-sm font-medium">Project icon</legend>
                   <div className="grid grid-cols-6 gap-2 sm:grid-cols-12">
@@ -183,7 +174,7 @@ export default function NewProjectPage() {
                       )
                     })}
                   </div>
-                  <p className="text-xs text-muted-foreground">Shown in the project switcher so projects are easier to scan.</p>
+                  <p className="text-xs text-muted-foreground">This makes projects easier to spot in the menu.</p>
                 </fieldset>
                 <div className="space-y-2">
                   <Label htmlFor="domain">Domain (optional)</Label>
@@ -194,7 +185,7 @@ export default function NewProjectPage() {
                     onChange={(e) => setDomain(e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    This helps identify the project, but it is not required to install the widget.
+                    You do not need this to set up the feedback form.
                   </p>
                 </div>
               </div>
@@ -216,31 +207,13 @@ export default function NewProjectPage() {
                 </div>
               </div>
             )}
-            <Button data-tour="project-create-submit" type="submit" size="lg" className="w-full" disabled={loading || !name.trim()}>
+            <Button data-tour="project-create-submit" type="submit" size="lg" className="h-12 w-full gap-2" disabled={loading || !name.trim()}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {goal === 'updates' ? 'Create project and set up user updates' : goal === 'both' ? 'Create project and set up both' : 'Create project and get install code'}
+              {goal === 'updates' ? 'Create project and write a user message' : goal === 'both' ? 'Create project' : 'Create project and make the form'}
+              {!loading && <ArrowRight className="h-4 w-4" />}
             </Button>
-          </form>
-          </CardContent>
-        </Card>
-
-        <aside className="border-t border-foreground/10 pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-          <p className="text-sm font-semibold">What happens next</p>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">Three focused screens. Advanced settings stay out of the way.</p>
-          <div className="mt-5 border-y">
-            {setupSteps.map(({ title, body }, index) => (
-              <div key={title} className="flex gap-3 border-b py-4 last:border-b-0">
-                <span className="font-mono text-[10px] text-primary">0{index + 1}</span>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{title}</p>
-                  <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-muted-foreground"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" /> Future form changes and user-facing product updates are delivered remotely. No new snippet.</p>
-        </aside>
-      </div>
+            <p className="text-center text-xs leading-5 text-muted-foreground">Next: make the form, add one code block, then send a test.</p>
+      </form>
     </div>
   )
 }

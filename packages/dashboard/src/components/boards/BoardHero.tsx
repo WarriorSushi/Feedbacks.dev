@@ -44,10 +44,10 @@ export function BoardHero({
   const heroDescription =
     board.branding.heroDescription ||
     board.description ||
-    'Vote on requests, add context, and track the public layer of a feedback workflow that starts inside the product.'
+    'Share an idea or bug. Vote for things you want. See what the team says next.'
   const categories = board.branding.categories?.slice(0, 4) || []
   const websiteHost = getWebsiteHost(board.branding.websiteUrl)
-  const submissionLabel = board.allow_submissions ? 'Open submissions' : 'Read only'
+  const submissionLabel = board.allow_submissions ? 'Anyone can post' : 'Read only'
   const accent = board.branding.accentColor || '#4d7c0f'
   const allBoardsHref = viewerSignedIn ? '/dashboard/boards' : '/boards'
 
@@ -58,7 +58,7 @@ export function BoardHero({
         borderColor: `${accent}26`,
       }}
     >
-      <div className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
+      <div className="relative mx-auto max-w-4xl px-4 py-7 sm:px-6 sm:py-10">
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <Link
             href={allBoardsHref}
@@ -83,23 +83,23 @@ export function BoardHero({
           )}
         </div>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
+        <div className="mt-7">
           <div className="min-w-0">
             <div
-              className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl border bg-card text-2xl"
+              className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl border bg-card text-xl"
               style={{ borderColor: `${accent}40` }}
               aria-hidden="true"
             >
               {board.branding.logoEmoji || displayTitle.slice(0, 1).toUpperCase()}
             </div>
-            <h1 className="max-w-4xl text-3xl font-bold leading-tight text-foreground sm:text-4xl lg:text-5xl">
+            <h1 className="max-w-3xl text-3xl font-bold leading-tight text-foreground sm:text-4xl">
               {displayTitle}
             </h1>
-            <p className="mt-5 max-w-3xl text-base leading-7 text-foreground/72 sm:text-lg">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-foreground/72">
               {heroDescription}
             </p>
 
-            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
               <span>
                 <strong className="font-semibold text-foreground">{feedbackCount}</strong> requests
               </span>
@@ -141,17 +141,19 @@ export function BoardHero({
             )}
           </div>
 
-          <div className="rounded-xl border bg-card p-4">
-            <p className="text-sm font-semibold text-foreground">Have something to add?</p>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Vote first, then add a fresh request when the board does not already cover it.
-            </p>
+          <div className="mt-7 flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center">
+            {board.allow_submissions && (
+              <Button onClick={onSubmitClick} className="gap-2 font-semibold">
+                Share an idea or bug
+                <MessageSquarePlus className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               type="button"
               variant={followed ? 'outline' : 'secondary'}
               onClick={onToggleFollow}
               disabled={followLoading}
-              className="mt-4 w-full gap-2 font-semibold"
+              className="gap-2 font-semibold"
             >
               {followLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -160,14 +162,9 @@ export function BoardHero({
               ) : (
                 <Bell className="h-4 w-4" />
               )}
-              {followed ? 'Following board' : 'Follow board'}
+              {followed ? 'Following' : 'Get board updates'}
             </Button>
-            {board.allow_submissions && (
-              <Button onClick={onSubmitClick} className="mt-2 w-full gap-2 font-semibold">
-                Share feedback
-                <MessageSquarePlus className="h-4 w-4" />
-              </Button>
-            )}
+            <p className="text-xs leading-5 text-muted-foreground sm:ml-2">Vote for an idea if it is already here. Add a new one if it is not.</p>
           </div>
         </div>
       </div>
