@@ -10,6 +10,7 @@ import { Check, Loader2, ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { DEFAULT_PROJECT_ICON, PROJECT_ICONS } from '@/lib/project-icons'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 const productChoices = [
   { value: 'feedback', label: 'Feedback form', body: 'Let users send bugs and ideas.' },
@@ -99,13 +100,15 @@ export default function NewProjectPage() {
         <ArrowLeft className="h-4 w-4" /> Back to projects
       </Link>
 
-      <header className="mt-8">
+      <Card className="mt-6">
+      <CardHeader>
         <p className="text-xs font-semibold text-primary">New project</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em]">Name your app or website</h1>
         <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">That is all we need to start. You will make the feedback form on the next screen.</p>
-      </header>
+      </CardHeader>
 
-      <form data-tour="project-create-form" onSubmit={handleSubmit} className="mt-8 space-y-5 border-t pt-7">
+      <CardContent>
+      <form data-tour="project-create-form" onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name">App or website name</Label>
               <Input
@@ -123,7 +126,7 @@ export default function NewProjectPage() {
               </p>
             </div>
 
-            <details className="border-y">
+            <details className="overflow-hidden rounded-lg border bg-[oklch(var(--surface-raised))] px-4">
               <summary className="cursor-pointer py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
                 Start with something else <span className="font-normal">· {productChoices.find((choice) => choice.value === goal)?.label}</span>
               </summary>
@@ -140,7 +143,7 @@ export default function NewProjectPage() {
               </fieldset>
             </details>
 
-            <details className="border-b">
+            <details className="overflow-hidden rounded-lg border bg-[oklch(var(--surface-raised))] px-4">
               <summary className="cursor-pointer py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
                 Add an icon or domain <span className="font-normal">· optional</span>
               </summary>
@@ -214,6 +217,8 @@ export default function NewProjectPage() {
             </Button>
             <p className="text-center text-xs leading-5 text-muted-foreground">Next: make the form, add one code block, then send a test.</p>
       </form>
+      </CardContent>
+      </Card>
     </div>
   )
 }

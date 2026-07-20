@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { CodeSnippet } from '@/components/code-snippet'
 import { CopyButton } from '@/components/copy-button'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Bot, CheckCircle2, Code2, Loader2, RefreshCw, XCircle } from 'lucide-react'
 
 interface InstallTabProps {
@@ -321,17 +322,18 @@ export function FeedbacksWidgetScript() {
 
   return (
     <div className="space-y-8" data-tour="install-workspace">
-      <section className="grid gap-8 border-b border-foreground/10 pb-8 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div>
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <Card>
+          <CardHeader>
           <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-primary"><Code2 className="h-4 w-4" /> One shared connection</div>
-          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.035em]">Install once. Keep the code unchanged.</h2>
+          <CardTitle className="mt-2 text-2xl tracking-[-0.035em]">Install once. Keep the code unchanged.</CardTitle>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
             This stable embed powers the feedback form and the product updates you show to users. Saved dashboard changes arrive remotely on the next page load.
           </p>
-
-          <div className="mt-6 divide-y border-y border-foreground/10">
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-3">
               {installSteps.map((step, index) => (
-                <div key={step.title} className="flex gap-3 px-4 py-3">
+                <div key={step.title} className="flex gap-3 rounded-lg border bg-[oklch(var(--surface-raised))] p-4">
                   <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
                     {index + 1}
                   </span>
@@ -341,15 +343,18 @@ export function FeedbacksWidgetScript() {
                   </div>
                 </div>
               ))}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <aside className="border-t border-foreground/10 pt-5 xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-semibold text-muted-foreground">Connection details</p>
+        <Card>
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                <CardTitle className="text-base">Connection details</CardTitle>
+                </div>
                 <Badge variant="outline">{modeLabel}</Badge>
-              </div>
-              <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-1">
+          </CardHeader>
+          <CardContent>
+              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-1">
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-muted-foreground">Project key</p>
                   {projectKey ? (
@@ -374,38 +379,41 @@ export function FeedbacksWidgetScript() {
                   <p className="mt-1 text-sm leading-5 text-muted-foreground">{verifyInstruction}</p>
                 </div>
               </div>
-        </aside>
+          </CardContent>
+        </Card>
       </section>
 
-      <section data-tour="install-snippet">
-        <header data-tour="install-snippet-header" className="flex flex-wrap items-end justify-between gap-4">
+      <Card data-tour="install-snippet">
+        <CardHeader data-tour="install-snippet-header" className="gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold">Choose where you are installing</h2>
+            <CardTitle className="text-lg">Choose where you are installing</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
               Select your environment and add this once near the application root.
             </p>
           </div>
-          <div data-tour="install-platforms" className="flex flex-wrap gap-1 border-b" role="group" aria-label="Install platform">
+          </div>
+          <div data-tour="install-platforms" className="flex flex-wrap gap-1 rounded-lg bg-[oklch(var(--surface-raised))] p-1" role="group" aria-label="Install platform">
             {installTargets.map((target) => (
               <button
                 key={target.id}
                 type="button"
                 aria-pressed={activePlatform === target.id}
                 onClick={() => setActivePlatform(target.id)}
-                className={`min-h-9 border-b-2 px-3 text-sm font-medium transition-colors ${
+                className={`min-h-9 rounded-md px-3 text-sm font-medium transition-colors ${
                   activePlatform === target.id
-                    ? 'border-primary text-foreground'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-card/60 hover:text-foreground'
                 }`}
               >
                 {target.label}
               </button>
             ))}
           </div>
-        </header>
+        </CardHeader>
 
-        <div className="mt-5 space-y-5">
-          <div className="flex flex-wrap items-start justify-between gap-3 border-y border-foreground/10 py-4">
+        <CardContent className="space-y-5">
+          <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg border bg-[oklch(var(--surface-raised))] p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-foreground">{selectedTarget.title}</p>
@@ -458,7 +466,7 @@ export function FeedbacksWidgetScript() {
             </div>
           )}
 
-          <div className="divide-y border-y border-foreground/10">
+          <div className="divide-y overflow-hidden rounded-lg border bg-[oklch(var(--surface-raised))]">
             <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
               <p className="text-sm font-medium text-foreground">Where this goes</p>
               <p className="text-sm leading-6 text-muted-foreground">{selectedTarget.placement}</p>
@@ -477,14 +485,14 @@ export function FeedbacksWidgetScript() {
             </div>
           </div>
 
-          <div className="flex items-start gap-3 bg-primary/[0.045] px-4 py-3 text-sm text-muted-foreground">
+          <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/[0.055] px-4 py-3 text-sm text-muted-foreground">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <p>After installation, change the button, fields, wording, placement, captcha, and user-facing product updates from the dashboard. <span className="font-medium text-foreground">You will not need a new snippet.</span></p>
           </div>
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      <details className="group rounded-xl border bg-card">
+      <details className="group rounded-xl border bg-card shadow-[var(--shadow-card)]">
         <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">
           <div>
             <div className="flex flex-wrap items-center gap-2">

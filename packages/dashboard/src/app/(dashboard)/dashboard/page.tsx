@@ -324,7 +324,7 @@ export default async function DashboardPage({
   return (
     <div className="animate-fade-in space-y-5">
       {/* ─── Header ───────────────────────────────────────── */}
-      <div className="grid gap-3 border-b pb-4 lg:grid-cols-[minmax(260px,1fr)_auto_minmax(220px,auto)] lg:items-center">
+      <div className="grid gap-4 rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6 lg:grid-cols-[minmax(260px,1fr)_auto_minmax(220px,auto)] lg:items-center">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
             Good {getGreeting()}, {displayName}
@@ -405,7 +405,7 @@ export default async function DashboardPage({
       </div>
 
       {total === 0 && primaryProject ? (
-        <div data-tour="dashboard-capabilities" className="flex flex-col gap-4 border-y border-primary/25 bg-primary/[0.04] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div data-tour="dashboard-capabilities" className="flex flex-col gap-4 rounded-xl border border-primary/25 bg-card p-5 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 gap-3">
             <Code2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
@@ -500,7 +500,7 @@ export default async function DashboardPage({
       )}
 
       {/* ─── Stat Cards ───────────────────────────────────── */}
-      <div className="grid grid-cols-2 border-y border-foreground/10 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)] sm:grid-cols-3 lg:grid-cols-6">
         {statCards.map((stat) => (
           <Link key={stat.id} href={stat.href} className={cn('block border-b border-r border-foreground/10 p-4 transition-colors hover:bg-muted/25 lg:border-b-0', stat.urgent && 'bg-amber-50/50 dark:bg-amber-950/15')}>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">

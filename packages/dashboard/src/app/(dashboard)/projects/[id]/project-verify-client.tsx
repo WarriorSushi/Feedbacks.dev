@@ -84,7 +84,7 @@ export function ProjectVerifyClient({
       <SetupProgress projectId={projectId} activeStep="verify" />
 
       {verifiedFeedbackId && (
-        <div className="flex flex-col gap-4 border-y border-primary/35 bg-primary/[0.055] px-4 py-4 sm:flex-row sm:items-center sm:justify-between" role="status">
+        <div className="flex flex-col gap-4 rounded-xl border border-primary/35 bg-card p-5 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:justify-between" role="status">
           <div className="flex min-w-0 gap-3">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
@@ -103,7 +103,7 @@ export function ProjectVerifyClient({
         </div>
       )}
 
-      <header data-tour="verify-guide" className="flex flex-wrap items-end justify-between gap-4 border-b border-foreground/10 pb-6">
+      <header data-tour="verify-guide" className="flex flex-wrap items-end justify-between gap-4 rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-[-0.035em]">Send one test. Know the connection works.</h1>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
@@ -120,15 +120,15 @@ export function ProjectVerifyClient({
         </div>
       </header>
 
-      <div className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="lg:border-r lg:border-foreground/10 lg:pr-7">
+      <div className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <aside className="rounded-xl border bg-card p-5 shadow-[var(--shadow-card)]">
             <div className="flex items-center gap-2">
               <Badge variant="secondary">Saved config</Badge>
               <Badge variant="outline">{modeLabel} mode</Badge>
             </div>
             <h2 className="mt-5 text-lg font-semibold">Three quick checks</h2>
             <p className="mt-1 text-sm text-muted-foreground">This hosted page tests your saved form and inbox path.</p>
-          <ol className="mt-5 divide-y border-y border-foreground/10 text-sm text-muted-foreground">
+          <ol className="mt-5 divide-y overflow-hidden rounded-lg border bg-[oklch(var(--surface-raised))] px-4 text-sm text-muted-foreground">
             <li className="grid grid-cols-[24px_1fr] gap-2 py-3">
               <span className="font-medium text-foreground">1</span><span>Find the form here. {verifyInstruction}</span>
             </li>
@@ -147,7 +147,7 @@ export function ProjectVerifyClient({
             </div>
         </aside>
 
-        <section className="min-w-0">
+        <section className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
             <div className="bg-muted/25 p-5 sm:p-7">
               <div className="max-w-xl space-y-3">
                 <p className="text-xs font-medium text-primary">Live saved configuration</p>

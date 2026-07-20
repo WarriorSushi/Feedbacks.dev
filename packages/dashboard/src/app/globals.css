@@ -9,10 +9,10 @@
     --foreground: 0.205 0.012 105;
     /* Tonal elevation: raised surfaces get gently deeper in light mode. */
     --surface-sidebar: 0.97 0.008 105;
-    --surface-raised: 0.965 0.01 105;
-    --surface-overlay: 0.95 0.012 105;
+    --surface-raised: 0.985 0.008 105;
+    --surface-overlay: 0.995 0.006 105;
     --surface-selected: 0.925 0.028 120;
-    --card: 0.975 0.007 105;
+    --card: 0.995 0.004 105;
     --card-foreground: 0.205 0.012 105;
     --popover: 0.95 0.012 105;
     --popover-foreground: 0.205 0.012 105;
@@ -37,14 +37,14 @@
   }
 
   .dark {
-    --background: 0.155 0.009 105;
+    --background: 0.135 0.009 105;
     --foreground: 0.94 0.009 105;
     /* Tonal elevation reverses in dark mode: higher surfaces become lighter. */
-    --surface-sidebar: 0.175 0.01 105;
-    --surface-raised: 0.205 0.011 105;
-    --surface-overlay: 0.235 0.012 105;
-    --surface-selected: 0.26 0.035 120;
-    --card: 0.19 0.01 105;
+    --surface-sidebar: 0.165 0.01 105;
+    --surface-raised: 0.225 0.011 105;
+    --surface-overlay: 0.255 0.012 105;
+    --surface-selected: 0.275 0.035 120;
+    --card: 0.195 0.01 105;
     --card-foreground: 0.94 0.009 105;
     --popover: 0.22 0.011 105;
     --popover-foreground: 0.94 0.009 105;
@@ -115,6 +115,11 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --shadow-card: 0 1px 2px rgb(15 18 13 / 0.04), 0 8px 28px rgb(15 18 13 / 0.035);
   --shadow-float: 0 20px 60px rgb(8 12 7 / 0.16);
+}
+
+.dark {
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.025), 0 14px 36px rgb(0 0 0 / 0.2);
+  --shadow-float: 0 24px 72px rgb(0 0 0 / 0.4);
 }
 
 /* ─── Keyframes ───────────────────────────────────────────────────────────── */

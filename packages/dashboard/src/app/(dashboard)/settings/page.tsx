@@ -158,7 +158,7 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
-      <header className="border-b pb-5">
+      <header className="rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
         <p className="text-xs font-semibold text-primary">Your account</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">Settings</h1>
         <p className="mt-2 text-sm text-muted-foreground">Manage your profile, alerts, theme, and account.</p>

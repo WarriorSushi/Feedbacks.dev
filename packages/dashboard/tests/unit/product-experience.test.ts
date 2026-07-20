@@ -81,7 +81,7 @@ test('navigation gives product updates user context instead of an ambiguous rele
 
   assert.match(sidebar, /Updates for users/)
   assert.match(projectHome, /Show product updates to users/)
-  assert.match(updatesOnboarding, /useState<Choice>\('updates'\)/)
+  assert.match(updatesOnboarding, /useState<Choice>\(["']updates["']\)/)
   assert.doesNotMatch(updatesOnboarding, /localStorage/)
   assert.doesNotMatch(sidebar, /label: 'Release notes'/)
 })
@@ -127,12 +127,32 @@ test('theme tokens use perceptual OKLCH colors in both themes', () => {
   const tailwind = read('../../tailwind.config.cjs')
 
   assert.match(css, /--background: 0\.985/)
-  assert.match(css, /\.dark[\s\S]*--background: 0\.155/)
+  assert.match(css, /\.dark[\s\S]*--background: 0\.135/)
+  assert.match(css, /\.dark[\s\S]*--surface-raised: 0\.225/)
+  assert.match(css, /\.dark[\s\S]*--card: 0\.195/)
   assert.match(css, /--surface-sidebar:/)
   assert.match(css, /--surface-selected:/)
   assert.match(tailwind, /surface:\s*\{/)
   assert.match(tailwind, /oklch\(var\(--primary\)/)
   assert.doesNotMatch(tailwind, /hsl\(var\(--primary\)/)
+})
+
+test('authenticated workspaces use elevated cards instead of flat divider-only canvases', () => {
+  const card = read('../../src/components/ui/card.tsx')
+  const install = read('../../src/app/(dashboard)/projects/[id]/install-tab.tsx')
+  const projectHome = read('../../src/app/(dashboard)/projects/[id]/project-home.tsx')
+  const customize = read('../../src/app/(dashboard)/projects/[id]/customize-tab.tsx')
+  const verify = read('../../src/app/(dashboard)/projects/[id]/project-verify-client.tsx')
+
+  assert.match(card, /rounded-xl border border-border\/80 bg-card/)
+  assert.match(card, /border-b bg-muted\/25/)
+  assert.match(card, /shadow-\[var\(--shadow-card\)\]/)
+  assert.match(install, /<Card data-tour="install-snippet">/)
+  assert.match(install, /surface-raised/)
+  assert.doesNotMatch(install, /grid gap-8 border-b/)
+  assert.match(projectHome, /<Card>/)
+  assert.match(customize, /rounded-xl border bg-card/)
+  assert.match(verify, /rounded-xl border bg-card/)
 })
 
 test('public docs use the stable canonical embed and remote customization language', () => {
