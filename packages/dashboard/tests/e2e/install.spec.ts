@@ -23,7 +23,7 @@ test('creates a project and lands on a stable one-time embed installation', asyn
   await expect(page.getByText(/Prefer global custom code/i)).toBeVisible()
 
   await page.goto(page.url().replace(/\/install(?:\?.*)?$/, '/feedback-form'))
-  await expect(page.getByRole('heading', { name: 'Make the feedback form fit your product' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Make the feedback form feel native' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Live form preview' })).toBeVisible()
 })
 
