@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils'
 type DemoView = 'feedback' | 'updates'
 type Category = 'bug' | 'idea' | 'praise' | 'question'
 
-const AUTO_ADVANCE_MS = 6000
+const AUTO_ADVANCE_MS = 8000
 
 const categoryOptions: { value: Category; label: string; Icon: typeof Bug }[] = [
   { value: 'bug', label: 'Bug', Icon: Bug },
@@ -193,6 +193,7 @@ export function LandingProductLoop() {
 
   const chooseScene = (index: number) => {
     setSceneIndex(index)
+    setPaused(true)
     setPanelOpen(true)
     setSent(false)
     setScreenshotReady(false)
