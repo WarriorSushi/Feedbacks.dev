@@ -289,7 +289,7 @@ export function PublicBoard({
   return (
     <div
       data-public-board-ready={ready ? 'true' : 'false'}
-      className="min-h-screen bg-[linear-gradient(180deg,_hsl(var(--background))_0%,_hsl(var(--muted))_100%)]"
+      className="min-h-screen bg-[linear-gradient(180deg,_oklch(var(--background))_0%,_oklch(var(--muted))_100%)]"
     >
       {board.customCss ? <style>{board.customCss}</style> : null}
       {viewerSignedIn && (

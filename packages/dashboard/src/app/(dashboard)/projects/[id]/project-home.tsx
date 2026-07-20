@@ -9,12 +9,12 @@ export function ProjectHome({ project }: { project: Project }) {
   const feedbackEnabled = project.settings?.widget_config?.feedbackEnabled !== false
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-7 animate-fade-in">
       <section className="border-b pb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Project home</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">What do you want to manage?</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{project.name}</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.035em]">Two products. One shared connection.</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-          {project.name} uses one small embed for two separate products. Install it once, then manage both products here without changing your site code.
+          Choose the product you want to manage. The shared embed is installed once, then saved changes reach your site remotely.
         </p>
       </section>
 
@@ -24,7 +24,7 @@ export function ProjectHome({ project }: { project: Project }) {
           eyebrow="Feedback collection"
           title="Feedback form"
           description="Collect bugs, ideas, questions, ratings, screenshots, and contact details from inside your product."
-          detail="You control the button, placement, fields, wording, and anti-spam settings remotely."
+          detail="Control the button, placement, fields, wording, and anti-spam settings remotely."
           status={feedbackEnabled ? 'Enabled' : 'Disabled'}
           href={`/projects/${project.id}/feedback-form`}
           action="Manage feedback form"
@@ -34,13 +34,13 @@ export function ProjectHome({ project }: { project: Project }) {
           eyebrow="In-product communication"
           title="Release notes"
           description="Publish “What’s new” announcements that appear inside your users’ product."
-          detail="Create, preview, schedule, and publish announcements. This is not a log of feedbacks.dev website changes."
+          detail="Create, preview, schedule, and publish announcements for your users."
           href={`/projects/${project.id}/release-notes`}
           action="Open release notes"
         />
       </div>
 
-      <Card className="overflow-hidden border-primary/25 bg-primary/[0.035]">
+      <Card className="overflow-hidden border-primary/25 bg-primary/[0.045]">
         <CardContent className="grid gap-6 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div className="flex gap-4">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -52,7 +52,7 @@ export function ProjectHome({ project }: { project: Project }) {
                 <Badge variant="secondary">Install once</Badge>
               </div>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                Add the public project embed to your app shell. After that, saved changes to the feedback form and release notes arrive remotely on the next page load—no replacement snippet or redeploy required.
+                Add the public project embed to your app shell. After that, Feedback form and Release notes changes arrive remotely on the next page load. No replacement snippet or redeploy is required.
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground" aria-label="Product setup flow">
                 <span className="rounded-md border bg-background px-2.5 py-1.5">1. Install embed</span>

@@ -427,10 +427,10 @@ export function ProductTour({
             height={spotlight.height}
             rx={spotlight.radius}
             fill="none"
-            stroke="hsl(var(--primary))"
+            stroke="oklch(var(--primary))"
             strokeWidth="2"
             vectorEffect="non-scaling-stroke"
-            style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.65))' }}
+            style={{ filter: 'drop-shadow(0 0 8px oklch(var(--primary) / 0.5))' }}
           />
         </svg>
       ) : (

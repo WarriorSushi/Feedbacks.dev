@@ -13,10 +13,16 @@ import { cn } from '@/lib/utils'
 import { DEFAULT_PROJECT_ICON, PROJECT_ICONS } from '@/lib/project-icons'
 
 const setupSteps = [
-  { Icon: CheckCircle2, title: 'Create project', body: 'Name the place where feedback belongs.' },
-  { Icon: Code2, title: 'Copy the default install', body: 'The generated snippet works without configuration.' },
-  { Icon: Inbox, title: 'Verify one message', body: 'Send one test, confirm the inbox, then customize if needed.' },
+  { Icon: CheckCircle2, title: 'Create this project', body: 'Choose the first product. You can enable the other later.' },
+  { Icon: Code2, title: 'Install one shared embed', body: 'Paste the generated Website snippet into your app shell.' },
+  { Icon: Inbox, title: 'Verify the connection', body: 'Send one test and confirm it reached the project inbox.' },
 ]
+
+const productChoices = [
+  { value: 'feedback', label: 'Feedback form', body: 'Collect bugs, ideas, questions, ratings, and screenshots.' },
+  { value: 'updates', label: 'Release notes', body: 'Publish in-product “What’s new” announcements.' },
+  { value: 'both', label: 'Both products', body: 'Collect user signal and communicate what shipped.' },
+] as const
 
 export default function NewProjectPage() {
   const [name, setName] = React.useState('')
@@ -92,7 +98,7 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-7 animate-fade-in">
       <Link
         href="/projects"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -100,10 +106,16 @@ export default function NewProjectPage() {
         <ArrowLeft className="h-4 w-4" /> Back to projects
       </Link>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <header className="max-w-2xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">New project</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.035em]">What are you adding to your product?</h1>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">A project is one app or website. Start with the product you need now, then install the shared embed once.</p>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
         <Card data-tour="project-create-form">
           <CardHeader>
-            <CardTitle>Create project</CardTitle>
+            <CardTitle className="text-lg">Project details</CardTitle>
             <CardDescription>
               One name is enough. The next screen gives you a working install snippet immediately.
             </CardDescription>
@@ -127,12 +139,13 @@ export default function NewProjectPage() {
             </div>
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">What do you want to do first?</legend>
-              <div className="grid gap-2 sm:grid-cols-3">
-                {([
-                  ['updates', 'Publish release notes'],
-                  ['feedback', 'Collect feedback'],
-                  ['both', 'Both'],
-                ] as const).map(([value, label]) => <button key={value} type="button" onClick={() => setGoal(value)} className={cn('min-h-11 rounded-md border px-3 text-left text-sm font-medium', goal === value ? 'border-primary bg-primary/5 text-primary' : 'hover:bg-muted/50')} aria-pressed={goal === value}>{label}</button>)}
+              <div className="grid gap-2">
+                {productChoices.map(({ value, label, body }) => (
+                  <button key={value} type="button" onClick={() => setGoal(value)} className={cn('grid min-h-16 grid-cols-[18px_1fr] gap-3 rounded-lg border px-4 py-3 text-left transition-colors', goal === value ? 'border-primary/50 bg-primary/[0.055]' : 'hover:border-foreground/20 hover:bg-muted/35')} aria-label={label} aria-pressed={goal === value}>
+                    <span className={cn('mt-0.5 flex h-4 w-4 items-center justify-center rounded-full border', goal === value ? 'border-primary bg-primary' : 'border-input')}>{goal === value && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}</span>
+                    <span><span className={cn('block text-sm font-semibold', goal === value && 'text-primary')}>{label}</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">{body}</span></span>
+                  </button>
+                ))}
               </div>
               <p className="text-xs text-muted-foreground">You can turn either product on or off later without changing the shared embed.</p>
             </fieldset>
@@ -211,25 +224,22 @@ export default function NewProjectPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Setup stays linear</CardTitle>
-            <CardDescription>
-              One screen at a time, no setup maze.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {setupSteps.map(({ Icon, title, body }) => (
-              <div key={title} className="flex gap-3 rounded-lg border bg-muted/20 p-3">
-                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+        <aside className="rounded-lg border bg-card px-5 py-5 shadow-[var(--shadow-card)]">
+          <p className="text-sm font-semibold">What happens next</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">Three focused screens. Advanced settings stay out of the way.</p>
+          <div className="mt-5 border-y">
+            {setupSteps.map(({ title, body }, index) => (
+              <div key={title} className="flex gap-3 border-b py-4 last:border-b-0">
+                <span className="font-mono text-[10px] text-primary">0{index + 1}</span>
                 <div className="min-w-0">
                   <p className="text-sm font-medium">{title}</p>
                   <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{body}</p>
                 </div>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+          <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-muted-foreground"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" /> Future form and release-note changes are delivered remotely. No new snippet.</p>
+        </aside>
       </div>
     </div>
   )

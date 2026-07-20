@@ -17,7 +17,7 @@ function buildContentSecurityPolicy(nonce: string): string {
     : 'https://test.dodopayments.com'
   const developmentScriptSource = process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''
 
-  return [
+  const directives = [
     "default-src 'self'",
     "base-uri 'self'",
     "object-src 'none'",
@@ -30,8 +30,9 @@ function buildContentSecurityPolicy(nonce: string): string {
     `connect-src 'self' ${appOrigin} ${supabaseOrigin} ${supabaseWsOrigin} ${dodoOrigin}`.trim(),
     "worker-src 'self' blob:",
     "frame-src 'self'",
-    'upgrade-insecure-requests',
-  ].join('; ')
+  ]
+  if (process.env.NODE_ENV !== 'development') directives.push('upgrade-insecure-requests')
+  return directives.join('; ')
 }
 
 export async function middleware(request: NextRequest) {

@@ -25,7 +25,7 @@ export function FeedbackProjectScope({
     <div className="border-y py-2.5">
       <div className="mb-2 px-0.5">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Project view</p>
-        <p className="text-[11px] text-muted-foreground/75">Choose one project or include the whole workspace.</p>
+        <p className="text-[11px] text-muted-foreground">Choose one project or include the whole workspace.</p>
       </div>
       <div className="-mx-4 px-4 md:mx-0 md:px-0">
         <div className="scroll-fade-x flex snap-x items-center gap-2 overflow-x-auto pb-1 pr-8 scrollbar-thin md:pr-0">
@@ -51,4 +51,3 @@ export function FeedbackProjectScope({
     </div>
   )
 }
-

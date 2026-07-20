@@ -24,7 +24,7 @@ export default function ProjectLoading() {
       <div className="rounded-xl border-2 border-foreground/15 bg-card p-3 dark:border-primary/25">
         <div className="grid gap-3 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-xl border-2 border-foreground/15 bg-background p-4 shadow-[5px_5px_0_hsl(var(--foreground)/0.16)] dark:border-primary/25">
+            <div key={i} className="rounded-xl border border-border/80 bg-background p-4 shadow-[var(--shadow-card)] dark:border-primary/25">
               <div className="flex gap-3">
                 <Skeleton className="h-7 w-7 rounded-full" />
                 <div className="space-y-2">

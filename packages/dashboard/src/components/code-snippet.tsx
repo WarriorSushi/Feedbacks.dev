@@ -50,6 +50,8 @@ export function CodeSnippet({ tabs, className, wrap = false, maxHeightClassName 
           className="absolute right-2 top-2 z-10 h-8 bg-background/95 px-2 text-xs shadow-sm backdrop-blur"
         />
         <pre
+          tabIndex={0}
+          aria-label={`${tabs[activeTab].label} code`}
           className={cn(
             'p-4 pr-24 text-sm',
             wrap ? 'overflow-x-hidden overflow-y-auto whitespace-pre-wrap break-words' : 'overflow-x-auto',
