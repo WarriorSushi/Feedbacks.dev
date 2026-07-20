@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { BrandWordmark } from '@/components/brand-wordmark'
 import {
-  LayoutDashboard,
+  House,
   MessageSquare,
   CreditCard,
   Settings,
@@ -51,15 +51,39 @@ type NavItem = {
   external?: boolean
 }
 
-const primaryNavItems: NavItem[] = [
-  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true, tourId: 'nav-dashboard', projectTab: 'home' },
-  { href: '/feedback-form', label: 'Feedback form', icon: MessageSquare, tourId: 'nav-feedback-form', projectTab: 'feedback-form' },
-  { href: '/feedback', label: 'Feedback inbox', icon: MessageSquare, tourId: 'nav-feedback' },
-  { href: '/release-notes', label: 'Updates for users', icon: Megaphone, tourId: 'nav-updates', projectTab: 'release-notes' },
-  { href: '/board', label: 'Public board', icon: Globe, tourId: 'nav-boards', projectTab: 'board' },
-  { href: '/install', label: 'Install & verify', icon: Code2, tourId: 'nav-install', projectTab: 'install' },
-  { href: '/integrations', label: 'Integrations', icon: Webhook, tourId: 'nav-integrations', projectTab: 'integrations' },
-  { href: '/api', label: 'API & MCP', icon: Code2, tourId: 'nav-api', projectTab: 'api' },
+type NavGroup = {
+  label?: string
+  items: NavItem[]
+}
+
+const primaryNavGroups: NavGroup[] = [
+  {
+    items: [
+      { href: '/dashboard', label: 'Home', icon: House, exact: true, tourId: 'nav-dashboard' },
+    ],
+  },
+  {
+    label: 'Collect',
+    items: [
+      { href: '/feedback-form', label: 'Feedback form', icon: MessageSquare, tourId: 'nav-feedback-form', projectTab: 'feedback-form' },
+      { href: '/feedback', label: 'Feedback inbox', icon: MessageSquare, tourId: 'nav-feedback' },
+    ],
+  },
+  {
+    label: 'Share with users',
+    items: [
+      { href: '/release-notes', label: 'Updates for users', icon: Megaphone, tourId: 'nav-updates', projectTab: 'release-notes' },
+      { href: '/board', label: 'Public feedback board', icon: Globe, tourId: 'nav-boards', projectTab: 'board' },
+    ],
+  },
+  {
+    label: 'Connect',
+    items: [
+      { href: '/install', label: 'Install & verify', icon: Code2, tourId: 'nav-install', projectTab: 'install' },
+      { href: '/integrations', label: 'Integrations', icon: Webhook, tourId: 'nav-integrations', projectTab: 'integrations' },
+      { href: '/api', label: 'API & MCP', icon: Code2, tourId: 'nav-api', projectTab: 'api' },
+    ],
+  },
 ]
 
 const utilityNavItems: NavItem[] = [
@@ -213,6 +237,8 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
             onMouseEnter={() => router.prefetch('/dashboard')}
             onFocus={() => router.prefetch('/dashboard')}
             className="whitespace-nowrap font-semibold transition-opacity active:opacity-70"
+            aria-label="Go to Home"
+            title="Home"
             tabIndex={collapsed ? -1 : 0}
           >
             <BrandWordmark
@@ -242,18 +268,22 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
             aria-expanded={projectOpen}
             aria-label="Switch project"
             className={cn(
-              'group flex min-h-11 w-full items-center justify-between rounded-lg px-2.5 py-2 text-[13px] md:min-h-0',
-              'border border-primary/20 bg-primary/[0.045]',
-              'transition-all duration-150 hover:border-primary/35 hover:bg-primary/[0.075]',
-              projectOpen && 'border-primary/40 bg-primary/[0.09]'
+              'group flex min-h-12 w-full items-center justify-between rounded-lg border px-2.5 py-2 text-left text-[13px]',
+              'border-border/80 bg-surface-raised shadow-sm shadow-black/[0.025]',
+              'transition-[background-color,border-color,box-shadow,transform] duration-150 hover:border-border hover:bg-surface-overlay',
+              'active:scale-[0.99]',
+              projectOpen && 'border-primary/25 bg-surface-overlay shadow-md shadow-black/[0.06]'
             )}
           >
             <span className="flex min-w-0 items-center gap-2">
-              <span aria-hidden="true" className="flex h-5 w-5 shrink-0 items-center justify-center text-sm leading-none">
+              <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-sm leading-none ring-1 ring-primary/10">
                 {projectIcon(currentProject)}
               </span>
-              <span className="truncate font-medium">
-                {currentProject?.name ?? 'Select project'}
+              <span className="min-w-0">
+                <span className="block text-[10px] font-medium uppercase tracking-[0.11em] text-muted-foreground">Current project</span>
+                <span className="block truncate font-medium leading-4">
+                  {currentProject?.name ?? 'Select project'}
+                </span>
               </span>
             </span>
             {projectOpen ? (
@@ -271,7 +301,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
             )}
           >
             <div className="min-h-0">
-              <div className="mt-1 overflow-hidden rounded-lg border border-border/80 bg-popover shadow-md shadow-black/5">
+              <div className="mt-1.5 overflow-hidden rounded-lg border border-border/80 bg-popover shadow-[var(--shadow-float)]">
                 {visibleProjects.map((p) => {
                   const isSelected = p.id === resolvedCurrentProjectId
                   const destination = projectDestination(p.id)
@@ -355,52 +385,58 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
 
       {/* Nav — scrolls when it overflows, pushes footer to bottom when it doesn't */}
       <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2.5">
-        <div className="space-y-0.5">
-          {primaryNavItems.map((item, index) => {
-            const projectTab = item.projectTab
-            const scopedHref = projectTab && currentProject
-              ? projectTab === 'home'
-                ? `/projects/${encodeURIComponent(currentProject.id)}`
-                : getProjectRoute(currentProject.id, projectTab as Parameters<typeof getProjectRoute>[1])
-              : item.href
-            const activeProjectSection = getProjectRouteSection(pathname)
-            const isActive = projectTab
-              ? projectTab === 'home'
-                ? Boolean(routeProjectId && pathname === `/projects/${routeProjectId}`)
-                : activeProjectSection === projectTab
-              : item.exact
-                ? pathname === item.href
-                : pathname === item.href || pathname.startsWith(item.href + '/')
-            return (
-              <React.Fragment key={item.href}>
-                {!collapsed && index === 1 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Products</p>}
-                {!collapsed && index === 5 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Setup & delivery</p>}
-                {!collapsed && index === 7 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Developers</p>}
-                <Link
-                  href={scopedHref}
-                  data-tour={item.tourId}
-                  prefetch={false}
-                  title={collapsed ? item.label : undefined}
-                  aria-label={collapsed ? item.label : undefined}
-                  aria-current={isActive ? 'page' : undefined}
-                  onClick={() => beginNavigation(scopedHref)}
-                  onMouseEnter={() => router.prefetch(scopedHref)}
-                  onFocus={() => router.prefetch(scopedHref)}
-                  className={cn(
-                    'group relative flex min-h-11 items-center gap-3 rounded-lg py-2 text-[13px] font-medium md:min-h-0',
-                    'transition-all duration-150 active:scale-[0.98]',
-                    collapsed ? 'justify-center px-2' : 'px-3',
-                    isActive
-                      ? ['bg-primary/[0.09] text-primary', 'before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-r-full', 'before:bg-primary']
-                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                  )}
-                >
-                  {pendingHref === scopedHref ? <Loader2 className={cn('h-[17px] w-[17px] shrink-0 animate-spin', isActive && 'text-primary')} /> : <item.icon className={cn('h-[17px] w-[17px] shrink-0 transition-transform duration-150', !isActive && 'group-hover:scale-[1.08]', isActive && 'text-primary')} />}
-                  {!collapsed && <span className="truncate">{item.label}</span>}
-                </Link>
-              </React.Fragment>
-            )
-          })}
+        <div className="space-y-3.5">
+          {primaryNavGroups.map((group, groupIndex) => (
+            <div key={group.label || 'home'} className="space-y-0.5">
+              {!collapsed && group.label && (
+                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/65">
+                  {group.label}
+                </p>
+              )}
+              {group.items.map((item) => {
+                const projectTab = item.projectTab
+                const scopedHref = projectTab && currentProject
+                  ? getProjectRoute(currentProject.id, projectTab as Parameters<typeof getProjectRoute>[1])
+                  : item.href
+                const activeProjectSection = getProjectRouteSection(pathname)
+                const isActive = projectTab
+                  ? activeProjectSection === projectTab
+                  : item.exact
+                    ? pathname === item.href
+                    : pathname === item.href || pathname.startsWith(item.href + '/')
+                return (
+                  <Link
+                    key={item.href}
+                    href={scopedHref}
+                    data-tour={item.tourId}
+                    prefetch={false}
+                    title={collapsed ? item.label : undefined}
+                    aria-label={collapsed ? item.label : undefined}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => beginNavigation(scopedHref)}
+                    onMouseEnter={() => router.prefetch(scopedHref)}
+                    onFocus={() => router.prefetch(scopedHref)}
+                    className={cn(
+                      'group relative flex min-h-11 items-center gap-3 rounded-lg py-2 text-[13px] font-medium md:min-h-0',
+                      'transition-[background-color,color,transform] duration-150 active:scale-[0.98]',
+                      collapsed ? 'justify-center px-2' : 'px-3',
+                      isActive
+                        ? 'bg-surface-selected text-primary'
+                        : 'text-muted-foreground hover:bg-surface-raised hover:text-foreground',
+                      collapsed && groupIndex > 0 && group.items[0] === item && 'mt-3',
+                    )}
+                  >
+                    {pendingHref === scopedHref ? (
+                      <Loader2 className="h-[17px] w-[17px] shrink-0 animate-spin text-primary" />
+                    ) : (
+                      <item.icon className={cn('h-[17px] w-[17px] shrink-0 transition-colors duration-150', isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
+                    )}
+                    {!collapsed && <span className="truncate">{item.label}</span>}
+                  </Link>
+                )
+              })}
+            </div>
+          ))}
 
           {/* The preview link follows the selected project instead of listing every project. */}
           {(() => {
@@ -420,10 +456,10 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
           })()}
         </div>
 
-        <div className="mt-auto border-t pt-1.5">
+        <div className="mt-auto border-t pt-2.5">
           {!collapsed && (
             <div className="mb-1 flex items-center justify-between px-2.5">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Account & help</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/65">Help & account</span>
               <Button
                 type="button"
                 variant="ghost"
@@ -459,7 +495,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
                       'group relative flex min-h-11 items-center gap-3 rounded-lg py-2 text-[13px] font-medium md:min-h-0',
                       'transition-all duration-150 active:scale-[0.98]',
                       collapsed ? 'justify-center px-2' : 'px-3',
-                      isActive ? 'bg-primary/8 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                      isActive ? 'bg-surface-selected text-primary' : 'text-muted-foreground hover:bg-surface-raised hover:text-foreground',
                     )}
                   >
                     {!item.external && pendingHref === item.href ? (
@@ -537,7 +573,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
           onFocus={() => router.prefetch('/dashboard?tour=1')}
           className={cn(
             'group flex min-h-11 items-center gap-2.5 rounded-lg py-2 text-[12px] font-medium text-muted-foreground md:min-h-0',
-            'transition-[background-color,color,transform] duration-150 hover:bg-accent hover:text-foreground active:scale-[0.98]',
+            'transition-[background-color,color,transform] duration-150 hover:bg-surface-raised hover:text-foreground active:scale-[0.98]',
             collapsed ? 'justify-center px-0' : 'px-2.5',
           )}
         >
@@ -546,7 +582,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
           ) : (
             <CircleHelp className="h-3.5 w-3.5 shrink-0 transition-transform duration-150 group-hover:scale-[1.08]" />
           )}
-          {!collapsed && <span className="truncate">Tour this workspace</span>}
+          {!collapsed && <span className="truncate">Quick product tour</span>}
         </Link>
       </div>
     </>
@@ -555,7 +591,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
   return (
     <>
       {/* ── Mobile top bar ──────────────────────────────────────────────── */}
-      <div className="flex h-14 shrink-0 items-center justify-between border-b bg-card px-4 md:hidden">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b bg-surface-sidebar px-4 md:hidden">
         <Link href="/dashboard" prefetch={false} className="font-semibold transition-opacity active:opacity-70">
           <BrandWordmark
             className="text-[17px]"
@@ -586,7 +622,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
       {/* ── Mobile drawer (fixed, slides in) ──────────────────────────── */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r bg-card md:hidden',
+          'fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r bg-surface-sidebar md:hidden',
           'transition-transform duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
         )}
@@ -597,7 +633,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
       {/* ── Desktop sidebar (static flex child, full height from parent) ─ */}
       <aside
         className={cn(
-          'hidden md:flex md:flex-col md:border-r md:bg-card/80 md:backdrop-blur-xl',
+          'hidden md:flex md:flex-col md:border-r md:bg-surface-sidebar',
           'transition-[width] duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]',
           collapsed ? 'md:w-[60px]' : 'md:w-[232px]'
         )}

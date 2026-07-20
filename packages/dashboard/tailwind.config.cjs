@@ -19,6 +19,12 @@ module.exports = {
         ring: 'oklch(var(--ring) / <alpha-value>)',
         background: 'oklch(var(--background) / <alpha-value>)',
         foreground: 'oklch(var(--foreground) / <alpha-value>)',
+        surface: {
+          sidebar: 'oklch(var(--surface-sidebar) / <alpha-value>)',
+          raised: 'oklch(var(--surface-raised) / <alpha-value>)',
+          overlay: 'oklch(var(--surface-overlay) / <alpha-value>)',
+          selected: 'oklch(var(--surface-selected) / <alpha-value>)',
+        },
         primary: {
           DEFAULT: 'oklch(var(--primary) / <alpha-value>)',
           foreground: 'oklch(var(--primary-foreground) / <alpha-value>)',

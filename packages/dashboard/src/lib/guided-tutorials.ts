@@ -35,7 +35,7 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
     title: 'Your workspace in 6 steps',
     description: 'See the core loop first. Advanced tools stay available when you need them.',
     steps: [
-      { title: 'Start from Overview', body: 'This project home separates feedback collection from the updates you show users, and shows their shared install status.', href: '/projects/{projectId}', target: '[data-tour="nav-dashboard"]' },
+      { title: 'Start from Home', body: 'Home shows the health of the selected project, recent feedback, and the clearest next action.', href: '/dashboard', target: '[data-tour="nav-dashboard"]' },
       { title: 'Shape the Feedback form', body: 'Choose the placement, wording, fields, color, and anti-spam settings. Saved changes reach the embed remotely.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="nav-feedback-form"]' },
       { title: 'Triage the Feedback inbox', body: 'User messages land here with page and browser context. Search, filter, tag, and decide what needs action.', href: '/feedback', target: '[data-tour="nav-feedback"]' },
       { title: 'Show updates to users', body: 'Tell users what shipped through the in-product “What’s new” popup. These are updates for your product, not feedbacks.dev.', href: '/projects/{projectId}/release-notes', target: '[data-tour="nav-updates"]' },

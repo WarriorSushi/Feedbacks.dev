@@ -7,9 +7,14 @@
     /* Warm, precise neutrals with one controlled product-green accent. */
     --background: 0.985 0.006 105;
     --foreground: 0.205 0.012 105;
-    --card: 0.997 0.003 105;
+    /* Tonal elevation: raised surfaces get gently deeper in light mode. */
+    --surface-sidebar: 0.97 0.008 105;
+    --surface-raised: 0.965 0.01 105;
+    --surface-overlay: 0.95 0.012 105;
+    --surface-selected: 0.925 0.028 120;
+    --card: 0.975 0.007 105;
     --card-foreground: 0.205 0.012 105;
-    --popover: 0.997 0.003 105;
+    --popover: 0.95 0.012 105;
     --popover-foreground: 0.205 0.012 105;
     --primary: 0.49 0.145 127;
     --primary-foreground: 0.985 0.01 110;
@@ -34,6 +39,11 @@
   .dark {
     --background: 0.155 0.009 105;
     --foreground: 0.94 0.009 105;
+    /* Tonal elevation reverses in dark mode: higher surfaces become lighter. */
+    --surface-sidebar: 0.175 0.01 105;
+    --surface-raised: 0.205 0.011 105;
+    --surface-overlay: 0.235 0.012 105;
+    --surface-selected: 0.26 0.035 120;
     --card: 0.19 0.01 105;
     --card-foreground: 0.94 0.009 105;
     --popover: 0.22 0.011 105;

@@ -28,6 +28,18 @@ test('navigation gives product updates user context instead of an ambiguous rele
   assert.doesNotMatch(sidebar, /label: 'Release notes'/)
 })
 
+test('sidebar exposes a stable Home destination and groups project work by user intent', () => {
+  const sidebar = read('../../src/components/sidebar.tsx')
+
+  assert.match(sidebar, /label: 'Home'/)
+  assert.match(sidebar, /label: 'Collect'/)
+  assert.match(sidebar, /label: 'Share with users'/)
+  assert.match(sidebar, /label: 'Connect'/)
+  assert.match(sidebar, /Public feedback board/)
+  assert.doesNotMatch(sidebar, /label: 'Overview'/)
+  assert.doesNotMatch(sidebar, /projectTab: 'home'/)
+})
+
 test('sign-in explains account creation and the shared embed before setup', () => {
   const source = read('../../src/app/auth/page.tsx')
 
@@ -43,6 +55,9 @@ test('theme tokens use perceptual OKLCH colors in both themes', () => {
 
   assert.match(css, /--background: 0\.985/)
   assert.match(css, /\.dark[\s\S]*--background: 0\.155/)
+  assert.match(css, /--surface-sidebar:/)
+  assert.match(css, /--surface-selected:/)
+  assert.match(tailwind, /surface:\s*\{/)
   assert.match(tailwind, /oklch\(var\(--primary\)/)
   assert.doesNotMatch(tailwind, /hsl\(var\(--primary\)/)
 })
