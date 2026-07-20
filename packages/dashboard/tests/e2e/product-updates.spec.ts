@@ -32,7 +32,7 @@ test('new Release-notes-only user verifies the embed, tests a draft, and publish
 
   await page.goto('/projects/new?goal=updates')
   await page.getByLabel('Project name').fill(`Playwright Updates ${Date.now().toString(36)}`)
-  await expect(page.getByRole('button', { name: 'Publish release notes' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: 'Release notes', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Create project and set up release notes' }).click()
   await expect(page).toHaveURL(/\/projects\/([^/]+)\/release-notes$/, { timeout: 30_000 })
 

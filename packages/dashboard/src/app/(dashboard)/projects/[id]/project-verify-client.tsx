@@ -96,10 +96,10 @@ export function ProjectVerifyClient({
             </div>
           </div>
           <Button asChild className="shrink-0">
-            <Link href={`/feedback/${verifiedFeedbackId}`}>
+            <a href={`/feedback/${verifiedFeedbackId}`}>
               Open verified item
               <ExternalLink className="ml-2 h-4 w-4" />
-            </Link>
+            </a>
           </Button>
         </div>
       )}

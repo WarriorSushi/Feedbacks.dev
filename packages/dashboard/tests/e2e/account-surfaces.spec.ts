@@ -8,7 +8,7 @@ test('protected routes require authentication and billing state loads after sign
   await page.context().clearCookies()
   await page.goto('/dashboard')
   await expect(page).toHaveURL(/\/auth\?redirect=/)
-  await expect(page.getByRole('heading', { name: 'Sign in to start setup' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Sign in or create an account' })).toBeVisible()
 
   await signInWithTestSession(page)
   await page.goto('/billing')

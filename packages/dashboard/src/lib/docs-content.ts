@@ -15,11 +15,11 @@ export interface DocsPage {
   blocks: DocsBlock[]
 }
 
-const websiteSnippet = `<script
+const websiteSnippet = `<div data-feedbacks-host="YOUR_PROJECT_KEY"></div>
+
+<script
   src="https://app.feedbacks.dev/widget/latest.js"
   data-project="YOUR_PROJECT_KEY"
-  data-api-url="https://app.feedbacks.dev/api/feedback"
-  data-config-version="1"
   defer
 ></script>`
 
@@ -64,19 +64,19 @@ export const DOCS_PAGES: DocsPage[] = [
     blocks: [
       { type: 'heading', id: 'create', title: '1. Create the project' },
       { type: 'paragraph', text: 'Open Projects, choose New Project, and use the name your team already uses for the product. The domain is optional. Creating the project opens its product home.' },
-      { type: 'heading', id: 'customize', title: '2. Save the form you want' },
-      { type: 'paragraph', text: 'Install the shared embed first. Then choose floating button, custom trigger, or inline form from Feedback form. Saved changes are delivered remotely.' },
-      { type: 'heading', id: 'install', title: '3. Paste the generated snippet' },
+      { type: 'heading', id: 'install', title: '2. Paste the generated snippet' },
       { type: 'code', label: 'HTML', language: 'html', code: websiteSnippet },
       { type: 'callout', tone: 'warning', title: 'Use the generated project key', body: 'YOUR_PROJECT_KEY is a placeholder. Copy the complete snippet from your project Install tab. Never put a private REST API key in browser code.' },
-      { type: 'heading', id: 'verify', title: '4. Verify both environments' },
+      { type: 'heading', id: 'verify', title: '3. Verify both environments' },
       { type: 'steps', items: [
         { title: 'Run hosted verification', body: 'This confirms the saved form and browser-safe project key work independently of your website.' },
         { title: 'Open your real page', body: 'Load the page where you installed the snippet and submit a message you can recognize.' },
         { title: 'Check the inbox', body: 'Confirm the message, project, URL, and browser context. Opening it marks it read without changing workflow status.' },
       ] },
+      { type: 'heading', id: 'customize', title: '4. Customize remotely' },
+      { type: 'paragraph', text: 'Choose floating button, custom trigger, or inline form from Feedback form. Save placement, fields, labels, colors, screenshots, attachments, and captcha settings without replacing the installed snippet.' },
       { type: 'heading', id: 'next', title: '5. Add only what you need next' },
-      { type: 'list', items: ['Restrict allowed origins after the real site works.', 'Enable screenshots, attachments, required email, or captcha from Customize.', 'Add Slack, Discord, GitHub Issues, or a webhook from Integrations.', 'Publish a public board only when you want requests, votes, and replies to be visible.'] },
+      { type: 'list', items: ['Restrict allowed origins after the real site works.', 'Add Slack, Discord, GitHub Issues, or a webhook from Integrations.', 'Publish Release notes when you want to show users what shipped.', 'Publish a public board only when you want requests, votes, and replies to be visible.'] },
     ],
   },
   {
@@ -108,7 +108,8 @@ export const DOCS_PAGES: DocsPage[] = [
         ['trigger', 'Your own button should open the feedback modal.'],
         ['inline', 'The form should render inside a specific page container.'],
       ] },
-      { type: 'code', label: 'Custom trigger', language: 'html', code: `<button data-feedbacks-trigger>Send feedback</button>\n${websiteSnippet.replace('data-config-version="1"', 'data-config-version="1"\n  data-embed-mode="trigger"\n  data-target="[data-feedbacks-trigger]"')}` },
+      { type: 'code', label: 'Custom trigger', language: 'html', code: `<button data-feedbacks-trigger>Send feedback</button>\n\n${websiteSnippet}` },
+      { type: 'callout', tone: 'note', title: 'Set the mode in Feedback form', body: 'Choose Custom trigger and save [data-feedbacks-trigger] as the target. The installed snippet stays unchanged.' },
     ],
   },
   {
@@ -117,9 +118,9 @@ export const DOCS_PAGES: DocsPage[] = [
     blocks: [
       { type: 'heading', id: 'nextjs', title: 'Next.js App Router' },
       { type: 'paragraph', text: 'Add the generated Website script to the root layout. This avoids duplicate instances and keeps the form available across routes.' },
-      { type: 'code', label: 'app/layout.tsx', language: 'tsx', code: `import Script from 'next/script'\n\nexport default function RootLayout({ children }) {\n  return (\n    <html lang="en">\n      <body>{children}</body>\n      <Script\n        src="https://app.feedbacks.dev/widget/latest.js"\n        data-project="YOUR_PROJECT_KEY"\n        data-api-url="https://app.feedbacks.dev/api/feedback"\n        data-config-version="1"\n        strategy="afterInteractive"\n      />\n    </html>\n  )\n}` },
+      { type: 'code', label: 'app/layout.tsx', language: 'tsx', code: `import Script from 'next/script'\n\nexport default function RootLayout({ children }) {\n  return (\n    <html lang="en">\n      <body>\n        {children}\n        <div data-feedbacks-host="YOUR_PROJECT_KEY" />\n        <Script\n          src="https://app.feedbacks.dev/widget/latest.js"\n          data-project="YOUR_PROJECT_KEY"\n          strategy="afterInteractive"\n        />\n      </body>\n    </html>\n  )\n}` },
       { type: 'heading', id: 'react-vue', title: 'React and Vue' },
-      { type: 'paragraph', text: 'The project Install tab generates framework-specific code from the saved form configuration. Put the wrapper at the application root. If your package registry cannot resolve a wrapper, use the Website script in the root HTML instead.' },
+      { type: 'paragraph', text: 'The project Install tab generates framework-specific code with the project key and application origin. Put the wrapper at the application root. Saved product settings are resolved remotely. If your package registry cannot resolve a wrapper, use the Website script in the root HTML instead.' },
       { type: 'heading', id: 'wordpress', title: 'WordPress' },
       { type: 'steps', items: [
         { title: 'Open Embed installation', body: 'Select WordPress to see the stable Website snippet and placement guidance.' },
@@ -145,7 +146,7 @@ export const DOCS_PAGES: DocsPage[] = [
         ['Labels and success copy', 'Form title, prompts, buttons, and completion message'],
         ['Captcha', 'Cloudflare Turnstile or hCaptcha for public forms'],
       ] },
-      { type: 'callout', tone: 'note', title: 'Save before copying code', body: 'Generated snippets include the saved configuration version. If you change the form, save and copy the updated snippet when the install attributes changed.' },
+      { type: 'callout', tone: 'success', title: 'The installed snippet stays stable', body: 'Save changes in Feedback form to publish them remotely. You only need new code after rotating the browser-safe project key or moving the embed to a different project.' },
     ],
   },
   {
@@ -336,7 +337,7 @@ FEEDBACKS_API_URL=https://app.feedbacks.dev` },
       { type: 'heading', id: 'widget-missing', title: 'The widget does not appear' },
       { type: 'list', items: ['Confirm the script request returns 200 in browser developer tools.', 'Check that data-project contains the generated browser-safe key.', 'Remove duplicate script tags.', 'For trigger or inline mode, confirm the target selector exists.', 'Purge WordPress, CDN, and page-builder caches.', 'Check Content Security Policy errors in the console.'] },
       { type: 'heading', id: 'submission', title: 'The form opens but submission fails' },
-      { type: 'list', items: ['Run hosted verification to separate host-page issues from project issues.', 'Confirm data-api-url points to https://app.feedbacks.dev/api/feedback.', 'Check allowed-origin rules against the exact page origin.', 'Check captcha keys and provider configuration.', 'Review plan quota and attachment validation messages.'] },
+      { type: 'list', items: ['Run hosted verification to separate host-page issues from project issues.', 'Confirm the public widget bootstrap request succeeds for the project key.', 'Check allowed-origin rules against the exact page origin.', 'Check captcha keys and provider configuration.', 'Review plan quota and attachment validation messages.'] },
       { type: 'heading', id: 'lazy-content', title: 'Screenshots miss animated or lazy content' },
       { type: 'paragraph', text: 'Screenshot capture records the visible viewport at the moment the user submits. Ask the user to scroll until lazy or animated content is visible, then open the form and capture. Full-page capture is intentionally not used.' },
       { type: 'heading', id: 'webhook', title: 'A webhook is failing' },

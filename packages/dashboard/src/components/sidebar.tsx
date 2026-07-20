@@ -52,12 +52,12 @@ type NavItem = {
 }
 
 const primaryNavItems: NavItem[] = [
-  { href: '/dashboard', label: 'Project home', icon: LayoutDashboard, exact: true, tourId: 'nav-dashboard', projectTab: 'home' },
+  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true, tourId: 'nav-dashboard', projectTab: 'home' },
   { href: '/feedback-form', label: 'Feedback form', icon: MessageSquare, tourId: 'nav-feedback-form', projectTab: 'feedback-form' },
   { href: '/feedback', label: 'Feedback inbox', icon: MessageSquare, tourId: 'nav-feedback' },
   { href: '/release-notes', label: 'Release notes', icon: Megaphone, tourId: 'nav-updates', projectTab: 'release-notes' },
   { href: '/board', label: 'Public board', icon: Globe, tourId: 'nav-boards', projectTab: 'board' },
-  { href: '/install', label: 'Embed installation', icon: Code2, tourId: 'nav-install', projectTab: 'install' },
+  { href: '/install', label: 'Install & verify', icon: Code2, tourId: 'nav-install', projectTab: 'install' },
   { href: '/integrations', label: 'Integrations', icon: Webhook, tourId: 'nav-integrations', projectTab: 'integrations' },
   { href: '/api', label: 'API & MCP', icon: Code2, tourId: 'nav-api', projectTab: 'api' },
 ]
@@ -374,7 +374,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
             return (
               <React.Fragment key={item.href}>
                 {!collapsed && index === 1 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Products</p>}
-                {!collapsed && index === 5 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Delivery</p>}
+                {!collapsed && index === 5 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Setup & delivery</p>}
                 {!collapsed && index === 7 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Developers</p>}
                 <Link
                   href={scopedHref}
@@ -391,7 +391,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
                     'transition-all duration-150 active:scale-[0.98]',
                     collapsed ? 'justify-center px-2' : 'px-3',
                     isActive
-                      ? ['bg-primary/8 text-primary', 'before:absolute before:inset-y-1 before:left-0 before:w-[3px] before:rounded-r-full', 'before:bg-primary before:shadow-[0_0_8px_hsl(var(--primary)/0.5)]']
+                      ? ['bg-primary/[0.09] text-primary', 'before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-r-full', 'before:bg-primary']
                       : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                   )}
                 >
@@ -492,8 +492,8 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
           <div
             className={cn(
               'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
-              'bg-[hsl(var(--primary)/0.12)] text-[12px] font-semibold text-primary',
-              'ring-1 ring-[hsl(var(--primary)/0.15)]'
+              'bg-primary/10 text-[12px] font-semibold text-primary',
+              'ring-1 ring-primary/15'
             )}
           >
             {displayName[0].toUpperCase()}
@@ -546,7 +546,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
           ) : (
             <CircleHelp className="h-3.5 w-3.5 shrink-0 transition-transform duration-150 group-hover:scale-[1.08]" />
           )}
-          {!collapsed && <span className="truncate">Take product tour</span>}
+          {!collapsed && <span className="truncate">Tour this workspace</span>}
         </Link>
       </div>
     </>
@@ -597,9 +597,9 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
       {/* ── Desktop sidebar (static flex child, full height from parent) ─ */}
       <aside
         className={cn(
-          'hidden md:flex md:flex-col md:border-r md:bg-card',
+          'hidden md:flex md:flex-col md:border-r md:bg-card/80 md:backdrop-blur-xl',
           'transition-[width] duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]',
-          collapsed ? 'md:w-[60px]' : 'md:w-60'
+          collapsed ? 'md:w-[60px]' : 'md:w-[232px]'
         )}
       >
         {sidebarContent}

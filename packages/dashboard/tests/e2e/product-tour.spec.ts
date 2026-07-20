@@ -8,16 +8,12 @@ test.skip(!env.ready, env.skipReason)
 const TOUR_STEP_TIMEOUT_MS = 60_000
 
 const tourSteps = [
-  { title: 'Project home', path: /\/projects\/[^/]+$/, target: 'nav-dashboard' },
-  { title: 'Feedback form', path: /\/projects\/[^/]+\/feedback-form$/, target: 'nav-feedback-form' },
-  { title: 'Feedback inbox', path: /\/feedback(?:\?.*)?$/, target: 'nav-feedback' },
-  { title: 'Release notes', path: /\/projects\/[^/]+\/release-notes$/, target: 'nav-updates' },
-  { title: 'Public board', path: /\/projects\/[^/]+\/board$/, target: 'nav-boards' },
-  { title: 'Embed installation', path: /\/projects\/[^/]+\/install$/, target: 'nav-install' },
-  { title: 'Integrations', path: /\/projects\/[^/]+\/integrations$/, target: 'nav-integrations' },
-  { title: 'API & MCP', path: /\/projects\/[^/]+\/api$/, target: 'nav-api' },
-  { title: 'Billing', path: /\/billing(?:\?.*)?$/, target: 'nav-billing' },
-  { title: 'Settings', path: /\/settings(?:\?.*)?$/, target: 'nav-settings' },
+  { title: 'Start from Overview', path: /\/projects\/[^/]+$/, target: 'nav-dashboard' },
+  { title: 'Shape the Feedback form', path: /\/projects\/[^/]+\/feedback-form$/, target: 'nav-feedback-form' },
+  { title: 'Triage the Feedback inbox', path: /\/feedback(?:\?.*)?$/, target: 'nav-feedback' },
+  { title: 'Publish Release notes', path: /\/projects\/[^/]+\/release-notes$/, target: 'nav-updates' },
+  { title: 'Install and verify once', path: /\/projects\/[^/]+\/install$/, target: 'nav-install' },
+  { title: 'Connect the rest when needed', path: /\/projects\/[^/]+\/integrations$/, target: 'nav-integrations' },
 ]
 
 test.describe('product tour', () => {

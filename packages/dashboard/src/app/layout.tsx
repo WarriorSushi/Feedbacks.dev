@@ -9,10 +9,10 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'feedbacks.dev — Developer-first feedback collection',
+    default: 'feedbacks.dev | Feedback forms and release notes',
     template: '%s | feedbacks.dev',
   },
-  description: 'Collect meaningful in-product feedback in minutes. Lightweight widget, triage dashboard, workflow integrations.',
+  description: 'Collect in-product feedback and publish release notes with one lightweight embed. Install once, verify, and manage remotely.',
   icons: {
     icon: [
       { url: '/new_logo_feedbacks.dev.svg', type: 'image/svg+xml' },

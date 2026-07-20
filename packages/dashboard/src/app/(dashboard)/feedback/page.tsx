@@ -805,7 +805,7 @@ function FeedbackRow({
           aria-hidden="true"
           className={cn(
             'mt-2 h-2 w-2 shrink-0 rounded-full transition-colors',
-            isUnread ? 'bg-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.12)]' : 'bg-transparent'
+            isUnread ? 'bg-primary shadow-[0_0_0_3px_oklch(var(--primary)/0.12)]' : 'bg-transparent'
           )}
         />
         <TypeIcon type={fb.type} className="mt-0.5 shrink-0 text-muted-foreground" />

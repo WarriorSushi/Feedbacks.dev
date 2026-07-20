@@ -20,23 +20,31 @@ export default async function DashboardLayout({
     redirect('/auth')
   }
 
-  const { data: projects } = await supabase
-    .from('projects')
-    .select('id, name, settings')
-    .eq('owner_user_id', user.id)
-    .order('created_at', { ascending: false })
-
-  const { data: billingAccount } = await supabase
-    .from('billing_accounts')
-    .select('plan_tier, billing_status')
-    .eq('user_id', user.id)
-    .maybeSingle()
-
-  const { data: userSettings } = await supabase
-    .from('user_settings')
-    .select('preferences')
-    .eq('user_id', user.id)
-    .maybeSingle()
+  const [
+    { data: projects },
+    { data: billingAccount },
+    { data: userSettings },
+    headersList,
+    cookieStore,
+  ] = await Promise.all([
+    supabase
+      .from('projects')
+      .select('id, name, settings')
+      .eq('owner_user_id', user.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('billing_accounts')
+      .select('plan_tier, billing_status')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+    supabase
+      .from('user_settings')
+      .select('preferences')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+    headers(),
+    cookies(),
+  ])
 
   const projectIds = (projects || []).map((project: { id: string }) => project.id)
   const { data: boardSettings } = projectIds.length > 0
@@ -48,8 +56,6 @@ export default async function DashboardLayout({
     : { data: [] }
 
   // Extract current project ID from URL path
-  const headersList = await headers()
-  const cookieStore = await cookies()
   const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
   const projectMatch = pathname.match(/\/projects\/([^/]+)/)
   const storedProjectId = cookieStore.get(CURRENT_PROJECT_COOKIE)?.value
@@ -81,8 +87,8 @@ export default async function DashboardLayout({
         boardSlugs={boardSlugs}
         billingAccount={billingAccount}
       />
-      <main className="min-h-0 flex-1 overflow-y-auto bg-muted/35 pb-[env(safe-area-inset-bottom,0px)] dark:bg-background">
-        <div className="mx-auto max-w-7xl px-4 py-4 md:px-6 md:py-6">{children}</div>
+      <main className="min-h-0 flex-1 overflow-y-auto bg-muted/25 pb-[env(safe-area-inset-bottom,0px)] dark:bg-background">
+        <div className="mx-auto max-w-[1320px] px-4 py-5 md:px-7 md:py-7">{children}</div>
       </main>
       <ProductTour
         initialOpen={false}

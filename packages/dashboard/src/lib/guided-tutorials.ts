@@ -32,19 +32,15 @@ export const GUIDED_TUTORIAL_PROGRESS_KEY = 'feedbacks-guided-tutorial-progress'
 export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
   {
     id: 'navigation',
-    title: 'Dashboard map',
-    description: 'Learn where each main product area lives.',
+    title: 'Your workspace in 6 steps',
+    description: 'See the core loop first. Advanced tools stay available when you need them.',
     steps: [
-      { title: 'Project home', body: 'See the Feedback form and Release notes products, then install their shared embed once.', href: '/projects/{projectId}', target: '[data-tour="nav-dashboard"]' },
-      { title: 'Feedback form', body: 'Manage the in-product form, fields, placement, wording, and anti-spam settings remotely.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="nav-feedback-form"]' },
-      { title: 'Feedback inbox', body: 'New messages land here. Search, filter, tag, and decide what needs action.', href: '/feedback', target: '[data-tour="nav-feedback"]' },
-      { title: 'Release notes', body: 'Publish “What’s new” announcements inside the product selected at the top of the sidebar.', href: '/projects/{projectId}/release-notes', target: '[data-tour="nav-updates"]' },
-      { title: 'Public board', body: 'Manage the public board for the project selected at the top of the sidebar.', href: '/projects/{projectId}/board', target: '[data-tour="nav-boards"]' },
-      { title: 'Embed installation', body: 'Install the shared embed once and confirm it is connected to the selected project.', href: '/projects/{projectId}/install', target: '[data-tour="nav-install"]' },
-      { title: 'Integrations', body: 'Route feedback for the selected project into your existing workflow.', href: '/projects/{projectId}/integrations', target: '[data-tour="nav-integrations"]' },
-      { title: 'API & MCP', body: 'Use REST and MCP tools for the project selected at the top of the sidebar.', href: '/projects/{projectId}/api', target: '[data-tour="nav-api"]' },
-      { title: 'Billing', body: 'Check usage, plan access, and billing management.', href: '/billing', target: '[data-tour="nav-billing"]' },
-      { title: 'Settings', body: 'Manage your profile, notifications, theme, account, and tutorial progress.', href: '/settings', target: '[data-tour="nav-settings"]' },
+      { title: 'Start from Overview', body: 'This project home separates your Feedback form and Release notes, and shows their shared install status.', href: '/projects/{projectId}', target: '[data-tour="nav-dashboard"]' },
+      { title: 'Shape the Feedback form', body: 'Choose the placement, wording, fields, color, and anti-spam settings. Saved changes reach the embed remotely.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="nav-feedback-form"]' },
+      { title: 'Triage the Feedback inbox', body: 'User messages land here with page and browser context. Search, filter, tag, and decide what needs action.', href: '/feedback', target: '[data-tour="nav-feedback"]' },
+      { title: 'Publish Release notes', body: 'Tell users what shipped through the in-product “What’s new” feed. These are your product announcements.', href: '/projects/{projectId}/release-notes', target: '[data-tour="nav-updates"]' },
+      { title: 'Install and verify once', body: 'Add the shared embed, send one known-good test, and confirm the connection before customizing further.', href: '/projects/{projectId}/install', target: '[data-tour="nav-install"]' },
+      { title: 'Connect the rest when needed', body: 'Public boards, integrations, API access, billing, and settings stay in the sidebar without blocking first setup.', href: '/projects/{projectId}/integrations', target: '[data-tour="nav-integrations"]' },
     ],
   },
   {
@@ -64,8 +60,7 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
     description: 'Choose placement, fields, labels, and preview the result.',
     steps: [
       { title: 'Feedback form', body: 'Change placement, wording, fields, and anti-spam settings remotely.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="nav-feedback-form"]' },
-      { title: 'Remote configuration', body: 'Save changes to publish them to every installed embed without replacing code.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="widget-settings"]' },
-      { title: 'Widget settings', body: 'Choose placement first, then change only the labels, color, and optional fields you need.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="widget-settings"]' },
+      { title: 'Remote configuration', body: 'Choose placement, labels, color, and optional fields, then save once to update every installed embed.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="widget-settings"]' },
       { title: 'Live preview', body: 'Preview the form before publishing the remote configuration.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="widget-preview"]' },
     ],
   },

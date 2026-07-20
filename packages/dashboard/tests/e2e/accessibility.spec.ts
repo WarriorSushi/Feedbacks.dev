@@ -6,6 +6,29 @@ import { createProjectViaApi } from './helpers/project'
 const env = skipE2EIfNeeded()
 test.skip(!env.ready, env.skipReason)
 
+test('landing and sign-in are accessible and fit a mobile viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+
+  for (const route of ['/', '/auth']) {
+    await page.goto(route)
+    await expect(page.locator('main')).toBeVisible()
+    const result = await new AxeBuilder({ page })
+      .include('main')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze()
+    const serious = result.violations.filter((violation) =>
+      violation.impact === 'serious' || violation.impact === 'critical',
+    )
+    expect(serious).toEqual([])
+
+    const sizes = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      content: document.documentElement.scrollWidth,
+    }))
+    expect(sizes.content).toBeLessThanOrEqual(sizes.viewport)
+  }
+})
+
 for (const route of ['/dashboard', '/feedback']) {
   test(`${route} has no serious accessibility violations`, async ({ page }) => {
     await signInWithTestSession(page)

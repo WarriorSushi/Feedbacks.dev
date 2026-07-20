@@ -1,5 +1,3 @@
-'use client'
-
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
@@ -33,11 +31,11 @@ export function BrandWordmark({
         aria-hidden="true"
         className={cn(
           'h-6 w-6 shrink-0 rounded-md object-contain',
-          intro && 'brand-wordmark-mark-intro',
+          intro && 'animate-fade-in',
           markClassName,
         )}
       />
-      <span className={cn('tracking-tight', intro && 'brand-wordmark-text-intro', textClassName)}>
+      <span className={cn('tracking-tight', intro && 'animate-fade-in', textClassName)}>
         feedbacks<span className={cn('text-primary', dotClassName)}>.dev</span>
       </span>
     </span>

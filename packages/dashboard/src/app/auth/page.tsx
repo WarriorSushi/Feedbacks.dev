@@ -2,31 +2,17 @@
 
 import * as React from 'react'
 import { Suspense } from 'react'
-import { generateInstallSnippets } from '@feedbacks/shared'
 import { createClient } from '@/lib/supabase-browser'
-import { publicEnv } from '@/lib/public-env'
 import { Button } from '@/components/ui/button'
 import { BrandWordmark } from '@/components/brand-wordmark'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { Github, Mail, Loader2, ArrowRight, CheckCircle2, KeyRound } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Github, KeyRound, Loader2, Mail, MessageSquare, Megaphone } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { sanitizeRedirectPath } from '@/lib/redirects'
-
-const features = [
-  'Sign in and land on project setup with the install snippet ready',
-  'Start with the Website snippet, then verify one real submission',
-  'Capture URL, browser context, and optional screenshots automatically',
-  'Add routing and public boards after the core loop is working',
-]
-
-const codeSnippet = generateInstallSnippets({
-  projectKey: 'your-project-key',
-  appOrigin: publicEnv.NEXT_PUBLIC_APP_ORIGIN,
-}).find((snippet) => snippet.label === 'Website')?.code || ''
 
 function AuthPageInner() {
   const [email, setEmail] = React.useState('')
@@ -39,329 +25,132 @@ function AuthPageInner() {
   const searchParams = useSearchParams()
   const redirect = sanitizeRedirectPath(searchParams.get('redirect'), '/projects/new')
   const encodedRedirect = encodeURIComponent(redirect)
-
   const supabase = React.useMemo(() => createClient(), [])
 
-  const handlePasswordSignIn = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handlePasswordSignIn = async (event: React.FormEvent) => {
+    event.preventDefault()
     setLoading(true)
     setError('')
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
-    if (error) {
-      setError(error.message)
-      return
-    }
-
+    if (authError) return setError(authError.message)
     window.location.href = redirect
   }
 
-  const handleMagicLink = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleMagicLink = async (event: React.FormEvent) => {
+    event.preventDefault()
     setMagicLoading(true)
     setError('')
-
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error: authError } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodedRedirect}`,
-      },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodedRedirect}` },
     })
-
     setMagicLoading(false)
-    if (error) {
-      setError(error.message)
-    } else {
-      setSent(true)
-    }
+    if (authError) setError(authError.message)
+    else setSent(true)
   }
 
   const handleGitHub = async () => {
     setGithubLoading(true)
     await supabase.auth.signInWithOAuth({
       provider: 'github',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodedRedirect}`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback?redirect=${encodedRedirect}` },
     })
   }
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-[hsl(238_28%_99%)] dark:bg-[hsl(238_22%_8%)]">
-
-      {/* ── Left panel: brand/feature cover ──────────────────────────────── */}
-      <div className="relative hidden w-[52%] shrink-0 overflow-hidden lg:flex">
-
-        {/* Dark indigo base */}
-        <div className="absolute inset-0 bg-[hsl(238_40%_10%)]" />
-
-        <div className="absolute inset-x-0 top-0 h-px bg-white/20" />
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-white/[0.03]" />
-
-        {/* Subtle dot grid overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.06]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
-          }}
-        />
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16">
-          {/* Top: logo */}
-          <Link
-            href="/"
-            className="font-semibold text-white/90 transition-opacity hover:text-white active:opacity-70"
-          >
-            <BrandWordmark
-              className="text-xl"
-              markClassName="h-7 w-7"
-              dotClassName="text-[hsl(238_72%_78%)]"
-            />
+    <main className="relative min-h-screen overflow-hidden bg-background">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,oklch(var(--primary)/0.1),transparent_34%)]" />
+      <div className="relative mx-auto grid min-h-screen max-w-7xl lg:grid-cols-[1fr_0.85fr]">
+        <section className="hidden border-r px-10 py-9 lg:flex lg:flex-col xl:px-16">
+          <Link href="/" className="inline-flex w-fit font-semibold transition-opacity hover:opacity-80">
+            <BrandWordmark className="text-lg" markClassName="h-6 w-6" />
           </Link>
+          <div className="my-auto max-w-xl py-16">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">First value in minutes</p>
+            <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-[-0.04em] xl:text-5xl">A small setup path.<br />A complete feedback loop.</h1>
+            <p className="mt-5 max-w-lg leading-7 text-muted-foreground">Sign in, create one project, install one shared embed, and send a test. Everything else can wait until the connection works.</p>
 
-          {/* Middle: headline + features */}
-          <div className="mt-auto">
-            <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[hsl(238_72%_78%)]">
-              First-run setup
-            </p>
-            <h1 className="max-w-sm text-4xl font-bold leading-[1.1] text-white xl:text-[2.75rem]">
-              Sign in,
-              <br />
-              create the project,
-              <br />
-              paste the snippet.
-            </h1>
+            <div className="mt-10 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
+              <div className="grid sm:grid-cols-2">
+                <div className="border-b p-5 sm:border-b-0 sm:border-r">
+                  <div className="flex items-center gap-2 text-sm font-semibold"><MessageSquare className="h-4 w-4 text-primary" /> Feedback form</div>
+                  <p className="mt-2 text-xs leading-5 text-muted-foreground">Users send bugs, ideas, questions, ratings, and screenshots to your inbox.</p>
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center gap-2 text-sm font-semibold"><Megaphone className="h-4 w-4 text-amber-500" /> Release notes</div>
+                  <p className="mt-2 text-xs leading-5 text-muted-foreground">You publish clear “What’s new” announcements back inside your product.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 border-t bg-primary/[0.045] px-5 py-4 text-xs text-muted-foreground">
+                <Check className="h-4 w-4 shrink-0 text-primary" /><span><strong className="text-foreground">One embed for both.</strong> Install it once and manage configuration remotely.</span>
+              </div>
+            </div>
 
-            <ul className="mt-8 space-y-3">
-              {features.map((f, i) => (
-                <li
-                  key={f}
-                  className="flex items-start gap-3 animate-fade-in"
-                  style={{ animationDelay: `${i * 80}ms` }}
-                >
-                  <CheckCircle2 className="mt-[2px] h-4 w-4 shrink-0 text-[hsl(238_72%_78%)]" />
-                  <span className="text-[15px] text-white/70">{f}</span>
+            <ol className="mt-8 grid grid-cols-3 border-y">
+              {['Create project', 'Install once', 'Verify a test'].map((step, index) => (
+                <li key={step} className="border-l px-3 py-4 first:border-l-0 first:pl-0">
+                  <span className="font-mono text-[10px] text-primary">0{index + 1}</span>
+                  <p className="mt-1 text-xs font-semibold">{step}</p>
                 </li>
               ))}
-            </ul>
-
-            {/* Code snippet */}
-            <div className="mt-10 overflow-hidden rounded-xl border border-white/10 bg-black/30 backdrop-blur-sm">
-              <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                <span className="ml-2 text-[11px] text-white/30">index.html</span>
-              </div>
-              <pre className="scrollbar-thin overflow-x-auto px-5 py-4 text-[13px] leading-relaxed">
-                <code>
-                  {codeSnippet.split('\n').map((line, i) => (
-                    <span key={i} className="block">
-                      {line.trim().startsWith('data-project') ? (
-                        <>
-                          <span className="text-[hsl(220_80%_75%)]">  data-project</span>
-                          <span className="text-white/40">{`="`}</span>
-                          <span className="text-[hsl(150_60%_68%)]">your-project-key</span>
-                          <span className="text-white/40">{`"`}</span>
-                        </>
-                      ) : line.trim().startsWith('data-api-url') ? (
-                        <>
-                          <span className="text-[hsl(220_80%_75%)]">  data-api-url</span>
-                          <span className="text-white/40">{`="`}</span>
-                          <span className="text-[hsl(150_60%_68%)]">{publicEnv.NEXT_PUBLIC_APP_ORIGIN}/api/feedback</span>
-                          <span className="text-white/40">{`"`}</span>
-                        </>
-                      ) : line.includes('script') ? (
-                        <span className="text-white/55">{line}</span>
-                      ) : (
-                        <span className="text-white/40">{line}</span>
-                      )}
-                    </span>
-                  ))}
-                </code>
-              </pre>
-            </div>
+            </ol>
           </div>
-        </div>
-      </div>
+          <p className="text-xs text-muted-foreground">Public browser-safe keys only. Private credentials stay server-side.</p>
+        </section>
 
-      {/* ── Right panel: auth form ────────────────────────────────────────── */}
-      <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center px-4 py-16 sm:px-6">
-
-        {/* Mobile logo */}
-        <div className="mb-10 text-center lg:hidden">
-          <Link
-            href="/"
-            className="font-semibold transition-opacity active:opacity-70"
-          >
-            <BrandWordmark className="text-xl" markClassName="h-7 w-7" />
-          </Link>
-          <h1 className="mt-3 text-2xl font-bold tracking-tight">
-            Sign in and start setup.
-          </h1>
-        </div>
-
-        <div className="w-full max-w-[360px] animate-fade-in">
-          {/* Heading */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold tracking-tight">
-              {sent ? 'Check your inbox' : 'Sign in to start setup'}
-            </h2>
-            <p className="mt-1.5 text-[14px] text-muted-foreground">
-              {sent
-                ? `We sent a magic link to ${email}`
-                : 'You will land on project setup first: create a project, copy the Website snippet, then verify one real submission.'}
-            </p>
+        <section className="flex min-w-0 flex-col px-5 py-6 sm:px-8 lg:justify-center lg:px-12 xl:px-20">
+          <div className="flex items-center justify-between lg:hidden">
+            <Link href="/" className="font-semibold"><BrandWordmark className="text-lg" markClassName="h-6 w-6" /></Link>
+            <Link href="/" className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"><ArrowLeft className="h-3.5 w-3.5" /> Home</Link>
           </div>
 
-          {sent ? (
-            /* ── Sent state ────────────────────────────────────────────── */
-            <div className="space-y-4">
-              <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-[hsl(var(--primary)/0.06)] p-4">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <div>
-                  <p className="text-[13px] font-medium">Magic link sent</p>
-                  <p className="mt-0.5 text-[12px] text-muted-foreground">
-                    Click the link in your email to sign in. It expires in 24 hours.
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                className="w-full text-[13px] text-muted-foreground"
-                onClick={() => { setSent(false); setEmail('') }}
-              >
-                Use a different email
-              </Button>
+          <div className="mx-auto my-auto w-full max-w-[390px] py-12">
+            <div className="mb-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Your workspace</p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.025em] sm:text-3xl">{sent ? 'Check your inbox' : 'Sign in or create an account'}</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{sent ? `We sent a secure sign-in link to ${email}.` : 'New here? GitHub or a magic link creates your account and opens project setup automatically.'}</p>
             </div>
-          ) : (
-            /* ── Sign-in form ──────────────────────────────────────────── */
-            <div className="space-y-3">
-              {/* GitHub */}
-              <Button
-                variant="outline"
-                className={cn(
-                  'group w-full justify-between border-border/80 text-[13px]',
-                  'h-11',
-                  'transition-all duration-200 hover:border-foreground/20 hover:bg-accent'
-                )}
-                onClick={handleGitHub}
-                disabled={githubLoading}
-                >
-                  <span className="flex items-center gap-2.5">
-                    {githubLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Github className="h-4 w-4" />
-                    )}
-                  Continue with GitHub
-                  </span>
-                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5" />
-                </Button>
 
-              {/* Divider */}
-              <div className="relative my-1 flex items-center gap-3">
-                <Separator className="flex-1" />
-                <span className="shrink-0 text-[11px] text-muted-foreground">or</span>
-                <Separator className="flex-1" />
+            {sent ? (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 rounded-lg border border-primary/25 bg-primary/[0.055] p-4">
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <div><p className="text-sm font-semibold">Magic link sent</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Open the email on this device to continue. The link expires in 24 hours.</p></div>
+                </div>
+                <Button variant="outline" className="w-full" onClick={() => { setSent(false); setEmail('') }}>Use a different email</Button>
               </div>
-
-              {/* Email form */}
-              <form onSubmit={handlePasswordSignIn} className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-[13px]">
-                    Email address
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@company.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-11 border-border/80 text-[14px] transition-colors focus:border-primary/60"
-                    required
-                    autoFocus
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-[13px]">
-                    Password
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-11 border-border/80 text-[14px] transition-colors focus:border-primary/60"
-                    required
-                  />
-                </div>
-
-                {error && (
-                  <p className="text-[12px] text-destructive">{error}</p>
-                )}
-
-                <Button
-                  className="h-11 w-full text-[13px]"
-                  type="submit"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <KeyRound className="mr-2 h-4 w-4" />
-                  )}
-                  Sign in and continue setup
+            ) : (
+              <div className="space-y-4">
+                <Button variant="outline" className="group h-11 w-full justify-between" onClick={handleGitHub} disabled={githubLoading}>
+                  <span className="flex items-center gap-2.5">{githubLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Github className="h-4 w-4" />}Continue with GitHub</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                 </Button>
-              </form>
 
-              <form onSubmit={handleMagicLink}>
-                <Button
-                  variant="ghost"
-                  className="h-10 w-full text-[13px] text-muted-foreground"
-                  type="submit"
-                  disabled={magicLoading || !email}
-                >
-                  {magicLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Mail className="mr-2 h-4 w-4" />
-                  )}
-                  Email me a magic link instead
-                </Button>
-              </form>
-            </div>
-          )}
+                <div className="flex items-center gap-3"><Separator className="flex-1" /><span className="text-[11px] text-muted-foreground">or use email</span><Separator className="flex-1" /></div>
 
-          {/* Footer */}
-          <p className="mt-8 text-center text-xs text-muted-foreground">
-            By continuing, you agree to our{' '}
-            <Link href="/terms" prefetch={false} className="underline underline-offset-2 transition-colors hover:text-foreground">
-              Terms
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" prefetch={false} className="underline underline-offset-2 transition-colors hover:text-foreground">
-              Privacy Policy
-            </Link>
-          </p>
-        </div>
+                <form onSubmit={handlePasswordSignIn} className="space-y-4">
+                  <div className="space-y-1.5"><Label htmlFor="email">Email address</Label><Input id="email" type="email" autoComplete="email" placeholder="you@company.com" value={email} onChange={(event) => setEmail(event.target.value)} className="h-11" required autoFocus /></div>
+                  <div className="space-y-1.5"><Label htmlFor="password">Password <span className="font-normal text-muted-foreground">for existing accounts</span></Label><Input id="password" type="password" autoComplete="current-password" placeholder="Your password" value={password} onChange={(event) => setPassword(event.target.value)} className="h-11" required /></div>
+                  {error && <p role="alert" className="rounded-md border border-destructive/25 bg-destructive/5 px-3 py-2 text-xs text-destructive">{error}</p>}
+                  <Button className="h-11 w-full" type="submit" disabled={loading}>{loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}Sign in with password</Button>
+                </form>
+
+                <form onSubmit={handleMagicLink}>
+                  <Button variant="secondary" className={cn('h-11 w-full', !email && 'opacity-60')} type="submit" disabled={magicLoading || !email}>{magicLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}Email me a secure sign-in link</Button>
+                </form>
+                <p className="text-center text-xs leading-5 text-muted-foreground">No account yet? Enter your email above and choose the secure sign-in link. We will create the account for you.</p>
+              </div>
+            )}
+
+            <p className="mt-8 text-center text-[11px] leading-5 text-muted-foreground">By continuing, you agree to our <Link href="/terms" prefetch={false} className="underline underline-offset-2 hover:text-foreground">Terms</Link> and <Link href="/privacy" prefetch={false} className="underline underline-offset-2 hover:text-foreground">Privacy Policy</Link>.</p>
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   )
 }
 
 export default function AuthPage() {
-  return (
-    <Suspense>
-      <AuthPageInner />
-    </Suspense>
-  )
+  return <Suspense><AuthPageInner /></Suspense>
 }
