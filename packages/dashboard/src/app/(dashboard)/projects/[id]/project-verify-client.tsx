@@ -11,7 +11,6 @@ import {
 import { readStoredProjectApiKey, rememberProjectApiKey } from '@/lib/project-api-keys'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle2, ExternalLink, RefreshCw } from 'lucide-react'
 import { WidgetPreviewSurface } from './widget-preview-surface'
 import { SetupProgress } from './project-flow-nav'
@@ -85,7 +84,7 @@ export function ProjectVerifyClient({
       <SetupProgress projectId={projectId} activeStep="verify" />
 
       {verifiedFeedbackId && (
-        <div className="flex flex-col gap-4 rounded-xl border border-primary/35 bg-primary/[0.08] p-5 sm:flex-row sm:items-center sm:justify-between" role="status">
+        <div className="flex flex-col gap-4 border-y border-primary/35 bg-primary/[0.055] px-4 py-4 sm:flex-row sm:items-center sm:justify-between" role="status">
           <div className="flex min-w-0 gap-3">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
@@ -104,9 +103,9 @@ export function ProjectVerifyClient({
         </div>
       )}
 
-      <div data-tour="verify-guide" className="flex flex-wrap items-center justify-between gap-3">
+      <header data-tour="verify-guide" className="flex flex-wrap items-end justify-between gap-4 border-b border-foreground/10 pb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Test your saved form</h1>
+          <h1 className="text-2xl font-semibold tracking-[-0.035em]">Send one test. Know the connection works.</h1>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
             This page is a safe test page. It proves your saved form can send feedback. It does not check the code on your own website.
           </p>
@@ -119,50 +118,39 @@ export function ProjectVerifyClient({
             <Button variant="outline">Manage feedback form</Button>
           </Link>
         </div>
-      </div>
+      </header>
 
-      <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
-        <Card>
-          <CardHeader>
+      <div className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <aside className="lg:border-r lg:border-foreground/10 lg:pr-7">
             <div className="flex items-center gap-2">
               <Badge variant="secondary">Saved config</Badge>
               <Badge variant="outline">{modeLabel} mode</Badge>
             </div>
-            <CardTitle className="text-lg">Do this</CardTitle>
-            <CardDescription>
-              Send one test. Then check the inbox.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-muted-foreground">
-            <div className="rounded-lg border bg-muted/20 p-4">
-              1. Find the form on this page. {verifyInstruction}
-            </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              2. Type <span className="font-medium text-foreground">Install test for {projectName}</span>.
-            </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              3. When it arrives, open the verified item from the success banner.
-            </div>
-            <div className="rounded-lg border border-dashed bg-muted/10 p-4">
+            <h2 className="mt-5 text-lg font-semibold">Three quick checks</h2>
+            <p className="mt-1 text-sm text-muted-foreground">This hosted page tests your saved form and inbox path.</p>
+          <ol className="mt-5 divide-y border-y border-foreground/10 text-sm text-muted-foreground">
+            <li className="grid grid-cols-[24px_1fr] gap-2 py-3">
+              <span className="font-medium text-foreground">1</span><span>Find the form here. {verifyInstruction}</span>
+            </li>
+            <li className="grid grid-cols-[24px_1fr] gap-2 py-3">
+              <span className="font-medium text-foreground">2</span><span>Type <span className="font-medium text-foreground">Install test for {projectName}</span>.</span>
+            </li>
+            <li className="grid grid-cols-[24px_1fr] gap-2 py-3">
+              <span className="font-medium text-foreground">3</span><span>Send it, then open the verified inbox item.</span>
+            </li>
+          </ol>
+            <div className="mt-5 text-sm leading-6 text-muted-foreground">
               {!resolvedProjectKey && 'A fresh project key is required before this hosted page can submit live test feedback.'}
               {resolvedProjectKey && status === 'loading' && 'Loading the live widget runtime…'}
               {resolvedProjectKey && status === 'ready' && `Ready. ${runtimeExpectation}`}
               {resolvedProjectKey && status === 'error' && `The widget could not be loaded: ${error}`}
             </div>
-          </CardContent>
-        </Card>
+        </aside>
 
-        <Card className="overflow-hidden">
-          <CardHeader className="border-b bg-muted/20">
-            <CardTitle className="text-lg">Test area</CardTitle>
-            <CardDescription>
-              Use this area only to test the saved form. To test your real website, paste the install code there and send a test from that site.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6 p-6">
-            <div className="rounded-2xl border bg-background p-6 shadow-sm">
+        <section className="min-w-0">
+            <div className="bg-muted/25 p-5 sm:p-7">
               <div className="max-w-xl space-y-3">
-                <p className="text-sm font-medium text-foreground">Saved form test</p>
+                <p className="text-xs font-medium text-primary">Live saved configuration</p>
                 <h2 className="text-2xl font-semibold tracking-tight">Send one test message.</h2>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {verifyInstruction}
@@ -170,7 +158,7 @@ export function ProjectVerifyClient({
               </div>
 
               {resolvedProjectKey ? (
-                <div className="mt-8 rounded-2xl border border-dashed bg-muted/20 p-6">
+                <div className="mt-8 min-h-56 border border-dashed border-foreground/15 bg-background p-6">
                   <WidgetPreviewSurface
                     appOrigin={appOrigin}
                     projectKey={resolvedProjectKey}
@@ -182,8 +170,8 @@ export function ProjectVerifyClient({
                   />
                 </div>
               ) : (
-                <div className="mt-8 rounded-2xl border border-dashed bg-muted/20 p-6">
-                  <div className="rounded-xl border border-primary/20 bg-background p-4 text-sm text-muted-foreground">
+                <div className="mt-8 min-h-56 border border-dashed border-foreground/15 bg-background p-6">
+                  <div className="text-sm text-muted-foreground">
                     <p className="font-medium text-foreground">This key is hidden now.</p>
                     <p className="mt-1">
                       feedbacks.dev only reveals project keys once. Generate a fresh key from the install tab to run hosted verification again{apiKeyLastFour ? ` for the key ending in ${apiKeyLastFour}` : ''}.
@@ -200,12 +188,12 @@ export function ProjectVerifyClient({
                 </div>
               )}
 
-              <div className="mt-4 rounded-xl border bg-muted/20 p-4 text-sm text-muted-foreground">
+              <div className="mt-5 border-t border-foreground/10 pt-4 text-sm text-muted-foreground">
                 If this page works but your website does not, the saved form is fine. Check where the install code was pasted on your site.
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-wrap gap-3">
               <Link href={`/feedback?projectId=${projectId}`}>
                 <Button>
                   Open project inbox
@@ -216,8 +204,7 @@ export function ProjectVerifyClient({
                 <Button variant="outline">Return to install instructions</Button>
               </Link>
             </div>
-          </CardContent>
-        </Card>
+        </section>
       </div>
     </div>
   )

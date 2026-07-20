@@ -4,15 +4,52 @@ import test from 'node:test'
 
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), 'utf8')
 
-test('landing page names both products and keeps the install-once architecture', () => {
+test('landing page explains both sides of the feedback loop and keeps the install-once architecture', () => {
   const source = read('../../src/app/page.tsx')
+  const demo = read('../../src/components/landing-product-loop.tsx')
+  const story = read('../../src/components/landing-feedback-story.tsx')
+  const install = read('../../src/components/landing-install-story.tsx')
 
-  assert.match(source, /Feedback form/)
-  assert.match(source, /Release notes/)
-  assert.match(source, /Install once, verify it works, then manage everything remotely/)
+  assert.match(source, /Collect feedback from users/)
+  assert.match(source, /show product updates to users/i)
+  assert.match(source, /Configure once\. Install once\. Keep improving\./)
+  assert.match(demo, /Send feedback/)
+  assert.match(demo, /Product updates/)
+  assert.match(demo, /Orbit/)
+  assert.match(demo, /Ledgerly/)
+  assert.match(demo, /Parcel/)
+  assert.match(demo, /Capture screenshot/)
+  assert.match(story, /User reports it/)
+  assert.match(story, /Your team acts/)
+  assert.match(story, /Users see the fix/)
+  assert.match(install, /Remote configuration/)
+  assert.match(install, /Copy once\. Keep control remotely\./)
+  assert.match(install, /Test feedback received/)
+  assert.match(source, /Unlimited projects/)
   assert.match(source, /generateInstallSnippets/)
   assert.doesNotMatch(source, /createServerSupabase/)
   assert.doesNotMatch(source, /userbase|Collecting user feedbacks/)
+})
+
+test('navigation gives product updates user context instead of an ambiguous release-notes label', () => {
+  const sidebar = read('../../src/components/sidebar.tsx')
+  const projectHome = read('../../src/app/(dashboard)/projects/[id]/project-home.tsx')
+
+  assert.match(sidebar, /Updates for users/)
+  assert.match(projectHome, /Show product updates to users/)
+  assert.doesNotMatch(sidebar, /label: 'Release notes'/)
+})
+
+test('sidebar exposes a stable Home destination and groups project work by user intent', () => {
+  const sidebar = read('../../src/components/sidebar.tsx')
+
+  assert.match(sidebar, /label: 'Home'/)
+  assert.match(sidebar, /label: 'Collect'/)
+  assert.match(sidebar, /label: 'Share with users'/)
+  assert.match(sidebar, /label: 'Connect'/)
+  assert.match(sidebar, /Public feedback board/)
+  assert.doesNotMatch(sidebar, /label: 'Overview'/)
+  assert.doesNotMatch(sidebar, /projectTab: 'home'/)
 })
 
 test('sign-in explains account creation and the shared embed before setup', () => {
@@ -30,6 +67,9 @@ test('theme tokens use perceptual OKLCH colors in both themes', () => {
 
   assert.match(css, /--background: 0\.985/)
   assert.match(css, /\.dark[\s\S]*--background: 0\.155/)
+  assert.match(css, /--surface-sidebar:/)
+  assert.match(css, /--surface-selected:/)
+  assert.match(tailwind, /surface:\s*\{/)
   assert.match(tailwind, /oklch\(var\(--primary\)/)
   assert.doesNotMatch(tailwind, /hsl\(var\(--primary\)/)
 })

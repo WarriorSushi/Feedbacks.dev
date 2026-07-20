@@ -14,11 +14,10 @@ import {
 import type { Project } from '@/lib/types'
 import { publicEnv } from '@/lib/public-env'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CodeSnippet } from '@/components/code-snippet'
 import { CopyButton } from '@/components/copy-button'
 import { Badge } from '@/components/ui/badge'
-import { Bot, Loader2, RefreshCw, XCircle } from 'lucide-react'
+import { Bot, CheckCircle2, Code2, Loader2, RefreshCw, XCircle } from 'lucide-react'
 
 interface InstallTabProps {
   project: Project
@@ -321,29 +320,19 @@ export function FeedbacksWidgetScript() {
   const selectedTarget = installTargets.find((target) => target.id === activePlatform) || installTargets[0]
 
   return (
-    <div className="space-y-6" data-tour="install-workspace">
-      <Card className="border-primary/25 bg-primary/[0.035]">
-        <CardContent className="space-y-5 p-5 sm:p-6">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className="bg-primary/90 text-primary-foreground">Shared embed</Badge>
-                <Badge variant="outline">Install once</Badge>
-              </div>
-              <h2 className="mt-3 text-xl font-semibold tracking-tight">
-                Add feedbacks.dev to your product once.
-              </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                This stable embed powers both the feedback form and release notes. Dashboard changes are delivered remotely on the next page load—this code does not need to be replaced.
-              </p>
-            </div>
-          </div>
+    <div className="space-y-8" data-tour="install-workspace">
+      <section className="grid gap-8 border-b border-foreground/10 pb-8 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div>
+          <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-primary"><Code2 className="h-4 w-4" /> One shared connection</div>
+          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.035em]">Install once. Keep the code unchanged.</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+            This stable embed powers the feedback form and the product updates you show to users. Saved dashboard changes arrive remotely on the next page load.
+          </p>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
-            <div className="divide-y rounded-xl border bg-background/80">
+          <div className="mt-6 divide-y border-y border-foreground/10">
               {installSteps.map((step, index) => (
                 <div key={step.title} className="flex gap-3 px-4 py-3">
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
                     {index + 1}
                   </span>
                   <div className="min-w-0">
@@ -352,24 +341,23 @@ export function FeedbacksWidgetScript() {
                   </div>
                 </div>
               ))}
-            </div>
+          </div>
+        </div>
 
-            <div className="space-y-3 rounded-xl border bg-background/80 p-4">
+        <aside className="border-t border-foreground/10 pt-5 xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Remote configuration
-                </p>
+                <p className="text-xs font-semibold text-muted-foreground">Connection details</p>
                 <Badge variant="outline">{modeLabel}</Badge>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+              <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-1">
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-muted-foreground">Project key</p>
                   {projectKey ? (
-                    <p className="mt-1 break-all rounded-md border bg-muted/20 px-2 py-1.5 font-mono text-xs text-foreground">
+                    <p className="mt-1 break-all font-mono text-xs text-foreground">
                       {projectKey}
                     </p>
                   ) : (
-                    <div className="mt-1 rounded-md border border-dashed bg-muted/10 p-3">
+                    <div className="mt-1">
                       <p className="text-sm leading-5 text-muted-foreground">
                         Key hidden{apiKeyLastFour ? `, ending in ${apiKeyLastFour}` : ''}. Generate a fresh key to copy a new snippet.
                       </p>
@@ -386,40 +374,38 @@ export function FeedbacksWidgetScript() {
                   <p className="mt-1 text-sm leading-5 text-muted-foreground">{verifyInstruction}</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </aside>
+      </section>
 
-      <Card data-tour="install-snippet">
-        <CardHeader data-tour="install-snippet-header">
+      <section data-tour="install-snippet">
+        <header data-tour="install-snippet-header" className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <CardTitle className="text-lg">Install code</CardTitle>
-            <CardDescription>
+            <h2 className="text-lg font-semibold">Choose where you are installing</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               Select your environment and add this once near the application root.
-            </CardDescription>
+            </p>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div data-tour="install-platforms" className="flex flex-wrap gap-2" role="group" aria-label="Install platform">
+          <div data-tour="install-platforms" className="flex flex-wrap gap-1 border-b" role="group" aria-label="Install platform">
             {installTargets.map((target) => (
               <button
                 key={target.id}
                 type="button"
                 aria-pressed={activePlatform === target.id}
                 onClick={() => setActivePlatform(target.id)}
-                className={`min-h-9 rounded-full border px-3 text-sm font-medium transition-colors ${
+                className={`min-h-9 border-b-2 px-3 text-sm font-medium transition-colors ${
                   activePlatform === target.id
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'bg-background text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                    ? 'border-primary text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {target.label}
               </button>
             ))}
           </div>
+        </header>
 
-          <div className="rounded-lg border bg-muted/10 p-4">
+        <div className="mt-5 space-y-5">
+          <div className="flex flex-wrap items-start justify-between gap-3 border-y border-foreground/10 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-foreground">{selectedTarget.title}</p>
@@ -472,7 +458,7 @@ export function FeedbacksWidgetScript() {
             </div>
           )}
 
-          <div className="divide-y rounded-lg border bg-muted/10">
+          <div className="divide-y border-y border-foreground/10">
             <div className="grid gap-1 px-4 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
               <p className="text-sm font-medium text-foreground">Where this goes</p>
               <p className="text-sm leading-6 text-muted-foreground">{selectedTarget.placement}</p>
@@ -491,11 +477,12 @@ export function FeedbacksWidgetScript() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
-            After installation, change the button, fields, wording, placement, captcha, and release notes from the dashboard. <span className="font-medium text-foreground">You will not need a new snippet.</span>
+          <div className="flex items-start gap-3 bg-primary/[0.045] px-4 py-3 text-sm text-muted-foreground">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <p>After installation, change the button, fields, wording, placement, captcha, and user-facing product updates from the dashboard. <span className="font-medium text-foreground">You will not need a new snippet.</span></p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <details className="group rounded-xl border bg-card">
         <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">

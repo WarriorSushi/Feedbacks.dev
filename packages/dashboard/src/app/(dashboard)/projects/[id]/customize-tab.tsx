@@ -221,9 +221,8 @@ export function CustomizeTab({
   const isInlineForm = embedMode === 'inline'
 
   return (
-    <div className="space-y-6">
-      <Card className={hasUnsavedChanges ? 'border-amber-300/80 bg-amber-50/50 dark:bg-amber-950/10' : ''}>
-        <CardHeader className="space-y-4 p-5">
+    <div className="space-y-7">
+      <header className={`space-y-4 border-b pb-6 ${hasUnsavedChanges ? 'border-amber-400/60' : 'border-foreground/10'}`}>
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -233,12 +232,12 @@ export function CustomizeTab({
                 <Badge variant="outline">{draftModeLabel}</Badge>
               </div>
               <div>
-                <CardTitle className="text-lg">Make the feedback form fit your product</CardTitle>
-                <CardDescription className="mt-1">
+                <h1 className="text-2xl font-semibold tracking-[-0.035em]">Make the feedback form feel native</h1>
+                <p className="mt-1 text-sm text-muted-foreground">
                   {hasUnsavedChanges
                     ? 'Save to publish these changes to every installed embed.'
                     : 'This saved version is delivered remotely. Your installed code stays the same.'}
-                </CardDescription>
+                </p>
               </div>
               {draftRestored && hasUnsavedChanges && (
                 <p className="text-sm text-muted-foreground">
@@ -259,7 +258,7 @@ export function CustomizeTab({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border bg-background/70 px-3 py-2 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-foreground/10 pt-3 text-sm text-muted-foreground">
             <span>
               Saved placement: <span className="font-medium text-foreground">{savedModeLabel}</span>
             </span>
@@ -274,8 +273,7 @@ export function CustomizeTab({
               )}
             </span>
           </div>
-        </CardHeader>
-      </Card>
+      </header>
 
       {!projectKey && (
         <div className="flex flex-col gap-3 rounded-lg border border-primary/30 bg-primary/[0.04] p-3 text-sm md:flex-row md:items-center md:justify-between">
@@ -300,15 +298,15 @@ export function CustomizeTab({
         </div>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
-        <Card data-tour="widget-settings">
-          <CardHeader>
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <Card data-tour="widget-settings" className="border-0 bg-transparent shadow-none">
+          <CardHeader className="border-b border-foreground/10 px-0 pb-5 pt-0">
             <CardTitle className="text-lg">Widget settings</CardTitle>
             <CardDescription>
               Choose where feedback appears, then tune the form details below.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-7 px-0 pt-6">
             <div className="space-y-3">
               <div>
                 <p className="text-sm font-semibold text-foreground">Placement</p>
@@ -342,10 +340,10 @@ export function CustomizeTab({
                     type="button"
                     aria-pressed={embedMode === mode}
                     onClick={() => updateConfig('embedMode', mode)}
-                    className={`rounded-xl border p-4 text-left transition-colors ${
+                    className={`border-y p-4 text-left transition-colors ${
                       embedMode === mode
-                        ? 'border-primary/40 bg-primary/10'
-                        : 'hover:border-foreground/20 hover:bg-muted/30'
+                        ? 'border-primary bg-primary/[0.06]'
+                        : 'border-foreground/10 hover:bg-muted/25'
                     }`}
                   >
                     <Icon className="h-4 w-4 text-primary" />
@@ -471,7 +469,7 @@ export function CustomizeTab({
               ).map(([key, label]) => (
                 <label
                   key={key}
-                  className="flex min-h-11 items-center gap-2 rounded-lg border bg-background px-3 text-sm transition-colors hover:bg-muted/30"
+                  className="flex min-h-11 items-center gap-2 border-b border-foreground/10 px-1 text-sm transition-colors hover:bg-muted/20"
                 >
                   <input
                     type="checkbox"
@@ -498,8 +496,8 @@ export function CustomizeTab({
           </CardContent>
         </Card>
 
-        <Card data-tour="widget-preview" className="overflow-hidden xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto">
-          <CardHeader className="border-b bg-muted/20">
+        <Card data-tour="widget-preview" className="overflow-hidden border-0 bg-muted/30 shadow-none xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto">
+          <CardHeader className="border-b border-foreground/10">
             <CardTitle className="text-lg">Live form preview</CardTitle>
             <CardDescription>
               Placement, color, copy, and optional fields update as you edit.
@@ -519,7 +517,7 @@ export function CustomizeTab({
       </div>
 
       {hasUnsavedChanges && (
-        <div className="sticky bottom-4 z-20 rounded-lg border border-amber-300/80 bg-amber-50 p-3 shadow-lg dark:bg-amber-950">
+        <div className="sticky bottom-4 z-20 border border-amber-300/80 bg-amber-50 p-3 shadow-lg dark:bg-amber-950">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-foreground">Publish remote changes</p>

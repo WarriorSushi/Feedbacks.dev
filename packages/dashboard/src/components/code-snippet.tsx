@@ -47,7 +47,7 @@ export function CodeSnippet({ tabs, className, wrap = false, maxHeightClassName 
           copiedLabel="Copied"
           variant="outline"
           size="sm"
-          className="absolute right-2 top-2 z-10 h-8 bg-background/95 px-2 text-xs shadow-sm backdrop-blur"
+          className="absolute right-2 top-2 z-10 h-8 border-zinc-600 bg-zinc-800 px-2 text-xs text-zinc-100 shadow-md hover:bg-zinc-700 hover:text-zinc-50"
         />
         <pre
           tabIndex={0}

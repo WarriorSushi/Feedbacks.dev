@@ -71,18 +71,18 @@ function AuthPageInner() {
             <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-[-0.04em] xl:text-5xl">A small setup path.<br />A complete feedback loop.</h1>
             <p className="mt-5 max-w-lg leading-7 text-muted-foreground">Sign in, create one project, install one shared embed, and send a test. Everything else can wait until the connection works.</p>
 
-            <div className="mt-10 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
+            <div className="mt-10 overflow-hidden border-y border-foreground/15">
               <div className="grid sm:grid-cols-2">
                 <div className="border-b p-5 sm:border-b-0 sm:border-r">
                   <div className="flex items-center gap-2 text-sm font-semibold"><MessageSquare className="h-4 w-4 text-primary" /> Feedback form</div>
                   <p className="mt-2 text-xs leading-5 text-muted-foreground">Users send bugs, ideas, questions, ratings, and screenshots to your inbox.</p>
                 </div>
                 <div className="p-5">
-                  <div className="flex items-center gap-2 text-sm font-semibold"><Megaphone className="h-4 w-4 text-amber-500" /> Release notes</div>
+                  <div className="flex items-center gap-2 text-sm font-semibold"><Megaphone className="h-4 w-4 text-amber-500" /> Updates for your users</div>
                   <p className="mt-2 text-xs leading-5 text-muted-foreground">You publish clear “What’s new” announcements back inside your product.</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 border-t bg-primary/[0.045] px-5 py-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-3 border-t bg-primary/[0.035] px-5 py-4 text-xs text-muted-foreground">
                 <Check className="h-4 w-4 shrink-0 text-primary" /><span><strong className="text-foreground">One embed for both.</strong> Install it once and manage configuration remotely.</span>
               </div>
             </div>

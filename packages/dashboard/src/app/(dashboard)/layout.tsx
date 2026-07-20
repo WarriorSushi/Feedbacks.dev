@@ -87,8 +87,8 @@ export default async function DashboardLayout({
         boardSlugs={boardSlugs}
         billingAccount={billingAccount}
       />
-      <main className="min-h-0 flex-1 overflow-y-auto bg-muted/25 pb-[env(safe-area-inset-bottom,0px)] dark:bg-background">
-        <div className="mx-auto max-w-[1320px] px-4 py-5 md:px-7 md:py-7">{children}</div>
+      <main className="min-h-0 flex-1 overflow-y-auto bg-background pb-[env(safe-area-inset-bottom,0px)]">
+        <div className="mx-auto max-w-[1240px] px-4 py-5 md:px-8 md:py-8">{children}</div>
       </main>
       <ProductTour
         initialOpen={false}

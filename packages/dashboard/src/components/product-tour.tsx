@@ -419,7 +419,7 @@ export function ProductTour({
               />
             </mask>
           </defs>
-          <rect width={viewport.width} height={viewport.height} fill="rgba(0,0,0,0.60)" mask={`url(#${maskId})`} />
+          <rect width={viewport.width} height={viewport.height} fill="rgba(0,0,0,0.52)" mask={`url(#${maskId})`} />
           <rect
             x={spotlight.left}
             y={spotlight.top}
@@ -430,7 +430,7 @@ export function ProductTour({
             stroke="oklch(var(--primary))"
             strokeWidth="2"
             vectorEffect="non-scaling-stroke"
-            style={{ filter: 'drop-shadow(0 0 8px oklch(var(--primary) / 0.5))' }}
+            style={{ filter: 'drop-shadow(0 2px 6px rgb(0 0 0 / 0.35))' }}
           />
         </svg>
       ) : (
@@ -443,13 +443,13 @@ export function ProductTour({
         aria-modal="true"
         aria-labelledby="product-tour-title"
         aria-describedby="product-tour-description"
-        className="pointer-events-auto fixed w-[calc(100vw-2rem)] max-w-[360px] rounded-xl border bg-card p-4 shadow-2xl"
+        className="pointer-events-auto fixed w-[calc(100vw-2rem)] max-w-[360px] rounded-lg border bg-card p-5 shadow-[0_24px_70px_rgb(0_0_0/0.32)]"
         style={{ top: panelPosition.top, left: panelPosition.left }}
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-              {tutorial.title} · Step {stepIndex + 1} of {steps.length}
+            <p className="text-[11px] font-semibold text-primary">
+              {tutorial.title} · {stepIndex + 1} of {steps.length}
             </p>
             <h2 id="product-tour-title" className="mt-2 text-base font-semibold">
               {activeStep.title}
