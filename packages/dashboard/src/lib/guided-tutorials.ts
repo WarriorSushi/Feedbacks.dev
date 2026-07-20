@@ -35,10 +35,10 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
     title: 'Your workspace in 6 steps',
     description: 'See the core loop first. Advanced tools stay available when you need them.',
     steps: [
-      { title: 'Start from Overview', body: 'This project home separates your Feedback form and Release notes, and shows their shared install status.', href: '/projects/{projectId}', target: '[data-tour="nav-dashboard"]' },
+      { title: 'Start from Overview', body: 'This project home separates feedback collection from the updates you show users, and shows their shared install status.', href: '/projects/{projectId}', target: '[data-tour="nav-dashboard"]' },
       { title: 'Shape the Feedback form', body: 'Choose the placement, wording, fields, color, and anti-spam settings. Saved changes reach the embed remotely.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="nav-feedback-form"]' },
       { title: 'Triage the Feedback inbox', body: 'User messages land here with page and browser context. Search, filter, tag, and decide what needs action.', href: '/feedback', target: '[data-tour="nav-feedback"]' },
-      { title: 'Publish Release notes', body: 'Tell users what shipped through the in-product “What’s new” feed. These are your product announcements.', href: '/projects/{projectId}/release-notes', target: '[data-tour="nav-updates"]' },
+      { title: 'Show updates to users', body: 'Tell users what shipped through the in-product “What’s new” popup. These are updates for your product, not feedbacks.dev.', href: '/projects/{projectId}/release-notes', target: '[data-tour="nav-updates"]' },
       { title: 'Install and verify once', body: 'Add the shared embed, send one known-good test, and confirm the connection before customizing further.', href: '/projects/{projectId}/install', target: '[data-tour="nav-install"]' },
       { title: 'Connect the rest when needed', body: 'Public boards, integrations, API access, billing, and settings stay in the sidebar without blocking first setup.', href: '/projects/{projectId}/integrations', target: '[data-tour="nav-integrations"]' },
     ],
@@ -51,7 +51,7 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
       { title: 'Your projects', body: 'A project is one app or website. Feedback, install settings, integrations, and a public board stay grouped here.', href: '/projects', target: '[data-tour="project-surface"]' },
       { title: 'Start a project', body: 'Use New Project when you are ready. The only required field is a name your team recognizes.', href: '/projects', target: '[data-tour="new-project"]' },
       { title: 'Name it clearly', body: 'Enter the product or site name. A domain is optional and can be added later.', href: '/projects/new', target: '[data-tour="project-create-form"]' },
-      { title: 'Choose the first product', body: 'Start with feedback, release notes, or both. This lesson will not create anything for you.', href: '/projects/new', target: '[data-tour="project-create-submit"]' },
+      { title: 'Choose the first product', body: 'Start by collecting feedback, showing updates to users, or both. This lesson will not create anything for you.', href: '/projects/new', target: '[data-tour="project-create-submit"]' },
     ],
   },
   {

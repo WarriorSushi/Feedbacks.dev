@@ -284,7 +284,7 @@ export default async function DashboardPage({
               {[
                 ['1', 'Create project', 'Only the project name is required.'],
                 ['2', 'Install and test', 'Add the shared embed once, then check the inbox.'],
-                ['3', 'Manage remotely', 'Change the feedback form or publish release notes without replacing code.'],
+                ['3', 'Manage remotely', 'Change the feedback form or publish updates to users without replacing code.'],
               ].map(([step, title, body]) => (
                 <div key={step} className="flex gap-3 rounded-lg border bg-muted/20 p-3">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
@@ -326,7 +326,7 @@ export default async function DashboardPage({
       {/* ─── Header ───────────────────────────────────────── */}
       <div className="grid gap-3 border-b pb-4 lg:grid-cols-[minmax(260px,1fr)_auto_minmax(220px,auto)] lg:items-center">
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">
+          <h1 className="truncate text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
             Good {getGreeting()},{' '}
             <span className="font-normal text-muted-foreground">{displayName}</span>
           </h1>
@@ -389,7 +389,7 @@ export default async function DashboardPage({
           </Link>
         </div>
         {billingSummary && (
-          <div className="min-w-0 rounded-md border bg-card px-3 py-2 lg:justify-self-end">
+          <div className="min-w-0 border-l border-foreground/10 pl-4 lg:justify-self-end">
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Plan</p>
             <p className="mt-0.5 truncate text-xs font-medium">
               {billingSummary.entitlements.label} · {billingSummary.entitlements.feedbackMonthlyLimit
@@ -406,7 +406,7 @@ export default async function DashboardPage({
       </div>
 
       {total === 0 && primaryProject ? (
-        <div data-tour="dashboard-capabilities" className="flex flex-col gap-4 rounded-lg border border-primary/25 bg-primary/[0.05] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div data-tour="dashboard-capabilities" className="flex flex-col gap-4 border-y border-primary/25 bg-primary/[0.04] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 gap-3">
             <Code2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
@@ -501,16 +501,9 @@ export default async function DashboardPage({
       )}
 
       {/* ─── Stat Cards ───────────────────────────────────── */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-2.5">
+      <div className="grid grid-cols-2 border-y border-foreground/10 sm:grid-cols-3 lg:grid-cols-6">
         {statCards.map((stat) => (
-          <Link key={stat.id} href={stat.href} className="block">
-            <Card
-              className={cn(
-                'h-full overflow-hidden transition-colors hover:border-primary/30 hover:bg-accent/20',
-                stat.urgent && 'border-amber-300 bg-amber-50/50 dark:border-amber-700/70 dark:bg-amber-950/20'
-              )}
-            >
-              <CardContent className="p-3.5">
+          <Link key={stat.id} href={stat.href} className={cn('block border-b border-r border-foreground/10 p-4 transition-colors hover:bg-muted/25 lg:border-b-0', stat.urgent && 'bg-amber-50/50 dark:bg-amber-950/15')}>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                   {stat.label}
                 </p>
@@ -523,8 +516,6 @@ export default async function DashboardPage({
                   {stat.value}
                 </p>
                 <p className="mt-1.5 text-[11px] text-muted-foreground">{stat.sub}</p>
-              </CardContent>
-            </Card>
           </Link>
         ))}
       </div>
@@ -787,15 +778,15 @@ export default async function DashboardPage({
       </div>
 
       {/* ─── 7-Day Trend Chart ────────────────────────────── */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-3 pt-4">
+      <section className="border-t border-foreground/10 pt-4">
+        <header className="flex flex-row items-center justify-between pb-3">
           <div>
-            <CardTitle className="text-sm font-semibold">Feedback Volume</CardTitle>
+            <h2 className="text-sm font-semibold">Feedback volume</h2>
             <p className="mt-0.5 text-[11px] text-muted-foreground">Last 7 days</p>
           </div>
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
+        </header>
+        <div>
           {total === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <TrendingUp className="h-9 w-9 text-muted-foreground/40" />
@@ -844,8 +835,8 @@ export default async function DashboardPage({
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }

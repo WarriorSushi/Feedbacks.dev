@@ -64,7 +64,7 @@ export function SetupProgress({
   const nextActionByStep: Record<SetupStep, { title: string; body: string; href: string; label: string }> = {
     install: {
       title: 'Install the embed once',
-      body: 'Paste one stable snippet into your app shell. Future form and release-note changes are delivered remotely without replacement code.',
+      body: 'Paste one stable snippet into your app shell. Future form and user-update changes arrive remotely without replacement code.',
       href: `/projects/${projectId}/verify`,
       label: 'Open verification',
     },
@@ -76,7 +76,7 @@ export function SetupProgress({
     },
     inbox: {
       title: 'Connected: manage products remotely',
-      body: 'The shared embed works. Change the feedback form or publish release notes from the dashboard without editing your site again.',
+      body: 'The shared embed works. Change the feedback form or publish updates to users without editing your site again.',
       href: `/projects/${projectId}`,
       label: 'Open project home',
     },
@@ -84,12 +84,8 @@ export function SetupProgress({
   const nextAction = nextActionByStep[activeStep]
 
   return (
-    <nav
-      aria-label="Setup steps"
-      data-tour="setup-progress"
-      className="rounded-xl border border-primary/25 bg-card shadow-sm"
-    >
-      <div className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+    <nav aria-label="Setup steps" data-tour="setup-progress" className="border-b border-foreground/10 pb-6">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
             Setup progress
@@ -114,20 +110,20 @@ export function SetupProgress({
         </Link>
       </div>
 
-      <ol className="grid grid-cols-3 border-t bg-muted/20">
+      <ol className="mt-5 grid grid-cols-3 border-y border-foreground/10">
         {steps.map((step, index) => {
           const current = activeStep === step.id
           const completed = index < activeIndex
           return (
-            <li key={step.id} className="border-l first:border-l-0">
+            <li key={step.id} className="border-l border-foreground/10 first:border-l-0">
               <Link
                 href={step.href}
                 prefetch={false}
                 onClick={() => beginNavigation(step.href)}
                 onMouseEnter={() => prefetch(step.href)}
                 onFocus={() => prefetch(step.href)}
-                className={`flex min-h-16 flex-col items-center justify-center gap-1 px-1.5 py-2 text-center transition-colors hover:bg-accent/45 md:flex-row md:justify-start md:gap-3 md:px-4 md:py-3 md:text-left ${
-                  current ? 'bg-primary/[0.08]' : ''
+                className={`flex min-h-16 flex-col items-center justify-center gap-1 px-1.5 py-2 text-center transition-colors hover:bg-accent/35 md:flex-row md:justify-start md:gap-3 md:px-4 md:py-3 md:text-left ${
+                  current ? 'bg-primary/[0.055]' : ''
                 }`}
                 aria-current={current ? 'step' : undefined}
               >

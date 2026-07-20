@@ -11,7 +11,7 @@ const tourSteps = [
   { title: 'Start from Overview', path: /\/projects\/[^/]+$/, target: 'nav-dashboard' },
   { title: 'Shape the Feedback form', path: /\/projects\/[^/]+\/feedback-form$/, target: 'nav-feedback-form' },
   { title: 'Triage the Feedback inbox', path: /\/feedback(?:\?.*)?$/, target: 'nav-feedback' },
-  { title: 'Publish Release notes', path: /\/projects\/[^/]+\/release-notes$/, target: 'nav-updates' },
+  { title: 'Show updates to users', path: /\/projects\/[^/]+\/release-notes$/, target: 'nav-updates' },
   { title: 'Install and verify once', path: /\/projects\/[^/]+\/install$/, target: 'nav-install' },
   { title: 'Connect the rest when needed', path: /\/projects\/[^/]+\/integrations$/, target: 'nav-integrations' },
 ]

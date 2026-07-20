@@ -55,7 +55,7 @@ const primaryNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true, tourId: 'nav-dashboard', projectTab: 'home' },
   { href: '/feedback-form', label: 'Feedback form', icon: MessageSquare, tourId: 'nav-feedback-form', projectTab: 'feedback-form' },
   { href: '/feedback', label: 'Feedback inbox', icon: MessageSquare, tourId: 'nav-feedback' },
-  { href: '/release-notes', label: 'Release notes', icon: Megaphone, tourId: 'nav-updates', projectTab: 'release-notes' },
+  { href: '/release-notes', label: 'Updates for users', icon: Megaphone, tourId: 'nav-updates', projectTab: 'release-notes' },
   { href: '/board', label: 'Public board', icon: Globe, tourId: 'nav-boards', projectTab: 'board' },
   { href: '/install', label: 'Install & verify', icon: Code2, tourId: 'nav-install', projectTab: 'install' },
   { href: '/integrations', label: 'Integrations', icon: Webhook, tourId: 'nav-integrations', projectTab: 'integrations' },

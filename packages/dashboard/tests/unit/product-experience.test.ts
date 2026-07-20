@@ -4,15 +4,28 @@ import test from 'node:test'
 
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), 'utf8')
 
-test('landing page names both products and keeps the install-once architecture', () => {
+test('landing page explains both sides of the feedback loop and keeps the install-once architecture', () => {
   const source = read('../../src/app/page.tsx')
+  const demo = read('../../src/components/landing-product-loop.tsx')
 
-  assert.match(source, /Feedback form/)
-  assert.match(source, /Release notes/)
-  assert.match(source, /Install once, verify it works, then manage everything remotely/)
+  assert.match(source, /Collect feedback from users/)
+  assert.match(source, /Show product updates to users/)
+  assert.match(source, /One embed\. No configuration-code treadmill/)
+  assert.match(demo, /Send feedback/)
+  assert.match(demo, /What&apos;s new/)
+  assert.match(source, /Unlimited projects/)
   assert.match(source, /generateInstallSnippets/)
   assert.doesNotMatch(source, /createServerSupabase/)
   assert.doesNotMatch(source, /userbase|Collecting user feedbacks/)
+})
+
+test('navigation gives product updates user context instead of an ambiguous release-notes label', () => {
+  const sidebar = read('../../src/components/sidebar.tsx')
+  const projectHome = read('../../src/app/(dashboard)/projects/[id]/project-home.tsx')
+
+  assert.match(sidebar, /Updates for users/)
+  assert.match(projectHome, /Show product updates to users/)
+  assert.doesNotMatch(sidebar, /label: 'Release notes'/)
 })
 
 test('sign-in explains account creation and the shared embed before setup', () => {

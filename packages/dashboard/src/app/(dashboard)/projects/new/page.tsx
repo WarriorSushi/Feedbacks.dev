@@ -20,7 +20,7 @@ const setupSteps = [
 
 const productChoices = [
   { value: 'feedback', label: 'Feedback form', body: 'Collect bugs, ideas, questions, ratings, and screenshots.' },
-  { value: 'updates', label: 'Release notes', body: 'Publish in-product “What’s new” announcements.' },
+  { value: 'updates', label: 'Updates for users', body: 'Publish in-product “What’s new” announcements.' },
   { value: 'both', label: 'Both products', body: 'Collect user signal and communicate what shipped.' },
 ] as const
 
@@ -113,14 +113,14 @@ export default function NewProjectPage() {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
-        <Card data-tour="project-create-form">
-          <CardHeader>
+        <Card data-tour="project-create-form" className="border-0 bg-transparent shadow-none">
+          <CardHeader className="border-b border-foreground/10 px-0 pt-0">
             <CardTitle className="text-lg">Project details</CardTitle>
             <CardDescription>
               One name is enough. The next screen gives you a working install snippet immediately.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-0 pt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Project name</Label>
@@ -141,7 +141,7 @@ export default function NewProjectPage() {
               <legend className="text-sm font-medium">What do you want to do first?</legend>
               <div className="grid gap-2">
                 {productChoices.map(({ value, label, body }) => (
-                  <button key={value} type="button" onClick={() => setGoal(value)} className={cn('grid min-h-16 grid-cols-[18px_1fr] gap-3 rounded-lg border px-4 py-3 text-left transition-colors', goal === value ? 'border-primary/50 bg-primary/[0.055]' : 'hover:border-foreground/20 hover:bg-muted/35')} aria-label={label} aria-pressed={goal === value}>
+                  <button key={value} type="button" onClick={() => setGoal(value)} className={cn('grid min-h-16 grid-cols-[18px_1fr] gap-3 border-y px-4 py-3 text-left transition-colors', goal === value ? 'border-primary bg-primary/[0.055]' : 'border-foreground/10 hover:bg-muted/30')} aria-label={label} aria-pressed={goal === value}>
                     <span className={cn('mt-0.5 flex h-4 w-4 items-center justify-center rounded-full border', goal === value ? 'border-primary bg-primary' : 'border-input')}>{goal === value && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}</span>
                     <span><span className={cn('block text-sm font-semibold', goal === value && 'text-primary')}>{label}</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">{body}</span></span>
                   </button>
@@ -218,13 +218,13 @@ export default function NewProjectPage() {
             )}
             <Button data-tour="project-create-submit" type="submit" size="lg" className="w-full" disabled={loading || !name.trim()}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {goal === 'updates' ? 'Create project and set up release notes' : goal === 'both' ? 'Create project and set up both' : 'Create project and get install code'}
+              {goal === 'updates' ? 'Create project and set up user updates' : goal === 'both' ? 'Create project and set up both' : 'Create project and get install code'}
             </Button>
           </form>
           </CardContent>
         </Card>
 
-        <aside className="rounded-lg border bg-card px-5 py-5 shadow-[var(--shadow-card)]">
+        <aside className="border-t border-foreground/10 pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
           <p className="text-sm font-semibold">What happens next</p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">Three focused screens. Advanced settings stay out of the way.</p>
           <div className="mt-5 border-y">
@@ -238,7 +238,7 @@ export default function NewProjectPage() {
               </div>
             ))}
           </div>
-          <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-muted-foreground"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" /> Future form and release-note changes are delivered remotely. No new snippet.</p>
+          <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-muted-foreground"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" /> Future form changes and user-facing product updates are delivered remotely. No new snippet.</p>
         </aside>
       </div>
     </div>

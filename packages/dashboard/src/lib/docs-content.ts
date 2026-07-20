@@ -43,7 +43,7 @@ export const DOCS_PAGES: DocsPage[] = [
       { type: 'steps', items: [
         { title: 'Create a project', body: 'A project is one app or website. It owns the widget configuration, feedback inbox, integrations, API key, and public board.' },
         { title: 'Install once', body: 'Paste the stable Website snippet into the shared page shell, footer, or tag manager used by the whole product.' },
-        { title: 'Manage remotely', body: 'Change placement, fields, wording, styling, captcha, and release notes from the dashboard without replacing the snippet.' },
+        { title: 'Manage remotely', body: 'Change the form or publish product updates to users from the dashboard without replacing the snippet.' },
         { title: 'Verify one submission', body: 'Use hosted verification, then send feedback from the real page and confirm both items reach the inbox.' },
       ] },
       { type: 'callout', tone: 'success', title: 'A successful first install has one proof', body: 'A known test message appears in the correct project inbox with its page URL and browser context.' },
@@ -76,7 +76,7 @@ export const DOCS_PAGES: DocsPage[] = [
       { type: 'heading', id: 'customize', title: '4. Customize remotely' },
       { type: 'paragraph', text: 'Choose floating button, custom trigger, or inline form from Feedback form. Save placement, fields, labels, colors, screenshots, attachments, and captcha settings without replacing the installed snippet.' },
       { type: 'heading', id: 'next', title: '5. Add only what you need next' },
-      { type: 'list', items: ['Restrict allowed origins after the real site works.', 'Add Slack, Discord, GitHub Issues, or a webhook from Integrations.', 'Publish Release notes when you want to show users what shipped.', 'Publish a public board only when you want requests, votes, and replies to be visible.'] },
+      { type: 'list', items: ['Restrict allowed origins after the real site works.', 'Add Slack, Discord, GitHub Issues, or a webhook from Integrations.', 'Publish an update for your users when you want to show what shipped.', 'Publish a public board only when you want requests, votes, and replies to be visible.'] },
     ],
   },
   {
@@ -150,11 +150,11 @@ export const DOCS_PAGES: DocsPage[] = [
     ],
   },
   {
-    slug: 'install/product-updates', category: 'Install', title: 'Release notes',
+    slug: 'install/product-updates', category: 'Install', title: 'Updates for your users',
     description: 'Publish an in-app What’s New modal through the widget you already installed.',
     blocks: [
       { type: 'heading', id: 'enable-once', title: 'Enable the runtime once' },
-      { type: 'paragraph', text: 'Open Release notes and activate it. The shared embed receives the module setting remotely; no regenerated snippet or application deployment is required.' },
+      { type: 'paragraph', text: 'Open Updates for users and activate it. The shared embed receives the module setting remotely; no regenerated snippet or application deployment is required.' },
       { type: 'code', label: 'Manual What’s New trigger', language: 'html', code: `<button data-feedbacks-updates-trigger type="button">What’s new</button>` },
       { type: 'heading', id: 'publish', title: 'Create and publish' },
       { type: 'steps', items: [
@@ -164,7 +164,7 @@ export const DOCS_PAGES: DocsPage[] = [
       ] },
       { type: 'heading', id: 'display-rules', title: 'Display rules and privacy' },
       { type: 'list', items: ['The widget automatically shows only the newest unseen eligible update.', 'Seen and dismissed state stays in localStorage, without cookies, account IDs, page URLs, or server-side viewer events.', 'Manual triggers can reopen the newest live update.', 'Included and excluded pathname prefixes control where updates can appear. Exclusions win.', 'Metrics are approximate daily aggregates for impressions, dismissals, and CTA clicks.'] },
-      { type: 'callout', tone: 'note', title: 'Keep it concise', body: 'Release notes are for useful “What’s new” communication, not a marketing carousel. One centered modal is shown at a time and it never overlaps the feedback form.' },
+      { type: 'callout', tone: 'note', title: 'Keep it concise', body: 'User-facing product updates are for useful “What’s new” communication, not a marketing carousel. One centered popup is shown at a time and it never overlaps the feedback form.' },
     ],
   },
   {

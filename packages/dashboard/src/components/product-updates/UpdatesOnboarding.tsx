@@ -126,34 +126,34 @@ export function UpdatesOnboarding({
   }
 
   if (currentEmbedState === 'connected' && !modules.updates) {
-    return <ConnectionState title="Your shared embed is connected" description="Turn on release notes remotely. Your existing installation does not need a code change." action="Activate release notes" onAction={activate} busy={saving} />
+    return <ConnectionState title="Your shared embed is connected" description="Turn on product updates for users remotely. Your existing installation does not need a code change." action="Activate updates for users" onAction={activate} busy={saving} />
   }
 
   if (modules.updates && currentEmbedState === 'connected') return null
 
-  return <div className="mx-auto max-w-3xl space-y-6">
-    <section className="space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Release notes setup</p>
-      <h2 className="text-2xl font-semibold tracking-tight">Show “What’s new” inside your product</h2>
-      <p className="max-w-2xl text-sm leading-6 text-muted-foreground">Release notes are announcements for your users—not updates about the feedbacks.dev website. Install the shared embed once, then publish every announcement from here.</p>
+  return <div className="mx-auto max-w-4xl space-y-7">
+    <section className="space-y-3 border-b border-foreground/10 pb-6">
+      <p className="text-xs font-semibold text-primary">Updates for your users</p>
+      <h2 className="text-2xl font-semibold tracking-[-0.035em]">Show what changed inside your product</h2>
+      <p className="max-w-2xl text-sm leading-6 text-muted-foreground">Publish a focused “What’s new” popup for your users. This is where you announce improvements to your product, not changes to the feedbacks.dev website.</p>
     </section>
 
-    <Card><CardContent className="space-y-5 p-5">
-      <Step title="1. Choose products" />
+    <section className="space-y-5">
+      <Step title="Choose what the shared embed should do" />
       <div className="grid gap-3 sm:grid-cols-3">
-        <ChoiceButton active={choice === 'updates'} title="Release notes only" description="Announce releases without a feedback launcher." onClick={() => setChoice('updates')} />
-        <ChoiceButton active={choice === 'feedback'} title="Feedback only" description="Collect feedback without release announcements." onClick={() => setChoice('feedback')} />
-        <ChoiceButton active={choice === 'both'} title="Feedback + release notes" description="Use one embed for both experiences." onClick={() => setChoice('both')} />
+        <ChoiceButton active={choice === 'updates'} title="Show updates only" description="Announce improvements without a feedback launcher." onClick={() => setChoice('updates')} />
+        <ChoiceButton active={choice === 'feedback'} title="Collect feedback only" description="Listen to users without publishing announcements." onClick={() => setChoice('feedback')} />
+        <ChoiceButton active={choice === 'both'} title="Collect + close the loop" description="Use one embed for both user experiences." onClick={() => setChoice('both')} />
       </div>
-      <Button onClick={() => void startSetup()} disabled={saving}>{saving ? 'Saving…' : choice === 'feedback' ? 'Continue to install' : 'Set up release notes'}</Button>
-    </CardContent></Card>
+      <Button onClick={() => void startSetup()} disabled={saving}>{saving ? 'Saving…' : choice === 'feedback' ? 'Continue to install' : 'Set up updates for users'}</Button>
+    </section>
 
-    {modules.updates && <Card><CardContent className="space-y-5 p-5">
-      <Step title="2. Install the embed" />
+    {modules.updates && <section className="space-y-5 border-t border-foreground/10 pt-6">
+      <Step title="Install the shared embed" />
       <div className="flex flex-wrap gap-2">{(['AI assistant', 'Script tag', 'React', 'Vue'] as Method[]).map((item) => <Button key={item} variant={method === item ? 'secondary' : 'outline'} size="sm" onClick={() => { setMethod(item); record('updates_install_method_selected') }}>{item === 'AI assistant' && <Bot className="mr-1.5 h-3.5 w-3.5" />}{item}</Button>)}</div>
       {projectKey ? <InstallInstructions method={method} projectKey={projectKey} choice={choice} /> : <p className="rounded-md bg-muted/60 p-3 text-sm text-muted-foreground">Your browser-safe project key is hidden. Generate a fresh key in <a className="underline" href={`/projects/${projectId}/install`}>Embed installation</a>, then return here to copy the exact instructions.</p>}
-      <div className="border-t pt-5"><Step title="3. Verify connection" /><p className="mt-2 text-sm text-muted-foreground">{polling ? 'Checking for your embed for up to one minute…' : currentEmbedState === 'stale' ? 'The last connection is stale. Load the page with the embed again, then check.' : 'Add the embed to your app and load that page once. We will detect it automatically.'}</p><Button className="mt-3" variant="outline" onClick={() => void checkConnection()}><RefreshCw className="mr-2 h-4 w-4" />Check connection</Button></div>
-    </CardContent></Card>}
+      <div className="border-t pt-5"><Step title="Verify the connection" /><p className="mt-2 text-sm text-muted-foreground">{polling ? 'Checking for your embed for up to one minute…' : currentEmbedState === 'stale' ? 'The last connection is stale. Load the page with the embed again, then check.' : 'Add the embed to your app and load that page once. We will detect it automatically.'}</p><Button className="mt-3" variant="outline" onClick={() => void checkConnection()}><RefreshCw className="mr-2 h-4 w-4" />Check connection</Button></div>
+    </section>}
   </div>
 }
 
@@ -162,14 +162,14 @@ function ConnectionState({ title, description, action, onAction, busy }: { title
 }
 
 function Step({ title }: { title: string }) { return <h3 className="font-semibold">{title}</h3> }
-function ChoiceButton({ active, title, description, onClick }: { active: boolean; title: string; description: string; onClick: () => void }) { return <button type="button" onClick={onClick} className={`min-h-28 rounded-md border p-4 text-left transition-colors ${active ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}><span className="block font-medium">{title}</span><span className="mt-1 block text-sm leading-5 text-muted-foreground">{description}</span></button> }
+function ChoiceButton({ active, title, description, onClick }: { active: boolean; title: string; description: string; onClick: () => void }) { return <button type="button" onClick={onClick} className={`min-h-28 border-y p-4 text-left transition-colors ${active ? 'border-primary bg-primary/[0.06]' : 'border-foreground/10 hover:bg-muted/30'}`}><span className="block font-medium">{title}</span><span className="mt-1 block text-sm leading-5 text-muted-foreground">{description}</span></button> }
 
 function InstallInstructions({ method, projectKey, choice }: { method: Method; projectKey: string; choice: Choice }) {
   const origin = typeof window === 'undefined' ? undefined : window.location.origin
   const snippets = generateInstallSnippets({ projectKey, appOrigin: origin })
   const snippet = method === 'Script tag' ? snippets.find((item) => item.label === 'Website') : snippets.find((item) => item.label === method)
   const websiteSnippet = snippets.find((item) => item.label === 'Website')?.code || ''
-  const productLabel = choice === 'both' ? 'feedback and release notes' : choice === 'updates' ? 'release notes only' : 'feedback only'
+  const productLabel = choice === 'both' ? 'feedback collection and user-facing product updates' : choice === 'updates' ? 'user-facing product updates only' : 'feedback collection only'
   const prompt = `Install the feedbacks.dev embed in this app. Use the browser-safe project key ${projectKey}. Enable ${productLabel}. Place the embed in the app shell so it loads once, preserve the existing design and dependencies, and do not add any private server key. Use this verified browser embed as the source of truth:\n\n${websiteSnippet}\n\nAfter installing, load a page and confirm the embed is detected in feedbacks.dev.`
   const content = method === 'AI assistant' ? prompt : snippet?.code || ''
   return <CodeSample title={method === 'AI assistant' ? 'Give this to your AI coding assistant' : `${method} instructions`} content={content} />
