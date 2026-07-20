@@ -84,7 +84,7 @@ export function SetupProgress({
   const nextAction = nextActionByStep[activeStep]
 
   return (
-    <nav aria-label="Setup steps" data-tour="setup-progress" className="border-b border-foreground/10 pb-6">
+    <nav aria-label="Setup steps" data-tour="setup-progress" className="rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
@@ -110,7 +110,7 @@ export function SetupProgress({
         </Link>
       </div>
 
-      <ol className="mt-5 grid grid-cols-3 border-y border-foreground/10">
+      <ol className="mt-5 grid grid-cols-3 overflow-hidden rounded-lg border border-foreground/10 bg-[oklch(var(--surface-raised))]">
         {steps.map((step, index) => {
           const current = activeStep === step.id
           const completed = index < activeIndex

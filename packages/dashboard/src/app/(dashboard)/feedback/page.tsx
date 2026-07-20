@@ -467,7 +467,7 @@ function FeedbackInboxInner() {
         />
 
         {showMoreFilters && (
-          <div className="space-y-3 border-y py-4">
+          <div className="space-y-3 rounded-xl border bg-[oklch(var(--surface-raised))] p-4">
             <div className="flex flex-wrap gap-1.5">
               {(['reviewed', 'in_progress', 'closed'] as FeedbackStatus[]).map((s) => <FilterPill key={s} active={status === s} onClick={() => updateParams({ status: status === s ? '' : s })}><span className={cn('h-1.5 w-1.5 rounded-full', statusMeta[s].dot)}/>{statusMeta[s].label}</FilterPill>)}
               {types.map((t) => <FilterPill key={t} active={type === t} onClick={() => updateParams({ type: type === t ? '' : t })}><TypeIcon type={t} className="h-3.5 w-3.5"/><span className="capitalize">{t}</span></FilterPill>)}

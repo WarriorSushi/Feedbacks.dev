@@ -222,7 +222,7 @@ export function CustomizeTab({
 
   return (
     <div className="space-y-7">
-      <header className={`space-y-4 border-b pb-6 ${hasUnsavedChanges ? 'border-amber-400/60' : 'border-foreground/10'}`}>
+      <header className={`space-y-4 rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6 ${hasUnsavedChanges ? 'border-amber-400/60' : 'border-border/80'}`}>
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -299,14 +299,14 @@ export function CustomizeTab({
       )}
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <Card data-tour="widget-settings" className="border-0 bg-transparent shadow-none">
-          <CardHeader className="border-b border-foreground/10 px-0 pb-5 pt-0">
+        <Card data-tour="widget-settings">
+          <CardHeader>
             <CardTitle className="text-lg">Widget settings</CardTitle>
             <CardDescription>
               Choose where feedback appears, then tune the form details below.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-7 px-0 pt-6">
+          <CardContent className="space-y-7">
             <div className="space-y-3">
               <div>
                 <p className="text-sm font-semibold text-foreground">Placement</p>
@@ -340,7 +340,7 @@ export function CustomizeTab({
                     type="button"
                     aria-pressed={embedMode === mode}
                     onClick={() => updateConfig('embedMode', mode)}
-                    className={`border-y p-4 text-left transition-colors ${
+                    className={`rounded-lg border p-4 text-left transition-colors ${
                       embedMode === mode
                         ? 'border-primary bg-primary/[0.06]'
                         : 'border-foreground/10 hover:bg-muted/25'
@@ -496,8 +496,8 @@ export function CustomizeTab({
           </CardContent>
         </Card>
 
-        <Card data-tour="widget-preview" className="overflow-hidden border-0 bg-muted/30 shadow-none xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto">
-          <CardHeader className="border-b border-foreground/10">
+        <Card data-tour="widget-preview" className="xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto">
+          <CardHeader>
             <CardTitle className="text-lg">Live form preview</CardTitle>
             <CardDescription>
               Placement, color, copy, and optional fields update as you edit.

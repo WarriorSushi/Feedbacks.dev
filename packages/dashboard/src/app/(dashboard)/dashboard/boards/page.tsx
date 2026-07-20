@@ -67,7 +67,7 @@ export default async function DashboardBoardsPage({
       </div>
 
       {!selectedProject ? (
-        <div className="border-y py-12 text-center">
+        <div className="rounded-xl border bg-card p-8 text-center shadow-[var(--shadow-card)] sm:p-12">
           <h2 className="text-lg font-semibold">Create a project first</h2>
           <p className="mt-2 text-sm text-muted-foreground">Each public page belongs to one project.</p>
           <Button className="mt-5" asChild><Link href="/projects/new">Create project</Link></Button>

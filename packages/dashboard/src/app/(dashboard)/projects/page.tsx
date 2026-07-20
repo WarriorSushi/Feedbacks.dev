@@ -40,7 +40,7 @@ export default async function ProjectsPage() {
 
   return (
     <div data-tour="project-surface" className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
         <div>
           <h1 className="text-2xl font-bold">Projects</h1>
           {billingSummary && (
@@ -100,7 +100,7 @@ export default async function ProjectsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-card">
+        <div className="overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
           {(projects as Project[]).map((project) => (
             <Link
               key={project.id}
