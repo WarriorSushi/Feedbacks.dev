@@ -100,7 +100,7 @@ test('configures endpoints, sends tests, and replays deliveries from the integra
     response.url().includes(`/api/projects/${project.id}/webhooks`)
     && response.request().method() === 'PUT',
   )
-  await page.getByRole('button', { name: 'Save Integrations' }).click()
+  await page.getByRole('button', { name: 'Save integrations' }).click()
   expect((await saveResponse).status()).toBe(200)
 
   const getResponse = await page.request.get(`/api/projects/${project.id}/webhooks`)

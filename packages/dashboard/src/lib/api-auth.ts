@@ -29,7 +29,7 @@ type AuthResult =
 
 /**
  * Get the authenticated user and verify they own the given project.
- * Returns user, project, and admin client — or an error NextResponse.
+ * Returns the user, project, and admin client, or an error NextResponse.
  */
 export async function getAuthedUserAndProject(projectId: string): Promise<AuthResult> {
   const supabase = await createServerSupabase()

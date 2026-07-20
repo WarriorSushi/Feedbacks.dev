@@ -212,8 +212,8 @@ export default async function DashboardPage({
     },
     {
       id: 'rating',
-      label: 'Avg Rating',
-      value: avgRating ? avgRating.toFixed(1) : '—',
+        label: 'Avg rating',
+      value: avgRating ? avgRating.toFixed(1) : 'N/A',
       urgent: false,
       sub: ratingCount ? `${ratingCount} rated` : 'no ratings yet',
       href: feedbackHref,
@@ -228,7 +228,7 @@ export default async function DashboardPage({
       }] : []),
     {
       id: 'agents',
-      label: 'Via Agent',
+      label: 'From agents',
       value: agents,
       urgent: false,
       sub: agents > 0 ? 'AI submitted' : 'none yet',
@@ -327,8 +327,7 @@ export default async function DashboardPage({
       <div className="grid gap-3 border-b pb-4 lg:grid-cols-[minmax(260px,1fr)_auto_minmax(220px,auto)] lg:items-center">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
-            Good {getGreeting()},{' '}
-            <span className="font-normal text-muted-foreground">{displayName}</span>
+            Good {getGreeting()}, {displayName}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {unread > 0 ? (
@@ -373,7 +372,7 @@ export default async function DashboardPage({
           <Link href="/projects/new">
             <Button size="sm" variant="outline" className="h-8 gap-1.5 px-2.5 text-xs font-medium">
               <Plus className="h-3.5 w-3.5" />
-              New Project
+              New project
             </Button>
           </Link>
           <Link href={feedbackHref}>
@@ -526,7 +525,7 @@ export default async function DashboardPage({
         <div className="lg:hidden">
           <CollapsibleDashboardSection
             storageId="quick-actions-mobile"
-            title="Quick Actions"
+            title="Shortcuts"
             contentClassName="grid grid-cols-2 gap-2 pb-3 pt-0"
           >
             <Link href={feedbackLink({ read: 'unread' })} className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs font-medium hover:bg-accent">
@@ -549,7 +548,7 @@ export default async function DashboardPage({
         {/* Recent Activity Feed */}
         <CollapsibleDashboardSection
           storageId="recent-activity"
-          title="Recent Activity"
+          title="Recent activity"
           contentClassName="p-0"
           action={
             <Link href={feedbackHref}>
@@ -653,12 +652,12 @@ export default async function DashboardPage({
             )}
         </CollapsibleDashboardSection>
 
-        {/* Sidebar — hidden on mobile, quick actions shown above instead */}
+        {/* Hide this sidebar on mobile and show shortcuts above instead. */}
         <div className="hidden flex-col gap-4 lg:flex">
           {/* Type Breakdown */}
           <CollapsibleDashboardSection
             storageId="by-type"
-            title="By Type"
+            title="Feedback types"
             contentClassName="space-y-3 pb-4 pt-0"
           >
               {total === 0 ? (
@@ -707,7 +706,7 @@ export default async function DashboardPage({
           {/* Quick Actions */}
           <CollapsibleDashboardSection
             storageId="quick-actions"
-            title="Quick Actions"
+            title="Shortcuts"
             contentClassName="space-y-0.5 pb-3 pt-0"
           >
               <Link

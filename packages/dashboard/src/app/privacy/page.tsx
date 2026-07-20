@@ -40,16 +40,16 @@ export default function PrivacyPage() {
           <h2>Data Storage</h2>
           <p>
             All data is stored securely on Supabase infrastructure with row-level security policies.
-            Feedback data belongs to you — you can export or delete it at any time.
+            Feedback data belongs to you. You can export or delete it at any time.
           </p>
 
           <h2>Third-Party Services</h2>
           <ul>
-            <li><strong>Supabase</strong> — database and authentication</li>
-            <li><strong>Vercel</strong> — hosting and deployment</li>
-            <li><strong>GitHub</strong> — OAuth authentication (optional)</li>
-            <li><strong>Dodo Payments</strong> — checkout, billing portal, and subscription events</li>
-            <li><strong>Resend</strong> — transactional email delivery for opt-in alerts</li>
+            <li><strong>Supabase:</strong> database and authentication</li>
+            <li><strong>Vercel:</strong> hosting and deployment</li>
+            <li><strong>GitHub:</strong> optional OAuth authentication</li>
+            <li><strong>Dodo Payments:</strong> checkout, billing portal, and subscription events</li>
+            <li><strong>Resend:</strong> transactional email delivery for opt-in alerts</li>
           </ul>
 
           <h2>Data Retention</h2>

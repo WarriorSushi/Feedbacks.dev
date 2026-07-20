@@ -43,7 +43,7 @@ async function verifyCaptcha(provider: 'turnstile' | 'hcaptcha', token: string):
     : process.env.HCAPTCHA_SECRET_KEY
 
   if (!secret) {
-    // No secret configured — fail closed
+    // Fail closed when no secret is configured.
     return false
   }
 
@@ -75,7 +75,7 @@ async function verifyCaptcha(provider: 'turnstile' | 'hcaptcha', token: string):
       return data.success === true
     }
   } catch {
-    // Verification service failure — fail closed
+    // Fail closed when the verification service fails.
   }
   return false
 }
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     // Honeypot check
     if (fields.hp) {
-      // Silently accept but don't store — looks successful to bots
+      // Silently accept without storing so the request looks successful to bots.
       return NextResponse.json({ success: true, id: crypto.randomUUID() }, { headers: CORS_HEADERS })
     }
 

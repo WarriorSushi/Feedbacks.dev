@@ -67,7 +67,7 @@ export function getTypeColor(type: string | null): string {
   }
 }
 
-/** Consolidated status configuration — single source of truth */
+/** Consolidated status configuration and single source of truth. */
 export const statusConfig: Record<string, { label: string; dot: string; color: string }> = {
   new: { label: 'New', dot: 'bg-blue-500', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
   reviewed: { label: 'Reviewed', dot: 'bg-yellow-500', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' },

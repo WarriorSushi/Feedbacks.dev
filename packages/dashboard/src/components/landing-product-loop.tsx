@@ -129,10 +129,19 @@ function ProductCanvas({ sceneIndex }: { sceneIndex: number }) {
 
 function FeedbackPanel({ sceneIndex, category, rating, screenshotReady, sent, onCategory, onRating, onScreenshot, onSend, onClose }: { sceneIndex: number; category: Category; rating: number; screenshotReady: boolean; sent: boolean; onCategory: (value: Category) => void; onRating: (value: number) => void; onScreenshot: () => void; onSend: () => void; onClose: () => void }) {
   const scene = scenes[sceneIndex]
-  if (sent) return <div className="flex min-h-[250px] flex-col items-center justify-center px-7 text-center"><span className="flex h-11 w-11 items-center justify-center rounded-full" style={{ backgroundColor: scene.accent, color: scene.accentInk }}><Check className="h-5 w-5"/></span><p className="mt-4 text-base font-bold">Sent to {scene.name}</p><p className="mt-2 text-xs leading-5 text-zinc-500">The team also gets the page, browser, rating, and screenshot.</p></div>
+  const position = sceneIndex === 0 ? 'right-3 top-4 sm:right-5 sm:top-5' : sceneIndex === 1 ? 'bottom-16 left-1/2 -translate-x-1/2' : 'left-3 top-5 sm:left-5'
+  const width = sceneIndex === 1 ? 'w-[min(500px,calc(100%-24px))]' : 'w-[min(330px,calc(100%-24px))]'
 
-  const position = sceneIndex === 0 ? 'right-3 top-4 sm:right-5 sm:top-5' : sceneIndex === 1 ? 'bottom-5 left-1/2 -translate-x-1/2' : 'left-3 top-5 sm:left-5'
-  const width = sceneIndex === 1 ? 'w-[min(460px,calc(100%-24px))]' : 'w-[min(330px,calc(100%-24px))]'
+  if (sent) {
+    return (
+      <div className={cn('absolute z-20 flex min-h-[250px] flex-col items-center justify-center overflow-hidden border border-black/10 bg-[#fffdfa] px-7 text-center text-[#20211d] shadow-[0_28px_80px_rgb(0_0_0/0.42)]', position, width, sceneIndex === 1 ? 'rounded-2xl' : sceneIndex === 2 ? 'rounded-[20px]' : 'rounded-lg')}>
+        <span className="flex h-11 w-11 items-center justify-center rounded-full" style={{ backgroundColor: scene.accent, color: scene.accentInk }}><Check className="h-5 w-5"/></span>
+        <p className="mt-4 text-base font-bold">Sent to {scene.name}</p>
+        <p className="mt-2 text-xs leading-5 text-zinc-500">The team also gets the page, browser, rating, and screenshot.</p>
+      </div>
+    )
+  }
+
   return (
     <div className={cn('absolute z-20 animate-fade-in overflow-hidden border border-black/10 bg-[#fffdfa] text-[#20211d] shadow-[0_28px_80px_rgb(0_0_0/0.42)]', position, width, sceneIndex === 1 ? 'rounded-2xl' : sceneIndex === 2 ? 'rounded-[20px]' : 'rounded-lg')}>
       <div className="flex items-start justify-between border-b border-zinc-200 px-4 py-3.5"><div><p className="text-sm font-bold">{sceneIndex === 0 ? 'Report a deploy problem' : sceneIndex === 1 ? 'Help improve this report' : 'Report an order problem'}</p><p className="mt-0.5 text-[10px] text-zinc-500">This goes to the {scene.name} team.</p></div><button type="button" onClick={onClose} className="p-1 text-zinc-400 hover:text-zinc-800" aria-label="Close feedback form"><X className="h-4 w-4"/></button></div>
@@ -197,7 +206,7 @@ export function LandingProductLoop() {
 
   return (
     <div className="landing-product-loop" aria-label="Live examples of feedbacks.dev inside three different customer products">
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-5"><div className="flex min-w-0 items-center gap-2.5"><span className="flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-black" style={{ backgroundColor: scene.accent, color: scene.accentInk }}>{scene.mark}</span><span className="truncate text-xs font-semibold text-zinc-100">{scene.name}</span><span className="hidden text-[11px] text-zinc-500 sm:inline">— a sample customer product</span></div><button type="button" onClick={() => setPaused((value) => !value)} className="inline-flex h-7 items-center gap-1.5 rounded-md border border-white/10 px-2 text-[10px] text-zinc-400 hover:text-white" aria-label={paused ? 'Resume examples' : 'Pause examples'}>{paused ? <Play className="h-3 w-3"/> : <Pause className="h-3 w-3"/>}<span className="hidden sm:inline">{paused ? 'Play' : 'Auto play'}</span></button></div>
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-5"><div className="flex min-w-0 items-center gap-2.5"><span className="flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-black" style={{ backgroundColor: scene.accent, color: scene.accentInk }}>{scene.mark}</span><span className="truncate text-xs font-semibold text-zinc-100">{scene.name}</span><span className="hidden text-[11px] text-zinc-500 sm:inline">Sample customer product</span></div><button type="button" onClick={() => setPaused((value) => !value)} className="inline-flex h-7 items-center gap-1.5 rounded-md border border-white/10 px-2 text-[10px] text-zinc-400 hover:text-white" aria-label={paused ? 'Resume examples' : 'Pause examples'}>{paused ? <Play className="h-3 w-3"/> : <Pause className="h-3 w-3"/>}<span className="hidden sm:inline">{paused ? 'Play' : 'Auto play'}</span></button></div>
 
       <div className="relative min-h-[455px] overflow-hidden sm:min-h-[470px]">
         <ProductCanvas sceneIndex={sceneIndex}/>

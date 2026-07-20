@@ -22,7 +22,7 @@ export async function OPTIONS() {
 
 export async function GET(request: NextRequest) {
   try {
-    // API key auth only — no cookie fallback on wildcard CORS routes
+    // Use API key auth only. Wildcard CORS routes have no cookie fallback.
     const apiAuth = await authenticateApiKey(request)
     if (!apiAuth) return jsonError('Invalid or missing API key', 401)
 

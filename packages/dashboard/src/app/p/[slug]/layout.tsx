@@ -4,7 +4,7 @@ import { Sidebar } from '@/components/sidebar'
 import { createAdminSupabase, createServerSupabase } from '@/lib/supabase-server'
 
 export const metadata: Metadata = {
-  title: 'Feature Board — feedbacks.dev',
+  title: 'Feature Board | feedbacks.dev',
   description: 'Vote on features and share your feedback',
 }
 
