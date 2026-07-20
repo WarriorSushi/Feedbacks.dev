@@ -107,6 +107,8 @@ Must support:
 - User can switch platform examples between at least Website, React, and Vue.
 - User can copy code with one click.
 - User can preview the widget before customizing.
+- The installed embed stays stable; saved widget configuration is resolved remotely on page load.
+- Changing placement, fields, copy, styling, or captcha does not require replacing the snippet.
 
 ### Widget behavior
 
@@ -124,6 +126,7 @@ Must support:
 - User can toggle optional fields.
 - User can configure simple anti-spam controls.
 - Advanced options exist, but are collapsed or separated from the quick path.
+- Saved customization is delivered to installed embeds through a strict browser-safe public configuration contract.
 
 ### Feedback inbox
 

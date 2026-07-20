@@ -1,3 +1,5 @@
+import type { PublicWidgetConfig } from './widget-install.js'
+
 export type ProductUpdateStatus = 'draft' | 'published' | 'archived'
 export type ProductUpdateTheme = 'auto' | 'light' | 'dark'
 export type ProductUpdateMetricType = 'impression' | 'dismissal' | 'cta_click'
@@ -71,7 +73,56 @@ export interface WidgetBootstrapModules {
 export interface WidgetBootstrapResponse {
   configVersion: 2
   modules: WidgetBootstrapModules
+  feedbackConfig: PublicWidgetConfig
   updates?: ProductUpdatesPublicResponse
+}
+
+const PUBLIC_WIDGET_CONFIG_KEYS = new Set([
+  'configVersion', 'apiUrl', 'updatesApiUrl', 'updatesEventsApiUrl', 'embedMode', 'position', 'target',
+  'buttonText', 'primaryColor', 'backgroundColor', 'scale', 'modalWidth', 'debug', 'requireEmail',
+  'enableType', 'enableRating', 'enableScreenshot', 'screenshotRequired', 'enableAttachment',
+  'attachmentMaxMB', 'allowedAttachmentMimes', 'requireCaptcha', 'captchaProvider', 'turnstileSiteKey',
+  'hcaptchaSiteKey', 'formTitle', 'formSubtitle', 'messageLabel', 'messagePlaceholder', 'emailLabel',
+  'submitButtonText', 'cancelButtonText', 'successTitle', 'successDescription', 'openOnKey', 'openAfterMs',
+])
+
+function isHttpUrl(value: unknown): value is string {
+  if (typeof value !== 'string') return false
+  try {
+    const url = new URL(value)
+    return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password
+  } catch {
+    return false
+  }
+}
+
+function isPublicWidgetConfig(value: unknown): value is PublicWidgetConfig {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const config = value as Record<string, unknown>
+  if (Object.keys(config).some((key) => !PUBLIC_WIDGET_CONFIG_KEYS.has(key))) return false
+  if (config.configVersion !== 1
+    || !isHttpUrl(config.apiUrl)
+    || !isHttpUrl(config.updatesApiUrl)
+    || !isHttpUrl(config.updatesEventsApiUrl)
+    || !['modal', 'inline', 'trigger'].includes(config.embedMode as string)
+    || !['bottom-right', 'bottom-left', 'top-right', 'top-left'].includes(config.position as string)) return false
+
+  const stringFields = ['target', 'buttonText', 'primaryColor', 'backgroundColor', 'captchaProvider', 'turnstileSiteKey', 'hcaptchaSiteKey', 'formTitle', 'formSubtitle', 'messageLabel', 'messagePlaceholder', 'emailLabel', 'submitButtonText', 'cancelButtonText', 'successTitle', 'successDescription', 'openOnKey']
+  const booleanFields = ['debug', 'requireEmail', 'enableType', 'enableRating', 'enableScreenshot', 'screenshotRequired', 'enableAttachment', 'requireCaptcha']
+  const numberFields = ['scale', 'modalWidth', 'attachmentMaxMB', 'openAfterMs']
+  if (stringFields.some((field) => config[field] !== undefined && typeof config[field] !== 'string')) return false
+  if (booleanFields.some((field) => config[field] !== undefined && typeof config[field] !== 'boolean')) return false
+  if (numberFields.some((field) => config[field] !== undefined && (typeof config[field] !== 'number' || !Number.isFinite(config[field])))) return false
+  if (config.allowedAttachmentMimes !== undefined
+    && (!Array.isArray(config.allowedAttachmentMimes) || config.allowedAttachmentMimes.some((mime) => typeof mime !== 'string'))) return false
+  if (config.captchaProvider !== undefined && !['turnstile', 'hcaptcha'].includes(config.captchaProvider as string)) return false
+  if (config.primaryColor !== undefined && (typeof config.primaryColor !== 'string' || !HEX_COLOR_RE.test(config.primaryColor))) return false
+  if (config.backgroundColor !== undefined && (typeof config.backgroundColor !== 'string' || !HEX_COLOR_RE.test(config.backgroundColor))) return false
+  if (typeof config.scale === 'number' && (config.scale < 0.5 || config.scale > 2)) return false
+  if (typeof config.modalWidth === 'number' && (!Number.isInteger(config.modalWidth) || config.modalWidth < 320 || config.modalWidth > 960)) return false
+  if (typeof config.attachmentMaxMB === 'number' && (!Number.isInteger(config.attachmentMaxMB) || config.attachmentMaxMB < 1 || config.attachmentMaxMB > 50)) return false
+  if (typeof config.openAfterMs === 'number' && (!Number.isInteger(config.openAfterMs) || config.openAfterMs < 0 || config.openAfterMs > 600_000)) return false
+  return true
 }
 
 /**
@@ -83,7 +134,7 @@ export interface WidgetBootstrapResponse {
 export function isWidgetBootstrapResponse(value: unknown): value is WidgetBootstrapResponse {
   if (!value || typeof value !== 'object') return false
   const response = value as Partial<WidgetBootstrapResponse>
-  if (response.configVersion !== 2 || !response.modules) return false
+  if (response.configVersion !== 2 || !response.modules || !isPublicWidgetConfig(response.feedbackConfig)) return false
   if (typeof response.modules.feedback !== 'boolean' || typeof response.modules.updates !== 'boolean') return false
   if (!response.modules.updates) return response.updates === undefined
   if (!response.updates || !isProductUpdatesPublicResponse(response.updates)) return false

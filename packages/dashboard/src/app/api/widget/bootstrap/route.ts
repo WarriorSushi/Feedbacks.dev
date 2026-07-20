@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { sanitizeProductUpdateCta, type WidgetBootstrapResponse } from '@feedbacks/shared'
+import { buildPublicWidgetConfig, sanitizeProductUpdateCta, type WidgetBootstrapResponse } from '@feedbacks/shared'
 import { createAdminSupabase } from '@/lib/supabase-server'
 import { hashProjectApiKey } from '@/lib/project-api-keys'
 import { isWidgetRequestOriginAllowed } from '@/lib/origin-allowlist'
@@ -25,7 +25,11 @@ export async function GET(request: NextRequest) {
   const { data: project, error: projectError } = await admin.from('projects').select('id,settings').eq('api_key_hash', await hashProjectApiKey(projectKey!)).maybeSingle()
   if (projectError) return NextResponse.json({ error: 'Bootstrap temporarily unavailable.' }, { status: 503, headers: cors })
   if (!project) {
-    const unavailable: WidgetBootstrapResponse = { configVersion: 2, modules: { feedback: false, updates: false } }
+    const unavailable: WidgetBootstrapResponse = {
+      configVersion: 2,
+      modules: { feedback: false, updates: false },
+      feedbackConfig: buildPublicWidgetConfig(projectKey!, {}, { appOrigin: publicEnv.NEXT_PUBLIC_APP_ORIGIN }),
+    }
     return NextResponse.json(unavailable, { headers: { ...cors, 'Cache-Control': cache } })
   }
   if (!isWidgetRequestOriginAllowed(request, (project as Project).settings?.widget_origin_restriction, { trustedOrigins: [publicEnv.NEXT_PUBLIC_APP_ORIGIN] })) return NextResponse.json({ error: 'Origin not allowed.' }, { status: 403, headers: cors })
@@ -34,7 +38,15 @@ export async function GET(request: NextRequest) {
   if (updateSettingsError) return NextResponse.json({ error: 'Bootstrap temporarily unavailable.' }, { status: 503, headers: cors })
   const feedback = (project as Project).settings?.widget_config?.feedbackEnabled !== false
   const updates = updateSettings?.enabled === true
-  const response: WidgetBootstrapResponse = { configVersion: 2, modules: { feedback, updates } }
+  const response: WidgetBootstrapResponse = {
+    configVersion: 2,
+    modules: { feedback, updates },
+    feedbackConfig: buildPublicWidgetConfig(
+      projectKey!,
+      (project as Project).settings?.widget_config,
+      { appOrigin: publicEnv.NEXT_PUBLIC_APP_ORIGIN },
+    ),
+  }
   if (updates) {
     const now = new Date().toISOString()
     const { data, error } = await admin.from('product_updates').select('*').eq('project_id', project.id).eq('status', 'published').lte('published_at', now).or(`expires_at.is.null,expires_at.gt.${now}`).order('published_at', { ascending: false }).order('id', { ascending: false }).limit(20)

@@ -19,9 +19,10 @@ test('renders the live widget and accepts a test submission', async ({ page }) =
   await expect(page.getByText('Test area')).toBeVisible()
   expect(widgetRuntimeResponse.ok()).toBeTruthy()
   await expect(page.getByText(/Ready/i)).toBeVisible({ timeout: 30_000 })
-  await expect(page.getByRole('button', { name: 'Feedback' })).toBeVisible()
+  const launcher = page.locator('.fb-launcher')
+  await expect(launcher).toBeVisible()
 
-  await page.getByRole('button', { name: 'Feedback' }).click()
+  await launcher.click()
   await expect(page.getByRole('dialog', { name: 'Send Feedback' })).toBeVisible()
 
   const message = `Install verification for ${project.name}`

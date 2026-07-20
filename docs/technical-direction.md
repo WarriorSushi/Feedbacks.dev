@@ -26,14 +26,16 @@ Recommended high-level shape:
 
 ## UX-driven technical constraints
 
-- widget configuration should be represented cleanly enough to generate accurate snippets
+- widget configuration should be represented as a strict browser-safe remote contract; current snippets stay stable after installation
 - save state should be explicit
 - preview state and persisted state should not be conflated
 
 ## Suggested implementation rules
 
 - one canonical config model for widget generation
-- one canonical snippet generator shared across marketing and dashboard
+- one canonical, minimal snippet generator shared across marketing and dashboard
+- install once, then resolve feedback form configuration and product modules from the public bootstrap
+- preserve the last validated remote configuration during a temporary bootstrap outage, with legacy attributes as a compatibility fallback
 - one clear saved-config representation per project
 - one canonical plan / entitlement matrix shared across billing, marketing, dashboard UI, and server enforcement
 - avoid giant all-in-one setup components

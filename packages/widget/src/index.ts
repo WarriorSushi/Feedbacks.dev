@@ -1,4 +1,4 @@
-import { parseWidgetDataAttributes } from '@feedbacks/shared';
+import { buildFeedbackApiUrl, parseWidgetDataAttributes } from '@feedbacks/shared';
 import FeedbacksWidget from './widget';
 
 export type { WidgetConfig, FeedbackData, FeedbackResponse, CategoryType, EmbedMode, Position } from './types';
@@ -13,6 +13,14 @@ function autoInit(): void {
     script.setAttribute('data-fb-initialized', 'true');
 
     const attr = (name: string) => script.getAttribute(name);
+    let derivedApiUrl: string | undefined;
+    if (!attr('data-api-url')) {
+      try {
+        derivedApiUrl = buildFeedbackApiUrl(new URL(script.src, window.location.href).origin);
+      } catch {
+        derivedApiUrl = undefined;
+      }
+    }
     const config = parseWidgetDataAttributes(
       {
         project: attr('data-project') || undefined,
@@ -25,7 +33,7 @@ function autoInit(): void {
         bg: attr('data-bg') || undefined,
         scale: attr('data-scale') || undefined,
         modalWidth: attr('data-modal-width') || undefined,
-        apiUrl: attr('data-api-url') || undefined,
+        apiUrl: attr('data-api-url') || derivedApiUrl,
         enableUpdates: attr('data-enable-updates') || undefined,
         updatesApiUrl: attr('data-updates-api-url') || undefined,
         updatesEventsApiUrl: attr('data-updates-events-api-url') || undefined,

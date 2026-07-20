@@ -1,4 +1,6 @@
 export const PROJECT_ROUTE_SECTIONS = [
+  'feedback-form',
+  'release-notes',
   'install',
   'integrations',
   'board',
@@ -11,10 +13,10 @@ export type ProjectRouteSection = typeof PROJECT_ROUTE_SECTIONS[number]
 
 const LEGACY_TAB_DESTINATIONS: Record<string, { section: ProjectRouteSection; search?: Record<string, string> }> = {
   install: { section: 'install' },
-  customize: { section: 'install', search: { view: 'customize' } },
+  customize: { section: 'feedback-form' },
   integrations: { section: 'integrations' },
   board: { section: 'board' },
-  updates: { section: 'updates' },
+  updates: { section: 'release-notes' },
   api: { section: 'api' },
   settings: { section: 'settings' },
 }
@@ -24,7 +26,8 @@ export function getProjectRoute(projectId: string, section: ProjectRouteSection)
 }
 
 export function getProjectRouteSection(pathname: string): ProjectRouteSection | null {
-  const match = pathname.match(/^\/projects\/[^/]+\/(install|integrations|board|updates|api|settings)(?:\/|$)/)
+  const match = pathname.match(/^\/projects\/[^/]+\/(feedback-form|release-notes|install|integrations|board|updates|api|settings)(?:\/|$)/)
+  if (match?.[1] === 'updates') return 'release-notes'
   return match?.[1] as ProjectRouteSection | undefined || null
 }
 

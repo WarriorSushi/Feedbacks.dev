@@ -4,7 +4,7 @@ Status: MVP and the modular navigation/onboarding redesign were completed and re
 
 This folder is the implementation handoff for an in-app changelog popup in the `feedbacks.dev` ecosystem.
 
-The dashboard product is labeled **Updates**. The end-user surface is named **What's New**.
+The dashboard product is labeled **Release notes** and explains that it publishes in-product “What’s new” announcements. The end-user surface is named **What's New**. The approved naming and remote-configuration amendment is [remote-configuration-and-naming-decision-2026-07-20.md](./remote-configuration-and-naming-decision-2026-07-20.md).
 
 ## Modular redesign
 
@@ -12,7 +12,7 @@ The dated implementation plan for making Updates a first-class sidebar product, 
 
 - `ux-navigation-redesign-implementation-plan-2026-07-18.md`
 
-The server-resolved module bootstrap now supersedes the MVP's one-time `data-enable-updates` activation requirement. Existing current-runtime Feedback installs can activate Updates remotely, while bootstrap failure preserves legacy Feedback behavior. The MVP security, privacy, content, metrics, and widget-size guardrails remain authoritative.
+The server-resolved bootstrap now supersedes the MVP's one-time `data-enable-updates` activation requirement and supplies the browser-safe feedback-form configuration. Existing current-runtime embeds can activate Release notes or change the Feedback form remotely, while bootstrap failure preserves legacy behavior. The MVP security, privacy, content, metrics, and widget-size guardrails remain authoritative.
 
 ## Goal
 
@@ -57,7 +57,7 @@ An end user can:
 These decisions are already made. Do not reopen them while implementing the MVP.
 
 1. Extend the existing widget and wrappers. Do not create a second customer-facing script or package.
-2. Resolve Feedback and Updates modules from the server bootstrap. Keep legacy `enableUpdates` / `data-enable-updates="true"` only as an outage fallback for older explicit installations; do not emit it in current snippets.
+2. Resolve Feedback and Release notes modules plus the browser-safe feedback-form configuration from the server bootstrap. Keep legacy attributes only as an outage fallback for older explicit installations; do not emit configuration attributes in current snippets.
 3. Store Product Updates separately from `board_announcements`. Their lifecycle, audience, presentation, and metrics are different.
 4. Use structured plain text. Do not accept arbitrary HTML, Markdown, JavaScript, iframes, or custom CSS.
 5. Render text with DOM `textContent`, never `innerHTML` with customer content.

@@ -79,7 +79,11 @@ export default function NewProjectPage() {
         const modulePayload = await modulesResponse.json().catch(() => null)
         throw new Error(modulePayload?.error || 'Project created, but the product choice could not be saved.')
       }
-      router.push(goal === 'feedback' ? `/projects/${payload.id}/install?created=1` : `/projects/${payload.id}/updates`)
+      router.push(goal === 'feedback'
+        ? `/projects/${payload.id}/install?created=1`
+        : goal === 'updates'
+          ? `/projects/${payload.id}/release-notes`
+          : `/projects/${payload.id}`)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Failed to create project')
     } finally {
@@ -125,7 +129,7 @@ export default function NewProjectPage() {
               <legend className="text-sm font-medium">What do you want to do first?</legend>
               <div className="grid gap-2 sm:grid-cols-3">
                 {([
-                  ['updates', 'Announce updates'],
+                  ['updates', 'Publish release notes'],
                   ['feedback', 'Collect feedback'],
                   ['both', 'Both'],
                 ] as const).map(([value, label]) => <button key={value} type="button" onClick={() => setGoal(value)} className={cn('min-h-11 rounded-md border px-3 text-left text-sm font-medium', goal === value ? 'border-primary bg-primary/5 text-primary' : 'hover:bg-muted/50')} aria-pressed={goal === value}>{label}</button>)}
@@ -201,7 +205,7 @@ export default function NewProjectPage() {
             )}
             <Button data-tour="project-create-submit" type="submit" size="lg" className="w-full" disabled={loading || !name.trim()}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {goal === 'updates' ? 'Create project and set up Updates' : goal === 'both' ? 'Create project and set up both' : 'Create project and get install code'}
+              {goal === 'updates' ? 'Create project and set up release notes' : goal === 'both' ? 'Create project and set up both' : 'Create project and get install code'}
             </Button>
           </form>
           </CardContent>

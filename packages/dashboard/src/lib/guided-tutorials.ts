@@ -35,11 +35,12 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
     title: 'Dashboard map',
     description: 'Learn where each main product area lives.',
     steps: [
-      { title: 'Overview', body: 'This is home. Use it for unread feedback, recent activity, and the next useful action.', href: '/dashboard', target: '[data-tour="nav-dashboard"]' },
+      { title: 'Project home', body: 'See the Feedback form and Release notes products, then install their shared embed once.', href: '/projects/{projectId}', target: '[data-tour="nav-dashboard"]' },
+      { title: 'Feedback form', body: 'Manage the in-product form, fields, placement, wording, and anti-spam settings remotely.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="nav-feedback-form"]' },
       { title: 'Feedback inbox', body: 'New messages land here. Search, filter, tag, and decide what needs action.', href: '/feedback', target: '[data-tour="nav-feedback"]' },
-      { title: 'Updates', body: 'Create release announcements for the project selected at the top of the sidebar.', href: '/projects/{projectId}/updates', target: '[data-tour="nav-updates"]' },
+      { title: 'Release notes', body: 'Publish “What’s new” announcements inside the product selected at the top of the sidebar.', href: '/projects/{projectId}/release-notes', target: '[data-tour="nav-updates"]' },
       { title: 'Public board', body: 'Manage the public board for the project selected at the top of the sidebar.', href: '/projects/{projectId}/board', target: '[data-tour="nav-boards"]' },
-      { title: 'Install & verify', body: 'Copy the shared embed and confirm it is connected to the selected project.', href: '/projects/{projectId}/install', target: '[data-tour="nav-install"]' },
+      { title: 'Embed installation', body: 'Install the shared embed once and confirm it is connected to the selected project.', href: '/projects/{projectId}/install', target: '[data-tour="nav-install"]' },
       { title: 'Integrations', body: 'Route feedback for the selected project into your existing workflow.', href: '/projects/{projectId}/integrations', target: '[data-tour="nav-integrations"]' },
       { title: 'API & MCP', body: 'Use REST and MCP tools for the project selected at the top of the sidebar.', href: '/projects/{projectId}/api', target: '[data-tour="nav-api"]' },
       { title: 'Billing', body: 'Check usage, plan access, and billing management.', href: '/billing', target: '[data-tour="nav-billing"]' },
@@ -54,7 +55,7 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
       { title: 'Your projects', body: 'A project is one app or website. Feedback, install settings, integrations, and a public board stay grouped here.', href: '/projects', target: '[data-tour="project-surface"]' },
       { title: 'Start a project', body: 'Use New Project when you are ready. The only required field is a name your team recognizes.', href: '/projects', target: '[data-tour="new-project"]' },
       { title: 'Name it clearly', body: 'Enter the product or site name. A domain is optional and can be added later.', href: '/projects/new', target: '[data-tour="project-create-form"]' },
-      { title: 'Continue to customization', body: 'Creating the project takes you directly to form customization. This lesson will not create anything for you.', href: '/projects/new', target: '[data-tour="project-create-submit"]' },
+      { title: 'Choose the first product', body: 'Start with feedback, release notes, or both. This lesson will not create anything for you.', href: '/projects/new', target: '[data-tour="project-create-submit"]' },
     ],
   },
   {
@@ -62,10 +63,10 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
     title: 'Customize the feedback form',
     description: 'Choose placement, fields, labels, and preview the result.',
     steps: [
-      { title: 'Project workspace', body: 'Install & verify stays selected while you configure the shared embed for this project.', href: '/projects/{projectId}/install?view=customize', target: '[data-tour="nav-install"]' },
-      { title: 'Setup progress', body: 'Follow Customize, Install, Verify, then Inbox. The highlighted step shows where you are.', href: '/projects/{projectId}/install?view=customize', target: '[data-tour="setup-progress"]' },
-      { title: 'Widget settings', body: 'Choose placement first, then change only the labels, color, and optional fields you need.', href: '/projects/{projectId}/install?view=customize', target: '[data-tour="widget-settings"]' },
-      { title: 'Live preview', body: 'Check the saved form here before copying installation code.', href: '/projects/{projectId}/install?view=customize', target: '[data-tour="widget-preview"]' },
+      { title: 'Feedback form', body: 'Change placement, wording, fields, and anti-spam settings remotely.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="nav-feedback-form"]' },
+      { title: 'Remote configuration', body: 'Save changes to publish them to every installed embed without replacing code.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="widget-settings"]' },
+      { title: 'Widget settings', body: 'Choose placement first, then change only the labels, color, and optional fields you need.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="widget-settings"]' },
+      { title: 'Live preview', body: 'Preview the form before publishing the remote configuration.', href: '/projects/{projectId}/feedback-form', target: '[data-tour="widget-preview"]' },
     ],
   },
   {
@@ -73,7 +74,7 @@ export const GUIDED_TUTORIALS: GuidedTutorialDefinition[] = [
     title: 'Install and verify',
     description: 'Find the right snippet and confirm one real submission.',
     steps: [
-      { title: 'Open Install', body: 'Install follows customization so the copied code always matches the saved form.', href: '/projects/{projectId}/install', target: '[data-tour="setup-progress"]' },
+      { title: 'Open Embed installation', body: 'Add the stable embed once. Form and release-note changes are managed remotely afterward.', href: '/projects/{projectId}/install', target: '[data-tour="setup-progress"]' },
       { title: 'Choose your platform', body: 'Website is the default. Choose WordPress, React, Next.js, or Vue only when that matches your app shell.', href: '/projects/{projectId}/install', target: '[data-tour="install-platforms"]' },
       { title: 'Copy the generated code', body: 'This section shows the exact snippet or explains when a fresh project key is needed. Paste generated code once in the shared page or app shell.', href: '/projects/{projectId}/install', target: '[data-tour="install-snippet-header"]' },
       { title: 'Send one known-good test', body: 'Use hosted verification after installing, then confirm the item appears in the project inbox.', href: '/projects/{projectId}/verify', target: '[data-tour="verify-guide"]' },

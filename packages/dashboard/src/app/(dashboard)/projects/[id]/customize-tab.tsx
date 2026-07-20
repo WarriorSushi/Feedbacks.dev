@@ -200,7 +200,10 @@ export function CustomizeTab({
         window.sessionStorage.removeItem(storageKey)
       }
       setDraftRestored(false)
-      toast({ title: 'Widget settings saved' })
+      toast({
+        title: 'Feedback form updated',
+        description: 'Installed embeds will use this configuration remotely. No code change is required.',
+      })
       router.refresh()
     } catch (error) {
       toast({
@@ -233,8 +236,8 @@ export function CustomizeTab({
                 <CardTitle className="text-lg">Make the feedback form fit your product</CardTitle>
                 <CardDescription className="mt-1">
                   {hasUnsavedChanges
-                    ? 'Save changes before copying install code.'
-                    : 'Install snippets use this saved version.'}
+                    ? 'Save to publish these changes to every installed embed.'
+                    : 'This saved version is delivered remotely. Your installed code stays the same.'}
                 </CardDescription>
               </div>
               {draftRestored && hasUnsavedChanges && (
@@ -267,7 +270,7 @@ export function CustomizeTab({
                   Draft changes: <span className="font-medium text-foreground">{changedFieldsSummary}</span>
                 </>
               ) : (
-                'Ready to install'
+                'Active remote configuration'
               )}
             </span>
           </div>
@@ -310,7 +313,7 @@ export function CustomizeTab({
               <div>
                 <p className="text-sm font-semibold text-foreground">Placement</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Pick one install style. The install tab will generate the matching code.
+                  Choose how the feedback form appears. The shared embed applies this remotely.
                 </p>
               </div>
               <div className="grid gap-3 md:grid-cols-3">
@@ -519,9 +522,9 @@ export function CustomizeTab({
         <div className="sticky bottom-4 z-20 rounded-lg border border-amber-300/80 bg-amber-50 p-3 shadow-lg dark:bg-amber-950">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-foreground">Save before installing</p>
+              <p className="text-sm font-semibold text-foreground">Publish remote changes</p>
               <p className="mt-0.5 text-sm text-muted-foreground">
-                Install code still uses the last saved version. Unsaved changes: {changedFieldsSummary}
+                Installed embeds keep using the last saved version until you save. Unsaved changes: {changedFieldsSummary}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

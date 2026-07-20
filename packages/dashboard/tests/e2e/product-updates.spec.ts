@@ -27,16 +27,16 @@ async function bootstrap(page: Page, projectKey: string) {
   }
 }
 
-test('new Updates-only user verifies the embed, tests a draft, and publishes', async ({ page }) => {
+test('new Release-notes-only user verifies the embed, tests a draft, and publishes', async ({ page }) => {
   await signInWithTestSession(page)
 
   await page.goto('/projects/new?goal=updates')
   await page.getByLabel('Project name').fill(`Playwright Updates ${Date.now().toString(36)}`)
-  await expect(page.getByRole('button', { name: 'Announce updates' })).toHaveAttribute('aria-pressed', 'true')
-  await page.getByRole('button', { name: 'Create project and set up Updates' }).click()
-  await expect(page).toHaveURL(/\/projects\/([^/]+)\/updates$/, { timeout: 30_000 })
+  await expect(page.getByRole('button', { name: 'Publish release notes' })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: 'Create project and set up release notes' }).click()
+  await expect(page).toHaveURL(/\/projects\/([^/]+)\/release-notes$/, { timeout: 30_000 })
 
-  const projectId = page.url().match(/\/projects\/([^/]+)\/updates$/)?.[1]
+  const projectId = page.url().match(/\/projects\/([^/]+)\/release-notes$/)?.[1]
   expect(projectId).toBeTruthy()
   const projectKey = await page.evaluate((id) => window.sessionStorage.getItem(`feedbacks:project-api-key:${id}`), projectId!)
   expect(projectKey).toBeTruthy()
@@ -45,8 +45,8 @@ test('new Updates-only user verifies the embed, tests a draft, and publishes', a
   expect(initialBootstrap.modules).toEqual({ feedback: false, updates: true })
 
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'Create your first update' }).click()
-  await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/updates/new$`))
+  await page.getByRole('button', { name: 'Create first release note' }).click()
+  await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/release-notes/new$`))
 
   const title = `Shipped ${Date.now().toString(36)}`
   await page.getByLabel('Title').fill(title)
@@ -55,7 +55,7 @@ test('new Updates-only user verifies the embed, tests a draft, and publishes', a
   await expect(page.getByRole('button', { name: 'Test', exact: true })).toBeVisible()
 
   await page.getByRole('button', { name: 'Test', exact: true }).click()
-  const privateTest = page.getByRole('dialog', { name: 'Private update test' })
+  const privateTest = page.getByRole('dialog', { name: 'Private release note test' })
   await expect(privateTest).toBeVisible()
   await expect(page.getByRole('button', { name: 'Close private test' })).toBeFocused()
   await expect(privateTest.getByText(title)).toBeVisible()
@@ -71,18 +71,18 @@ test('new Updates-only user verifies the embed, tests a draft, and publishes', a
   expect(publishedBootstrap.updates?.updates.some((update) => update.title === title)).toBeTruthy()
 })
 
-test('an existing Feedback installation activates Updates without a snippet change', async ({ page }) => {
+test('an existing Feedback installation activates Release notes without a snippet change', async ({ page }) => {
   await signInWithTestSession(page)
   const project = await createProjectViaApi(page, { name: `Playwright Remote Activation ${Date.now().toString(36)}` })
 
   const before = await bootstrap(page, project.apiKey)
   expect(before.modules).toEqual({ feedback: true, updates: false })
 
-  await page.goto(`/projects/${project.id}/updates`, { waitUntil: 'domcontentloaded' })
-  await expect(page.getByRole('heading', { name: 'Your feedbacks.dev embed is connected' })).toBeVisible()
+  await page.goto(`/projects/${project.id}/release-notes`, { waitUntil: 'domcontentloaded' })
+  await expect(page.getByRole('heading', { name: 'Your shared embed is connected' })).toBeVisible()
   await expect(page.getByText('Your existing installation does not need a code change.')).toBeVisible()
-  await page.getByRole('button', { name: 'Activate Updates' }).click()
-  await expect(page.getByRole('button', { name: 'Create your first update' })).toBeVisible()
+  await page.getByRole('button', { name: 'Activate release notes' }).click()
+  await expect(page.getByRole('button', { name: 'Create first release note' })).toBeVisible()
 
   const after = await bootstrap(page, project.apiKey)
   expect(after.modules).toEqual({ feedback: true, updates: true })
@@ -96,7 +96,12 @@ test('Updates-only never renders the Feedback launcher', async ({ page }) => {
   await page.goto(projectVerifyPath(project.id), { waitUntil: 'domcontentloaded' })
   await expect(page.getByText(/Ready/i)).toBeVisible({ timeout: 30_000 })
   await page.waitForTimeout(2_000)
-  await expect(page.getByRole('button', { name: 'Feedback' })).toHaveCount(0)
+  await expect(page.locator('.fb-launcher')).toHaveCount(0)
+
+  await page.route('**/api/widget/bootstrap**', (route) => route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"temporary"}' }))
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await expect(page.getByText(/Ready/i)).toBeVisible({ timeout: 30_000 })
+  await expect(page.locator('.fb-launcher')).toHaveCount(0)
 })
 
 test('a bootstrap failure preserves an existing Feedback installation', async ({ page }) => {
@@ -105,5 +110,5 @@ test('a bootstrap failure preserves an existing Feedback installation', async ({
   await page.route('**/api/widget/bootstrap**', (route) => route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"temporary"}' }))
 
   await page.goto(projectVerifyPath(project.id), { waitUntil: 'domcontentloaded' })
-  await expect(page.getByRole('button', { name: 'Feedback' })).toBeVisible({ timeout: 30_000 })
+  await expect(page.locator('.fb-launcher')).toBeVisible({ timeout: 30_000 })
 })

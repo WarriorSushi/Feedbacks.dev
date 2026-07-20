@@ -52,11 +52,12 @@ type NavItem = {
 }
 
 const primaryNavItems: NavItem[] = [
-  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true, tourId: 'nav-dashboard' },
+  { href: '/dashboard', label: 'Project home', icon: LayoutDashboard, exact: true, tourId: 'nav-dashboard', projectTab: 'home' },
+  { href: '/feedback-form', label: 'Feedback form', icon: MessageSquare, tourId: 'nav-feedback-form', projectTab: 'feedback-form' },
   { href: '/feedback', label: 'Feedback inbox', icon: MessageSquare, tourId: 'nav-feedback' },
-  { href: '/updates', label: 'Updates', icon: Megaphone, tourId: 'nav-updates', projectTab: 'updates' },
+  { href: '/release-notes', label: 'Release notes', icon: Megaphone, tourId: 'nav-updates', projectTab: 'release-notes' },
   { href: '/board', label: 'Public board', icon: Globe, tourId: 'nav-boards', projectTab: 'board' },
-  { href: '/install', label: 'Install & verify', icon: Code2, tourId: 'nav-install', projectTab: 'install' },
+  { href: '/install', label: 'Embed installation', icon: Code2, tourId: 'nav-install', projectTab: 'install' },
   { href: '/integrations', label: 'Integrations', icon: Webhook, tourId: 'nav-integrations', projectTab: 'integrations' },
   { href: '/api', label: 'API & MCP', icon: Code2, tourId: 'nav-api', projectTab: 'api' },
 ]
@@ -358,18 +359,23 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
           {primaryNavItems.map((item, index) => {
             const projectTab = item.projectTab
             const scopedHref = projectTab && currentProject
-              ? getProjectRoute(currentProject.id, projectTab as Parameters<typeof getProjectRoute>[1])
+              ? projectTab === 'home'
+                ? `/projects/${encodeURIComponent(currentProject.id)}`
+                : getProjectRoute(currentProject.id, projectTab as Parameters<typeof getProjectRoute>[1])
               : item.href
             const activeProjectSection = getProjectRouteSection(pathname)
             const isActive = projectTab
-              ? activeProjectSection === projectTab
+              ? projectTab === 'home'
+                ? Boolean(routeProjectId && pathname === `/projects/${routeProjectId}`)
+                : activeProjectSection === projectTab
               : item.exact
                 ? pathname === item.href
                 : pathname === item.href || pathname.startsWith(item.href + '/')
             return (
               <React.Fragment key={item.href}>
                 {!collapsed && index === 1 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Products</p>}
-                {!collapsed && index === 4 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Configure</p>}
+                {!collapsed && index === 5 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Delivery</p>}
+                {!collapsed && index === 7 && <p className="mb-1 mt-3 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Developers</p>}
                 <Link
                   href={scopedHref}
                   data-tour={item.tourId}
