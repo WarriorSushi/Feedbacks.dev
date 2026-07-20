@@ -1,6 +1,5 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Loader2 } from 'lucide-react'
@@ -37,12 +36,9 @@ export function BoardAdvancedSection({
 }: BoardAdvancedSectionProps) {
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Custom CSS</CardTitle>
-          <CardDescription>Optional CSS overrides for teams that need a final layer of polish.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
+      <details className="border-b pb-6">
+        <summary className="cursor-pointer text-base font-semibold">Custom CSS <span className="text-sm font-normal text-muted-foreground">· optional</span></summary>
+        <div className="mt-4 space-y-3">
           <textarea
             value={settings.custom_css}
             onChange={(e) => onSettingsChange({ custom_css: e.target.value.slice(0, 6000) })}
@@ -51,19 +47,13 @@ export function BoardAdvancedSection({
             placeholder=".feedbacks-board { --feedbacks-accent: #0f766e; }"
           />
           <p className="text-xs text-muted-foreground">
-            Custom CSS is sanitized on read before it reaches the public board. Keep overrides small and focused on clarity.
+            Use this only if the color and logo settings are not enough.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </details>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Reports and trust queue</CardTitle>
-          <CardDescription>
-            Board and post reports now stay inside the product instead of routing through mailto links.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
+      <section className="space-y-3 border-b pb-7">
+        <div><h3 className="text-base font-semibold">Reports</h3><p className="mt-1 text-sm text-muted-foreground">Check posts that visitors flag.</p></div>
           {reports.length === 0 ? (
             <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
               No reports yet. When someone flags the board or a post, it will show up here.
@@ -123,8 +113,7 @@ export function BoardAdvancedSection({
               </div>
             ))
           )}
-        </CardContent>
-      </Card>
+      </section>
     </div>
   )
 }

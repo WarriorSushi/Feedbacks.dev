@@ -6,10 +6,10 @@ import type { BoardReport, Project } from '@/lib/types'
 import type { BoardAnnouncement, BoardBranding } from '@/lib/public-board'
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/copy-button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Check, ExternalLink, Globe2, Loader2, Lock, Rocket, Settings2 } from 'lucide-react'
+import { ExternalLink, Loader2, Rocket } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { BoardIdentitySection } from './BoardIdentitySection'
@@ -41,10 +41,10 @@ interface BoardStats {
 type TabId = 'identity' | 'content' | 'visibility' | 'advanced'
 
 const TABS: { id: TabId; label: string }[] = [
-  { id: 'identity', label: 'Identity' },
-  { id: 'content', label: 'Content' },
-  { id: 'visibility', label: 'Visibility' },
-  { id: 'advanced', label: 'Moderation' },
+  { id: 'identity', label: 'Name and look' },
+  { id: 'content', label: 'Page content' },
+  { id: 'visibility', label: 'Who can see it' },
+  { id: 'advanced', label: 'Safety' },
 ]
 
 function slugify(text: string): string {
@@ -60,7 +60,7 @@ function createDefaultSettings(project: Project): BoardSettingsState {
     slug: slugify(project.name),
     display_name: project.name,
     title: `${project.name} Feedback`,
-    description: 'Share requests, vote on what matters, and follow product updates in one place.',
+    description: 'Share an idea, vote, and see what the team says.',
     show_types: ['idea', 'bug'],
     allow_submissions: true,
     require_email_to_vote: false,
@@ -71,12 +71,12 @@ function createDefaultSettings(project: Project): BoardSettingsState {
       accentColor: '#0f766e',
       logoEmoji: '◦',
       heroEyebrow: 'Public board',
-      heroTitle: `${project.name} roadmap and feedback`,
-      heroDescription: 'Track what the team is building, vote on requests, and see public updates without the noise of a bloated portal.',
-      tagline: `${project.name} keeps feedback visible and actionable.`,
+      heroTitle: `Help shape ${project.name}`,
+      heroDescription: 'Share an idea or bug. Vote for things you want. See what the team plans to do.',
+      tagline: 'Your ideas help us build better.',
       categories: [],
       emptyStateTitle: 'No requests yet',
-      emptyStateDescription: 'Start the conversation by submitting the first request or sharing a bug report.',
+      emptyStateDescription: 'Be the first to share an idea or bug.',
     },
     announcements: [],
   }
@@ -154,13 +154,6 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
   const isPrivate = (settings.branding.visibility || 'public') === 'private'
   const isListed = (settings.branding.visibility || 'public') === 'public' && settings.branding.directoryOptIn !== false
   const canOpenBoard = settings.enabled && !isPrivate
-  const launchSteps = [
-    { label: 'URL ready', done: Boolean(settings.slug) },
-    { label: 'Public access enabled', done: canOpenBoard },
-    { label: 'Visitors can post', done: settings.allow_submissions },
-  ]
-  const completedSteps = launchSteps.filter((step) => step.done).length
-
   const updateSettings = (patch: Partial<BoardSettingsState>) => {
     setSettings((prev) => ({ ...prev, ...patch }))
   }
@@ -333,9 +326,8 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="overflow-hidden">
-        <CardHeader className="border-b bg-muted/20">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <section className="border-b pb-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={canOpenBoard ? 'secondary' : 'outline'}>
@@ -350,17 +342,15 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
                 </Badge>
                 {isListed && <Badge variant="outline">Listed in directory</Badge>}
               </div>
-              <CardTitle className="mt-3 text-xl">Public board</CardTitle>
-              <CardDescription className="mt-1 max-w-2xl">
-                Publish a clean customer-facing page for feedback, votes, public replies, and product updates.
-              </CardDescription>
+              <h2 className="mt-3 text-xl font-semibold">Public feedback page</h2>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">Give users one place to share ideas, vote, and see your replies.</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
               {!canOpenBoard && (
                 <Button onClick={() => void handleEnableAndSave()} disabled={saving}>
                   {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Rocket className="mr-2 h-4 w-4" />}
-                  Enable and save
+                  Publish page
                 </Button>
               )}
               <CopyButton value={boardUrl} label="Copy link" copiedLabel="Copied" variant="outline" disabled={!settings.slug} />
@@ -368,109 +358,38 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
                 <Button variant="outline" asChild>
                   <a href={boardUrl} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="mr-2 h-4 w-4" />
-                    Open public board
+                    Open page
                   </a>
                 </Button>
               ) : (
                 <Button variant="outline" disabled>
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  Open public board
+                  Open page
                 </Button>
               )}
             </div>
           </div>
-        </CardHeader>
-
-        <CardContent className="space-y-5 p-5">
-          <div className="flex flex-col gap-3 rounded-xl border bg-background p-3 sm:flex-row sm:items-center">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border bg-muted/30">
-              {canOpenBoard ? <Globe2 className="h-5 w-5 text-primary" /> : <Lock className="h-5 w-5 text-muted-foreground" />}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-foreground">
-                {canOpenBoard ? 'Share this board with customers' : 'Finish setup, then publish'}
-              </p>
-              <p className="mt-1 truncate font-mono text-sm text-muted-foreground">{boardUrl}</p>
+          <div className="mt-5 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="min-w-0 truncate font-mono text-xs text-muted-foreground">{boardUrl}</p>
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
+              <span><strong className="font-semibold text-foreground">{stats.followerCount}</strong> followers</span>
+              <span><strong className="font-semibold text-foreground">{stats.watchCount}</strong> watched posts</span>
+              <span><strong className="font-semibold text-foreground">{stats.openReportCount}</strong> reports to check</span>
             </div>
           </div>
-
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="divide-y rounded-xl border bg-background">
-              {[
-                { label: 'Followers', value: stats.followerCount, description: 'People following the board.' },
-                { label: 'Watched posts', value: stats.watchCount, description: 'Requests watched for updates.' },
-                { label: 'Open reports', value: stats.openReportCount, description: 'Reports awaiting review.' },
-              ].map(({ label, value, description }) => (
-                <div key={label} className="grid gap-1 px-4 py-3 sm:grid-cols-[140px_80px_minmax(0,1fr)] sm:items-center">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-                  <p className="text-lg font-semibold tabular-nums text-foreground">{value}</p>
-                  <p className="text-xs leading-5 text-muted-foreground">{description}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="rounded-xl border bg-background px-4 py-3">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-foreground">Launch checklist</p>
-                <span className="text-xs font-medium text-muted-foreground">
-                  {completedSteps}/{launchSteps.length}
-                </span>
-              </div>
-              <div className="mt-3 space-y-2">
-                {launchSteps.map((step) => (
-                  <div key={step.label} className="flex items-center gap-2 text-sm">
-                    <span
-                      className={cn(
-                        'flex h-5 w-5 items-center justify-center rounded-full border',
-                        step.done
-                          ? 'border-primary/30 bg-primary/10 text-primary'
-                          : 'border-border text-muted-foreground',
-                      )}
-                    >
-                      {step.done ? <Check className="h-3.5 w-3.5" /> : <Settings2 className="h-3.5 w-3.5" />}
-                    </span>
-                    <span className={step.done ? 'text-foreground' : 'text-muted-foreground'}>
-                      {step.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border bg-background px-4 py-4">
-            <p className="text-sm font-semibold text-foreground">Public promise</p>
-            <div className="mt-3 grid gap-3 md:grid-cols-3">
-              {[
-                ['Review cadence', 'Check new public requests on a predictable rhythm before asking customers to follow the board.'],
-                ['Status discipline', 'Use public replies for context and only mark work in progress or shipped when the team is ready to stand behind it.'],
-                ['Privacy expectations', 'Keep private customer details out of public replies and move sensitive follow-up into a private channel.'],
-              ].map(([label, description]) => (
-                <div key={label} className="rounded-lg border bg-muted/10 px-3 py-3">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {label}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-foreground/72">
-                    {description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      </section>
 
       {/* Tab bar */}
-      <div className="flex gap-1 overflow-x-auto rounded-lg border bg-muted/50 p-1 scrollbar-thin">
+      <div className="flex gap-6 overflow-x-auto border-b scrollbar-thin">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              'min-h-10 shrink-0 rounded-md px-4 py-2 text-sm font-medium transition-colors',
+              'min-h-11 shrink-0 border-b-2 px-0 py-2 text-sm font-medium transition-colors',
               activeTab === tab.id
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'border-primary text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
             {tab.label}
@@ -522,10 +441,10 @@ export function BoardSettingsTabs({ project }: BoardSettingsTabsProps) {
         />
       )}
 
-      <Button onClick={() => void handleSave()} disabled={saving}>
+      <div className="sticky bottom-4 flex justify-end"><Button onClick={() => void handleSave()} disabled={saving} className="shadow-lg">
         {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Save board settings
-      </Button>
+        Save changes
+      </Button></div>
     </div>
   )
 }

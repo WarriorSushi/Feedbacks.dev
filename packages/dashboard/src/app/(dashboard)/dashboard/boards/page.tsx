@@ -52,16 +52,16 @@ export default async function DashboardBoardsPage({
     <div className="mx-auto max-w-6xl space-y-6" data-tour="owner-boards">
       <div data-tour="owner-boards-summary" className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Public boards</p>
-          <h1 className="mt-2 text-2xl font-bold">{selectedProject ? `${selectedProject.name} board` : 'Public board'}</h1>
+          <p className="text-xs font-semibold text-primary">Public feedback page</p>
+          <h1 className="mt-2 text-2xl font-bold">{selectedProject ? selectedProject.name : 'Your public page'}</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Publish, preview, and manage the public board for the project selected in the sidebar.
+            Let users share ideas, vote, and see your replies.
           </p>
         </div>
         <Button variant="outline" asChild>
           <a href={publicBoardsUrl}>
             <Globe className="mr-2 h-4 w-4" />
-            Browse all boards
+            See public pages
           </a>
         </Button>
       </div>
@@ -69,7 +69,7 @@ export default async function DashboardBoardsPage({
       {!selectedProject ? (
         <div className="border-y py-12 text-center">
           <h2 className="text-lg font-semibold">Create a project first</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Every public board belongs to one project.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Each public page belongs to one project.</p>
           <Button className="mt-5" asChild><Link href="/projects/new">Create project</Link></Button>
         </div>
       ) : (
@@ -96,7 +96,7 @@ export default async function DashboardBoardsPage({
               <Button size="sm" asChild>
                 <Link href={`/projects/${selectedProject.id}?tab=board`}>
                   <Settings2 className="mr-1.5 h-3.5 w-3.5" />
-                  {board ? 'Manage board' : 'Set up board'}
+                  {board ? 'Edit page' : 'Make public page'}
                 </Link>
               </Button>
             </div>

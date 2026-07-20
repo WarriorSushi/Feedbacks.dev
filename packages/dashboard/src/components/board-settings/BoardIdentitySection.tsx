@@ -1,7 +1,6 @@
 'use client'
 
 import type React from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { BoardBranding } from '@/lib/public-board'
@@ -46,12 +45,8 @@ export function BoardIdentitySection({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Identity</CardTitle>
-        <CardDescription>Name, URL, and visual identity for your public board.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-5">
+    <section className="space-y-5 border-b pb-7">
+      <div><h3 className="text-base font-semibold">Name and look</h3><p className="mt-1 text-sm text-muted-foreground">Set the name, link, mark, and color users will see.</p></div>
         <div className="space-y-2">
           <Label htmlFor="board-display-name">Display name</Label>
           <Input
@@ -120,7 +115,6 @@ export function BoardIdentitySection({
             placeholder="https://example.com"
           />
         </div>
-      </CardContent>
-    </Card>
+    </section>
   )
 }

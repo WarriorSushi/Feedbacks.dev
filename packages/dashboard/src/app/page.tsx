@@ -60,21 +60,21 @@ export default function LandingPage() {
           <div className="landing-hero-grain absolute inset-0" aria-hidden="true" />
           <div className="relative mx-auto grid max-w-[1440px] gap-14 px-5 pb-16 pt-14 sm:px-8 sm:pt-20 lg:grid-cols-[0.7fr_1.3fr] lg:items-center lg:gap-14 lg:pb-24 lg:pt-24">
             <div className="lg:pb-6">
-              <p className="inline-flex items-center gap-2 text-xs font-semibold text-foreground/70"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> Product feedback that comes full circle</p>
+              <p className="inline-flex items-center gap-2 text-xs font-semibold text-foreground/70"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> Feedback and updates inside your app</p>
               <h1 className="mt-5 max-w-2xl text-[2.75rem] font-semibold leading-[0.98] tracking-[-0.055em] sm:text-[4.25rem] lg:text-[4.6rem]">
-                Hear the issue.<br />Show the fix.
+                Find what users need.<br />Show what you fixed.
               </h1>
               <p className="mt-6 max-w-[590px] text-base leading-7 text-muted-foreground sm:text-lg">
-                Add a focused feedback form to your product, route useful context to your team, then show users what changed—all through one lightweight embed.
+                Put a small feedback form in your app. Get the page and screenshot with each message. Then show users the fixes you ship.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href={authHref}>
                   <Button size="lg" className="h-12 w-full gap-2 px-6 sm:w-auto">Create a free project <ArrowRight className="h-4 w-4" /></Button>
                 </Link>
-                <Link href="#setup"><Button variant="outline" size="lg" className="h-12 w-full bg-background/70 px-6 sm:w-auto">See the 3-step setup</Button></Link>
+                <Link href="#products"><Button variant="outline" size="lg" className="h-12 w-full bg-background/70 px-6 sm:w-auto">See how it works</Button></Link>
               </div>
               <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
-                {['Free to start', 'Installs in minutes', 'No code change after setup'].map((item) => (
+                {['Free to start', 'One code block', 'Change it without new code'].map((item) => (
                   <span key={item} className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" />{item}</span>
                 ))}
               </div>
@@ -87,10 +87,10 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-0 sm:px-6">
             <div className="mb-12 grid gap-6 px-5 sm:px-0 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
               <div>
-                <p className="text-xs font-semibold text-primary">One visible feedback loop</p>
-                <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">From “this is broken”<br />to “we fixed it.”</h2>
+                <p className="text-xs font-semibold text-primary">A clear path from problem to fix</p>
+                <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Users speak. You fix it.<br />They see the change.</h2>
               </div>
-              <p className="max-w-2xl text-base leading-7 text-muted-foreground lg:justify-self-end">Collect feedback from users inside your product. Triage it with the context intact. Then show product updates to users in the same place they first felt the problem.</p>
+              <p className="max-w-2xl text-base leading-7 text-muted-foreground lg:justify-self-end">Users send a bug or idea from your app. Your team gets the details it needs. When you ship a fix, users see a clear “What changed” message inside your app.</p>
             </div>
             <LandingFeedbackStory />
           </div>
@@ -100,10 +100,10 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-0 sm:px-6">
             <div className="mb-12 grid gap-6 px-5 sm:px-0 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
               <div>
-                <p className="text-xs font-semibold text-primary">One-time setup</p>
-                <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Configure once. Install once. Keep improving.</h2>
+                <p className="text-xs font-semibold text-primary">Set up once</p>
+                <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Make the form yours. Paste one code block.</h2>
               </div>
-              <p className="max-w-2xl leading-7 text-muted-foreground lg:justify-self-end">Shape the experience first, paste the generated Website snippet, then send one private test. Every later form or product-update change arrives remotely—without another code change.</p>
+              <p className="max-w-2xl leading-7 text-muted-foreground lg:justify-self-end">Choose the words, fields, and color. Paste the code into your site. Send one test. Later changes show up on their own, so you do not paste code again.</p>
             </div>
             <LandingInstallStory snippet={installSnippet} />
           </div>
@@ -116,15 +116,15 @@ export default function LandingPage() {
               <div className="relative"><WidgetDemo /></div>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Useful signal, less interrogation</p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">The form feels native. The context arrives automatically.</h2>
-              <p className="mt-5 leading-7 text-muted-foreground">Choose the fields you need and keep the form short. Every submission can arrive with the page URL, browser context, rating, and screenshot, ready to triage.</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Short for users. Useful for your team.</p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Ask one clear question. Get the details for free.</h2>
+              <p className="mt-5 leading-7 text-muted-foreground">Users write what went wrong. feedbacks.dev can add the page, browser, rating, and screenshot. Your team spends less time asking follow-up questions.</p>
               <div className="mt-8 space-y-4">
                 {[
-                  [MousePointer2, 'Remote presentation', 'Change the trigger, placement, labels, fields, and color without replacing the embed.'],
-                  [Inbox, 'Focused triage', 'Search, filter, tag, and route feedback from one project-aware inbox.'],
-                  [Bot, 'Agent-ready handoff', 'Give your coding agent a scoped setup packet instead of copying secrets into chat.'],
-                  [ShieldCheck, 'Trust by default', 'Browser-safe keys in public code. Private and service-role credentials stay server-side.'],
+                  [MousePointer2, 'Change it any time', 'Edit the button, place, words, fields, and color without replacing the code.'],
+                  [Inbox, 'See what needs work', 'Search, sort, tag, and move each message through a simple inbox.'],
+                  [Bot, 'Send work to your tools', 'Pass a clear task to your coding agent or team without sharing private keys.'],
+                  [ShieldCheck, 'Safe to paste', 'The website code uses a public project key. Private keys stay on the server.'],
                 ].map(([Icon, title, body]) => {
                   const ItemIcon = Icon as typeof Inbox
                   return <div key={String(title)} className="flex gap-4"><ItemIcon className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><div><h3 className="text-sm font-semibold">{String(title)}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{String(body)}</p></div></div>
@@ -137,19 +137,19 @@ export default function LandingPage() {
         <section id="pricing" className="border-b bg-muted/20 py-20 sm:py-28">
           <div className="mx-auto max-w-5xl px-5 sm:px-6">
             <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr]">
-              <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Straightforward pricing</p><h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Start free. Upgrade for scale, not basics.</h2><p className="mt-5 leading-7 text-muted-foreground">Both products, the install flow, and the dashboard are available from day one.</p></div>
+              <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Simple pricing</p><h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Start free. Pay when you grow.</h2><p className="mt-5 leading-7 text-muted-foreground">The feedback form, messages for users, setup, and inbox are ready from day one.</p></div>
               <div className="overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
                 <div className="grid md:grid-cols-2">
                   <div className="p-6 sm:p-8">
                     <p className="text-sm font-semibold">Free</p><p className="mt-3 text-4xl font-semibold tracking-tight">${freePlan.monthlyPrice}<span className="text-sm font-normal text-muted-foreground"> / month</span></p>
                     <p className="mt-2 text-sm text-muted-foreground">For one or two products getting started.</p>
-                    <ul className="mt-6 space-y-3 text-sm">{[`${freePlan.projectLimit} projects`, `${freePlan.feedbackMonthlyLimit} feedback / month`, 'Feedback form + updates for users', 'One shared embed'].map(item => <li key={item} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" />{item}</li>)}</ul>
+                    <ul className="mt-6 space-y-3 text-sm">{[`${freePlan.projectLimit} projects`, `${freePlan.feedbackMonthlyLimit} feedback / month`, 'Feedback form + messages for users', 'One code block'].map(item => <li key={item} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" />{item}</li>)}</ul>
                     <Link href={authHref} className="mt-7 block"><Button variant="outline" className="w-full">Start free</Button></Link>
                   </div>
                   <div className="border-t border-primary/20 bg-primary/[0.045] p-6 sm:p-8 md:border-l md:border-t-0">
                     <div className="flex items-center justify-between"><p className="text-sm font-semibold">Pro</p><span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Full product</span></div>
                     <p className="mt-3 text-4xl font-semibold tracking-tight">${proPlan.monthlyPrice}<span className="text-sm font-normal text-muted-foreground"> / month</span></p>
-                    <p className="mt-2 text-sm text-muted-foreground">For teams routing product signal every week.</p>
+                    <p className="mt-2 text-sm text-muted-foreground">For teams that get more feedback each week.</p>
                     <ul className="mt-6 space-y-3 text-sm">{[proPlan.projectLimit ? `${proPlan.projectLimit} projects` : 'Unlimited projects', 'Unlimited feedback history', 'Integrations, boards, API & MCP', 'Priority support'].map(item => <li key={item} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" />{item}</li>)}</ul>
                     <Link href={authHref} className="mt-7 block"><Button className="w-full">Start with Pro</Button></Link>
                   </div>
@@ -162,8 +162,8 @@ export default function LandingPage() {
         <section className="px-5 py-20 sm:px-6 sm:py-28">
           <div className="mx-auto max-w-4xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Ready when you are</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-5xl">Install once. Start listening today.</h2>
-            <p className="mx-auto mt-5 max-w-xl leading-7 text-muted-foreground">Create a project, paste one safe snippet, and verify the first submission. The product guides the rest.</p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-5xl">Hear your users today.</h2>
+            <p className="mx-auto mt-5 max-w-xl leading-7 text-muted-foreground">Create a project, paste one safe code block, and send a test. We guide you through each step.</p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Link href={authHref}><Button size="lg" className="h-12 w-full gap-2 px-7 sm:w-auto">Create a free project <ArrowRight className="h-4 w-4" /></Button></Link><Link href="/docs" prefetch={false}><Button size="lg" variant="outline" className="h-12 w-full px-7 sm:w-auto">Read the docs</Button></Link></div>
           </div>
         </section>

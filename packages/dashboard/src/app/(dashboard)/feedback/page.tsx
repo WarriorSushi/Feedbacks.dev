@@ -9,13 +9,11 @@ import { isFeedbackUnread, parseFeedbackReadStateFilter } from '@/lib/feedback-r
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
 import {
   cn,
   truncate,
   formatRelativeTime,
   getStatusColor,
-  getTypeColor,
   statusConfig as globalStatusConfig,
 } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
@@ -42,12 +40,12 @@ import {
   Bot,
   ClipboardList,
   EyeOff,
+  SlidersHorizontal,
 } from 'lucide-react'
 import Link from 'next/link'
 
 const PAGE_SIZE = 20
 
-const statuses: FeedbackStatus[] = ['new', 'reviewed', 'planned', 'in_progress', 'closed']
 const types: FeedbackType[] = ['bug', 'idea', 'praise', 'question']
 const priorities: FeedbackPriority[] = ['low', 'medium', 'high', 'critical']
 
@@ -116,6 +114,9 @@ function FeedbackInboxInner() {
   const [searchInput, setSearchInput] = React.useState(search)
   const [tagInput, setTagInput] = React.useState(tag)
   const [bulkTagInput, setBulkTagInput] = React.useState('')
+  const [showMoreFilters, setShowMoreFilters] = React.useState(
+    Boolean(type || tag || agent || publicOnly || priority || (status && status !== 'new' && status !== 'planned')),
+  )
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
@@ -368,43 +369,32 @@ function FeedbackInboxInner() {
 
   const hasFilters = status || type || search || agent || publicOnly || priority || projectId || tag || read === 'unread'
   return (
-    <div className="animate-fade-in space-y-4 pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
+    <div className="animate-fade-in space-y-5 pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
       {/* ─── Header ─────────────────────────────────────── */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-end justify-between border-b pb-5">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Inbox</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {loading ? (
-              'Loading…'
-            ) : (
-              <>
-                <span className="font-medium text-foreground">{total}</span>{' '}
-                {total === 1 ? 'item' : 'items'}
-                {hasFilters && ' · filtered'}
-              </>
-            )}
-          </p>
+          <p className="text-xs font-semibold text-primary">Your users</p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight">Feedback</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Read new messages. Decide what to do next.</p>
           {billingSummary?.entitlements.historyDays && (
             <p className="mt-1 text-xs text-muted-foreground">
               Free plan view limited to the most recent {billingSummary.entitlements.historyDays} days.
             </p>
           )}
         </div>
-        <p className="hidden text-[11px] text-muted-foreground lg:block" aria-label="Inbox keyboard shortcuts">
-          / search · J/K move · Enter open
-        </p>
+        <div className="text-right"><p className="text-2xl font-semibold tabular-nums">{loading ? '—' : total}</p><p className="text-xs text-muted-foreground">{hasFilters ? 'shown' : total === 1 ? 'message' : 'messages'}</p></div>
       </div>
 
       {/* ─── Filters ─────────────────────────────────────── */}
-      <div className="flex flex-col gap-2.5">
-        <div data-tour="inbox-search" className="flex flex-col gap-2 md:flex-row md:items-center">
-          <form onSubmit={handleSearch}>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <form data-tour="inbox-search" onSubmit={handleSearch} className="w-full lg:max-w-md">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search feedback…"
                 aria-label="Search feedback"
-                className="h-9 w-full pl-9 text-sm md:w-72"
+                className="h-10 w-full pl-9 text-sm"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />
@@ -424,36 +414,7 @@ function FeedbackInboxInner() {
             </div>
           </form>
 
-          <form onSubmit={handleTagSearch}>
-            <div className="relative">
-              <Tag className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Filter by tag…"
-                aria-label="Filter feedback by tag"
-                className="h-9 w-full pl-9 text-sm md:w-56"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-              />
-              {tagInput && (
-                <button
-                  type="button"
-                  aria-label="Clear tag filter"
-                  onClick={() => {
-                    setTagInput('')
-                    updateParams({ tag: '' })
-                  }}
-                  className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-
-        <div data-tour="inbox-filters" className="-mx-4 px-4 md:mx-0 md:px-0">
-          <div className="scroll-fade-x flex snap-x items-center gap-1.5 overflow-x-auto pb-1 pr-8 scrollbar-thin md:pr-0">
-          {/* Status group */}
+          <div data-tour="inbox-filters" className="scroll-fade-x -mx-4 flex snap-x items-center gap-1.5 overflow-x-auto px-4 pb-1 scrollbar-thin md:mx-0 md:px-0">
           <FilterPill
             active={!status && read === 'all'}
             onClick={() => updateParams({ status: '', read: '' })}
@@ -467,7 +428,7 @@ function FeedbackInboxInner() {
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
             Unread
           </FilterPill>
-          {statuses.map((s) => (
+          {(['new', 'planned'] as FeedbackStatus[]).map((s) => (
             <FilterPill
               key={s}
               active={status === s}
@@ -480,45 +441,7 @@ function FeedbackInboxInner() {
             </FilterPill>
           ))}
 
-          <span className="mx-0.5 h-4 w-px bg-border" />
-
-          {/* Type group */}
-          {types.map((t) => (
-            <FilterPill
-              key={t}
-              active={type === t}
-              onClick={() => updateParams({ type: type === t ? '' : t })}
-            >
-              <TypeIcon type={t} className="h-3.5 w-3.5" />
-              <span className="capitalize">{t}</span>
-            </FilterPill>
-          ))}
-
-          <span className="mx-0.5 h-4 w-px bg-border" />
-
-          <FilterPill
-            active={agent === '1'}
-            onClick={() => updateParams({ agent: agent === '1' ? '' : '1' })}
-          >
-            <Bot className="h-3.5 w-3.5" />
-            Agent
-          </FilterPill>
-
-          <FilterPill
-            active={publicOnly}
-            onClick={() => updateParams({ public: publicOnly ? '' : '1' })}
-          >
-            <MessageSquare className="h-3.5 w-3.5" />
-            Public board
-          </FilterPill>
-
-          <FilterPill
-            active={priority === 'high'}
-            onClick={() => updateParams({ priority: priority === 'high' ? '' : 'high' })}
-          >
-            <Star className="h-3.5 w-3.5" />
-            High priority
-          </FilterPill>
+          <button type="button" onClick={() => setShowMoreFilters((value) => !value)} aria-expanded={showMoreFilters} className={cn('flex min-h-11 flex-shrink-0 items-center gap-1.5 rounded-full px-3 text-[11px] font-medium md:min-h-8', showMoreFilters ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground')}><SlidersHorizontal className="h-3.5 w-3.5"/> More</button>
 
           {hasFilters && (
             <button
@@ -542,11 +465,26 @@ function FeedbackInboxInner() {
           showingAllProjects={showingAllProjects}
           onSelect={(nextProjectId) => updateParams({ projectId: nextProjectId })}
         />
-        <SavedInboxViews currentQuery={searchParams.toString()} />
+
+        {showMoreFilters && (
+          <div className="space-y-3 border-y py-4">
+            <div className="flex flex-wrap gap-1.5">
+              {(['reviewed', 'in_progress', 'closed'] as FeedbackStatus[]).map((s) => <FilterPill key={s} active={status === s} onClick={() => updateParams({ status: status === s ? '' : s })}><span className={cn('h-1.5 w-1.5 rounded-full', statusMeta[s].dot)}/>{statusMeta[s].label}</FilterPill>)}
+              {types.map((t) => <FilterPill key={t} active={type === t} onClick={() => updateParams({ type: type === t ? '' : t })}><TypeIcon type={t} className="h-3.5 w-3.5"/><span className="capitalize">{t}</span></FilterPill>)}
+              <FilterPill active={agent === '1'} onClick={() => updateParams({ agent: agent === '1' ? '' : '1' })}><Bot className="h-3.5 w-3.5"/>Agent</FilterPill>
+              <FilterPill active={publicOnly} onClick={() => updateParams({ public: publicOnly ? '' : '1' })}><MessageSquare className="h-3.5 w-3.5"/>Public board</FilterPill>
+              <FilterPill active={priority === 'high'} onClick={() => updateParams({ priority: priority === 'high' ? '' : 'high' })}><Star className="h-3.5 w-3.5"/>High priority</FilterPill>
+            </div>
+            <form onSubmit={handleTagSearch} className="max-w-sm">
+              <div className="relative"><Tag className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"/><Input placeholder="Find a tag…" aria-label="Filter feedback by tag" className="h-9 w-full pl-9 text-sm" value={tagInput} onChange={(e) => setTagInput(e.target.value)}/>{tagInput && <button type="button" aria-label="Clear tag filter" onClick={() => { setTagInput(''); updateParams({ tag: '' }) }} className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-accent"><X className="h-3.5 w-3.5"/></button>}</div>
+            </form>
+            <SavedInboxViews currentQuery={searchParams.toString()} />
+          </div>
+        )}
       </div>
 
       {/* ─── Main List ────────────────────────────────────── */}
-      <Card data-tour="inbox-list" className="overflow-hidden">
+      <section data-tour="inbox-list" className="overflow-hidden border-y bg-card">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -587,7 +525,7 @@ function FeedbackInboxInner() {
             ))}
           </div>
         )}
-      </Card>
+      </section>
 
       {/* ─── Pagination ──────────────────────────────────── */}
       {totalPages > 1 && (
@@ -774,6 +712,8 @@ function FeedbackRow({
 }) {
   const isUnread = isFeedbackUnread(fb)
   const source = getFeedbackSource(fb)
+  const [firstLine, ...otherLines] = fb.message.split('\n').filter(Boolean)
+  const preview = otherLines.join(' ')
 
   return (
     <div
@@ -820,10 +760,11 @@ function FeedbackRow({
             )}
           >
             {isUnread && <span className="sr-only">Unread feedback: </span>}
-            {truncate(fb.message, 120)}
+            {truncate(firstLine || fb.message, 96)}
           </p>
+          {preview && <p className="mt-1 truncate text-xs text-muted-foreground">{truncate(preview, 120)}</p>}
 
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
             {/* Status */}
             <span
               className={cn(
@@ -840,34 +781,8 @@ function FeedbackRow({
               {statusMeta[fb.status]?.label || fb.status}
             </span>
 
-            {/* Type badge */}
-            {fb.type && (
-              <>
-                <span className="text-[10px] text-muted-foreground/30">·</span>
-                <Badge
-                  variant="secondary"
-                  className={cn('h-4 px-1.5 text-[11px]', getTypeColor(fb.type))}
-                >
-                  {fb.type}
-                </Badge>
-              </>
-            )}
-
-            {/* Agent badge */}
-            {fb.agent_name && (
-              <>
-                <span className="text-[10px] text-muted-foreground/30">·</span>
-                <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
-                  <Bot className="h-3 w-3" />
-                  <span className="font-medium">{fb.agent_name}</span>
-                </span>
-              </>
-            )}
-
             <span className="text-[10px] text-muted-foreground/30">·</span>
-            <Badge variant="outline" className="h-4 px-1.5 text-[10px]">
-              {source}
-            </Badge>
+            <span className="text-[11px] text-muted-foreground">{source}</span>
 
             {/* Project */}
             {fb.projects && (
@@ -882,7 +797,7 @@ function FeedbackRow({
             {fb.tags && fb.tags.length > 0 && (
               <>
                 <span className="text-[10px] text-muted-foreground/30">·</span>
-                <span className="flex flex-wrap items-center gap-1">
+                <span className="hidden flex-wrap items-center gap-1 sm:flex">
                   {fb.tags.slice(0, 2).map((tagValue) => (
                     <Badge key={tagValue} variant="outline" className="h-4 px-1.5 text-[10px]">
                       {tagValue}

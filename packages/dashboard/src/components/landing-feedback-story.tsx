@@ -5,9 +5,9 @@ import { ArrowRight, Check, CircleDot, MessageSquare, Send, Tag } from 'lucide-r
 import { cn } from '@/lib/utils'
 
 const steps = [
-  { label: 'User reports it', note: 'Inside Orbit' },
-  { label: 'Your team acts', note: 'Inside feedbacks.dev' },
-  { label: 'Users see the fix', note: 'Back inside Orbit' },
+  { label: 'A user tells you', note: 'In your app' },
+  { label: 'Your team fixes it', note: 'In your inbox' },
+  { label: 'Users see the fix', note: 'Back in your app' },
 ] as const
 
 export function LandingFeedbackStory() {
@@ -27,7 +27,7 @@ export function LandingFeedbackStory() {
           <button
             key={step.label}
             type="button"
-            onClick={() => { setActive(index); setPaused(true) }}
+            onClick={() => setActive(index)}
             aria-pressed={active === index}
             className={cn(
               'relative flex items-center gap-3 border-white/10 px-5 py-4 text-left transition-colors md:border-l md:first:border-l-0',
@@ -48,9 +48,9 @@ export function LandingFeedbackStory() {
           {active === 0 && (
             <div className="grid w-full items-center gap-8 md:grid-cols-[0.85fr_1.15fr]">
               <div className="max-w-sm">
-                <p className="text-xs font-semibold text-lime-300">The moment friction happens</p>
-                <h3 className="mt-3 text-2xl font-semibold tracking-[-0.035em]">Feedback stays attached to the experience.</h3>
-                <p className="mt-3 text-sm leading-6 text-zinc-400">No support scavenger hunt. The message arrives with the exact page, browser, rating, and optional screenshot.</p>
+                <p className="text-xs font-semibold text-lime-300">A user gets stuck</p>
+                <h3 className="mt-3 text-2xl font-semibold tracking-[-0.035em]">They tell you without leaving your app.</h3>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">The message comes with the page, browser, rating, and screenshot. Your team sees where the problem happened.</p>
               </div>
               <div className="relative mx-auto w-full max-w-lg border border-white/10 bg-[#1a1b1e] p-5 shadow-2xl">
                 <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-xs font-semibold">Orbit / Deployment #8421</span><span className="text-[10px] text-zinc-400">production</span></div>
@@ -65,7 +65,7 @@ export function LandingFeedbackStory() {
 
           {active === 1 && (
             <div className="w-full max-w-5xl border border-white/10 bg-[#18191c] shadow-2xl">
-              <div className="flex items-center justify-between border-b border-white/10 px-5 py-4"><div><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-lime-300">feedbacks.dev inbox</p><p className="mt-1 text-sm font-semibold">Orbit product feedback</p></div><span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-zinc-400">1 new signal</span></div>
+              <div className="flex items-center justify-between border-b border-white/10 px-5 py-4"><div><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-lime-300">Your feedback inbox</p><p className="mt-1 text-sm font-semibold">Orbit</p></div><span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-zinc-400">1 new message</span></div>
               <div className="grid md:grid-cols-[0.86fr_1.14fr]">
                 <div className="border-b border-white/10 md:border-b-0 md:border-r">
                   {['Build logs stop updating after…', 'Search misses archived services', 'Love the new deploy diff'].map((item, index) => (
@@ -76,7 +76,7 @@ export function LandingFeedbackStory() {
                   <div className="flex flex-wrap gap-2"><span className="inline-flex items-center gap-1 rounded-full bg-rose-400/10 px-2 py-1 text-[10px] text-rose-300"><CircleDot className="h-3 w-3" /> Bug</span><span className="inline-flex items-center gap-1 rounded-full bg-sky-400/10 px-2 py-1 text-[10px] text-sky-300"><Tag className="h-3 w-3" /> Deployments</span></div>
                   <p className="mt-5 text-base font-semibold leading-6">Build logs stop updating after the deploy reaches 80%.</p>
                   <dl className="mt-5 grid grid-cols-2 gap-y-3 border-y border-white/10 py-4 text-[10px]"><div><dt className="text-zinc-400">Page</dt><dd className="mt-1 text-zinc-300">/deployments/8421</dd></div><div><dt className="text-zinc-400">Browser</dt><dd className="mt-1 text-zinc-300">Edge 128</dd></div><div><dt className="text-zinc-400">Rating</dt><dd className="mt-1 text-amber-300">★★★★☆</dd></div><div><dt className="text-zinc-400">Screenshot</dt><dd className="mt-1 text-lime-300">Attached</dd></div></dl>
-                  <button type="button" onClick={() => { setActive(2); setPaused(true) }} className="mt-5 inline-flex items-center gap-2 bg-lime-300 px-3 py-2 text-[10px] font-bold text-zinc-950 transition-transform hover:-translate-y-0.5">Mark fixed & notify users <ArrowRight className="h-3 w-3" /></button>
+                  <button type="button" onClick={() => setActive(2)} className="mt-5 inline-flex items-center gap-2 bg-lime-300 px-3 py-2 text-[10px] font-bold text-zinc-950 transition-transform hover:-translate-y-0.5">Mark fixed and tell users <ArrowRight className="h-3 w-3" /></button>
                 </div>
               </div>
             </div>
@@ -85,13 +85,13 @@ export function LandingFeedbackStory() {
           {active === 2 && (
             <div className="grid w-full items-center gap-8 md:grid-cols-[0.9fr_1.1fr]">
               <div className="max-w-sm">
-                <p className="text-xs font-semibold text-lime-300">Close the loop where it began</p>
-                <h3 className="mt-3 text-2xl font-semibold tracking-[-0.035em]">The fix reaches users inside Orbit.</h3>
-                <p className="mt-3 text-sm leading-6 text-zinc-400">Publish once from feedbacks.dev. The existing embed shows the update to the right users—no new snippet or release required.</p>
+                <p className="text-xs font-semibold text-lime-300">The user sees your work</p>
+                <h3 className="mt-3 text-2xl font-semibold tracking-[-0.035em]">Show the fix inside your app.</h3>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">Write one short message in feedbacks.dev. Your app shows it with the code you already added.</p>
               </div>
               <div className="relative mx-auto w-full max-w-md overflow-hidden border border-white/10 bg-[#1a1b1e] shadow-2xl">
                 <div className="bg-violet-300 p-5 text-[#1b1328]"><p className="text-[9px] font-black uppercase tracking-[0.14em]">New in Orbit</p><p className="mt-3 text-xl font-bold">Live build logs are here</p></div>
-                <div className="p-5"><p className="text-xs leading-5 text-zinc-400">Watch every deployment step in real time, with clearer errors when a build needs attention.</p><div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4"><span className="inline-flex items-center gap-1 text-[10px] text-lime-300"><Check className="h-3 w-3" /> Delivered in product</span><button type="button" onClick={() => { setActive(0); setPaused(true) }} className="inline-flex items-center gap-1 text-[10px] font-semibold text-zinc-200 transition-colors hover:text-lime-300">See the user report <ArrowRight className="h-3 w-3" /></button></div></div>
+                <div className="p-5"><p className="text-xs leading-5 text-zinc-400">Watch each build step. When a build fails, Orbit now tells you what to fix.</p><div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4"><span className="inline-flex items-center gap-1 text-[10px] text-lime-300"><Check className="h-3 w-3" /> Shown in Orbit</span><button type="button" onClick={() => setActive(0)} className="inline-flex items-center gap-1 text-[10px] font-semibold text-zinc-200 transition-colors hover:text-lime-300">Start again <ArrowRight className="h-3 w-3" /></button></div></div>
               </div>
             </div>
           )}
@@ -99,7 +99,7 @@ export function LandingFeedbackStory() {
       </div>
 
       <div className="flex flex-col gap-3 border-t border-white/10 px-5 py-4 text-[10px] text-zinc-400 sm:flex-row sm:items-center sm:justify-between">
-        <span className="inline-flex items-center gap-2"><MessageSquare className="h-3.5 w-3.5 text-lime-300" /> One continuous, visible product conversation</span>
+        <span className="inline-flex items-center gap-2"><MessageSquare className="h-3.5 w-3.5 text-lime-300" /> One clear path from problem to fix</span>
         <button type="button" onClick={() => setPaused((value) => !value)} className="inline-flex items-center gap-2 self-start text-zinc-400 hover:text-white"><Send className="h-3 w-3" /> {paused ? 'Resume story' : 'Pause story'}</button>
       </div>
     </div>
