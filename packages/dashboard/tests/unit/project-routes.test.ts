@@ -10,7 +10,7 @@ test('legacy project tab URLs redirect to their approved stable routes', async (
 
   assert.equal(
     getLegacyProjectTabRedirect(new URL('https://app.feedbacks.dev/projects/project-1?tab=updates')),
-    '/projects/project-1/updates',
+    '/projects/project-1/release-notes',
   )
   assert.equal(
     getLegacyProjectTabRedirect(new URL('https://app.feedbacks.dev/projects/project-1?created=1&tab=install')),
@@ -18,7 +18,7 @@ test('legacy project tab URLs redirect to their approved stable routes', async (
   )
   assert.equal(
     getLegacyProjectTabRedirect(new URL('https://app.feedbacks.dev/projects/project-1?tab=customize')),
-    '/projects/project-1/install?view=customize',
+    '/projects/project-1/feedback-form',
   )
 })
 
@@ -26,7 +26,9 @@ test('unknown project tabs and stable routes are not redirected', async () => {
   const { getLegacyProjectTabRedirect, getProjectRouteSection } = await loadProjectRoutes()
 
   assert.equal(getLegacyProjectTabRedirect(new URL('https://app.feedbacks.dev/projects/project-1?tab=unknown')), null)
-  assert.equal(getProjectRouteSection('/projects/project-1/updates'), 'updates')
-  assert.equal(getProjectRouteSection('/projects/project-1/updates/new'), 'updates')
+  assert.equal(getProjectRouteSection('/projects/project-1/updates'), 'release-notes')
+  assert.equal(getProjectRouteSection('/projects/project-1/updates/new'), 'release-notes')
+  assert.equal(getProjectRouteSection('/projects/project-1/release-notes'), 'release-notes')
+  assert.equal(getProjectRouteSection('/projects/project-1/feedback-form'), 'feedback-form')
   assert.equal(getProjectRouteSection('/projects/project-1'), null)
 })

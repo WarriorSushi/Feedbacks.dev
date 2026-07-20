@@ -59,8 +59,8 @@ Each board gets its own public URL at `www.feedbacks.dev/p/your-product` with:
 - Custom accent colors and branding
 - Announcements and changelog
 
-### Product Updates (opt-in)
-Publish a concise in-app “What’s New” modal through the existing widget after enabling it once in widget configuration. The dashboard supports project-scoped drafts, publishing, basic settings, and aggregate metrics. Operators must apply the ordered migration and complete the Product Updates rollout plan before enabling it for customers.
+### Release notes (opt-in)
+Publish concise in-product “What’s New” announcements through the shared embed. The dashboard supports project-scoped drafts, publishing, basic settings, and aggregate metrics. The embed is installed once; product activation and feedback-form configuration are delivered remotely without replacement snippets.
 
 ### Board Directory
 Discover what other products are building. Browse public boards, filter by category, find inspiration.

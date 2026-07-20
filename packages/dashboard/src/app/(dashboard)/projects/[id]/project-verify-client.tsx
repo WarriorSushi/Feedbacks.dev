@@ -115,8 +115,8 @@ export function ProjectVerifyClient({
           <Link href={`/feedback?projectId=${projectId}`}>
             <Button variant="outline">Open project inbox</Button>
           </Link>
-          <Link href={`/projects/${projectId}/install?view=customize`}>
-            <Button variant="outline">Customize widget</Button>
+          <Link href={`/projects/${projectId}/feedback-form`}>
+            <Button variant="outline">Manage feedback form</Button>
           </Link>
         </div>
       </div>

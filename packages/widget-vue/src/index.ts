@@ -41,7 +41,6 @@ type WidgetRuntimeWindow = Window & {
 }
 
 const runtimeLoaders = new Map<string, Promise<void>>()
-let targetCounter = 0
 
 function resolveRuntimeCtor(runtime: WidgetRuntimeWindow['FeedbacksWidget']) {
   if (typeof runtime === 'function') return runtime
@@ -101,16 +100,11 @@ function loadWidgetRuntime(appOrigin?: string): Promise<void> {
   return promise
 }
 
-function createTargetId(): string {
-  targetCounter += 1
-  return `feedbacks-widget-${targetCounter}`
-}
-
 function sanitizeTargetSelector(target?: string): string | undefined {
   if (!target) return undefined
   const trimmed = target.trim()
   if (!trimmed) return undefined
-  return trimmed.startsWith('#') || trimmed.startsWith('.') ? trimmed : `#${trimmed}`
+  return ['#', '.', '['].some((prefix) => trimmed.startsWith(prefix)) ? trimmed : `#${trimmed}`
 }
 
 export const FeedbacksWidget = defineComponent({
@@ -159,13 +153,8 @@ export const FeedbacksWidget = defineComponent({
     id: { type: String, default: undefined },
   },
   setup(props: FeedbacksWidgetProps, { slots }: { slots: { default?: () => unknown } }) {
-    const autoTargetId = createTargetId()
     const instanceRef = { current: null as WidgetInstance | null }
     const isMounted = ref(false)
-    const renderedTargetId = computed(() => {
-      if (props.target || props.embedMode === 'modal') return undefined
-      return autoTargetId
-    })
     const runtimeConfig = computed(() => {
       const savedConfig: SavedWidgetConfig = {
         apiUrl: props.apiUrl,
@@ -174,8 +163,7 @@ export const FeedbacksWidget = defineComponent({
         updatesEventsApiUrl: props.updatesEventsApiUrl,
         embedMode: props.embedMode,
         position: props.position,
-        target: sanitizeTargetSelector(props.target)
-          ?? (renderedTargetId.value ? `#${renderedTargetId.value}` : undefined),
+        target: sanitizeTargetSelector(props.target),
         buttonText: props.buttonText,
         primaryColor: props.primaryColor,
         backgroundColor: props.backgroundColor,
@@ -252,30 +240,12 @@ export const FeedbacksWidget = defineComponent({
     })
 
     return () => {
-      if (props.embedMode === 'modal') return null
-
-      const commonProps = {
-        id: props.id || renderedTargetId.value,
+      return h('div', {
+        id: props.id,
         class: props.className,
         style: props.style,
-      }
-
-      if (props.embedMode === 'inline') {
-        return renderedTargetId.value ? h('div', commonProps) : null
-      }
-
-      if (renderedTargetId.value) {
-        return h(
-          'button',
-          {
-            ...commonProps,
-            type: 'button',
-          },
-          slots.default?.() ?? props.buttonText ?? 'Feedback'
-        )
-      }
-
-      return null
+        'data-feedbacks-host': props.projectKey,
+      }, slots.default?.())
     }
   },
 })

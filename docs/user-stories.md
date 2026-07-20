@@ -125,7 +125,8 @@ As a user, I want to switch between floating modal, inline embed, and custom tri
 Acceptance criteria:
 - recommended mode is obvious
 - alternative modes are available
-- each mode includes the right install snippet
+- switching modes updates installed embeds remotely without replacement code
+- the stable host supports modal, inline, and trigger modes
 
 ### US-4.3
 
@@ -281,7 +282,8 @@ As an owner, I want install docs and widget settings to stay consistent over tim
 Acceptance criteria:
 - saved widget settings are retrievable
 - current version/config is obvious
-- generated install code reflects the saved configuration
+- generated install code remains stable after installation
+- saved browser-safe configuration is delivered remotely and matches the dashboard preview
 
 ## Priority order
 

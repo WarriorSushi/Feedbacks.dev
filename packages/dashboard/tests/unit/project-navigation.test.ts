@@ -55,10 +55,10 @@ test('project switching preserves every project surface while moving to stable r
 test('legacy project tab fixture covers the approved stable route map', () => {
   const expectedFuturePaths = {
     install: '/projects/{projectId}/install',
-    customize: '/projects/{projectId}/install?view=customize',
+    customize: '/projects/{projectId}/feedback-form',
     integrations: '/projects/{projectId}/integrations',
     board: '/projects/{projectId}/board',
-    updates: '/projects/{projectId}/updates',
+    updates: '/projects/{projectId}/release-notes',
     api: '/projects/{projectId}/api',
     settings: '/projects/{projectId}/settings',
   }

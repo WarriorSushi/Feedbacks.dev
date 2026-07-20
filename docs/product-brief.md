@@ -66,6 +66,7 @@ The install path must feel obvious:
 - copy code
 - see widget live
 - customize later
+- install once and manage the feedback form remotely
 
 ### 2. Developer trust
 

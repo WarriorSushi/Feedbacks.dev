@@ -283,8 +283,8 @@ export default async function DashboardPage({
             <CardContent className="space-y-3">
               {[
                 ['1', 'Create project', 'Only the project name is required.'],
-                ['2', 'Customize form', 'Pick floating button, custom trigger, or inline form.'],
-                ['3', 'Install and test', 'Copy the matching code, then check the inbox.'],
+                ['2', 'Install and test', 'Add the shared embed once, then check the inbox.'],
+                ['3', 'Manage remotely', 'Change the feedback form or publish release notes without replacing code.'],
               ].map(([step, title, body]) => (
                 <div key={step} className="flex gap-3 rounded-lg border bg-muted/20 p-3">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
@@ -303,7 +303,7 @@ export default async function DashboardPage({
         <Card>
           <CardContent className="divide-y p-0">
             {[
-              { Icon: Code2, title: 'Code matches your saved form', body: 'The install screen uses the style you saved in Customize.' },
+              { Icon: Code2, title: 'One stable embed', body: 'Install once. Saved feedback-form and release-note changes arrive remotely.' },
               { Icon: ShieldCheck, title: 'Safe by default', body: 'The first snippet uses the browser-safe project key, not private server credentials.' },
               { Icon: Inbox, title: 'One test proves the loop', body: 'Send a short test message, then use the inbox for triage and routing.' },
             ].map(({ Icon, title, body }) => (
@@ -447,16 +447,16 @@ export default async function DashboardPage({
                 },
                 {
                   step: 2,
-                  title: 'Choose the form style',
-                  description: 'Save the placement before copying install code',
+                  title: 'Install the shared embed',
+                  description: 'Add one stable snippet near your application root',
                   href: null,
                   done: false,
                   cta: null,
                 },
                 {
                   step: 3,
-                  title: 'Install and send one test',
-                  description: 'Paste the matching code, then confirm the inbox item',
+                  title: 'Verify and manage remotely',
+                  description: 'Confirm one inbox item, then configure products from the dashboard',
                   href: null,
                   done: false,
                   cta: null,
@@ -695,7 +695,7 @@ export default async function DashboardPage({
                           </span>
                           <span className="text-[11px] tabular-nums text-muted-foreground">
                             {count}{' '}
-                            <span className="text-muted-foreground/50">({pct}%)</span>
+                            <span className="text-muted-foreground">({pct}%)</span>
                           </span>
                         </div>
                         <div className="h-1 overflow-hidden rounded-full bg-muted">

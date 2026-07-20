@@ -18,7 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CodeSnippet } from '@/components/code-snippet'
 import { CopyButton } from '@/components/copy-button'
 import { Badge } from '@/components/ui/badge'
-import { Bot, ExternalLink, Loader2, RefreshCw, Sparkles, XCircle } from 'lucide-react'
+import { Bot, Loader2, RefreshCw, XCircle } from 'lucide-react'
 
 interface InstallTabProps {
   project: Project
@@ -33,11 +33,6 @@ interface SetupTokenStatus {
   expires_at: string
   revoked_at: string | null
   created_at: string
-}
-
-interface ProjectSetupStatus {
-  totalFeedback: number
-  newFeedback: number
 }
 
 type InstallPlatform = 'website' | 'wordpress' | 'html-block' | 'react' | 'next' | 'vue' | 'mobile'
@@ -55,7 +50,6 @@ export function InstallTab({
   const [revokingTokenId, setRevokingTokenId] = React.useState<string | null>(null)
   const [setupPacketError, setSetupPacketError] = React.useState<string | null>(null)
   const [setupTokens, setSetupTokens] = React.useState<SetupTokenStatus[]>([])
-  const [projectSetupStatus, setProjectSetupStatus] = React.useState<ProjectSetupStatus | null>(null)
   const [activePlatform, setActivePlatform] = React.useState<InstallPlatform>('website')
   const appOrigin = publicEnv.NEXT_PUBLIC_APP_ORIGIN
   const savedConfig = React.useMemo(
@@ -155,17 +149,6 @@ ${JSON.stringify(setupPacket, null, 2)}`
     void loadSetupTokens()
   }, [loadSetupTokens])
 
-  const loadProjectSetupStatus = React.useCallback(async () => {
-    const response = await fetch(`/api/projects/${project.id}`, { cache: 'no-store' })
-    if (!response.ok) return
-    const payload = await response.json()
-    setProjectSetupStatus(payload.stats || null)
-  }, [project.id])
-
-  React.useEffect(() => {
-    void loadProjectSetupStatus()
-  }, [loadProjectSetupStatus])
-
   const createSetupPacketLink = async () => {
     if (!projectKey) {
       setSetupPacketError('Generate a fresh project key before creating a setup packet link.')
@@ -231,7 +214,7 @@ ${JSON.stringify(setupPacket, null, 2)}`
     },
     {
       title: 'Copy code',
-      body: 'Use the code block only. Placement notes stay outside it.',
+      body: 'Add the stable embed once near your app root.',
     },
     {
       title: 'Verify one message',
@@ -244,12 +227,14 @@ import Script from "next/script"
 
 export function FeedbacksWidgetScript() {
   return (
-    <Script
-      src="${widgetScriptUrl}"
-      data-project="${projectKey}"
-      data-api-url="${feedbackApiUrl}"
-      strategy="afterInteractive"
-    />
+    <>
+      <div data-feedbacks-host="${projectKey}" />
+      <Script
+        src="${widgetScriptUrl}"
+        data-project="${projectKey}"
+        strategy="afterInteractive"
+      />
+    </>
   )
 }` : ''
   const installTargets: Array<{
@@ -342,14 +327,14 @@ export function FeedbacksWidgetScript() {
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className="bg-primary/90 text-primary-foreground">Step 2</Badge>
-                <Badge variant="outline">{modeLabel} mode</Badge>
+                <Badge className="bg-primary/90 text-primary-foreground">Shared embed</Badge>
+                <Badge variant="outline">Install once</Badge>
               </div>
               <h2 className="mt-3 text-xl font-semibold tracking-tight">
-                Put the feedback form on your site.
+                Add feedbacks.dev to your product once.
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                Pick where your site runs. Copy the code below. Paste it into your site. Then send one test from your own site.
+                This stable embed powers both the feedback form and release notes. Dashboard changes are delivered remotely on the next page load—this code does not need to be replaced.
               </p>
             </div>
           </div>
@@ -372,7 +357,7 @@ export function FeedbacksWidgetScript() {
             <div className="space-y-3 rounded-xl border bg-background/80 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Current install
+                  Remote configuration
                 </p>
                 <Badge variant="outline">{modeLabel}</Badge>
               </div>
@@ -396,7 +381,7 @@ export function FeedbacksWidgetScript() {
                   )}
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Saved mode</p>
+                  <p className="text-xs font-medium text-muted-foreground">Current feedback form</p>
                   <p className="mt-1 text-sm font-medium text-foreground">{modeLabel}</p>
                   <p className="mt-1 text-sm leading-5 text-muted-foreground">{verifyInstruction}</p>
                 </div>
@@ -411,7 +396,7 @@ export function FeedbacksWidgetScript() {
           <div>
             <CardTitle className="text-lg">Install code</CardTitle>
             <CardDescription>
-              Select the environment you are installing into. Instructions stay outside the code block so copy-paste stays clean.
+              Select your environment and add this once near the application root.
             </CardDescription>
           </div>
         </CardHeader>
@@ -507,7 +492,7 @@ export function FeedbacksWidgetScript() {
           </div>
 
           <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
-            Need to change the button, use your own trigger, or embed the form directly on a page? Open <span className="font-medium text-foreground">Customize</span>, save changes, then return for updated code.
+            After installation, change the button, fields, wording, placement, captcha, and release notes from the dashboard. <span className="font-medium text-foreground">You will not need a new snippet.</span>
           </div>
         </CardContent>
       </Card>
@@ -657,70 +642,6 @@ export function FeedbacksWidgetScript() {
         </div>
       </details>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <CardTitle className="text-lg">Verify the install</CardTitle>
-          </div>
-          <CardDescription>
-            Use the hosted verification page to remove site-specific variables. If feedback lands in the inbox there, your project key and saved config are correct.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="rounded-lg border bg-muted/20 p-4">
-            <p className="text-sm font-medium text-foreground">Current setup status</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {projectSetupStatus && projectSetupStatus.totalFeedback > 0
-                ? `${projectSetupStatus.totalFeedback} feedback ${projectSetupStatus.totalFeedback === 1 ? 'item has' : 'items have'} reached this project. ${projectSetupStatus.newFeedback} ${projectSetupStatus.newFeedback === 1 ? 'is' : 'are'} still new.`
-                : 'No feedback has reached this project yet. Run hosted verification after installing the snippet.'}
-            </p>
-          </div>
-          <div className="divide-y rounded-lg border bg-muted/10">
-            {[
-              'Open the verification page in a new tab.',
-              `Submit a short test item like "Install verification for ${project.name}".`,
-              'Open the inbox and confirm the item appears for this project.',
-            ].map((step, index) => (
-              <div key={step} className="flex gap-3 px-4 py-3 text-sm">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
-                  {index + 1}
-                </span>
-                {step}
-              </div>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            {projectKey ? (
-              <Link href={`/projects/${project.id}/verify`}>
-                <Button>
-                  Open verification page
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            ) : (
-              <Button disabled>
-                Open verification page
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </Button>
-            )}
-            <Link href={`/feedback?projectId=${project.id}`}>
-              <Button variant="outline">Open project inbox</Button>
-            </Link>
-          </div>
-          {!projectKey && (
-            <p className="text-sm text-muted-foreground">
-              Generate a fresh key first. The hosted verification page needs the same key that your new snippet will use.
-            </p>
-          )}
-
-          <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
-            If the hosted verification page works but your own site does not, keep the saved config as-is and check snippet placement first. Most first-run issues come from where the code is pasted, not from the widget settings.
-          </div>
-        </CardContent>
-      </Card>
-
       <details className="group rounded-xl border bg-card">
         <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5">
           <div>
@@ -742,7 +663,7 @@ export function FeedbacksWidgetScript() {
             <div className="rounded-lg border bg-muted/20 p-4">
               <p className="text-sm font-medium text-foreground">Anti-spam baseline</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Public board submissions already use rate limiting. For the widget install, save captcha settings in <span className="font-medium text-foreground">Customize</span> if you need stronger protection on public forms.
+                Public board submissions already use rate limiting. For the widget install, save captcha settings in <span className="font-medium text-foreground">Feedback form</span> if you need stronger protection on public forms.
               </p>
             </div>
           </div>

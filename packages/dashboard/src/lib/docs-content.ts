@@ -42,8 +42,8 @@ export const DOCS_PAGES: DocsPage[] = [
       { type: 'heading', id: 'fast-path', title: 'The fast path' },
       { type: 'steps', items: [
         { title: 'Create a project', body: 'A project is one app or website. It owns the widget configuration, feedback inbox, integrations, API key, and public board.' },
-        { title: 'Customize before copying code', body: 'Choose the placement and fields in the dashboard so the generated snippet already matches the form you want.' },
-        { title: 'Install once', body: 'Paste the generated Website snippet into the shared page shell, footer, or tag manager used by the whole product.' },
+        { title: 'Install once', body: 'Paste the stable Website snippet into the shared page shell, footer, or tag manager used by the whole product.' },
+        { title: 'Manage remotely', body: 'Change placement, fields, wording, styling, captcha, and release notes from the dashboard without replacing the snippet.' },
         { title: 'Verify one submission', body: 'Use hosted verification, then send feedback from the real page and confirm both items reach the inbox.' },
       ] },
       { type: 'callout', tone: 'success', title: 'A successful first install has one proof', body: 'A known test message appears in the correct project inbox with its page URL and browser context.' },
@@ -63,9 +63,9 @@ export const DOCS_PAGES: DocsPage[] = [
     description: 'Go from an empty account to a verified feedback submission in a few minutes.',
     blocks: [
       { type: 'heading', id: 'create', title: '1. Create the project' },
-      { type: 'paragraph', text: 'Open Projects, choose New Project, and use the name your team already uses for the product. The domain is optional. Creating the project opens Customize first.' },
+      { type: 'paragraph', text: 'Open Projects, choose New Project, and use the name your team already uses for the product. The domain is optional. Creating the project opens its product home.' },
       { type: 'heading', id: 'customize', title: '2. Save the form you want' },
-      { type: 'paragraph', text: 'Choose floating button, custom trigger, or inline form. Keep the defaults for the first test unless the host page requires a specific trigger. Save before opening Install.' },
+      { type: 'paragraph', text: 'Install the shared embed first. Then choose floating button, custom trigger, or inline form from Feedback form. Saved changes are delivered remotely.' },
       { type: 'heading', id: 'install', title: '3. Paste the generated snippet' },
       { type: 'code', label: 'HTML', language: 'html', code: websiteSnippet },
       { type: 'callout', tone: 'warning', title: 'Use the generated project key', body: 'YOUR_PROJECT_KEY is a placeholder. Copy the complete snippet from your project Install tab. Never put a private REST API key in browser code.' },
@@ -122,7 +122,7 @@ export const DOCS_PAGES: DocsPage[] = [
       { type: 'paragraph', text: 'The project Install tab generates framework-specific code from the saved form configuration. Put the wrapper at the application root. If your package registry cannot resolve a wrapper, use the Website script in the root HTML instead.' },
       { type: 'heading', id: 'wordpress', title: 'WordPress' },
       { type: 'steps', items: [
-        { title: 'Open the project Install tab', body: 'Select WordPress to see the current Website snippet and placement guidance.' },
+        { title: 'Open Embed installation', body: 'Select WordPress to see the stable Website snippet and placement guidance.' },
         { title: 'Add it through one code tool', body: 'Use the theme footer, a header/footer code plugin, or a tag manager. Do not add the same snippet in more than one place.' },
         { title: 'Clear page caches', body: 'Purge optimization and CDN caches before deciding the script failed to load.' },
         { title: 'Scroll before taking a screenshot', body: 'Lazy and animated sections may not exist until they enter the viewport. Screenshot capture records the visible viewport at the user current scroll position.' },
@@ -134,7 +134,7 @@ export const DOCS_PAGES: DocsPage[] = [
     description: 'Change placement, fields, labels, colors, screenshots, attachments, and abuse protection.',
     blocks: [
       { type: 'heading', id: 'dashboard-first', title: 'Prefer dashboard configuration' },
-      { type: 'paragraph', text: 'Customize saves one canonical form configuration and regenerates matching install code. This is easier to review than maintaining hand-edited attributes across multiple sites.' },
+      { type: 'paragraph', text: 'Feedback form saves one canonical remote configuration. Every installed embed receives it from the public bootstrap, so you do not maintain attributes or replace snippets across sites.' },
       { type: 'heading', id: 'options', title: 'Common options' },
       { type: 'table', columns: ['Option', 'What it changes'], rows: [
         ['Placement and mode', 'Floating corner, custom trigger, or inline container'],
@@ -149,11 +149,11 @@ export const DOCS_PAGES: DocsPage[] = [
     ],
   },
   {
-    slug: 'install/product-updates', category: 'Install', title: 'Product Updates',
+    slug: 'install/product-updates', category: 'Install', title: 'Release notes',
     description: 'Publish an in-app What’s New modal through the widget you already installed.',
     blocks: [
       { type: 'heading', id: 'enable-once', title: 'Enable the runtime once' },
-      { type: 'paragraph', text: 'Open your project Customize tab, enable Product Updates, save, and copy the regenerated snippet. This adds data-enable-updates="true". Later updates are published remotely from the Updates tab and do not need another application deployment.' },
+      { type: 'paragraph', text: 'Open Release notes and activate it. The shared embed receives the module setting remotely; no regenerated snippet or application deployment is required.' },
       { type: 'code', label: 'Manual What’s New trigger', language: 'html', code: `<button data-feedbacks-updates-trigger type="button">What’s new</button>` },
       { type: 'heading', id: 'publish', title: 'Create and publish' },
       { type: 'steps', items: [
@@ -163,7 +163,7 @@ export const DOCS_PAGES: DocsPage[] = [
       ] },
       { type: 'heading', id: 'display-rules', title: 'Display rules and privacy' },
       { type: 'list', items: ['The widget automatically shows only the newest unseen eligible update.', 'Seen and dismissed state stays in localStorage, without cookies, account IDs, page URLs, or server-side viewer events.', 'Manual triggers can reopen the newest live update.', 'Included and excluded pathname prefixes control where updates can appear. Exclusions win.', 'Metrics are approximate daily aggregates for impressions, dismissals, and CTA clicks.'] },
-      { type: 'callout', tone: 'note', title: 'Keep it concise', body: 'Product Updates is for useful release communication, not a marketing carousel. One centered modal is shown at a time and it never overlaps the feedback form.' },
+      { type: 'callout', tone: 'note', title: 'Keep it concise', body: 'Release notes are for useful “What’s new” communication, not a marketing carousel. One centered modal is shown at a time and it never overlaps the feedback form.' },
     ],
   },
   {

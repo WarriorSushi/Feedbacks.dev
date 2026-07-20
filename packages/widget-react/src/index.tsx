@@ -92,7 +92,7 @@ function sanitizeTargetSelector(target?: string): string | undefined {
   if (!target) return undefined
   const trimmed = target.trim()
   if (!trimmed) return undefined
-  return trimmed.startsWith('#') || trimmed.startsWith('.') ? trimmed : `#${trimmed}`
+  return ['#', '.', '['].some((prefix) => trimmed.startsWith(prefix)) ? trimmed : `#${trimmed}`
 }
 
 export function FeedbacksWidget(props: FeedbacksWidgetProps) {
@@ -142,12 +142,7 @@ export function FeedbacksWidget(props: FeedbacksWidgetProps) {
   } = props
 
   const instanceRef = React.useRef<WidgetInstance | null>(null)
-  const autoTargetId = React.useId().replace(/[^a-zA-Z0-9_-]/g, '')
-  const renderedTargetId = !target && embedMode !== 'modal'
-    ? `feedbacks-widget-${autoTargetId}`
-    : undefined
   const resolvedTarget = sanitizeTargetSelector(target)
-    ?? (renderedTargetId ? `#${renderedTargetId}` : undefined)
   const savedConfig: SavedWidgetConfig = {
     apiUrl,
     enableUpdates,
@@ -219,32 +214,12 @@ export function FeedbacksWidget(props: FeedbacksWidgetProps) {
     }
   }, [appOrigin, configKey])
 
-  if (embedMode === 'modal') {
-    return null
-  }
-
-  if (!renderedTargetId) {
-    return null
-  }
-
-  if (embedMode === 'inline') {
-    return React.createElement('div', {
-      id: id || renderedTargetId,
-      className,
-      style,
-    })
-  }
-
-  return React.createElement(
-    'button',
-    {
-      id: id || renderedTargetId,
-      className,
-      style,
-      type: 'button',
-    },
-    children ?? buttonText ?? 'Feedback'
-  )
+  return React.createElement('div', {
+    id,
+    className,
+    style,
+    'data-feedbacks-host': projectKey,
+  }, children)
 }
 
 export default FeedbacksWidget

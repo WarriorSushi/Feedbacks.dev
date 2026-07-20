@@ -18,8 +18,9 @@ import { Suspense } from 'react'
 import { InstallTab } from './install-tab'
 import { CustomizeTab } from './customize-tab'
 import { IntegrationsTab } from './integrations-tab'
-import { SetupProgress, type SetupStep } from './project-flow-nav'
+import { SetupProgress } from './project-flow-nav'
 import { ProductUpdatesTab } from '@/components/product-updates/ProductUpdatesTab'
+import { ProjectHome } from './project-home'
 
 interface ProjectTabsProps {
   project: Project
@@ -29,10 +30,10 @@ interface ProjectTabsProps {
   updateId?: string
 }
 
-export type ProjectTab = 'install' | 'customize' | 'integrations' | 'board' | 'updates' | 'api' | 'settings'
+export type ProjectTab = 'home' | 'install' | 'customize' | 'integrations' | 'board' | 'updates' | 'api' | 'settings'
 type TabId = ProjectTab
 
-const tabs: TabId[] = ['install', 'customize', 'integrations', 'board', 'updates', 'api', 'settings']
+const tabs: TabId[] = ['home', 'install', 'customize', 'integrations', 'board', 'updates', 'api', 'settings']
 
 export function ProjectTabs({ project, billingSummary, initialTab, updatesView, updateId }: ProjectTabsProps) {
   return (
@@ -55,8 +56,7 @@ function ProjectTabsInner({ project, billingSummary, initialTab, updatesView, up
   const [apiKey, setApiKey] = React.useState<string | null>(project.api_key)
   const [rotatingApiKey, setRotatingApiKey] = React.useState(false)
   const tabParam = searchParams.get('tab') as TabId | null
-  const activeTab = initialTab || (tabs.includes(tabParam as TabId) ? tabParam! : 'install')
-  const activeSetupStep: SetupStep = activeTab === 'install' ? 'install' : 'customize'
+  const activeTab = initialTab || (tabs.includes(tabParam as TabId) ? tabParam! : 'home')
   const apiKeyLastFour = React.useMemo(
     () => apiKey?.slice(-4) || project.api_key_last_four || null,
     [apiKey, project.api_key_last_four],
@@ -110,7 +110,9 @@ function ProjectTabsInner({ project, billingSummary, initialTab, updatesView, up
 
   return (
     <div className="space-y-6" data-project-tabs-ready={isInteractive ? 'true' : 'false'}>
-      {(activeTab === 'install' || activeTab === 'customize') && <SetupProgress projectId={project.id} activeStep={activeSetupStep} />}
+      {activeTab === 'install' && <SetupProgress projectId={project.id} activeStep="install" />}
+
+      {activeTab === 'home' && <ProjectHome project={project} />}
 
       {activeTab === 'install' && (
         <InstallTab

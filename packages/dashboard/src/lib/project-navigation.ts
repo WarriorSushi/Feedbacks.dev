@@ -16,18 +16,20 @@ export function getProjectDestination({
   const section = getProjectRouteSection(pathname)
   if (section) return getProjectRoute(projectId, section)
   if (/^\/projects\/[^/]+/.test(pathname) && activeProjectTab) {
-    if (activeProjectTab === 'customize') return `${getProjectRoute(projectId, 'install')}?view=customize`
+    if (activeProjectTab === 'customize') return getProjectRoute(projectId, 'feedback-form')
+    if (activeProjectTab === 'updates') return getProjectRoute(projectId, 'release-notes')
     return getProjectRoute(projectId, activeProjectTab as Parameters<typeof getProjectRoute>[1])
   }
   return `/projects/${encodedProjectId}`
 }
-type ProjectRouteSection = 'install' | 'integrations' | 'board' | 'updates' | 'api' | 'settings'
+type ProjectRouteSection = 'feedback-form' | 'release-notes' | 'install' | 'integrations' | 'board' | 'api' | 'settings'
 
 function getProjectRoute(projectId: string, section: ProjectRouteSection): string {
   return `/projects/${encodeURIComponent(projectId)}/${section}`
 }
 
 function getProjectRouteSection(pathname: string): ProjectRouteSection | null {
-  const match = pathname.match(/^\/projects\/[^/]+\/(install|integrations|board|updates|api|settings)(?:\/|$)/)
+  const match = pathname.match(/^\/projects\/[^/]+\/(feedback-form|release-notes|install|integrations|board|updates|api|settings)(?:\/|$)/)
+  if (match?.[1] === 'updates') return 'release-notes'
   return match?.[1] as ProjectRouteSection | undefined || null
 }

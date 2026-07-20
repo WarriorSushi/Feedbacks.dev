@@ -21,7 +21,13 @@ export default async function ProjectSectionPage({
   const { data: project } = await supabase.from('projects').select('*').eq('id', id).single()
   if (!project) notFound()
 
-  const initialTab: ProjectTab = section === 'install' && view === 'customize' ? 'customize' : section as ProjectTab
+  const initialTab: ProjectTab = section === 'feedback-form'
+    ? 'customize'
+    : section === 'release-notes'
+      ? 'updates'
+      : section === 'install' && view === 'customize'
+        ? 'customize'
+        : section as ProjectTab
   const billingSummary = await getCurrentUserBillingSummary()
   return <ProjectTabs project={project as Project} billingSummary={billingSummary} initialTab={initialTab} />
 }

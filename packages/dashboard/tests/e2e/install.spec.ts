@@ -5,7 +5,7 @@ import { createProjectViaApi, projectInstallPath } from './helpers/project'
 const env = skipE2EIfNeeded()
 test.skip(!env.ready, env.skipReason)
 
-test('creates a project and lands on a working install before optional customization', async ({ page }) => {
+test('creates a project and lands on a stable one-time embed installation', async ({ page }) => {
   await signInWithTestSession(page)
 
   await page.goto('/projects/new')
@@ -14,7 +14,7 @@ test('creates a project and lands on a working install before optional customiza
 
   await expect(page).toHaveURL(/\/projects\/[^/]+\/install\?created=1/, { timeout: 30_000 })
   await expect(page.getByRole('navigation', { name: 'Setup steps' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Put the feedback form on your site.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Add feedbacks.dev to your product once.' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Copy code' })).toBeVisible()
   await expect(page.getByText('Choose platform')).toBeVisible()
   await expect(page.getByText('Verify one message')).toBeVisible()
@@ -22,7 +22,7 @@ test('creates a project and lands on a working install before optional customiza
   await page.getByRole('button', { name: 'HTML block' }).click()
   await expect(page.getByText(/Prefer global custom code/i)).toBeVisible()
 
-  await page.getByRole('link', { name: /Customize Optional after success/ }).click()
+  await page.goto(page.url().replace(/\/install(?:\?.*)?$/, '/feedback-form'))
   await expect(page.getByRole('heading', { name: 'Make the feedback form fit your product' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Live form preview' })).toBeVisible()
 })
@@ -33,7 +33,7 @@ test('copy-paste install guidance stays visible for an existing project', async 
 
   await page.goto(projectInstallPath(project.id), { waitUntil: 'domcontentloaded' })
 
-  await expect(page.getByRole('heading', { name: 'Put the feedback form on your site.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Add feedbacks.dev to your product once.' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Install code' })).toBeVisible()
   await expect(
     page.getByText(/Paste before the closing body tag/i),

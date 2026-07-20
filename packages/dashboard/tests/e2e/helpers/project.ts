@@ -49,7 +49,7 @@ export function projectInstallPath(projectId: string): string {
 }
 
 export function projectCustomizePath(projectId: string): string {
-  return `/projects/${projectId}/install?view=customize`
+  return `/projects/${projectId}/feedback-form`
 }
 
 export function projectVerifyPath(projectId: string): string {

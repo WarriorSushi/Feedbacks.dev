@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, Check, Loader2 } from 'lucide-react'
 
-export type SetupStep = 'customize' | 'install' | 'verify' | 'inbox'
+export type SetupStep = 'install' | 'verify' | 'inbox'
 
 function usePendingProjectLink() {
   const pathname = usePathname()
@@ -43,8 +43,8 @@ export function SetupProgress({
   const steps: Array<{ id: SetupStep; label: string; body: string; href: string }> = [
     {
       id: 'install',
-      label: 'Install',
-      body: 'Copy the matching code.',
+      label: 'Install once',
+      body: 'Add the shared embed.',
       href: `/projects/${projectId}/install`,
     },
     {
@@ -59,24 +59,12 @@ export function SetupProgress({
       body: 'Confirm it arrived.',
       href: `/feedback?projectId=${projectId}`,
     },
-    {
-      id: 'customize',
-      label: 'Customize',
-      body: 'Optional after success.',
-      href: `/projects/${projectId}/install?view=customize`,
-    },
   ]
   const activeIndex = Math.max(steps.findIndex((step) => step.id === activeStep), 0)
   const nextActionByStep: Record<SetupStep, { title: string; body: string; href: string; label: string }> = {
-    customize: {
-      title: 'Update the install after customization',
-      body: 'Save the form style, then copy the regenerated code if the trigger mode changed.',
-      href: `/projects/${projectId}/install`,
-      label: 'Continue to install',
-    },
     install: {
-      title: 'Next: copy code and run verification',
-      body: 'Paste the selected snippet into your app shell, then use the hosted page to send one known-good test.',
+      title: 'Install the embed once',
+      body: 'Paste one stable snippet into your app shell. Future form and release-note changes are delivered remotely without replacement code.',
       href: `/projects/${projectId}/verify`,
       label: 'Open verification',
     },
@@ -87,10 +75,10 @@ export function SetupProgress({
       label: 'Open project inbox',
     },
     inbox: {
-      title: 'Installed: customize only if you need to',
-      body: 'The core loop works. Adjust placement and labels now, or keep the defaults and start collecting feedback.',
-      href: `/projects/${projectId}/install?view=customize`,
-      label: 'Customize form',
+      title: 'Connected: manage products remotely',
+      body: 'The shared embed works. Change the feedback form or publish release notes from the dashboard without editing your site again.',
+      href: `/projects/${projectId}`,
+      label: 'Open project home',
     },
   }
   const nextAction = nextActionByStep[activeStep]
@@ -126,7 +114,7 @@ export function SetupProgress({
         </Link>
       </div>
 
-      <ol className="grid grid-cols-4 border-t bg-muted/20">
+      <ol className="grid grid-cols-3 border-t bg-muted/20">
         {steps.map((step, index) => {
           const current = activeStep === step.id
           const completed = index < activeIndex

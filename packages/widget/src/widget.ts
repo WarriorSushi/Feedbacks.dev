@@ -1,6 +1,13 @@
 import styles from './styles.css';
 import type { WidgetConfig, FeedbackData, FeedbackResponse, CategoryType } from './types';
-import { isWidgetBootstrapResponse, type WidgetBootstrapResponse } from '@feedbacks/shared';
+import {
+  isWidgetBootstrapResponse,
+  readCachedFeedbackEnabled,
+  readCachedRemoteWidgetConfig,
+  writeCachedFeedbackEnabled,
+  writeCachedRemoteWidgetConfig,
+  type WidgetBootstrapResponse,
+} from '@feedbacks/shared';
 import { ProductUpdatesController } from './product-updates';
 import { acquireOverlay, releaseOverlay } from './overlay-coordinator';
 
@@ -72,6 +79,8 @@ class FeedbacksWidget {
   private updatesController: ProductUpdatesController | null = null;
   private feedbackEnabled = false;
   private inlineContainer: HTMLElement | null = null;
+  private managedHost: HTMLElement | null = null;
+  private generatedTrigger: HTMLButtonElement | null = null;
   private bootstrapController: AbortController | null = null;
   private autoOpenTimer: number | null = null;
   private destroyed = false;
@@ -96,15 +105,30 @@ class FeedbacksWidget {
   private setup(): void {
     if (this.destroyed) return;
     this.injectStyles();
-    this.applyTheme();
     void this.initializeModules();
   }
 
   private async initializeModules(): Promise<void> {
     const bootstrap = await this.loadBootstrap();
     if (this.destroyed) return;
+    const storage = this.getLocalStorage();
+    let cachedFeedbackEnabled: boolean | undefined;
 
-    this.feedbackEnabled = bootstrap?.modules.feedback ?? true;
+    if (bootstrap) {
+      this.cfg = { ...this.cfg, ...bootstrap.feedbackConfig, projectKey: this.cfg.projectKey };
+      writeCachedRemoteWidgetConfig(storage, this.cfg.projectKey, bootstrap.feedbackConfig);
+      writeCachedFeedbackEnabled(storage, this.cfg.projectKey, bootstrap.modules.feedback);
+    } else {
+      const cachedConfig = readCachedRemoteWidgetConfig(storage, this.cfg.projectKey);
+      cachedFeedbackEnabled = readCachedFeedbackEnabled(storage, this.cfg.projectKey);
+      if (cachedConfig) {
+        this.cfg = { ...this.cfg, ...cachedConfig, projectKey: this.cfg.projectKey };
+        this.log('Using the last verified remote configuration');
+      }
+    }
+    this.applyTheme();
+
+    this.feedbackEnabled = bootstrap?.modules.feedback ?? cachedFeedbackEnabled ?? this.cfg.feedbackEnabled ?? true;
     if (this.feedbackEnabled) this.setupFeedbackPresentation();
 
     if (bootstrap?.modules.updates) {
@@ -185,6 +209,22 @@ class FeedbacksWidget {
     return url.toString();
   }
 
+  private getLocalStorage(): Storage | null {
+    try {
+      return window.localStorage;
+    } catch {
+      return null;
+    }
+  }
+
+  private findManagedHost(): HTMLElement | null {
+    if (this.managedHost?.isConnected) return this.managedHost;
+    const host = Array.from(document.querySelectorAll<HTMLElement>('[data-feedbacks-host]'))
+      .find((element) => element.dataset.feedbacksHost === this.cfg.projectKey) || null;
+    this.managedHost = host;
+    return host;
+  }
+
   // ---- Styles & Theme ----
 
   private injectStyles(): void {
@@ -254,7 +294,26 @@ class FeedbacksWidget {
 
   private attachTriggers(): void {
     const sel = this.cfg.target || '[data-feedbacks-trigger]';
-    const els = document.querySelectorAll(sel);
+    let els: Element[] = [];
+    try {
+      els = Array.from(document.querySelectorAll(sel));
+    } catch {
+      this.log('Invalid trigger selector');
+    }
+    if (els.length === 0) {
+      const host = this.findManagedHost();
+      if (host) {
+        host.innerHTML = '';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'fb-btn-submit fb-managed-trigger';
+        button.textContent = this.cfg.buttonText || 'Feedback';
+        this.applyThemeToElement(button);
+        host.appendChild(button);
+        this.generatedTrigger = button;
+        els = [button];
+      }
+    }
     els.forEach(el => el.addEventListener('click', (e) => { if (!this.feedbackEnabled) return; e.preventDefault(); this.open(); }));
     this.log(`Attached to ${els.length} trigger(s)`);
   }
@@ -262,7 +321,13 @@ class FeedbacksWidget {
   // ---- Inline Mode ----
 
   private renderInline(): void {
-    const target = this.cfg.target ? document.querySelector(this.cfg.target) : null;
+    let target: Element | null = null;
+    try {
+      target = this.cfg.target ? document.querySelector(this.cfg.target) : null;
+    } catch {
+      this.log('Invalid inline selector');
+    }
+    target ||= this.findManagedHost();
     if (!target) { this.log('Inline target not found'); return; }
     const container = document.createElement('div');
     this.inlineContainer = container;
@@ -272,6 +337,7 @@ class FeedbacksWidget {
     (target as HTMLElement).innerHTML = '';
     (target as HTMLElement).appendChild(container);
     this.bindForm(container, false);
+    void this.renderCaptcha(container, false);
   }
 
   // ---- Modal ----
@@ -811,6 +877,8 @@ class FeedbacksWidget {
     this.updatesController = null;
     releaseOverlay(this);
     this.launcher?.remove();
+    this.generatedTrigger?.remove();
+    this.generatedTrigger = null;
     this.inlineContainer?.remove();
     this.inlineContainer = null;
     this.overlayEl?.remove();

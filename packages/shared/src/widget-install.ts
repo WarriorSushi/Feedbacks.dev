@@ -49,6 +49,13 @@ export interface WidgetConfig extends SavedWidgetConfig {
   projectKey: string
 }
 
+/**
+ * Configuration that is safe to return from the unauthenticated widget
+ * bootstrap endpoint. Module switches stay server-controlled and the project
+ * key is already supplied by the embed, so neither belongs in this payload.
+ */
+export type PublicWidgetConfig = Omit<WidgetConfig, 'projectKey' | 'feedbackEnabled' | 'enableUpdates'>
+
 export interface WidgetScriptAttribute {
   name: string
   value?: string
@@ -116,6 +123,11 @@ export interface InstallSnippet {
   code: string
 }
 
+export interface WidgetConfigStorage {
+  getItem(key: string): string | null
+  setItem(key: string, value: string): void
+}
+
 const DEFAULT_APP_ORIGIN = 'https://app.feedbacks.dev'
 const DEFAULT_INLINE_TARGET_PREFIX = 'feedbacks-inline'
 const DEFAULT_TRIGGER_TARGET_PREFIX = 'feedbacks-trigger'
@@ -131,6 +143,46 @@ const MIME_TYPE_RE = /^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/i
 const EMBED_MODES: readonly EmbedMode[] = ['modal', 'inline', 'trigger']
 const POSITIONS: readonly WidgetPosition[] = ['bottom-right', 'bottom-left', 'top-right', 'top-left']
 const CAPTCHA_PROVIDERS: readonly CaptchaProvider[] = ['turnstile', 'hcaptcha']
+const REMOTE_CONFIG_CACHE_PREFIX = 'feedbacks:widget-config:'
+const FEEDBACK_MODULE_CACHE_PREFIX = 'feedbacks:feedback-enabled:'
+const PUBLIC_WIDGET_CONFIG_KEYS = new Set<keyof PublicWidgetConfig>([
+  'configVersion',
+  'apiUrl',
+  'updatesApiUrl',
+  'updatesEventsApiUrl',
+  'embedMode',
+  'position',
+  'target',
+  'buttonText',
+  'primaryColor',
+  'backgroundColor',
+  'scale',
+  'modalWidth',
+  'debug',
+  'requireEmail',
+  'enableType',
+  'enableRating',
+  'enableScreenshot',
+  'screenshotRequired',
+  'enableAttachment',
+  'attachmentMaxMB',
+  'allowedAttachmentMimes',
+  'requireCaptcha',
+  'captchaProvider',
+  'turnstileSiteKey',
+  'hcaptchaSiteKey',
+  'formTitle',
+  'formSubtitle',
+  'messageLabel',
+  'messagePlaceholder',
+  'emailLabel',
+  'submitButtonText',
+  'cancelButtonText',
+  'successTitle',
+  'successDescription',
+  'openOnKey',
+  'openAfterMs',
+])
 
 function sanitizeSuffix(projectKey: string): string {
   const suffix = projectKey.replace(/[^a-z0-9]+/gi, '').toLowerCase().slice(-10)
@@ -170,7 +222,7 @@ function sanitizeUrl(value: unknown): string | undefined {
 
   try {
     const parsed = new URL(trimmed)
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return undefined
+    if ((parsed.protocol !== 'https:' && parsed.protocol !== 'http:') || parsed.username || parsed.password) return undefined
     return stripTrailingSlash(parsed.toString())
   } catch {
     return undefined
@@ -323,7 +375,7 @@ function buildDefaultProductUpdateMetricsApiUrl(appOrigin?: string): string {
 export function normalizeWidgetTarget(target: string | undefined, fallback: string): string {
   const trimmed = target?.trim()
   if (!trimmed || trimmed === '#') return fallback
-  return trimmed.startsWith('#') ? trimmed : `#${trimmed}`
+  return ['#', '.', '['].some((prefix) => trimmed.startsWith(prefix)) ? trimmed : `#${trimmed}`
 }
 
 export function getDefaultWidgetTarget(mode: EmbedMode, projectKey: string): string | undefined {
@@ -386,6 +438,99 @@ export function buildWidgetEditorConfig(
     requireEmail: runtimeConfig.requireEmail ?? false,
     formTitle: runtimeConfig.formTitle || DEFAULT_FORM_TITLE,
     messagePlaceholder: runtimeConfig.messagePlaceholder || DEFAULT_MESSAGE_PLACEHOLDER,
+  }
+}
+
+export function buildPublicWidgetConfig(
+  projectKey: string,
+  savedConfig: SavedWidgetConfig | null | undefined = {},
+  options: { appOrigin?: string } = {},
+): PublicWidgetConfig {
+  const runtimeConfig = buildRuntimeWidgetConfig(
+    projectKey,
+    buildWidgetEditorConfig(projectKey, savedConfig, options),
+    options,
+  )
+  const {
+    projectKey: _projectKey,
+    feedbackEnabled: _feedbackEnabled,
+    enableUpdates: _enableUpdates,
+    ...publicConfig
+  } = runtimeConfig
+
+  return Object.fromEntries(
+    Object.entries(publicConfig).filter(([, value]) => value !== undefined),
+  ) as PublicWidgetConfig
+}
+
+export function isPublicWidgetConfig(value: unknown): value is PublicWidgetConfig {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const source = value as Record<string, unknown>
+  const keys = Object.keys(source)
+  if (keys.some((key) => !PUBLIC_WIDGET_CONFIG_KEYS.has(key as keyof PublicWidgetConfig))) return false
+  if (source.configVersion !== WIDGET_CONFIG_VERSION) return false
+  if (typeof source.apiUrl !== 'string'
+    || typeof source.updatesApiUrl !== 'string'
+    || typeof source.updatesEventsApiUrl !== 'string'
+    || !EMBED_MODES.includes(source.embedMode as EmbedMode)
+    || !POSITIONS.includes(source.position as WidgetPosition)) return false
+
+  const sanitized = sanitizeSavedWidgetConfig(source as SavedWidgetConfig, { projectKey: 'fb_public_contract' })
+  return keys.every((key) => JSON.stringify(source[key]) === JSON.stringify((sanitized as Record<string, unknown>)[key]))
+}
+
+export function readCachedRemoteWidgetConfig(
+  storage: WidgetConfigStorage | null | undefined,
+  projectKey: string,
+): PublicWidgetConfig | null {
+  if (!storage) return null
+  try {
+    const raw = storage.getItem(`${REMOTE_CONFIG_CACHE_PREFIX}${projectKey}`)
+    if (!raw) return null
+    const value: unknown = JSON.parse(raw)
+    return isPublicWidgetConfig(value) ? value : null
+  } catch {
+    return null
+  }
+}
+
+export function writeCachedRemoteWidgetConfig(
+  storage: WidgetConfigStorage | null | undefined,
+  projectKey: string,
+  config: PublicWidgetConfig,
+): void {
+  if (!storage || !isPublicWidgetConfig(config)) return
+  try {
+    storage.setItem(`${REMOTE_CONFIG_CACHE_PREFIX}${projectKey}`, JSON.stringify(config))
+  } catch {
+    // Storage may be disabled or full. Remote configuration still works for
+    // this page load, so caching must never make widget initialization fail.
+  }
+}
+
+export function readCachedFeedbackEnabled(
+  storage: WidgetConfigStorage | null | undefined,
+  projectKey: string,
+): boolean | undefined {
+  if (!storage) return undefined
+  try {
+    const value: unknown = JSON.parse(storage.getItem(`${FEEDBACK_MODULE_CACHE_PREFIX}${projectKey}`) || 'null')
+    return typeof value === 'boolean' ? value : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export function writeCachedFeedbackEnabled(
+  storage: WidgetConfigStorage | null | undefined,
+  projectKey: string,
+  enabled: boolean,
+): void {
+  if (!storage) return
+  try {
+    storage.setItem(`${FEEDBACK_MODULE_CACHE_PREFIX}${projectKey}`, JSON.stringify(enabled))
+  } catch {
+    // Module caching is an outage fallback and must never block initialization.
   }
 }
 
@@ -540,109 +685,17 @@ export function getWidgetScriptAttributes(config: WidgetConfig): WidgetScriptAtt
   return attributes.filter((attribute) => typeof attribute.value === 'string' && attribute.value.length > 0)
 }
 
-function buildWebsiteMarkup(config: WidgetConfig): string[] {
-  const lines: string[] = []
-  if (config.embedMode === 'inline' && config.target) {
-    lines.push(`<div id="${config.target.replace(/^#/, '')}"></div>`, '')
-  }
-  if (config.embedMode === 'trigger' && config.target) {
-    lines.push(`<button id="${config.target.replace(/^#/, '')}" type="button">${config.buttonText || DEFAULT_BUTTON_TEXT}</button>`, '')
-  }
-  return lines
-}
-
 function formatWebsiteSnippet(config: WidgetConfig, appOrigin?: string): string {
-  const lines = buildWebsiteMarkup(config)
-  const attributes = getWidgetScriptAttributes(config)
-
-  lines.push('<script')
+  const lines = [`<div data-feedbacks-host="${config.projectKey}"></div>`, '', '<script']
   lines.push(`  src="${buildWidgetScriptUrl(appOrigin)}"`)
-  attributes.forEach((attribute) => {
-    lines.push(`  ${attribute.name}="${attribute.value}"`)
-  })
+  lines.push(`  data-project="${config.projectKey}"`)
   lines.push('  defer')
   lines.push('></script>')
 
   return lines.join('\n')
 }
 
-function formatReactValue(value: string | number | boolean | string[]): string {
-  if (Array.isArray(value)) {
-    return `{[${value.map((item) => `"${quoteString(item)}"`).join(', ')}]}`
-  }
-  if (typeof value === 'string') return `"${quoteString(value)}"`
-  if (typeof value === 'number') return `{${value}}`
-  return value ? '{true}' : '{false}'
-}
-
-function formatVueProp(key: string, value: string | number | boolean | string[]): string {
-  const propName = toKebabCase(key)
-
-  if (Array.isArray(value)) {
-    return `    :${propName}='${JSON.stringify(value)}'`
-  }
-  if (typeof value === 'string') {
-    return `    ${propName}="${quoteString(value)}"`
-  }
-
-  return `    :${propName}="${String(value)}"`
-}
-
-function getWrapperPropEntries(config: WidgetConfig, appOrigin?: string): Array<[string, string | number | boolean | string[]]> {
-  const entries: Array<[string, string | number | boolean | string[]]> = [
-    ['projectKey', config.projectKey],
-    ['appOrigin', normalizeAppOrigin(appOrigin)],
-    ['apiUrl', config.apiUrl || buildFeedbackApiUrl(appOrigin)],
-  ]
-  const defaultTarget = config.embedMode
-    ? getDefaultWidgetTarget(config.embedMode, config.projectKey)
-    : undefined
-
-  if (config.embedMode && config.embedMode !== DEFAULT_MODAL_MODE) entries.push(['embedMode', config.embedMode])
-  if (config.position && config.position !== DEFAULT_MODAL_POSITION) entries.push(['position', config.position])
-  if (config.target && config.target !== defaultTarget) entries.push(['target', config.target])
-  if (config.buttonText && config.buttonText !== DEFAULT_BUTTON_TEXT) entries.push(['buttonText', config.buttonText])
-  if (config.primaryColor) entries.push(['primaryColor', config.primaryColor])
-  if (config.backgroundColor) entries.push(['backgroundColor', config.backgroundColor])
-  if (typeof config.scale === 'number') entries.push(['scale', config.scale])
-  if (typeof config.modalWidth === 'number') entries.push(['modalWidth', config.modalWidth])
-  if (config.debug) entries.push(['debug', true])
-  if (config.enableUpdates) entries.push(['enableUpdates', true])
-  if (config.enableUpdates && config.updatesApiUrl) entries.push(['updatesApiUrl', config.updatesApiUrl])
-  if (config.enableUpdates && config.updatesEventsApiUrl) entries.push(['updatesEventsApiUrl', config.updatesEventsApiUrl])
-  if (config.requireEmail) entries.push(['requireEmail', true])
-  if (config.enableType === false) entries.push(['enableType', false])
-  if (config.enableRating === false) entries.push(['enableRating', false])
-  if (config.enableScreenshot) entries.push(['enableScreenshot', true])
-  if (config.screenshotRequired) entries.push(['screenshotRequired', true])
-  if (config.enableAttachment) entries.push(['enableAttachment', true])
-  if (typeof config.attachmentMaxMB === 'number') entries.push(['attachmentMaxMB', config.attachmentMaxMB])
-  if (config.allowedAttachmentMimes?.length) entries.push(['allowedAttachmentMimes', config.allowedAttachmentMimes])
-  if (config.requireCaptcha) entries.push(['requireCaptcha', true])
-  if (config.captchaProvider) entries.push(['captchaProvider', config.captchaProvider])
-  if (config.turnstileSiteKey) entries.push(['turnstileSiteKey', config.turnstileSiteKey])
-  if (config.hcaptchaSiteKey) entries.push(['hcaptchaSiteKey', config.hcaptchaSiteKey])
-  if (config.formTitle) entries.push(['formTitle', config.formTitle])
-  if (config.formSubtitle) entries.push(['formSubtitle', config.formSubtitle])
-  if (config.messageLabel) entries.push(['messageLabel', config.messageLabel])
-  if (config.messagePlaceholder) entries.push(['messagePlaceholder', config.messagePlaceholder])
-  if (config.emailLabel) entries.push(['emailLabel', config.emailLabel])
-  if (config.submitButtonText) entries.push(['submitButtonText', config.submitButtonText])
-  if (config.cancelButtonText) entries.push(['cancelButtonText', config.cancelButtonText])
-  if (config.successTitle) entries.push(['successTitle', config.successTitle])
-  if (config.successDescription) entries.push(['successDescription', config.successDescription])
-  if (config.openOnKey) entries.push(['openOnKey', config.openOnKey])
-  if (typeof config.openAfterMs === 'number') entries.push(['openAfterMs', config.openAfterMs])
-
-  return entries
-}
-
-function toKebabCase(value: string): string {
-  return value.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)
-}
-
 function formatReactSnippet(config: WidgetConfig, appOrigin?: string): string {
-  const props = getWrapperPropEntries(config, appOrigin)
   return [
     `import { FeedbacksWidget } from '@feedbacks/widget-react'`,
     '',
@@ -650,7 +703,8 @@ function formatReactSnippet(config: WidgetConfig, appOrigin?: string): string {
     '  return (',
     '    <>',
     '      <FeedbacksWidget',
-    ...props.map(([key, value]) => `        ${key}=${formatReactValue(value)}`),
+    `        projectKey="${quoteString(config.projectKey)}"`,
+    `        appOrigin="${quoteString(normalizeAppOrigin(appOrigin))}"`,
     '      />',
     '      {/* your app */}',
     '    </>',
@@ -660,7 +714,6 @@ function formatReactSnippet(config: WidgetConfig, appOrigin?: string): string {
 }
 
 function formatVueSnippet(config: WidgetConfig, appOrigin?: string): string {
-  const props = getWrapperPropEntries(config, appOrigin)
   return [
     '<script setup>',
     `import { FeedbacksWidget } from '@feedbacks/widget-vue'`,
@@ -668,7 +721,8 @@ function formatVueSnippet(config: WidgetConfig, appOrigin?: string): string {
     '',
     '<template>',
     '  <FeedbacksWidget',
-    ...props.map(([key, value]) => formatVueProp(key, value)),
+    `    project-key="${quoteString(config.projectKey)}"`,
+    `    app-origin="${quoteString(normalizeAppOrigin(appOrigin))}"`,
     '  />',
     '</template>',
   ].join('\n')

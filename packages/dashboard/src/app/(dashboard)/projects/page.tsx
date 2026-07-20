@@ -82,10 +82,10 @@ export default async function ProjectsPage() {
             <FolderOpen className="h-10 w-10 text-muted-foreground/40 mb-4" />
             <p className="text-sm font-medium">No projects yet</p>
             <p className="mt-1 text-xs text-muted-foreground max-w-[240px]">
-              Create one project, choose the form style, then send one test feedback item.
+              Create one project, install the shared embed once, then send one test feedback item.
             </p>
             <div className="mt-5 grid w-full max-w-md gap-2 text-left sm:grid-cols-3">
-              {['Create project', 'Customize form', 'Install and test'].map((step, index) => (
+              {['Create project', 'Install and test', 'Manage remotely'].map((step, index) => (
                 <div key={step} className="rounded-lg border bg-muted/20 px-3 py-2 text-xs">
                   <span className="mr-1 font-semibold text-primary">{index + 1}.</span>
                   {step}
