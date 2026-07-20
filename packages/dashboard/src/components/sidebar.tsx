@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button'
 import { BrandWordmark } from '@/components/brand-wordmark'
 import {
   House,
-  MessageSquare,
+  ClipboardPenLine,
+  Inbox,
   CreditCard,
   Settings,
   LogOut,
@@ -65,8 +66,8 @@ const primaryNavGroups: NavGroup[] = [
   {
     label: 'Collect',
     items: [
-      { href: '/feedback-form', label: 'Feedback form', icon: MessageSquare, tourId: 'nav-feedback-form', projectTab: 'feedback-form' },
-      { href: '/feedback', label: 'Feedback inbox', icon: MessageSquare, tourId: 'nav-feedback' },
+      { href: '/feedback-form', label: 'Feedback form', icon: ClipboardPenLine, tourId: 'nav-feedback-form', projectTab: 'feedback-form' },
+      { href: '/feedback', label: 'Feedback inbox', icon: Inbox, tourId: 'nav-feedback' },
     ],
   },
   {

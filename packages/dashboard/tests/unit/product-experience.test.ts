@@ -79,6 +79,8 @@ test('sidebar exposes a stable Home destination and groups project work by user 
   assert.match(sidebar, /label: 'Share with users'/)
   assert.match(sidebar, /label: 'Connect'/)
   assert.match(sidebar, /Public feedback board/)
+  assert.match(sidebar, /label: 'Feedback form', icon: ClipboardPenLine/)
+  assert.match(sidebar, /label: 'Feedback inbox', icon: Inbox/)
   assert.doesNotMatch(sidebar, /label: 'Overview'/)
   assert.doesNotMatch(sidebar, /projectTab: 'home'/)
 })
