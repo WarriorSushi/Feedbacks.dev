@@ -1,6 +1,7 @@
 import '@/lib/env' // validate env vars at startup
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { headers } from 'next/headers'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/toaster'
@@ -22,11 +23,15 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // A nonce-based CSP only works when Next renders per request and can attach
+  // the middleware nonce to framework and hydration scripts.
+  await headers()
+
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={inter.className}>
