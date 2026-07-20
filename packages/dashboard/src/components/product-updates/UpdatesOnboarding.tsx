@@ -19,13 +19,6 @@ const choiceModules: Record<Choice, ModuleState> = {
   both: { feedback: true, updates: true },
 }
 
-function choiceFromModules(modules: ModuleState): Choice {
-  if (modules.feedback && modules.updates) return 'both'
-  return modules.feedback ? 'feedback' : 'updates'
-}
-
-function storageKey(projectId: string) { return `feedbacks:updates-setup:${projectId}` }
-
 export function UpdatesOnboarding({
   projectId,
   projectKey,
@@ -40,7 +33,7 @@ export function UpdatesOnboarding({
   onRefresh: () => Promise<void>
 }) {
   const router = useRouter()
-  const [choice, setChoice] = React.useState<Choice>(() => choiceFromModules(modules))
+  const [choice, setChoice] = React.useState<Choice>('updates')
   const [method, setMethod] = React.useState<Method>('AI assistant')
   const [saving, setSaving] = React.useState(false)
   const [polling, setPolling] = React.useState(false)
@@ -56,18 +49,10 @@ export function UpdatesOnboarding({
 
   React.useEffect(() => { record('updates_setup_started') }, [record])
   React.useEffect(() => { setCurrentEmbedState(embedState) }, [embedState])
-  React.useEffect(() => {
-    const saved = window.localStorage.getItem(storageKey(projectId)) as Choice | null
-    if (saved && saved in choiceModules) setChoice(saved)
-  }, [projectId])
   React.useEffect(() => { if (currentEmbedState === 'connected') record('updates_embed_verified') }, [currentEmbedState, record])
   React.useEffect(() => {
     if (currentEmbedState === 'connected' && modules.updates) router.replace(`/projects/${projectId}/updates/new`)
   }, [currentEmbedState, modules.updates, projectId, router])
-
-  React.useEffect(() => {
-    window.localStorage.setItem(storageKey(projectId), choice)
-  }, [choice, projectId])
 
   const checkConnection = React.useCallback(async () => {
     try {
@@ -131,14 +116,14 @@ export function UpdatesOnboarding({
 
   if (modules.updates && currentEmbedState === 'connected') return null
 
-  return <div className="mx-auto max-w-4xl space-y-7">
-    <section className="space-y-3 border-b border-foreground/10 pb-6">
+  return <div className="mx-auto max-w-4xl space-y-5">
+    <section className="rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
       <p className="text-xs font-semibold text-primary">Updates for your users</p>
       <h2 className="text-2xl font-semibold tracking-[-0.035em]">Show what changed inside your product</h2>
       <p className="max-w-2xl text-sm leading-6 text-muted-foreground">Publish a focused “What’s new” popup for your users. This is where you announce improvements to your product, not changes to the feedbacks.dev website.</p>
     </section>
 
-    <section className="space-y-5">
+    <section className="space-y-5 rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
       <Step title="Choose what the shared embed should do" />
       <div className="grid gap-3 sm:grid-cols-3">
         <ChoiceButton active={choice === 'updates'} title="Show updates only" description="Announce improvements without a feedback launcher." onClick={() => setChoice('updates')} />
@@ -148,7 +133,7 @@ export function UpdatesOnboarding({
       <Button onClick={() => void startSetup()} disabled={saving}>{saving ? 'Saving…' : choice === 'feedback' ? 'Continue to install' : 'Set up updates for users'}</Button>
     </section>
 
-    {modules.updates && <section className="space-y-5 border-t border-foreground/10 pt-6">
+    {modules.updates && <section className="space-y-5 rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
       <Step title="Install the shared embed" />
       <div className="flex flex-wrap gap-2">{(['AI assistant', 'Script tag', 'React', 'Vue'] as Method[]).map((item) => <Button key={item} variant={method === item ? 'secondary' : 'outline'} size="sm" onClick={() => { setMethod(item); record('updates_install_method_selected') }}>{item === 'AI assistant' && <Bot className="mr-1.5 h-3.5 w-3.5" />}{item}</Button>)}</div>
       {projectKey ? <InstallInstructions method={method} projectKey={projectKey} choice={choice} /> : <p className="rounded-md bg-muted/60 p-3 text-sm text-muted-foreground">Your browser-safe project key is hidden. Generate a fresh key in <a className="underline" href={`/projects/${projectId}/install`}>Embed installation</a>, then return here to copy the exact instructions.</p>}

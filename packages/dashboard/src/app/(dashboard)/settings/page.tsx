@@ -165,11 +165,11 @@ export default function SettingsPage() {
       </header>
 
       {/* Profile */}
-      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
-        <CardHeader className="px-0 pt-0">
+      <Card className="overflow-hidden rounded-xl shadow-[var(--shadow-card)]">
+        <CardHeader className="border-b bg-muted/25">
           <CardTitle className="text-lg">Profile</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 px-0">
+        <CardContent className="space-y-4 pt-6">
           <div className="space-y-2">
             <Label htmlFor="settings-email">Email</Label>
             <Input id="settings-email" value={email} disabled />
@@ -191,14 +191,14 @@ export default function SettingsPage() {
       </Card>
 
       {/* Notifications */}
-      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
-        <CardHeader className="px-0 pt-0">
+      <Card className="overflow-hidden rounded-xl shadow-[var(--shadow-card)]">
+        <CardHeader className="border-b bg-muted/25">
           <CardTitle className="text-lg">Notifications</CardTitle>
           <CardDescription>
             Choose which account alerts reach your email.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 px-0">
+        <CardContent className="space-y-3 pt-6">
           <div className="divide-y border-y bg-muted/10">
             <label className="flex min-h-14 items-start gap-3 px-4 py-3 text-sm">
               <input
@@ -274,11 +274,11 @@ export default function SettingsPage() {
       </Card>
 
       {/* Theme */}
-      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
-        <CardHeader className="px-0 pt-0">
+      <Card className="overflow-hidden rounded-xl shadow-[var(--shadow-card)]">
+        <CardHeader className="border-b bg-muted/25">
           <CardTitle className="text-lg">Appearance</CardTitle>
         </CardHeader>
-        <CardContent className="px-0">
+        <CardContent className="pt-6">
           <div className="flex gap-2">
             {(['light', 'dark', 'system'] as const).map((t) => (
               <Button
@@ -295,14 +295,14 @@ export default function SettingsPage() {
       </Card>
 
       {/* Account */}
-      <Card className="rounded-none border-x-0 border-t-0 border-muted bg-transparent">
-        <CardHeader className="px-0 pt-0">
+      <Card className="overflow-hidden rounded-xl border-destructive/35 shadow-[var(--shadow-card)]">
+        <CardHeader className="border-b border-destructive/25 bg-destructive/[0.045]">
           <CardTitle className="text-lg">Account</CardTitle>
           <CardDescription>
             Delete your account and all associated data.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 px-0">
+        <CardContent className="space-y-4 pt-6">
           <div className="border-y border-destructive/30 bg-destructive/5 px-4 py-4 text-sm">
             <div className="flex items-start gap-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" />

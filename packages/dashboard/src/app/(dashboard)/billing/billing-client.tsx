@@ -123,8 +123,8 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
-        <CardHeader className="px-0 pt-0">
+      <Card className="overflow-hidden rounded-xl shadow-[var(--shadow-card)]">
+        <CardHeader className="border-b bg-muted/25">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={summary.account.plan_tier === 'pro' ? 'default' : 'secondary'}>
               {summary.entitlements.label}
@@ -137,7 +137,7 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
             See your plan, usage, limits, and renewal date in one place.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 px-0">
+        <CardContent className="space-y-4 pt-6">
           <div className="divide-y border-y bg-muted/10">
             {[
               {
@@ -184,15 +184,15 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
         </CardContent>
       </Card>
 
-      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
-        <CardHeader className="px-0 pt-0">
+      <Card className="overflow-hidden rounded-xl shadow-[var(--shadow-card)]">
+        <CardHeader className="border-b bg-muted/25">
           <CardTitle className="text-base">Entitlements</CardTitle>
           <CardDescription>
             Free includes the core setup tools with smaller limits. Pro raises those limits for teams.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid border-y px-0 md:grid-cols-2 md:divide-x">
-          <div className="p-4 text-sm md:pl-0 md:pr-6">
+        <CardContent className="grid pt-6 md:grid-cols-2 md:divide-x">
+          <div className="pb-4 text-sm md:pb-0 md:pr-6">
             <p className="font-medium">Included now</p>
             <ul className="mt-2 space-y-1 text-muted-foreground">
               <li>REST API: {summary.entitlements.apiAccess ? 'Available' : 'Not included'}</li>
@@ -203,7 +203,7 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
               <li>Custom branding: {summary.entitlements.customBranding ? 'Available' : 'Upgrade to Pro'}</li>
             </ul>
           </div>
-          <div className="border-t p-4 text-sm md:border-t-0 md:pl-6 md:pr-0">
+          <div className="border-t pt-4 text-sm md:border-t-0 md:pl-6 md:pt-0">
             <p className="font-medium">Operational notes</p>
             <ul className="mt-2 space-y-1 text-muted-foreground">
               <li>Checkout returns here, but plan changes only after verified webhook processing.</li>

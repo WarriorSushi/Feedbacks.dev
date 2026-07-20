@@ -371,7 +371,7 @@ function FeedbackInboxInner() {
   return (
     <div className="animate-fade-in space-y-5 pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
       {/* ─── Header ─────────────────────────────────────── */}
-      <div className="flex items-end justify-between border-b pb-5">
+      <div className="flex items-end justify-between rounded-xl border bg-card p-5 shadow-[var(--shadow-card)]">
         <div>
           <p className="text-xs font-semibold text-primary">Your users</p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight">Feedback</h1>
@@ -386,7 +386,7 @@ function FeedbackInboxInner() {
       </div>
 
       {/* ─── Filters ─────────────────────────────────────── */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <form data-tour="inbox-search" onSubmit={handleSearch} className="w-full lg:max-w-md">
             <div className="relative">
@@ -484,7 +484,7 @@ function FeedbackInboxInner() {
       </div>
 
       {/* ─── Main List ────────────────────────────────────── */}
-      <section data-tour="inbox-list" className="overflow-hidden border-y bg-card">
+      <section data-tour="inbox-list" className="overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

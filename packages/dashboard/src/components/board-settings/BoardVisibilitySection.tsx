@@ -2,6 +2,7 @@
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { WorkspaceSection } from '@/components/ui/workspace-section'
 import { CURATED_BOARD_CATEGORIES, getBoardCategoryLabel, normalizeBoardCategories } from '@/lib/board-categories'
 import { cn } from '@/lib/utils'
 import type { BoardBranding, BoardVisibility } from '@/lib/public-board'
@@ -33,8 +34,7 @@ export function BoardVisibilitySection({
   }
 
   return (
-    <section className="space-y-5 border-b pb-7">
-      <div><h3 className="text-base font-semibold">Who can see it</h3><p className="mt-1 text-sm text-muted-foreground">Make the page public, share it by link, or keep it private.</p></div>
+    <WorkspaceSection title="Who can see it" description="Make the page public, share it by link, or keep it private.">
         <label className="flex min-h-12 items-start gap-3 rounded-lg border bg-muted/10 px-3 py-3 text-sm">
           <input
             type="checkbox"
@@ -124,6 +124,6 @@ export function BoardVisibilitySection({
             </span>
           </label>
         )}
-    </section>
+    </WorkspaceSection>
   )
 }

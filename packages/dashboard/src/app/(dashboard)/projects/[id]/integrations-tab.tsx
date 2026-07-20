@@ -548,8 +548,8 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
 
   return (
     <div className="space-y-4" data-tour="integration-workspace">
-      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
-        <CardHeader className="px-0 pt-0">
+      <Card className="overflow-hidden rounded-xl shadow-[var(--shadow-card)]">
+        <CardHeader className="border-b bg-muted/25">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">Workflow routing</Badge>
             <Badge variant="outline">Operational logs</Badge>
@@ -566,7 +566,7 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
       </Card>
 
       {!featureLocked && billingSummary && (
-        <Card className="rounded-none border-x-0 bg-muted/10">
+        <Card className="overflow-hidden rounded-xl bg-muted/15 shadow-[var(--shadow-card)]">
           <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-foreground">
@@ -615,8 +615,8 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
         const Icon = section.icon
 
         return (
-          <Card key={section.kind} data-webhook-kind={section.kind} data-tour="integration-endpoint" className="rounded-none border-x-0 border-t-0 bg-transparent">
-            <CardHeader className="flex flex-col gap-3 px-0 md:flex-row md:items-start md:justify-between">
+          <Card key={section.kind} data-webhook-kind={section.kind} data-tour="integration-endpoint" className="overflow-hidden rounded-xl shadow-[var(--shadow-card)]">
+            <CardHeader className="flex flex-col gap-3 border-b bg-muted/25 md:flex-row md:items-start md:justify-between">
               <div>
                 <div className="flex items-center gap-2">
                   <Icon className="h-4 w-4 text-primary" />
@@ -637,7 +637,7 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
               </Button>
             </CardHeader>
 
-            <CardContent className="space-y-4 px-0">
+            <CardContent className="space-y-4 pt-6">
               {endpoints.length === 0 ? (
                 <div className="border-y border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
                   No {section.title.toLowerCase()} endpoint yet. Add one when you are ready to send feedback there.
@@ -799,8 +799,8 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
         )
       })}
 
-      <Card className="rounded-none border-x-0 border-t-0 border-dashed bg-transparent">
-        <CardHeader className="px-0">
+      <Card className="overflow-hidden rounded-xl border-dashed shadow-[var(--shadow-card)]">
+        <CardHeader className="border-b bg-muted/25">
           <div className="flex items-center gap-2">
             <Mail className="h-4 w-4 text-muted-foreground" />
             <CardTitle className="text-base">Email Notifications</CardTitle>
@@ -810,7 +810,7 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
             Email alerts for new feedback and failed integrations are managed in account settings.
           </CardDescription>
         </CardHeader>
-        <CardContent className="border-y bg-muted/10 px-4 py-4">
+        <CardContent className="bg-muted/10 pt-6">
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <BellRing className="h-4 w-4" />
@@ -825,8 +825,8 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
 
       {!featureLocked && (
         <>
-          <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
-            <CardHeader className="flex flex-col gap-3 px-0 md:flex-row md:items-start md:justify-between">
+          <Card className="overflow-hidden rounded-xl shadow-[var(--shadow-card)]">
+            <CardHeader className="flex flex-col gap-3 border-b bg-muted/25 md:flex-row md:items-start md:justify-between">
               <div>
                 <CardTitle className="text-base">Recent delivery history</CardTitle>
                 <CardDescription>
@@ -838,7 +838,7 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
                 Refresh logs
               </Button>
             </CardHeader>
-            <CardContent className="px-0">
+            <CardContent className="pt-6">
               <DeliveryLogList deliveries={deliveries} resendingId={resendingId} onResend={handleResend} />
             </CardContent>
           </Card>
