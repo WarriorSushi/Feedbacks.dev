@@ -9,8 +9,8 @@ test('creates a project and lands on a stable one-time embed installation', asyn
   await signInWithTestSession(page)
 
   await page.goto('/projects/new')
-  await page.getByLabel('Project name').fill(`Playwright Install ${Date.now().toString(36)}`)
-  await page.getByRole('button', { name: 'Create project and get install code' }).click()
+  await page.getByLabel('App or website name').fill(`Playwright Install ${Date.now().toString(36)}`)
+  await page.getByRole('button', { name: 'Create project and make the form' }).click()
 
   await expect(page).toHaveURL(/\/projects\/[^/]+\/install\?created=1/, { timeout: 30_000 })
   await expect(page.getByRole('navigation', { name: 'Setup steps' })).toBeVisible()

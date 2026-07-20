@@ -31,9 +31,8 @@ test('new Updates-only user verifies the embed, tests a draft, and publishes', a
   await signInWithTestSession(page)
 
   await page.goto('/projects/new?goal=updates')
-  await page.getByLabel('Project name').fill(`Playwright Updates ${Date.now().toString(36)}`)
-  await expect(page.getByRole('button', { name: 'Updates for users', exact: true })).toHaveAttribute('aria-pressed', 'true')
-  await page.getByRole('button', { name: 'Create project and set up user updates' }).click()
+  await page.getByLabel('App or website name').fill(`Playwright Updates ${Date.now().toString(36)}`)
+  await page.getByRole('button', { name: 'Create project and write a user message' }).click()
   await expect(page).toHaveURL(/\/projects\/([^/]+)\/release-notes$/, { timeout: 30_000 })
 
   const projectId = page.url().match(/\/projects\/([^/]+)\/release-notes$/)?.[1]
