@@ -10,15 +10,22 @@ const steps = [
   { label: 'Users see the fix', note: 'Back in your app' },
 ] as const
 
+const AUTO_ADVANCE_MS = 8000
+
 export function LandingFeedbackStory() {
   const [active, setActive] = React.useState(0)
   const [paused, setPaused] = React.useState(false)
 
   React.useEffect(() => {
     if (paused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const timer = window.setInterval(() => setActive((value) => (value + 1) % steps.length), 4200)
+    const timer = window.setInterval(() => setActive((value) => (value + 1) % steps.length), AUTO_ADVANCE_MS)
     return () => window.clearInterval(timer)
   }, [paused])
+
+  const chooseStep = (index: number) => {
+    setActive(index)
+    setPaused(true)
+  }
 
   return (
     <div className="landing-story overflow-hidden border-y border-foreground/15 bg-[#121315] text-zinc-100 shadow-[var(--shadow-float)] lg:rounded-[18px] lg:border">
@@ -27,7 +34,7 @@ export function LandingFeedbackStory() {
           <button
             key={step.label}
             type="button"
-            onClick={() => setActive(index)}
+            onClick={() => chooseStep(index)}
             aria-pressed={active === index}
             className={cn(
               'relative flex items-center gap-3 border-white/10 px-5 py-4 text-left transition-colors md:border-l md:first:border-l-0',

@@ -11,23 +11,31 @@ const steps = [
   { title: 'Send a test', detail: 'Make sure it works' },
 ] as const
 
+const AUTO_ADVANCE_MS = 8000
+
 export function LandingInstallStory({ snippet }: { snippet: string }) {
   const [active, setActive] = React.useState(0)
+  const [paused, setPaused] = React.useState(false)
 
   React.useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const timer = window.setInterval(() => setActive((value) => (value + 1) % steps.length), 4400)
+    if (paused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const timer = window.setInterval(() => setActive((value) => (value + 1) % steps.length), AUTO_ADVANCE_MS)
     return () => window.clearInterval(timer)
-  }, [])
+  }, [paused])
+
+  const chooseStep = (index: number) => {
+    setActive(index)
+    setPaused(true)
+  }
 
   return (
     <div className="overflow-hidden border-y border-zinc-800 bg-zinc-950 text-zinc-100 shadow-[var(--shadow-float)] sm:rounded-[16px] sm:border">
       <div className="grid border-b border-white/10 sm:grid-cols-3">
         {steps.map((step, index) => (
-          <button key={step.title} type="button" onClick={() => setActive(index)} aria-pressed={active === index} className={cn('relative flex min-h-[72px] items-center gap-3 border-white/10 px-5 text-left transition-colors sm:border-l sm:first:border-l-0', index > 0 && 'border-t sm:border-t-0', active === index ? 'bg-white/[0.07]' : 'hover:bg-white/[0.03]')}>
+          <button key={step.title} type="button" onClick={() => chooseStep(index)} aria-pressed={active === index} className={cn('relative flex min-h-[72px] items-center gap-3 border-white/10 px-5 text-left transition-colors sm:border-l sm:first:border-l-0', index > 0 && 'border-t sm:border-t-0', active === index ? 'bg-white/[0.07]' : 'hover:bg-white/[0.03]')}>
             <span className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-md border font-mono text-[10px]', active === index ? 'border-lime-300 bg-lime-300 text-zinc-950' : 'border-white/15 text-zinc-400')}>{index + 1}</span>
             <span><span className="block text-xs font-semibold">{step.title}</span><span className="mt-1 block text-[10px] text-zinc-400">{step.detail}</span></span>
-            {active === index && <span className="landing-install-progress absolute bottom-0 left-0 h-0.5 w-full bg-lime-300" />}
+            {active === index && <span className={cn('absolute bottom-0 left-0 h-0.5 w-full bg-lime-300', !paused && 'landing-install-progress')} />}
           </button>
         ))}
       </div>
