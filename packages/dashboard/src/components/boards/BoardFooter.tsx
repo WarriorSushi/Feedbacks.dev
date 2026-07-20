@@ -19,7 +19,7 @@ export function BoardFooter({ canModerate, projectId }: BoardFooterProps) {
           <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-1">
             <span>Powered by</span>
             <BrandWordmark markClassName="h-4 w-4" dotClassName="text-current" />
-            <span>— install feedback first, publish boards when ready</span>
+            <span>Install feedback first. Publish boards when ready.</span>
           </span>
         </Link>
         {canModerate && (

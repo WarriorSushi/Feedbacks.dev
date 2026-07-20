@@ -123,8 +123,8 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
+      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
+        <CardHeader className="px-0 pt-0">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={summary.account.plan_tier === 'pro' ? 'default' : 'secondary'}>
               {summary.entitlements.label}
@@ -134,11 +134,11 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
           </div>
           <CardTitle className="mt-3 text-lg">Billing and plan</CardTitle>
           <CardDescription>
-            Billing runs through Dodo Payments. Entitlements update from server-side webhook state, not from the browser redirect alone.
+            See your plan, usage, limits, and renewal date in one place.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="divide-y rounded-lg border bg-muted/10">
+        <CardContent className="space-y-4 px-0">
+          <div className="divide-y border-y bg-muted/10">
             {[
               {
                 label: 'Projects',
@@ -168,7 +168,7 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
             {summary.account.plan_tier === 'pro' ? (
               <Button onClick={openPortal} disabled={portalLoading || !summary.billingEnabled}>
                 {portalLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Manage Billing
+                Manage billing
               </Button>
             ) : (
               <Button onClick={startCheckout} disabled={checkoutLoading || !summary.billingEnabled}>
@@ -184,15 +184,15 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
+        <CardHeader className="px-0 pt-0">
           <CardTitle className="text-base">Entitlements</CardTitle>
           <CardDescription>
             Free includes the core setup tools with smaller limits. Pro raises those limits for teams.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-lg border bg-muted/20 p-4 text-sm">
+        <CardContent className="grid border-y px-0 md:grid-cols-2 md:divide-x">
+          <div className="p-4 text-sm md:pl-0 md:pr-6">
             <p className="font-medium">Included now</p>
             <ul className="mt-2 space-y-1 text-muted-foreground">
               <li>REST API: {summary.entitlements.apiAccess ? 'Available' : 'Not included'}</li>
@@ -203,7 +203,7 @@ export function BillingClient({ initialSummary }: BillingClientProps) {
               <li>Custom branding: {summary.entitlements.customBranding ? 'Available' : 'Upgrade to Pro'}</li>
             </ul>
           </div>
-          <div className="rounded-lg border bg-muted/20 p-4 text-sm">
+          <div className="border-t p-4 text-sm md:border-t-0 md:pl-6 md:pr-0">
             <p className="font-medium">Operational notes</p>
             <ul className="mt-2 space-y-1 text-muted-foreground">
               <li>Checkout returns here, but plan changes only after verified webhook processing.</li>

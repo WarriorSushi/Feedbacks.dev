@@ -157,21 +157,25 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold">Settings</h1>
+    <div className="mx-auto max-w-2xl space-y-8">
+      <header className="border-b pb-5">
+        <p className="text-xs font-semibold text-primary">Your account</p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">Settings</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Manage your profile, alerts, theme, and account.</p>
+      </header>
 
       {/* Profile */}
-      <Card>
-        <CardHeader>
+      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
+        <CardHeader className="px-0 pt-0">
           <CardTitle className="text-lg">Profile</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 px-0">
           <div className="space-y-2">
             <Label htmlFor="settings-email">Email</Label>
             <Input id="settings-email" value={email} disabled />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="settings-name">Display Name</Label>
+            <Label htmlFor="settings-name">Display name</Label>
             <Input
               id="settings-name"
               value={displayName}
@@ -181,21 +185,21 @@ export default function SettingsPage() {
           </div>
           <Button onClick={handleSaveProfile} disabled={saving}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Profile
+            Save profile
           </Button>
         </CardContent>
       </Card>
 
       {/* Notifications */}
-      <Card>
-        <CardHeader>
+      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
+        <CardHeader className="px-0 pt-0">
           <CardTitle className="text-lg">Notifications</CardTitle>
           <CardDescription>
-            Project workflow routing and account email notifications are separate surfaces.
+            Choose which account alerts reach your email.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="divide-y rounded-lg border bg-muted/10">
+        <CardContent className="space-y-3 px-0">
+          <div className="divide-y border-y bg-muted/10">
             <label className="flex min-h-14 items-start gap-3 px-4 py-3 text-sm">
               <input
                 type="checkbox"
@@ -256,25 +260,25 @@ export default function SettingsPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/projects">
-              <Button variant="outline" size="sm">Open project integrations</Button>
+              <Button variant="outline" size="sm">Choose a project</Button>
             </Link>
             <Link href="/billing">
-              <Button variant="ghost" size="sm">Open billing</Button>
+              <Button variant="ghost" size="sm">View billing</Button>
             </Link>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Mail className="h-4 w-4" />
-            Project workflow routing stays in project integrations. Account email alerts live here.
+            Slack, Discord, GitHub, and webhooks are set up inside each project.
           </div>
         </CardContent>
       </Card>
 
       {/* Theme */}
-      <Card>
-        <CardHeader>
+      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
+        <CardHeader className="px-0 pt-0">
           <CardTitle className="text-lg">Appearance</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-0">
           <div className="flex gap-2">
             {(['light', 'dark', 'system'] as const).map((t) => (
               <Button
@@ -291,15 +295,15 @@ export default function SettingsPage() {
       </Card>
 
       {/* Account */}
-      <Card className="border-muted">
-        <CardHeader>
+      <Card className="rounded-none border-x-0 border-t-0 border-muted bg-transparent">
+        <CardHeader className="px-0 pt-0">
           <CardTitle className="text-lg">Account</CardTitle>
           <CardDescription>
             Delete your account and all associated data.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">
+        <CardContent className="space-y-4 px-0">
+          <div className="border-y border-destructive/30 bg-destructive/5 px-4 py-4 text-sm">
             <div className="flex items-start gap-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" />
               <div className="space-y-1">

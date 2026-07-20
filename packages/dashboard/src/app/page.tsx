@@ -5,6 +5,7 @@ import { PLAN_MATRIX, generateInstallSnippets } from '@feedbacks/shared'
 import { LandingProductLoop } from '@/components/landing-product-loop'
 import { LandingFeedbackStory } from '@/components/landing-feedback-story'
 import { LandingInstallStory } from '@/components/landing-install-story'
+import { LandingConnectionsStory } from '@/components/landing-connections-story'
 import { LandingScrollHeader } from '@/components/landing-scroll-header'
 import { publicEnv } from '@/lib/public-env'
 import {
@@ -58,11 +59,12 @@ export default function LandingPage() {
       <main>
         <section className="landing-hero relative overflow-hidden border-b">
           <div className="landing-hero-grain absolute inset-0" aria-hidden="true" />
-          <div className="relative mx-auto grid max-w-[1440px] gap-14 px-5 pb-16 pt-14 sm:px-8 sm:pt-20 lg:grid-cols-[0.7fr_1.3fr] lg:items-center lg:gap-14 lg:pb-24 lg:pt-24">
+          <div className="relative mx-auto grid max-w-[1440px] gap-12 px-5 pb-16 pt-14 sm:px-8 sm:pt-20 xl:grid-cols-[minmax(540px,0.88fr)_minmax(0,1.12fr)] xl:items-center xl:gap-12 xl:pb-24 xl:pt-24">
             <div className="lg:pb-6">
               <p className="inline-flex items-center gap-2 text-xs font-semibold text-foreground/70"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> Feedback and updates inside your app</p>
-              <h1 className="mt-5 max-w-2xl text-[2.75rem] font-semibold leading-[0.98] tracking-[-0.055em] sm:text-[4.25rem] lg:text-[4.6rem]">
-                Find what users need.<br />Show what you fixed.
+              <h1 className="mt-5 max-w-2xl text-[2rem] font-semibold leading-[0.98] tracking-[-0.055em] sm:text-[4rem] xl:text-[3.55rem] 2xl:text-[3.85rem]">
+                <span className="block xl:whitespace-nowrap">Find what users need.</span>
+                <span className="mt-1 block xl:whitespace-nowrap">Show what you fixed.</span>
               </h1>
               <p className="mt-6 max-w-[590px] text-base leading-7 text-muted-foreground sm:text-lg">
                 Put a small feedback form in your app. Get the page and screenshot with each message. Then show users the fixes you ship.
@@ -85,10 +87,10 @@ export default function LandingPage() {
 
         <section id="products" className="border-b py-20 sm:py-28">
           <div className="mx-auto max-w-7xl px-0 sm:px-6">
-            <div className="mb-12 grid gap-6 px-5 sm:px-0 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div className="mb-12 grid gap-6 px-5 sm:px-0 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
               <div>
                 <p className="text-xs font-semibold text-primary">A clear path from problem to fix</p>
-                <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Users speak. You fix it.<br />They see the change.</h2>
+                <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl xl:text-[2.75rem] xl:leading-[1.05]"><span className="block xl:whitespace-nowrap">Users speak. You fix it.</span><span className="mt-1 block xl:whitespace-nowrap">They see the change.</span></h2>
               </div>
               <p className="max-w-2xl text-base leading-7 text-muted-foreground lg:justify-self-end">Users send a bug or idea from your app. Your team gets the details it needs. When you ship a fix, users see a clear “What changed” message inside your app.</p>
             </div>
@@ -101,11 +103,24 @@ export default function LandingPage() {
             <div className="mb-12 grid gap-6 px-5 sm:px-0 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
               <div>
                 <p className="text-xs font-semibold text-primary">Set up once</p>
-                <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Make the form yours. Paste one code block.</h2>
+                <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] sm:text-4xl xl:text-[2.75rem] xl:leading-[1.05]"><span className="block">Make the form yours.</span><span className="mt-1 block">Paste one code block.</span></h2>
               </div>
               <p className="max-w-2xl leading-7 text-muted-foreground lg:justify-self-end">Choose the words, fields, and color. Paste the code into your site. Send one test. Later changes show up on their own, so you do not paste code again.</p>
             </div>
             <LandingInstallStory snippet={installSnippet} />
+          </div>
+        </section>
+
+        <section className="border-b bg-muted/20 py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-0 sm:px-6">
+            <div className="mb-12 grid gap-6 px-5 sm:px-0 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+              <div>
+                <p className="text-xs font-semibold text-primary">After feedback reaches the inbox</p>
+                <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] sm:text-4xl xl:text-[2.75rem] xl:leading-[1.05]">Turn a user message into work your team can finish.</h2>
+              </div>
+              <p className="max-w-2xl leading-7 text-muted-foreground lg:justify-self-end">Send the right feedback to Slack, Discord, GitHub, or any webhook. Let trusted coding agents read and submit feedback through REST or MCP. Give users a public page for ideas, votes, and replies.</p>
+            </div>
+            <LandingConnectionsStory />
           </div>
         </section>
 
@@ -150,7 +165,7 @@ export default function LandingPage() {
                     <div className="flex items-center justify-between"><p className="text-sm font-semibold">Pro</p><span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Full product</span></div>
                     <p className="mt-3 text-4xl font-semibold tracking-tight">${proPlan.monthlyPrice}<span className="text-sm font-normal text-muted-foreground"> / month</span></p>
                     <p className="mt-2 text-sm text-muted-foreground">For teams that get more feedback each week.</p>
-                    <ul className="mt-6 space-y-3 text-sm">{[proPlan.projectLimit ? `${proPlan.projectLimit} projects` : 'Unlimited projects', 'Unlimited feedback history', 'Integrations, boards, API & MCP', 'Priority support'].map(item => <li key={item} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" />{item}</li>)}</ul>
+                    <ul className="mt-6 space-y-3 text-sm">{[proPlan.projectLimit ? `${proPlan.projectLimit} projects` : 'Unlimited projects', 'Unlimited feedback history', 'Integrations, boards, API and MCP', 'Priority support'].map(item => <li key={item} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" />{item}</li>)}</ul>
                     <Link href={authHref} className="mt-7 block"><Button className="w-full">Start with Pro</Button></Link>
                   </div>
                 </div>

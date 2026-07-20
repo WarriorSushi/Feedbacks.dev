@@ -54,7 +54,7 @@ export function LandingFeedbackStory() {
               </div>
               <div className="relative mx-auto w-full max-w-lg border border-white/10 bg-[#1a1b1e] p-5 shadow-2xl">
                 <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-xs font-semibold">Orbit / Deployment #8421</span><span className="text-[10px] text-zinc-400">production</span></div>
-                <div className="mt-5 border-l-2 border-rose-400 bg-rose-400/[0.07] p-4">
+                <div className="mt-5 border border-rose-400/35 bg-rose-400/[0.07] p-4">
                   <div className="flex items-center gap-2 text-[10px] font-semibold text-rose-300"><CircleDot className="h-3 w-3" /> BUILD STALLED</div>
                   <p className="mt-2 text-sm text-zinc-200">Build logs stop updating after the deploy reaches 80%.</p>
                   <div className="mt-4 flex items-center justify-between text-[10px] text-zinc-400"><span>/deployments/8421 · Edge 128</span><span className="inline-flex items-center gap-1 text-lime-300"><Check className="h-3 w-3" /> Screenshot</span></div>

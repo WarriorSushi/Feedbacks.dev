@@ -383,7 +383,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
         </div>
       )}
 
-      {/* Nav — scrolls when it overflows, pushes footer to bottom when it doesn't */}
+      {/* Nav scrolls when it overflows and pushes the footer down when it does not. */}
       <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2.5">
         <div className="space-y-3.5">
           {primaryNavGroups.map((group, groupIndex) => (
@@ -513,7 +513,7 @@ export function Sidebar({ user, projects, currentProjectId, boardSlugs = {}, bil
         </div>
       </nav>
 
-      {/* Footer — always visible at bottom */}
+      {/* Footer stays visible at the bottom. */}
       <div className="shrink-0 space-y-1 border-t p-2.5">
         {/* Theme toggle */}
         <ThemeToggle collapsed={collapsed} />

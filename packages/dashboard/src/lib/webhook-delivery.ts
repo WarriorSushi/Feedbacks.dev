@@ -239,7 +239,7 @@ async function deliverSingle(
     responseBody = error instanceof Error ? error.message : 'Unknown error'
   }
 
-  // Log delivery — use correct DB column names
+  // Log the delivery using the database column names.
   await admin.from('webhook_deliveries').insert({
     id: deliveryId,
     project_id: projectId,

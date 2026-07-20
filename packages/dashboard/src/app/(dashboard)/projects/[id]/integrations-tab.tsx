@@ -548,8 +548,8 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
 
   return (
     <div className="space-y-4" data-tour="integration-workspace">
-      <Card>
-        <CardHeader>
+      <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
+        <CardHeader className="px-0 pt-0">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">Workflow routing</Badge>
             <Badge variant="outline">Operational logs</Badge>
@@ -566,7 +566,7 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
       </Card>
 
       {!featureLocked && billingSummary && (
-        <Card>
+        <Card className="rounded-none border-x-0 bg-muted/10">
           <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-foreground">
@@ -615,8 +615,8 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
         const Icon = section.icon
 
         return (
-          <Card key={section.kind} data-webhook-kind={section.kind} data-tour="integration-endpoint">
-            <CardHeader className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <Card key={section.kind} data-webhook-kind={section.kind} data-tour="integration-endpoint" className="rounded-none border-x-0 border-t-0 bg-transparent">
+            <CardHeader className="flex flex-col gap-3 px-0 md:flex-row md:items-start md:justify-between">
               <div>
                 <div className="flex items-center gap-2">
                   <Icon className="h-4 w-4 text-primary" />
@@ -637,10 +637,10 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
               </Button>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 px-0">
               {endpoints.length === 0 ? (
-                <div className="rounded-lg border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
-                  No {section.title.toLowerCase()} endpoints yet.
+                <div className="border-y border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
+                  No {section.title.toLowerCase()} endpoint yet. Add one when you are ready to send feedback there.
                 </div>
               ) : (
                 endpoints.map((endpoint, index) => {
@@ -648,7 +648,7 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
                   const isGitHub = section.kind === 'github'
 
                   return (
-                    <div key={endpoint.id} className="space-y-4 rounded-xl border p-4">
+                    <div key={endpoint.id} className="space-y-4 border-y bg-muted/10 p-4">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="outline">Endpoint {index + 1}</Badge>
@@ -739,7 +739,7 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
                           </div>
 
                           {section.kind === 'generic' && (
-                            <div className="rounded-lg border bg-muted/10 p-3">
+                            <div className="border-y bg-background/60 p-3">
                               <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_1.2fr] md:items-start">
                                 <div>
                                   <label className="text-xs font-medium text-muted-foreground">
@@ -799,22 +799,22 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
         )
       })}
 
-      <Card className="border-dashed">
-        <CardHeader>
+      <Card className="rounded-none border-x-0 border-t-0 border-dashed bg-transparent">
+        <CardHeader className="px-0">
           <div className="flex items-center gap-2">
             <Mail className="h-4 w-4 text-muted-foreground" />
             <CardTitle className="text-base">Email Notifications</CardTitle>
             <Badge variant="secondary">Live in Settings</Badge>
           </div>
           <CardDescription>
-            Account-level email alerts are live in Settings for new feedback and webhook failures. This screen stays focused on routing destinations instead of pretending per-project email fan-out already exists.
+            Email alerts for new feedback and failed integrations are managed in account settings.
           </CardDescription>
         </CardHeader>
-        <CardContent className="rounded-b-xl bg-muted/10">
+        <CardContent className="border-y bg-muted/10 px-4 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <BellRing className="h-4 w-4" />
-              Email alerts are managed from your account settings, while Slack or a generic webhook is still the clearest project-routing path.
+              Use email for personal alerts. Use Slack, Discord, GitHub, or a webhook for team workflows.
             </div>
             <Link href="/settings">
               <Button variant="outline" size="sm">Manage email alerts</Button>
@@ -825,8 +825,8 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
 
       {!featureLocked && (
         <>
-          <Card>
-            <CardHeader className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <Card className="rounded-none border-x-0 border-t-0 bg-transparent">
+            <CardHeader className="flex flex-col gap-3 px-0 md:flex-row md:items-start md:justify-between">
               <div>
                 <CardTitle className="text-base">Recent delivery history</CardTitle>
                 <CardDescription>
@@ -838,14 +838,14 @@ export function IntegrationsTab({ project, initialBillingSummary }: Integrations
                 Refresh logs
               </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-0">
               <DeliveryLogList deliveries={deliveries} resendingId={resendingId} onResend={handleResend} />
             </CardContent>
           </Card>
 
           <Button onClick={handleSave} disabled={saving}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Integrations
+            Save integrations
           </Button>
         </>
       )}
