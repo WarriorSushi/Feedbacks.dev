@@ -18,19 +18,19 @@ test('publishes a board and exercises duplicate and spam submission checks', asy
 
   await page.goto(`/projects/${project.id}/board`, { waitUntil: 'domcontentloaded' })
   await expect(page.locator('[data-project-tabs-ready="true"]')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Public board' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Open public board' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Public feedback page' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Open page' })).toBeVisible()
 
   await page.goto(board.url, { waitUntil: 'domcontentloaded' })
   await expect(page.locator('[data-public-board-ready="true"]')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Playwright board' })).toBeVisible()
-  await page.getByRole('button', { name: /share feedback|submit feedback/i }).first().click()
-  const submitDialog = page.getByRole('dialog', { name: /post a request or bug report|submit feedback/i })
+  await page.getByRole('button', { name: 'Share an idea or bug' }).click()
+  const submitDialog = page.getByRole('dialog', { name: 'Share an idea or bug' })
   await expect(submitDialog).toBeVisible()
 
   const uniqueMessage = `Need clearer setup guidance ${Date.now().toString(36)}`
-  await submitDialog.getByLabel(/Your feedback/).fill(uniqueMessage)
-  await submitDialog.getByRole('button', { name: 'Submit feedback' }).click()
+  await submitDialog.getByLabel('What do you need?').fill(uniqueMessage)
+  await submitDialog.getByRole('button', { name: 'Post to board' }).click()
   await expect(submitDialog).toHaveCount(0)
   await expect(page.getByText(uniqueMessage)).toBeVisible()
 
