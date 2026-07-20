@@ -1,137 +1,84 @@
 'use client'
 
 import * as React from 'react'
-import { Bug, Lightbulb, Star, MessageSquare } from 'lucide-react'
+import { Bug, Camera, Check, CircleHelp, Lightbulb, MessageSquare, Star, X } from 'lucide-react'
 import type { CategoryType } from './landing-types'
+import { cn } from '@/lib/utils'
 
-const DEMOS: {
-  type: CategoryType
+const demos: {
+  type: CategoryType | 'question'
   label: string
   Icon: typeof Bug
   text: string
-  activeClass: string
 }[] = [
-  {
-    type: 'bug',
-    label: 'Bug',
-    Icon: Bug,
-    text: 'CSV export crashes on datasets over 1 000 rows.',
-    activeClass:
-      'border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-400',
-  },
-  {
-    type: 'idea',
-    label: 'Idea',
-    Icon: Lightbulb,
-    text: 'Keyboard shortcuts for the dashboard would be huge.',
-    activeClass:
-      'border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400',
-  },
-  {
-    type: 'praise',
-    label: 'Praise',
-    Icon: Star,
-    text: 'The new search is blazing fast. Really great work!',
-    activeClass:
-      'border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400',
-  },
+  { type: 'bug', label: 'Bug', Icon: Bug, text: 'CSV export stalls when the report contains more than 1,000 rows.' },
+  { type: 'idea', label: 'Idea', Icon: Lightbulb, text: 'Let me save this filter as a view for the rest of my team.' },
+  { type: 'praise', label: 'Praise', Icon: Star, text: 'The new search is noticeably faster. Great improvement!' },
+  { type: 'question', label: 'Question', Icon: CircleHelp, text: 'Can I invite a client to view this report without editing it?' },
 ]
 
 export function WidgetDemo() {
   const [active, setActive] = React.useState(0)
-  const [fading, setFading] = React.useState(false)
+  const [open, setOpen] = React.useState(true)
+  const [submitted, setSubmitted] = React.useState(false)
+  const [screenshotReady, setScreenshotReady] = React.useState(false)
 
-  React.useEffect(() => {
-    const id = setInterval(() => {
-      setFading(true)
-      const swapId = setTimeout(() => {
-        setActive((prev) => (prev + 1) % DEMOS.length)
-        setFading(false)
-      }, 220)
-      return () => clearTimeout(swapId)
-    }, 3400)
-    return () => clearInterval(id)
-  }, [])
+  const selectDemo = (index: number) => {
+    setActive(index)
+    setSubmitted(false)
+  }
 
-  const demo = DEMOS[active]
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-3 text-sm font-semibold text-background shadow-2xl transition-transform hover:-translate-y-0.5">
+        <MessageSquare className="h-4 w-4" /> Send feedback
+      </button>
+    )
+  }
 
   return (
-    <div className="w-72 overflow-hidden rounded-2xl border bg-background shadow-2xl shadow-black/10 sm:w-80">
-      <div className="flex items-center justify-between border-b px-4 py-3">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-semibold">Send Feedback</span>
+    <div className="w-[min(360px,calc(100vw-64px))] overflow-hidden rounded-[14px] border bg-background shadow-2xl shadow-black/15">
+      {submitted ? (
+        <div className="flex min-h-[390px] flex-col items-center justify-center px-8 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-5 w-5" /></span>
+          <h3 className="mt-4 text-lg font-bold">Thank you!</h3>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">Your feedback was sent with the useful context attached.</p>
+          <button type="button" onClick={() => setSubmitted(false)} className="mt-5 rounded-md bg-foreground px-4 py-2 text-xs font-semibold text-background">Send another</button>
         </div>
-        <button className="text-xs text-muted-foreground transition-colors hover:text-foreground">
-          ✕
-        </button>
-      </div>
+      ) : (
+        <>
+          <div className="flex items-start justify-between px-5 pb-0 pt-5">
+            <div><h3 className="text-base font-bold">Send feedback</h3><p className="mt-1 text-xs text-muted-foreground">Help us improve by sharing your thoughts.</p></div>
+            <button type="button" onClick={() => setOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label="Close feedback form"><X className="h-4 w-4" /></button>
+          </div>
 
-      <div className="flex gap-1.5 px-4 pt-3">
-        {DEMOS.map((d, i) => {
-          const DIcon = d.Icon
-          const isActive = i === active
-          return (
-            <button
-              key={d.type}
-              onClick={() => {
-                setFading(true)
-                setTimeout(() => {
-                  setActive(i)
-                  setFading(false)
-                }, 180)
-              }}
-              className={`flex flex-1 items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-all duration-200 ${
-                isActive ? d.activeClass : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <DIcon className="h-3.5 w-3.5" />
-              {d.label}
-            </button>
-          )
-        })}
-      </div>
+          <div className="space-y-4 p-5">
+            <div>
+              <p className="mb-2 text-xs font-semibold">Category</p>
+              <div className="grid grid-cols-4 gap-1.5" role="radiogroup" aria-label="Feedback category">
+                {demos.map((demo, index) => {
+                  const DemoIcon = demo.Icon
+                  return <button key={demo.type} type="button" role="radio" aria-checked={index === active} onClick={() => selectDemo(index)} className={cn('flex min-w-0 flex-col items-center gap-1 rounded-md border px-1 py-2 text-[10px] font-medium transition-all', index === active ? 'border-primary bg-primary/[0.08] text-primary' : 'text-muted-foreground hover:border-foreground/30 hover:text-foreground')}><DemoIcon className="h-3.5 w-3.5" /><span className="truncate">{demo.label}</span></button>
+                })}
+              </div>
+            </div>
 
-      <div className="px-4 pb-4 pt-3">
-        <div
-          className="min-h-[56px] rounded-lg border bg-muted/40 px-3 py-2.5 text-sm leading-relaxed text-foreground/70 transition-opacity duration-200"
-          style={{ opacity: fading ? 0 : 1 }}
-        >
-          {demo.text}
-        </div>
-        <div
-          className="mt-3 flex items-center justify-between transition-opacity duration-200"
-          style={{ opacity: fading ? 0 : 1 }}
-        >
-          <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-            <demo.Icon className="h-3.5 w-3.5" />
-            {demo.label} report
-          </span>
-          <button className="rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-80">
-            Submit
-          </button>
-        </div>
-      </div>
+            <div>
+              <p className="mb-2 text-xs font-semibold">Your feedback *</p>
+              <div key={active} className="min-h-[72px] animate-fade-in rounded-md border bg-background px-3 py-2.5 text-sm leading-5 text-foreground/75 shadow-inner shadow-black/[0.025]">{demos[active].text}</div>
+              <p className="mt-1 text-right text-[10px] text-muted-foreground">{demos[active].text.length} / 2,000</p>
+            </div>
+
+            <div className="flex items-end justify-between gap-4">
+              <div><p className="text-xs font-semibold">Rating</p><div className="mt-1 flex text-amber-400">{[1, 2, 3, 4, 5].map((value) => <Star key={value} className={cn('h-4 w-4', value < 5 && 'fill-current')} />)}</div></div>
+              <button type="button" onClick={() => setScreenshotReady((value) => !value)} className={cn('inline-flex items-center gap-1.5 rounded-md border px-2.5 py-2 text-[10px] font-medium transition-colors', screenshotReady ? 'border-emerald-300 text-emerald-600' : 'text-muted-foreground hover:text-foreground')}><Camera className="h-3.5 w-3.5" /> {screenshotReady ? 'Screenshot ready' : 'Capture screenshot'}</button>
+            </div>
+
+            <div className="flex items-center justify-between border-t pt-4"><span className="text-[10px] text-muted-foreground">Page + browser included</span><button type="button" onClick={() => setSubmitted(true)} className="rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5">Send feedback</button></div>
+          </div>
+          <p className="border-t py-2 text-center text-[9px] text-muted-foreground">Powered by feedbacks.dev</p>
+        </>
+      )}
     </div>
-  )
-}
-
-export function ScrollHeader({ children }: { children: React.ReactNode }) {
-  const [scrolled, setScrolled] = React.useState(false)
-
-  React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled ? 'border-b bg-background/95 backdrop-blur-sm' : ''
-      }`}
-    >
-      {children}
-    </header>
   )
 }
