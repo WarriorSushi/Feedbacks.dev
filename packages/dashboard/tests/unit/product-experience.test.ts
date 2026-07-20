@@ -130,6 +130,7 @@ test('theme tokens use perceptual OKLCH colors in both themes', () => {
   assert.match(css, /\.dark[\s\S]*--background: 0\.135/)
   assert.match(css, /\.dark[\s\S]*--surface-raised: 0\.225/)
   assert.match(css, /\.dark[\s\S]*--card: 0\.195/)
+  assert.match(css, /\[class~="shadow-\[var\(--shadow-card\)\]"\]/)
   assert.match(css, /--surface-sidebar:/)
   assert.match(css, /--surface-selected:/)
   assert.match(tailwind, /surface:\s*\{/)

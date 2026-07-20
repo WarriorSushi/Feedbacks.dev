@@ -259,6 +259,9 @@
 
   .surface-card { box-shadow: var(--shadow-card); }
 
+  /* Tailwind does not emit this CSS-variable arbitrary shadow reliably in production. */
+  [class~="shadow-[var(--shadow-card)]"] { box-shadow: var(--shadow-card); }
+
   .animate-logo-load-pop {
     animation: logo-load-pop 1.1s var(--ease-out-expo) infinite;
     transform-origin: center;
