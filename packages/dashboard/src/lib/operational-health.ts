@@ -5,6 +5,8 @@ export interface CronHealthRow {
   finished_at: string | null
 }
 
+type CronHealth = Record<string, { healthy: boolean; lastRunAt: string | null; status: string | null }>
+
 export function evaluateCronHealth(
   rows: CronHealthRow[],
   now = Date.now(),
@@ -27,5 +29,11 @@ export function evaluateCronHealth(
         status: latest?.status || null,
       }]
     }),
+  )
+}
+
+export function areRequiredCronsHealthy(cron: CronHealth, queueBacklog: number): boolean {
+  return Object.entries(cron).every(
+    ([jobName, job]) => job.healthy || (jobName === 'webhook_jobs' && queueBacklog === 0),
   )
 }

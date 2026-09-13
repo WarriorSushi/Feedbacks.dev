@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
-import { evaluateCronHealth } from '@/lib/operational-health'
+import { areRequiredCronsHealthy, evaluateCronHealth } from '@/lib/operational-health'
 import { getRequestId, logOperationalEvent } from '@/lib/operational-logging'
 import { verifyBearerSecret } from '@/lib/secret-auth'
 
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
   const activationAvailable = activationResults.every((result) => !result.error)
   const [projectsCreated, installCodesCopied, verified, reachedFirstFeedback] = activationResults
     .map((result) => result.count || 0)
-  const healthy = Object.values(cron).every((job) => job.healthy)
+  const healthy = areRequiredCronsHealthy(cron, queueBacklog)
     && queueBacklog < 100
     && failedLast24Hours < 20
     && failedBillingLast24Hours === 0

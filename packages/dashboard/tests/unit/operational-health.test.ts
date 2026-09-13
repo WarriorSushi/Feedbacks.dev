@@ -18,3 +18,16 @@ test('cron health distinguishes current success from stale or failed jobs', asyn
   assert.equal(result.e2e_cleanup.healthy, false)
   assert.equal(result.account_deletions.healthy, false)
 })
+
+test('stale webhook cron only degrades health while retries are queued', async () => {
+  const { areRequiredCronsHealthy } = await loadOperationalHealth()
+  const cron = {
+    webhook_jobs: { healthy: false, lastRunAt: null, status: null },
+    notification_digests: { healthy: true, lastRunAt: null, status: 'succeeded' },
+  }
+
+  assert.equal(areRequiredCronsHealthy(cron, 0), true)
+  assert.equal(areRequiredCronsHealthy(cron, 1), false)
+  cron.notification_digests.healthy = false
+  assert.equal(areRequiredCronsHealthy(cron, 0), false)
+})
